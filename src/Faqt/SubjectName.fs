@@ -88,4 +88,4 @@ let get () =
         // Remove remaining calls to Should.
         |> String.regexReplace "\.Should\(\)" ""
     with ex ->
-        raise (Exception("Exception while getting subject name", ex))
+        "SUBJECT NAME UNAVAILABLE, MAKE SURE TO USE DEBUG MODE"
