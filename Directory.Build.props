@@ -1,10 +1,16 @@
 <Project>
 
+  <Sdk Name="DotNet.ReproducibleBuilds.Isolated" Version="1.1.1" />
+
   <PropertyGroup>
     <DisableImplicitLibraryPacksFolder>true</DisableImplicitLibraryPacksFolder>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <WarnOn>1182;3390;$(WarnOn)</WarnOn>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="DotNet.ReproducibleBuilds" Version="1.1.1" PrivateAssets="All" />
+  </ItemGroup>
 
 </Project>
