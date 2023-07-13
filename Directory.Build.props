@@ -9,4 +9,8 @@
     <WarnOn>1182;3390;$(WarnOn)</WarnOn>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="DotNet.ReproducibleBuilds" Version="1.1.1" PrivateAssets="All" />
+  </ItemGroup>
+
 </Project>
