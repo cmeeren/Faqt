@@ -1,7 +1,5 @@
 <Project>
 
-  <Sdk Name="DotNet.ReproducibleBuilds.Isolated" Version="1.1.1" />
-
   <PropertyGroup>
     <DisableImplicitLibraryPacksFolder>true</DisableImplicitLibraryPacksFolder>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
