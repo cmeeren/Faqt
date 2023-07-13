@@ -19,7 +19,7 @@ jobs:
       - name: Test
         run: dotnet test -c Debug
 
-      - name: Test
+      - name: Pack
         run: dotnet pack -c Release src/Faqt/Faqt.fsproj
 
       - name: Push
