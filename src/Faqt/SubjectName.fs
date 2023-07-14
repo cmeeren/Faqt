@@ -22,10 +22,7 @@ let get fileName methodName lineNo =
             // In general, lines after the opening delimiter will not be considered.
             i = 0 || line.StartsWith(".") || line.StartsWith("//")
         )
-        |> Seq.map (fun (_i, line) ->
-            // TODO
-            // let line = if i = 0 then line.Substring(colNo - 1) else line
-
+        |> Seq.map (fun (_, line) ->
             line
             // Known limitation: This will also change string contents (and ``quoted`` identifiers). A workaround is added
             // to preserve URL string literals. To remove this limitation fully, the source code must be parsed properly,
