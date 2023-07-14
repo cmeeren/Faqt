@@ -209,6 +209,7 @@ let ``Testable.Whose`` () =
     |> assertExnMsgSubjectName "thisIsAVariableName.Length"
 
 
+// TODO: Can we work around this now?
 [<Fact>]
 let ``Known limitation: And.Whose: Only first assertion with the matching name is considered`` () =
     fun () ->

@@ -4,24 +4,6 @@ open System
 open System.Runtime.CompilerServices
 
 
-/// Place this attribute on classes containing assertion extensions as an alternative to applying FaqtAssertionAttribute
-/// to individual methods/functions. See FaqtAssertionAttribute for details.
-[<AttributeUsage(AttributeTargets.Class)>]
-type ContainsFaqtAssertionsAttribute() =
-    inherit Attribute()
-
-
-/// Place this attribute on assertion methods as well as any intermediate helper functions/methods that call other
-/// assertions. (Not needed if the type/module has ContainsFaqtAssertionsAttribute.) In short, from the top level
-/// assertion (that a user calls) to the innermost assertion (that the top-level assertion delegates to), the methods in
-/// all stack frames must contain an unbroken chain of this attribute.
-[<AttributeUsage(AttributeTargets.Method
-                 ||| AttributeTargets.Property
-                 ||| AttributeTargets.Constructor)>]
-type FaqtAssertionAttribute() =
-    inherit Attribute()
-
-
 /// The exception raised for all Faqt assertion failures.
 type AssertionFailedException(message: string) =
     inherit Exception(message)

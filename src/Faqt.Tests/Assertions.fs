@@ -53,65 +53,11 @@ module SatisfyAny =
     let ``Passes if all of the inner assertions passes and can be chained with And`` () =
         "asd"
             .Should()
-            .SatisfyAny((fun s1 -> s1.Length.Should().Be(3)), (fun s1 -> s1.Length.Should().NotBe(2)))
-        |> ignore<And<string>>
-
-
-    [<Fact>]
-    let ``Passes if only one of the inner assertions passes 1`` () =
-        "asd"
-            .Should()
-            .SatisfyAny((fun s1 -> s1.Length.Should().Be(2)), (fun s1 -> s1.Length.Should().NotBe(2)))
-        |> ignore<And<string>>
-
-
-    [<Fact>]
-    let ``Passes if only one of the inner assertions passes 2`` () =
-        "asd"
-            .Should()
-            .SatisfyAny((fun s1 -> s1.Length.Should().Be(3)), (fun s1 -> s1.Length.Should().NotBe(3)))
-        |> ignore<And<string>>
-
-
-    [<Fact>]
-    let ``Fails with expected message if all of the inner assertions fail`` () =
-        fun () ->
-            "asd"
-                .Should()
-                .SatisfyAny((fun s1 -> s1.Length.Should().Be(2)), (fun s1 -> s1.Length.Should().NotBe(3)))
-        |> assertExnMsg
-            """
-"asd"
-    should satisfy at least one of the 2 supplied assertions, but none were satisfied.
-
-[Assertion 1/2]
-
-s1.Length
-    should be
-2
-    but was
-3
-
-[Assertion 2/2]
-
-s1.Length
-    should not be
-3
-    but the values were equal.
-"""
-
-
-module SatisfyAnyBecause =
-
-
-    [<Fact>]
-    let ``Passes if all of the inner assertions passes and can be chained with And`` () =
-        "asd"
-            .Should()
-            .SatisfyAnyBecause(
-                "some reason",
-                (fun s1 -> s1.Length.Should().Be(3)),
-                (fun s1 -> s1.Length.Should().NotBe(2))
+            .SatisfyAny(
+                [
+                    (fun s1 -> s1.Length.Should().Be(3))
+                    (fun s1 -> s1.Length.Should().NotBe(2))
+                ]
             )
         |> ignore<And<string>>
 
@@ -120,10 +66,11 @@ module SatisfyAnyBecause =
     let ``Passes if only one of the inner assertions passes 1`` () =
         "asd"
             .Should()
-            .SatisfyAnyBecause(
-                "some reason",
-                (fun s1 -> s1.Length.Should().Be(2)),
-                (fun s1 -> s1.Length.Should().NotBe(2))
+            .SatisfyAny(
+                [
+                    (fun s1 -> s1.Length.Should().Be(2))
+                    (fun s1 -> s1.Length.Should().NotBe(2))
+                ]
             )
         |> ignore<And<string>>
 
@@ -132,28 +79,30 @@ module SatisfyAnyBecause =
     let ``Passes if only one of the inner assertions passes 2`` () =
         "asd"
             .Should()
-            .SatisfyAnyBecause(
-                "some reason",
-                (fun s1 -> s1.Length.Should().Be(3)),
-                (fun s1 -> s1.Length.Should().NotBe(3))
-            )
-        |> ignore<And<string>>
-
-
-    [<Fact>]
-    let ``Fails with expected message if all of the inner assertions fail`` () =
-        fun () ->
-            "asd"
-                .Should()
-                .SatisfyAnyBecause(
-                    "some reason",
-                    (fun s1 -> s1.Length.Should().Be(2)),
+            .SatisfyAny(
+                [
+                    (fun s1 -> s1.Length.Should().Be(3))
                     (fun s1 -> s1.Length.Should().NotBe(3))
+                ]
+            )
+        |> ignore<And<string>>
+
+
+    [<Fact>]
+    let ``Fails with expected message if all of the inner assertions fail`` () =
+        fun () ->
+            "asd"
+                .Should()
+                .SatisfyAny(
+                    [
+                        (fun s1 -> s1.Length.Should().Be(2))
+                        (fun s1 -> s1.Length.Should().NotBe(3))
+                    ]
                 )
         |> assertExnMsg
             """
 "asd"
-    should satisfy at least one of the 2 supplied assertions because some reason, but none were satisfied.
+    should satisfy at least one of the 2 supplied assertions, but none were satisfied.
 
 [Assertion 1/2]
 

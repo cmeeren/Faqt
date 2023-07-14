@@ -10,16 +10,16 @@ module bc =
 
     [<Fact>]
     let ``Prefixes with "because " if not already present`` () =
-        Assert.Equal("because some reason", bc (Some "some reason"))
+        Assert.Equal("because some reason", bc "some reason")
 
 
     [<Fact>]
     let ``Does not prefix with "because " if already present`` () =
-        Assert.Equal("because some reason", bc (Some "because some reason"))
+        Assert.Equal("because some reason", bc "because some reason")
 
 
     [<Fact>]
-    let ``Returns empty string for None input`` () = Assert.Empty(bc None)
+    let ``Returns empty string for empty input`` () = Assert.Empty(bc "")
 
 
 module bcc =
@@ -27,16 +27,16 @@ module bcc =
 
     [<Fact>]
     let ``Prefixes with "because " if not already present, and suffixes with ", "`` () =
-        Assert.Equal("because some reason, ", bcc (Some "some reason"))
+        Assert.Equal("because some reason, ", bcc "some reason")
 
 
     [<Fact>]
     let ``Does not prefix with "because " if already present, and suffixes with ", "`` () =
-        Assert.Equal("because some reason, ", bcc (Some "because some reason"))
+        Assert.Equal("because some reason, ", bcc "because some reason")
 
 
     [<Fact>]
-    let ``Returns empty string for None input`` () = Assert.Empty(bcc None)
+    let ``Returns empty string for empty input`` () = Assert.Empty(bcc "")
 
 
 module sbc =
@@ -44,16 +44,16 @@ module sbc =
 
     [<Fact>]
     let ``Prefixes with " because " if "because " is not already present`` () =
-        Assert.Equal(" because some reason", sbc (Some "some reason"))
+        Assert.Equal(" because some reason", sbc "some reason")
 
 
     [<Fact>]
     let ``Prefixes with " " if "because " is already present`` () =
-        Assert.Equal(" because some reason", sbc (Some "because some reason"))
+        Assert.Equal(" because some reason", sbc "because some reason")
 
 
     [<Fact>]
-    let ``Returns empty string for None input`` () = Assert.Empty(sbc None)
+    let ``Returns empty string for empty input`` () = Assert.Empty(sbc "")
 
 
 module sbcc =
@@ -61,13 +61,13 @@ module sbcc =
 
     [<Fact>]
     let ``Prefixes with " because " if "because " is not already present, and suffixes with ", "`` () =
-        Assert.Equal(" because some reason, ", sbcc (Some "some reason"))
+        Assert.Equal(" because some reason, ", sbcc "some reason")
 
 
     [<Fact>]
     let ``Prefixes with " " if "because " is already present, and suffixes with ", "`` () =
-        Assert.Equal(" because some reason, ", sbcc (Some "because some reason"))
+        Assert.Equal(" because some reason, ", sbcc "because some reason")
 
 
     [<Fact>]
-    let ``Returns empty string for None input`` () = Assert.Empty(sbcc None)
+    let ``Returns empty string for empty input`` () = Assert.Empty(sbcc "")

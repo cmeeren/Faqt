@@ -1,44 +1,17 @@
 ﻿module internal Faqt.SubjectName
 
 open System
-open System.Diagnostics
 open System.IO
 open System.Text.RegularExpressions
 open Faqt
 
 
-let private isPartOfAssertion (frame: StackFrame) =
-    frame.HasMethod()
-    && (frame.GetMethod().CustomAttributes
-        |> Seq.exists (fun ai -> ai.AttributeType = typeof<FaqtAssertionAttribute>)
-        || frame.GetMethod().DeclaringType.CustomAttributes
-           |> Seq.exists (fun ai -> ai.AttributeType = typeof<ContainsFaqtAssertionsAttribute>))
-
-
-let private getAssertionMethodNameAndCallingFrame () =
-    let frames = StackTrace(fNeedFileInfo = true).GetFrames()
-
-    let indexOfFrameThatCallsTopmostAssertion =
-        frames
-        |> Seq.indexed
-        |> Seq.skipWhile (snd >> (not << isPartOfAssertion))
-        |> Seq.skipWhile (snd >> isPartOfAssertion)
-        |> Seq.head
-        |> fst
-
-    let assertionFrame = frames |> Seq.item (indexOfFrameThatCallsTopmostAssertion - 1)
-    let userFrame = frames |> Seq.item indexOfFrameThatCallsTopmostAssertion
-    assertionFrame.GetMethod().Name, userFrame
-
 let private transformationPlaceholder = "..."
 
 
-let get () =
+let get fileName methodName lineNo =
     try
-        let methodName, frame = getAssertionMethodNameAndCallingFrame ()
-        let sourceCodeLines = frame.GetFileName() |> File.ReadAllLines
-        let lineNo = frame.GetFileLineNumber()
-        let colNo = frame.GetFileColumnNumber()
+        let sourceCodeLines = File.ReadAllLines(fileName)
 
         sourceCodeLines
         |> Seq.skip (lineNo - 1)
@@ -49,8 +22,9 @@ let get () =
             // In general, lines after the opening delimiter will not be considered.
             i = 0 || line.StartsWith(".") || line.StartsWith("//")
         )
-        |> Seq.map (fun (i, line) ->
-            let line = if i = 0 then line.Substring(colNo - 1) else line
+        |> Seq.map (fun (_i, line) ->
+            // TODO
+            // let line = if i = 0 then line.Substring(colNo - 1) else line
 
             line
             // Known limitation: This will also change string contents (and ``quoted`` identifiers). A workaround is added
@@ -87,5 +61,10 @@ let get () =
 
         // Remove remaining calls to Should.
         |> String.regexReplace "\.Should\(\)" ""
+
+        // Remove "...fun ... ->" from start of line (e.g. in single-line chains in Satisfy)
+        |> String.regexReplace ".*fun .+? -> " ""
+        |> String.trim
     with ex ->
+        // TODO: Improve subject name when failed
         "SUBJECT NAME UNAVAILABLE, MAKE SURE TO USE DEBUG MODE"
