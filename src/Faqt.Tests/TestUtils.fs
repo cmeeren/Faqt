@@ -5,7 +5,6 @@ open System.Runtime.CompilerServices
 open System.Runtime.InteropServices
 open Faqt
 open AssertionHelpers
-open type AssertionHelpers
 open Xunit
 
 
@@ -28,7 +27,7 @@ type Assertions =
             ?methodNameOverride
         ) : AndDerived<'a, 'a> =
         if not pass then
-            fail (sub (fn, lno, methodNameOverride))
+            Fail(t, "", fn, lno, methodNameOverride).Throw("{subject}")
 
         AndDerived(t, t.Subject)
 
@@ -43,7 +42,7 @@ type Assertions =
             ?methodNameOverride
         ) : And<'a> =
         if not pass then
-            fail (sub (fn, lno, methodNameOverride))
+            Fail(t, "", fn, lno, methodNameOverride).Throw("{subject}")
 
         And(t)
 

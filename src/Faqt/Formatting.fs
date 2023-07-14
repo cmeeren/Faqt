@@ -10,7 +10,8 @@ type private FormatterCache<'a>() =
 let mutable private defaultFormatter: (obj -> string) voption = ValueNone
 
 
-let internal format (x: 'a) : string =
+/// Formats the specified value.
+let format (x: 'a) : string =
     let formatted =
         match FormatterCache<'a>.Format with
         | ValueSome format -> format x

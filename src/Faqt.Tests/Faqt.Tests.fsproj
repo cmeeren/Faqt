@@ -7,7 +7,6 @@
   <ItemGroup>
     <Compile Include="TestUtils.fs" />
     <Compile Include="SubjectName.fs" />
-    <Compile Include="AssertionHelpers.fs" />
     <Compile Include="Testable.fs" />
     <Compile Include="And.fs" />
     <Compile Include="AndDerived.fs" />

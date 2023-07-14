@@ -78,3 +78,8 @@ module String =
         (str: string)
         =
         Regex.Replace(str, pattern, replacement)
+
+
+    let formatSimple args str =
+        (str, Seq.indexed args)
+        ||> Seq.fold (fun str (i, arg) -> str |> replace $"{{%i{i}}}" arg)

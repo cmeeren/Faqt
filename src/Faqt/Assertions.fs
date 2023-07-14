@@ -6,7 +6,7 @@ open Microsoft.FSharp.Quotations
 open Microsoft.FSharp.Quotations.Patterns
 open Microsoft.FSharp.Reflection
 open AssertionHelpers
-open type AssertionHelpers
+open Formatting
 
 
 [<Extension>]
@@ -30,8 +30,11 @@ type Assertions =
             assertion t.Subject |> ignore
             And(t)
         with :? AssertionFailedException as ex ->
-            fail
-                $"{sub (fn, lno, methodNameOverride)}\n\tshould satisfy the supplied assertion{sbc because}, but the assertion failed with the following message:\n{ex.Message}"
+            Fail(t, because, fn, lno, methodNameOverride)
+                .Throw(
+                    "{subject}\n\tshould satisfy the supplied assertion{because}, but the assertion failed with the following message:\n{0}",
+                    ex.Message
+                )
 
 
     [<Extension>]
@@ -62,8 +65,12 @@ type Assertions =
                 |> Seq.mapi (fun i ex -> $"\n\n[Assertion %i{i + 1}/%i{assertions.Length}]\n%s{ex.Message}")
                 |> String.concat ""
 
-            fail
-                $"{sub (fn, lno, methodNameOverride)}\n\tshould satisfy at least one of the %i{assertions.Length} supplied assertions{sbc because}, but none were satisfied.{assertionFailuresString}"
+            Fail(t, because, fn, lno, methodNameOverride)
+                .Throw(
+                    "{subject}\n\tshould satisfy at least one of the {0} supplied assertions{because}, but none were satisfied.{1}",
+                    string assertions.Length,
+                    assertionFailuresString
+                )
 
         And(t)
 
@@ -80,8 +87,8 @@ type Assertions =
             ?methodNameOverride
         ) : And<'a> =
         if t.Subject <> expected then
-            fail
-                $"{sub (fn, lno, methodNameOverride)}\n\tshould be\n{fmt expected}\n\t{bcc because}but was\n{fmt t.Subject}"
+            Fail(t, because, fn, lno, methodNameOverride)
+                .Throw("{subject}\n\tshould be\n{0}\n\t{because}but was\n{actual}", format expected)
 
         And(t)
 
@@ -98,8 +105,8 @@ type Assertions =
             ?methodNameOverride
         ) : And<'a> =
         if t.Subject = expected then
-            fail
-                $"{sub (fn, lno, methodNameOverride)}\n\tshould not be\n{fmt expected}\n\t{bcc because}but the values were equal."
+            Fail(t, because, fn, lno, methodNameOverride)
+                .Throw("{subject}\n\tshould not be\n{0}\n\t{because}but the values were equal.", format expected)
 
         And(t)
 
@@ -115,7 +122,8 @@ type Assertions =
             ?methodNameOverride
         ) : And<'a> =
         if not (isNull t.Subject) then
-            fail $"{sub (fn, lno, methodNameOverride)}\n\tshould be null{sbc because}, but was\n{fmt t.Subject}"
+            Fail(t, because, fn, lno, methodNameOverride)
+                .Throw("{subject}\n\tshould be null{because}, but was\n{actual}")
 
         And(t)
 
@@ -131,7 +139,8 @@ type Assertions =
             ?methodNameOverride
         ) : And<'a> =
         if isNull t.Subject then
-            fail $"{sub (fn, lno, methodNameOverride)}\n\tshould not be null{sbc because}, but was null."
+            Fail(t, because, fn, lno, methodNameOverride)
+                .Throw("{subject}\n\tshould not be null{because}, but was null.")
 
         And(t)
 
@@ -155,8 +164,9 @@ type Assertions =
             | NewUnionCase(caseInfo, _) when
                 caseInfo.Tag <> FSharpValue.PreComputeUnionTagReaderCached typeof<'a> t.Subject
                 ->
-                fail
-                    $"{sub (fn, lno, methodNameOverride)}\n\tshould be of case\n{caseInfo.Name}\n\t{bcc because}but was\n{fmt t.Subject}"
+                Fail(t, because, fn, lno, methodNameOverride)
+                    .Throw("{subject}\n\tshould be of case\n{0}\n\t{because}but was\n{actual}", caseInfo.Name)
+
             | NewUnionCase(caseInfo, _) ->
                 let fieldValues = FSharpValue.PreComputeUnionReaderCached caseInfo t.Subject
 
@@ -187,8 +197,8 @@ type Assertions =
         ) : And<'a> =
         match caseConstructor with
         | NewUnionCase(caseInfo, _) when caseInfo.Tag <> FSharpValue.PreComputeUnionTagReaderCached typeof<'a> t.Subject ->
-            fail
-                $"{sub (fn, lno, methodNameOverride)}\n\tshould be of case\n{caseInfo.Name}\n\t{bcc because}but was\n{fmt t.Subject}"
+            Fail(t, because, fn, lno, methodNameOverride)
+                .Throw("{subject}\n\tshould be of case\n{0}\n\t{because}but was\n{actual}", caseInfo.Name)
         | NewUnionCase _ -> And(t)
         | _ -> invalidOp $"The specified expression is not a case constructor for %s{typeof<'a>.FullName}"
 

@@ -4,7 +4,7 @@ open System.Runtime.CompilerServices
 open System.Runtime.InteropServices
 open Faqt
 open AssertionHelpers
-open type AssertionHelpers
+open Formatting
 open Xunit
 
 
@@ -36,8 +36,11 @@ type private Assertions =
             ?methodNameOverride
         ) : And<string> =
         if t.Subject = "Russia" && target = "Ukraine" then
-            fail
-                $"\tExpected\n{sub (fn, lno, methodNameOverride)}\n\tto not invade\n{fmt target}\n\t{bcc because}but an invasion was found to be taking place by\n{fmt t.Subject}"
+            Fail(t, because, fn, lno, methodNameOverride)
+                .Throw(
+                    "\tExpected\n{subject}\n\tto not invade\n{0}\n\t{because}but an invasion was found to be taking place by\n{actual}",
+                    format target
+                )
 
         And(t)
 
