@@ -12,7 +12,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="faqt-logo-128x128.png" Pack="True" PackagePath="" />
+    <None Include="faqt-logo-128x128.png" Pack="True" PackagePath="" Visible="false" />
     <Compile Include="Utils.fs" />
     <Compile Include="Types.fs" />
     <Compile Include="SubjectName.fs" />
