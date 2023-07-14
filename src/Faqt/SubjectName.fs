@@ -63,5 +63,4 @@ let get fileName methodName lineNo =
         |> String.regexReplace ".*fun .+? -> " ""
         |> String.trim
     with ex ->
-        // TODO: Improve subject name when failed
-        "SUBJECT NAME UNAVAILABLE, MAKE SURE TO USE DEBUG MODE"
+        "subject"
