@@ -42,7 +42,7 @@ let get fileName methodName lineNo =
         // method, we don't know anyway which invocation failed, since the stack frame only contains the location of the
         // start of the chain, so we only support deriving the subject name from the part of the expression up to the first
         // call to this method.
-        |> String.regexReplace $"\.{Regex.Escape methodName}\(.*" ""
+        |> String.regexReplace $"\.{Regex.Escape methodName} *\(.*" ""
 
         // Replace Should...Whose and Should...Which with transformation placeholder, since it's assumed the code
         // contains something returning AndDerived. Make an exception for And.Whose and And.Which, since they are
@@ -51,13 +51,13 @@ let get fileName methodName lineNo =
         |> String.regexReplace "\.Should\(\)\..+?\.(?<!And\.)(Whose|Which)\." transformationPlaceholder
 
         // Remove Should...And; this code doesn't change the subject.
-        |> String.regexReplace "\.Should\(\)\..+?\.And" ""
+        |> String.regexReplace "\.Should *\(\)\..+?\.And" ""
 
         // Remove remaining Subject/Whose/Which; they are methods on Testable and don't change the subject.
         |> String.regexReplace "\.(Subject|Whose|Which)\." "."
 
         // Remove remaining calls to Should.
-        |> String.regexReplace "\.Should\(\)" ""
+        |> String.regexReplace "\.Should *\(\)" ""
 
         // Remove "...fun ... ->" from start of line (e.g. in single-line chains in Satisfy)
         |> String.regexReplace ".*fun .+? -> " ""
