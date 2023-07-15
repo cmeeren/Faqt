@@ -17,7 +17,7 @@ assertions remain to be implemented. A feature complete 1.0 version will hopeful
 
 ## A motivating example
 
-Here is an example of what you can do with Faqt. Simply use `Should()` o start asserting, whether in a unit test or for
+Here is an example of what you can do with Faqt. Simply use `Should()` to start asserting, whether in a unit test or for
 validating preconditions etc. in domain code (demonstrated below). Like FluentAssertions, all assertions support an
 optional "because" parameter that will be used in the output.
 
