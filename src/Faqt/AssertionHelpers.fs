@@ -32,6 +32,7 @@ type Fail<'a>
         )
         |> Option.defaultValue ""
 
+
     /// Fail the assertion with the given template and args. The template may contain the tokens "{subject}",
     /// "{actual}", and "{because}". {subject} will be replaced with the subject name. {value} will be replaced with the
     /// (formatted) value being tested. {actual} will be replaced with an empty string if an empty "because" was passed
