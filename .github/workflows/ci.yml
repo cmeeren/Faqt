@@ -17,54 +17,69 @@ jobs:
         run: dotnet fantomas --check .
 
 
-  ci-linux:
+  test-local-sources-linux:
 
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v3
 
-      - name: Test with local source files and no embedded sources
+      - name: Test
         run: dotnet test -c Release -p:DeterministicSourcePaths=false -p:EmbedAllSources=false
 
-      - name: Clean
-        run: dotnet clean -c Release
 
-      - name: Test with deterministic source paths and embedded sources
+  test-embedded-sources-linux:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Test
         run: dotnet test -c Release -p:DeterministicSourcePaths=true -p:EmbedAllSources=true
 
 
-  ci-win:
+  test-local-sources-windows:
 
     runs-on: windows-latest
 
     steps:
       - uses: actions/checkout@v3
 
-      - name: Test with local source files and no embedded sources
+      - name: Test
         run: dotnet test -c Release -p:DeterministicSourcePaths=false -p:EmbedAllSources=false
 
-      - name: Clean
-        run: dotnet clean -c Release
 
-      - name: Test with deterministic source paths and embedded sources
+  test-embedded-sources-windows:
+
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Test
         run: dotnet test -c Release -p:DeterministicSourcePaths=true -p:EmbedAllSources=true
 
 
-  ci-mac:
+  test-local-sources-macos:
 
     runs-on: macos-latest
 
     steps:
       - uses: actions/checkout@v3
 
-      - name: Test with local source files and no embedded sources
+      - name: Test
         run: dotnet test -c Release -p:DeterministicSourcePaths=false -p:EmbedAllSources=false
 
-      - name: Clean
-        run: dotnet clean -c Release
 
-      - name: Test with deterministic source paths and embedded sources
+  test-embedded-sources-macos:
+
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Test
         run: dotnet test -c Release -p:DeterministicSourcePaths=true -p:EmbedAllSources=true
 
 
@@ -74,9 +89,12 @@ jobs:
 
     needs:
       - lint
-      - ci-linux
-      - ci-win
-      - ci-mac
+      - test-local-sources-linux
+      - test-local-sources-windows
+      - test-local-sources-macos
+      - test-embedded-sources-linux
+      - test-embedded-sources-windows
+      - test-embedded-sources-macos
 
     steps:
       - uses: actions/checkout@v3
