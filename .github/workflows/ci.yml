@@ -17,7 +17,7 @@ jobs:
         run: dotnet fantomas --check .
 
       - name: Test with local source files and no embedded sources
-        run: dotnet test -c Release -p:DeterministicSourcePaths=true -p:EmbedAllSources=false
+        run: dotnet test -c Release -p:DeterministicSourcePaths=false -p:EmbedAllSources=false
 
       - name: Clean
         run: dotnet clean -c Release
