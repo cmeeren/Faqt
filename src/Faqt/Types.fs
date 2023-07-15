@@ -1,6 +1,7 @@
 ﻿namespace Faqt
 
 open System
+open System.Reflection
 open System.Runtime.CompilerServices
 open System.Runtime.InteropServices
 
@@ -11,10 +12,10 @@ type AssertionFailedException(message: string) =
 
 
 [<Struct>]
-type Testable<'a> internal (subject: 'a, callerFilePath: string, callerLineNo: int) =
+type Testable<'a> internal (subject: 'a, callerFilePath: string, callerLineNo: int, callerAssembly: Assembly) =
 
     internal new(subject: 'a, continueFrom: Testable<'a>) =
-        Testable(subject, continueFrom.CallerFilePath, continueFrom.CallerLineNo)
+        Testable(subject, continueFrom.CallerFilePath, continueFrom.CallerLineNo, continueFrom.CallerAssembly)
 
     /// Returns the subject being tested. Aliases: Whose, Which.
     member _.Subject: 'a = subject
@@ -25,6 +26,8 @@ type Testable<'a> internal (subject: 'a, callerFilePath: string, callerLineNo: i
     member internal _.CallerFilePath = callerFilePath
 
     member internal _.CallerLineNo = callerLineNo
+
+    member internal _.CallerAssembly = callerAssembly
 
 
 /// A type which allows chaining assertions.
@@ -67,4 +70,4 @@ type TestableExtensions =
             [<CallerFilePath; Optional; DefaultParameterValue("")>] fn: string,
             [<CallerLineNumber; Optional; DefaultParameterValue(0)>] lno: int
         ) : Testable<'a> =
-        Testable(this, fn, lno)
+        Testable(this, fn, lno, Assembly.GetCallingAssembly())
