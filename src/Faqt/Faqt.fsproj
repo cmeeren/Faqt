@@ -8,7 +8,7 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageTags>F# fluent assertion assertions mstest xunit nunit unit test testing preconditions postconditions invariants</PackageTags>
     <PackageIcon>faqt-logo-128x128.png</PackageIcon>
-    <PackageReleaseNotes>https://github.com/cmeeren/Faqt/blob/master/RELEASE_NOTES.md</PackageReleaseNotes>
+    <PackageReleaseNotes>https://github.com/cmeeren/Faqt/blob/main/RELEASE_NOTES.md</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
