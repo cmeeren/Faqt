@@ -16,8 +16,17 @@ jobs:
       - name: Check code format
         run: dotnet fantomas --check .
 
-      - name: Test
-        run: dotnet test -c Debug
+      - name: Test with source
+        run: dotnet test -c Release
+
+      - name: Clean
+        run: dotnet clean -c Release
+
+      - name: Test with deterministic source paths and embedded sources
+        run: dotnet test -c Release -p:DeterministicSourcePaths=true -p:EmbedAllSources=true
+
+      - name: Clean
+        run: dotnet clean -c Release
 
       - name: Pack
         run: dotnet pack -c Release src/Faqt/Faqt.fsproj
