@@ -16,8 +16,8 @@ jobs:
       - name: Check code format
         run: dotnet fantomas --check .
 
-      - name: Test with source
-        run: dotnet test -c Release
+      - name: Test with local source files and no embedded sources
+        run: dotnet test -c Release -p:DeterministicSourcePaths=true -p:EmbedAllSources=false
 
       - name: Clean
         run: dotnet clean -c Release
