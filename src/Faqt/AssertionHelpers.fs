@@ -40,7 +40,9 @@ type Fail<'a>
     /// template does not contain ", " immediately following the token.
     member _.Throw(template, [<ParamArray>] formattedValues: string[]) =
         let methodName = defaultArg methodNameOverride methodName
-        let subjectName = SubjectName.get t.CallerFilePath methodName t.CallerLineNo
+
+        let subjectName =
+            SubjectName.get t.CallerAssembly.Location t.CallerFilePath methodName t.CallerLineNo
 
         // We want to replace {subject}, {actual}, and {because} with values we have no control over, and which may
         // contain formatting tokens such as {0}, {1}, etc. We do not want those replaced in String.formatSimple; only
