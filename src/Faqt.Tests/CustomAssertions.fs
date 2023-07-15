@@ -1,7 +1,6 @@
 ﻿module ``Custom assertions``
 
 open System.Runtime.CompilerServices
-open System.Runtime.InteropServices
 open Faqt
 open AssertionHelpers
 open Formatting
@@ -20,13 +19,7 @@ type private Assertions =
 
 
     [<Extension>]
-    static member NotInvade
-        (
-            t: Testable<string>,
-            target: string,
-            [<Optional; DefaultParameterValue("")>] because,
-            ?methodNameOverride
-        ) : And<string> =
+    static member NotInvade(t: Testable<string>, target: string, ?because, ?methodNameOverride) : And<string> =
         if t.Subject = "Russia" && target = "Ukraine" then
             Fail(t, because, methodNameOverride)
                 .Throw(

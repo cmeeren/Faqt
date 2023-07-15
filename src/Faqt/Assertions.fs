@@ -1,7 +1,6 @@
 ﻿namespace Faqt
 
 open System.Runtime.CompilerServices
-open System.Runtime.InteropServices
 open Microsoft.FSharp.Quotations
 open Microsoft.FSharp.Quotations.Patterns
 open Microsoft.FSharp.Reflection
@@ -17,13 +16,7 @@ type Assertions =
     /// assertions, but Satisfy (combined with And) can be useful if you want to fluently perform multiple assertion
     /// chains, for example if asserting on different parts of a value.
     [<Extension>]
-    static member Satisfy
-        (
-            t: Testable<'a>,
-            assertion: 'a -> 'ignored,
-            [<Optional; DefaultParameterValue("")>] because,
-            ?methodNameOverride
-        ) : And<'a> =
+    static member Satisfy(t: Testable<'a>, assertion: 'a -> 'ignored, ?because, ?methodNameOverride) : And<'a> =
         try
             assertion t.Subject |> ignore
             And(t)
@@ -40,7 +33,7 @@ type Assertions =
         (
             t: Testable<'a>,
             assertions: seq<'a -> 'ignored>,
-            [<Optional; DefaultParameterValue("")>] because,
+            ?because,
             ?methodNameOverride
         ) : And<'a> =
         let assertions = assertions |> Seq.toArray
@@ -73,13 +66,7 @@ type Assertions =
 
     /// Asserts that the subject is the specified value, using the default equality comparison (=).
     [<Extension>]
-    static member Be
-        (
-            t: Testable<'a>,
-            expected: 'a,
-            [<Optional; DefaultParameterValue("")>] because,
-            ?methodNameOverride
-        ) : And<'a> =
+    static member Be(t: Testable<'a>, expected: 'a, ?because, ?methodNameOverride) : And<'a> =
         if t.Subject <> expected then
             Fail(t, because, methodNameOverride)
                 .Throw("{subject}\n\tshould be\n{0}\n\t{because}but was\n{actual}", format expected)
@@ -89,13 +76,7 @@ type Assertions =
 
     /// Asserts that the subject is not the specified value, using default equality comparison (=).
     [<Extension>]
-    static member NotBe
-        (
-            t: Testable<'a>,
-            expected: 'a,
-            [<Optional; DefaultParameterValue("")>] because,
-            ?methodNameOverride
-        ) : And<'a> =
+    static member NotBe(t: Testable<'a>, expected: 'a, ?because, ?methodNameOverride) : And<'a> =
         if t.Subject = expected then
             Fail(t, because, methodNameOverride)
                 .Throw("{subject}\n\tshould not be\n{0}\n\t{because}but the values were equal.", format expected)
@@ -105,12 +86,7 @@ type Assertions =
 
     /// Asserts that the subject is null.
     [<Extension>]
-    static member BeNull
-        (
-            t: Testable<'a>,
-            [<Optional; DefaultParameterValue("")>] because,
-            ?methodNameOverride
-        ) : And<'a> =
+    static member BeNull(t: Testable<'a>, ?because, ?methodNameOverride) : And<'a> =
         if not (isNull t.Subject) then
             Fail(t, because, methodNameOverride)
                 .Throw("{subject}\n\tshould be null{because}, but was\n{actual}")
@@ -120,12 +96,7 @@ type Assertions =
 
     /// Asserts that the subject is not null.
     [<Extension>]
-    static member NotBeNull
-        (
-            t: Testable<'a>,
-            [<Optional; DefaultParameterValue("")>] because,
-            ?methodNameOverride
-        ) : And<'a> =
+    static member NotBeNull(t: Testable<'a>, ?because, ?methodNameOverride) : And<'a> =
         if isNull t.Subject then
             Fail(t, because, methodNameOverride)
                 .Throw("{subject}\n\tshould not be null{because}, but was null.")
@@ -140,7 +111,7 @@ type Assertions =
         (
             t: Testable<'a>,
             [<ReflectedDefinition>] caseConstructor: Quotations.Expr<'b -> 'a>,
-            [<Optional; DefaultParameterValue("")>] because,
+            ?because,
             ?methodNameOverride
         ) : AndDerived<'a, 'b> =
         let rec inner (expr: Expr) =
@@ -176,7 +147,7 @@ type Assertions =
         (
             t: Testable<'a>,
             [<ReflectedDefinition>] caseConstructor: Quotations.Expr<'a>,
-            [<Optional; DefaultParameterValue("")>] because,
+            ?because,
             ?methodNameOverride
         ) : And<'a> =
         match caseConstructor with
@@ -189,24 +160,22 @@ type Assertions =
 
     /// Asserts that the subject is Some, and allows continuing to assert on the inner value. Alias of BeOfCase(Some).
     [<Extension>]
-    static member BeSome
-        (
-            t: Testable<'a option>,
-            [<Optional; DefaultParameterValue("")>] because: string,
-            ?methodNameOverride
-        ) : AndDerived<'a option, 'a> =
-        t.BeOfCase(Some, because, defaultArg methodNameOverride (nameof Assertions.BeSome))
+    static member BeSome(t: Testable<'a option>, ?because, ?methodNameOverride) : AndDerived<'a option, 'a> =
+        t.BeOfCase(
+            Some,
+            ?because = because,
+            methodNameOverride = defaultArg methodNameOverride (nameof Assertions.BeSome)
+        )
 
 
     /// Asserts that the subject is None. Alias of BeOfCase(None), and equivalent to Be(None) (but with a different
     /// error message).
     [<Extension>]
-    static member BeNone
-        (
-            t: Testable<'a option>,
-            [<Optional; DefaultParameterValue("")>] because: string,
-            ?methodNameOverride
-        ) : And<'a option> =
-        t.BeOfCase(None, because, defaultArg methodNameOverride (nameof Assertions.BeNone))
+    static member BeNone(t: Testable<'a option>, ?because, ?methodNameOverride) : And<'a option> =
+        t.BeOfCase(
+            None,
+            ?because = because,
+            methodNameOverride = defaultArg methodNameOverride (nameof Assertions.BeNone)
+        )
 
 // TODO: Always type annotations on because, fn, lno

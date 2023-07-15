@@ -10,16 +10,14 @@ open Faqt
 type Fail<'a>
     (
         t: Testable<'a>,
-        because: string,
+        because: string option,
         methodNameOverride: string option,
         [<CallerMemberName; Optional; DefaultParameterValue("")>] methodName
     ) =
 
 
-    let bc (because: string) prefixSpace suffixComma : string =
+    let bc (because: string option) prefixSpace suffixComma : string =
         because
-        |> Some
-        |> Option.filter (not << String.IsNullOrEmpty)
         |> Option.map (
             String.removePrefix "because "
             >> String.trim

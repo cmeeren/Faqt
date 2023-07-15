@@ -19,7 +19,7 @@ type Assertions =
     [<Extension>]
     static member TestDerived(t: Testable<'a>, pass, ?methodNameOverride) : AndDerived<'a, 'a> =
         if not pass then
-            Fail(t, "", methodNameOverride).Throw("{subject}")
+            Fail(t, None, methodNameOverride).Throw("{subject}")
 
         AndDerived(t, t.Subject)
 
@@ -27,7 +27,7 @@ type Assertions =
     [<Extension>]
     static member Test(t: Testable<'a>, pass, ?methodNameOverride) : And<'a> =
         if not pass then
-            Fail(t, "", methodNameOverride).Throw("{subject}")
+            Fail(t, None, methodNameOverride).Throw("{subject}")
 
         And(t)
 
