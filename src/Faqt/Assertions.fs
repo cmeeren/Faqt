@@ -22,15 +22,13 @@ type Assertions =
             t: Testable<'a>,
             assertion: 'a -> 'ignored,
             [<Optional; DefaultParameterValue("")>] because,
-            [<CallerFilePath; Optional; DefaultParameterValue("")>] fn,
-            [<CallerLineNumber; Optional; DefaultParameterValue(0)>] lno,
             ?methodNameOverride
         ) : And<'a> =
         try
             assertion t.Subject |> ignore
             And(t)
         with :? AssertionFailedException as ex ->
-            Fail(t, because, fn, lno, methodNameOverride)
+            Fail(t, because, methodNameOverride)
                 .Throw(
                     "{subject}\n\tshould satisfy the supplied assertion{because}, but the assertion failed with the following message:\n{0}",
                     ex.Message
@@ -43,8 +41,6 @@ type Assertions =
             t: Testable<'a>,
             assertions: seq<'a -> 'ignored>,
             [<Optional; DefaultParameterValue("")>] because,
-            [<CallerFilePath; Optional; DefaultParameterValue("")>] fn,
-            [<CallerLineNumber; Optional; DefaultParameterValue(0)>] lno,
             ?methodNameOverride
         ) : And<'a> =
         let assertions = assertions |> Seq.toArray
@@ -65,7 +61,7 @@ type Assertions =
                 |> Seq.mapi (fun i ex -> $"\n\n[Assertion %i{i + 1}/%i{assertions.Length}]\n%s{ex.Message}")
                 |> String.concat ""
 
-            Fail(t, because, fn, lno, methodNameOverride)
+            Fail(t, because, methodNameOverride)
                 .Throw(
                     "{subject}\n\tshould satisfy at least one of the {0} supplied assertions{because}, but none were satisfied.{1}",
                     string assertions.Length,
@@ -82,12 +78,10 @@ type Assertions =
             t: Testable<'a>,
             expected: 'a,
             [<Optional; DefaultParameterValue("")>] because,
-            [<CallerFilePath; Optional; DefaultParameterValue("")>] fn,
-            [<CallerLineNumber; Optional; DefaultParameterValue(0)>] lno,
             ?methodNameOverride
         ) : And<'a> =
         if t.Subject <> expected then
-            Fail(t, because, fn, lno, methodNameOverride)
+            Fail(t, because, methodNameOverride)
                 .Throw("{subject}\n\tshould be\n{0}\n\t{because}but was\n{actual}", format expected)
 
         And(t)
@@ -100,12 +94,10 @@ type Assertions =
             t: Testable<'a>,
             expected: 'a,
             [<Optional; DefaultParameterValue("")>] because,
-            [<CallerFilePath; Optional; DefaultParameterValue("")>] fn,
-            [<CallerLineNumber; Optional; DefaultParameterValue(0)>] lno,
             ?methodNameOverride
         ) : And<'a> =
         if t.Subject = expected then
-            Fail(t, because, fn, lno, methodNameOverride)
+            Fail(t, because, methodNameOverride)
                 .Throw("{subject}\n\tshould not be\n{0}\n\t{because}but the values were equal.", format expected)
 
         And(t)
@@ -117,12 +109,10 @@ type Assertions =
         (
             t: Testable<'a>,
             [<Optional; DefaultParameterValue("")>] because,
-            [<CallerFilePath; Optional; DefaultParameterValue("")>] fn,
-            [<CallerLineNumber; Optional; DefaultParameterValue(0)>] lno,
             ?methodNameOverride
         ) : And<'a> =
         if not (isNull t.Subject) then
-            Fail(t, because, fn, lno, methodNameOverride)
+            Fail(t, because, methodNameOverride)
                 .Throw("{subject}\n\tshould be null{because}, but was\n{actual}")
 
         And(t)
@@ -134,12 +124,10 @@ type Assertions =
         (
             t: Testable<'a>,
             [<Optional; DefaultParameterValue("")>] because,
-            [<CallerFilePath; Optional; DefaultParameterValue("")>] fn,
-            [<CallerLineNumber; Optional; DefaultParameterValue(0)>] lno,
             ?methodNameOverride
         ) : And<'a> =
         if isNull t.Subject then
-            Fail(t, because, fn, lno, methodNameOverride)
+            Fail(t, because, methodNameOverride)
                 .Throw("{subject}\n\tshould not be null{because}, but was null.")
 
         And(t)
@@ -153,8 +141,6 @@ type Assertions =
             t: Testable<'a>,
             [<ReflectedDefinition>] caseConstructor: Quotations.Expr<'b -> 'a>,
             [<Optional; DefaultParameterValue("")>] because,
-            [<CallerFilePath; Optional; DefaultParameterValue("")>] fn,
-            [<CallerLineNumber; Optional; DefaultParameterValue(0)>] lno,
             ?methodNameOverride
         ) : AndDerived<'a, 'b> =
         let rec inner (expr: Expr) =
@@ -164,7 +150,7 @@ type Assertions =
             | NewUnionCase(caseInfo, _) when
                 caseInfo.Tag <> FSharpValue.PreComputeUnionTagReaderCached typeof<'a> t.Subject
                 ->
-                Fail(t, because, fn, lno, methodNameOverride)
+                Fail(t, because, methodNameOverride)
                     .Throw("{subject}\n\tshould be of case\n{0}\n\t{because}but was\n{actual}", caseInfo.Name)
 
             | NewUnionCase(caseInfo, _) ->
@@ -191,13 +177,11 @@ type Assertions =
             t: Testable<'a>,
             [<ReflectedDefinition>] caseConstructor: Quotations.Expr<'a>,
             [<Optional; DefaultParameterValue("")>] because,
-            [<CallerFilePath; Optional; DefaultParameterValue("")>] fn,
-            [<CallerLineNumber; Optional; DefaultParameterValue(0)>] lno,
             ?methodNameOverride
         ) : And<'a> =
         match caseConstructor with
         | NewUnionCase(caseInfo, _) when caseInfo.Tag <> FSharpValue.PreComputeUnionTagReaderCached typeof<'a> t.Subject ->
-            Fail(t, because, fn, lno, methodNameOverride)
+            Fail(t, because, methodNameOverride)
                 .Throw("{subject}\n\tshould be of case\n{0}\n\t{because}but was\n{actual}", caseInfo.Name)
         | NewUnionCase _ -> And(t)
         | _ -> invalidOp $"The specified expression is not a case constructor for %s{typeof<'a>.FullName}"
@@ -209,11 +193,9 @@ type Assertions =
         (
             t: Testable<'a option>,
             [<Optional; DefaultParameterValue("")>] because: string,
-            [<CallerFilePath; Optional; DefaultParameterValue("")>] fn: string,
-            [<CallerLineNumber; Optional; DefaultParameterValue(0)>] lno: int,
             ?methodNameOverride
         ) : AndDerived<'a option, 'a> =
-        t.BeOfCase(Some, because, fn, lno, defaultArg methodNameOverride (nameof Assertions.BeSome))
+        t.BeOfCase(Some, because, defaultArg methodNameOverride (nameof Assertions.BeSome))
 
 
     /// Asserts that the subject is None. Alias of BeOfCase(None), and equivalent to Be(None) (but with a different
@@ -223,10 +205,8 @@ type Assertions =
         (
             t: Testable<'a option>,
             [<Optional; DefaultParameterValue("")>] because: string,
-            [<CallerFilePath; Optional; DefaultParameterValue("")>] fn: string,
-            [<CallerLineNumber; Optional; DefaultParameterValue(0)>] lno: int,
             ?methodNameOverride
         ) : And<'a option> =
-        t.BeOfCase(None, because, fn, lno, defaultArg methodNameOverride (nameof Assertions.BeNone))
+        t.BeOfCase(None, because, defaultArg methodNameOverride (nameof Assertions.BeNone))
 
 // TODO: Always type annotations on because, fn, lno

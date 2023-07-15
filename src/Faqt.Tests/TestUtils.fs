@@ -2,7 +2,6 @@
 module TestUtils
 
 open System.Runtime.CompilerServices
-open System.Runtime.InteropServices
 open Faqt
 open AssertionHelpers
 open Xunit
@@ -18,74 +17,36 @@ type Assertions =
 
 
     [<Extension>]
-    static member TestDerived
-        (
-            t: Testable<'a>,
-            pass,
-            [<CallerFilePath; Optional; DefaultParameterValue("")>] fn,
-            [<CallerLineNumber; Optional; DefaultParameterValue(0)>] lno,
-            ?methodNameOverride
-        ) : AndDerived<'a, 'a> =
+    static member TestDerived(t: Testable<'a>, pass, ?methodNameOverride) : AndDerived<'a, 'a> =
         if not pass then
-            Fail(t, "", fn, lno, methodNameOverride).Throw("{subject}")
+            Fail(t, "", methodNameOverride).Throw("{subject}")
 
         AndDerived(t, t.Subject)
 
 
     [<Extension>]
-    static member Test
-        (
-            t: Testable<'a>,
-            pass,
-            [<CallerFilePath; Optional; DefaultParameterValue("")>] fn,
-            [<CallerLineNumber; Optional; DefaultParameterValue(0)>] lno,
-            ?methodNameOverride
-        ) : And<'a> =
+    static member Test(t: Testable<'a>, pass, ?methodNameOverride) : And<'a> =
         if not pass then
-            Fail(t, "", fn, lno, methodNameOverride).Throw("{subject}")
+            Fail(t, "", methodNameOverride).Throw("{subject}")
 
         And(t)
 
 
     [<Extension>]
-    static member PassDerived
-        (
-            t: Testable<'a>,
-            [<CallerFilePath; Optional; DefaultParameterValue("")>] fn,
-            [<CallerLineNumber; Optional; DefaultParameterValue(0)>] lno,
-            ?methodNameOverride
-        ) : AndDerived<'a, 'a> =
-        t.TestDerived(true, fn, lno, defaultArg methodNameOverride (nameof Assertions.PassDerived))
+    static member PassDerived(t: Testable<'a>, ?methodNameOverride) : AndDerived<'a, 'a> =
+        t.TestDerived(true, defaultArg methodNameOverride (nameof Assertions.PassDerived))
 
 
     [<Extension>]
-    static member Pass
-        (
-            t: Testable<'a>,
-            [<CallerFilePath; Optional; DefaultParameterValue("")>] fn,
-            [<CallerLineNumber; Optional; DefaultParameterValue(0)>] lno,
-            ?methodNameOverride
-        ) : And<'a> =
-        t.Test(true, fn, lno, defaultArg methodNameOverride (nameof Assertions.Pass))
+    static member Pass(t: Testable<'a>, ?methodNameOverride) : And<'a> =
+        t.Test(true, defaultArg methodNameOverride (nameof Assertions.Pass))
 
 
     [<Extension>]
-    static member FailDerived
-        (
-            t: Testable<'a>,
-            [<CallerFilePath; Optional; DefaultParameterValue("")>] fn,
-            [<CallerLineNumber; Optional; DefaultParameterValue(0)>] lno,
-            ?methodNameOverride
-        ) : AndDerived<'a, 'a> =
-        t.TestDerived(false, fn, lno, defaultArg methodNameOverride (nameof Assertions.FailDerived))
+    static member FailDerived(t: Testable<'a>, ?methodNameOverride) : AndDerived<'a, 'a> =
+        t.TestDerived(false, defaultArg methodNameOverride (nameof Assertions.FailDerived))
 
 
     [<Extension>]
-    static member Fail
-        (
-            t: Testable<'a>,
-            [<CallerFilePath; Optional; DefaultParameterValue("")>] fn,
-            [<CallerLineNumber; Optional; DefaultParameterValue(0)>] lno,
-            ?methodNameOverride
-        ) : And<'a> =
-        t.Test(false, fn, lno, defaultArg methodNameOverride (nameof Assertions.Fail))
+    static member Fail(t: Testable<'a>, ?methodNameOverride) : And<'a> =
+        t.Test(false, defaultArg methodNameOverride (nameof Assertions.Fail))

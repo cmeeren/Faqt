@@ -11,8 +11,6 @@ type Fail<'a>
     (
         t: Testable<'a>,
         because: string,
-        fileName: string,
-        lineNo: int,
         methodNameOverride: string option,
         [<CallerMemberName; Optional; DefaultParameterValue("")>] methodName
     ) =
@@ -43,7 +41,7 @@ type Fail<'a>
     /// template does not contain ", " immediately following the token.
     member _.Throw(template, [<ParamArray>] formattedValues: string[]) =
         let methodName = defaultArg methodNameOverride methodName
-        let subjectName = SubjectName.get fileName methodName lineNo
+        let subjectName = SubjectName.get t.CallerFilePath methodName t.CallerLineNo
 
         // We want to replace {subject}, {actual}, and {because} with values we have no control over, and which may
         // contain formatting tokens such as {0}, {1}, etc. We do not want those replaced in String.formatSimple; only
@@ -69,3 +67,12 @@ type Fail<'a>
         |> String.regexReplace $"(?<=\s){becausePlaceholder}(?=, )" (bc because false false)
         |> AssertionFailedException
         |> raise
+
+
+[<Extension>]
+type TestableExtensions =
+
+
+    /// Use this overload when calling Should() in custom assertions.
+    [<Extension>]
+    static member Should(this: 'a, continueFrom: Testable<'a>) : Testable<'a> = Testable(this, continueFrom)
