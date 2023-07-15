@@ -177,5 +177,3 @@ type Assertions =
             ?because = because,
             methodNameOverride = defaultArg methodNameOverride (nameof Assertions.BeNone)
         )
-
-// TODO: Always type annotations on because, fn, lno
