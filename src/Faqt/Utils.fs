@@ -23,6 +23,14 @@ let memoizeRefEq (f: 'a -> 'b) =
     fun a -> cache.GetOrAdd(a, f)
 
 
+/// Memoizes the specified function using normal equality (=) on the input arguments.
+///
+/// Don't call with additional arguments as ad-hoc tuples or records, since these will never be reference equal.
+let memoize4 (f: 'a -> 'b -> 'c -> 'd -> 'e) =
+    let cache = new ConcurrentDictionary<'a * 'b * 'c * 'd, 'e>()
+    fun a b c d -> cache.GetOrAdd((a, b, c, d), (fun (a, b, c, d) -> f a b c d))
+
+
 let private preComputeUnionReaderCached =
     memoizeRefEq FSharpValue.PreComputeUnionReader
 
