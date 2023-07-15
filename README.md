@@ -86,7 +86,7 @@ As expected by the discerning F# developer, Faqt is:
 - **Usable:** Faqt comes with batteries included - many useful assertions, including aliases (like `BeTrue()`
   for `Be(true)` on booleans, and `BeSome` for `BeOfCase(Some)` on `option` values).
 - **Safe:** Assertions are as type-safe as F# allows.
-- **Extendable:** Not assertion? No problem. Writing your own assertions is very simple.
+- **Extendable:** No assertion? No problem! Writing your own assertions is very simple.
 - **Informative:** The assertion failure messages are designed to give you all the information you need in an
   easy-to-parse format.
 - **Discoverable:** The fluent syntax means you can just type a dot to discover all possible assertions.
