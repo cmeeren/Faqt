@@ -7,8 +7,8 @@ Faqt
 
 Faqt improves on the best of [FluentAssertions](https://github.com/fluentassertions/fluentassertions)
 and [Shouldly](https://github.com/shouldly/shouldly) and serves it steaming hot on a silver platter
-to the discerning F# developer. **It aims to the best assertion library for F#.** If you don't agree, that's a bug -
-please raise an issue.
+to the discerning F# developer. **It aims to the best assertion library for F#.** If you don't agree, I consider that a
+bug - please raise an issue.
 
 ### Work in progress, 1.0 to be released late August 2023
 
