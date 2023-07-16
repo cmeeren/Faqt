@@ -114,11 +114,11 @@ open Formatting
 type Assertions =
 
     [<Extension>]
-    static member Be(t: Testable<'a>, expected: 'a, ?because, ?methodNameOverride) : And<'a> =
+    static member Be(t: Testable<'a>, expected: 'a, ?because) : And<'a> =
         use _ = t.Assert()
 
         if t.Subject <> expected then
-            Fail(t, because, methodNameOverride)
+            Fail(t, because)
                 .Throw("{subject}\n\tshould be\n{0}\n\t{because}but was\n{actual}", format expected)
 
         And(t)
@@ -136,7 +136,8 @@ Here are the important points:
 * Accept whichever arguments you need for your assertion, and end with `?because`.
 
 * First in your method, call `use _ = t.Assert()`. This is needed to track important state necessary for subject
-  names to work.
+  names to work. If your assertion calls user code that is expected to call their own assertions (like `Satisfy`),
+  call `t.Assert(true)` instead, and make sure it's disposed before you call `Fail`.
 
 * If your condition is not met, call
 

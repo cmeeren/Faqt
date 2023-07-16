@@ -16,13 +16,7 @@ module Satisfy =
 
     [<Fact>]
     let ``Fails with expected message if the inner assertion fails`` () =
-        fun () ->
-            "asd"
-                .Length.Should()
-                .Satisfy(fun x ->
-                    // Comment to force break
-                    x.ToString().Length.Should().Be(2)
-                )
+        fun () -> "asd".Length.Should().Satisfy(fun x -> x.ToString().Length.Should().Be(2))
         |> assertExnMsg
             """
 "asd".Length
@@ -38,16 +32,7 @@ x.ToString().Length
 
     [<Fact>]
     let ``Fails with expected message with because`` () =
-        fun () ->
-            "asd"
-                .Should()
-                .Satisfy(
-                    (fun x ->
-                        // Comment to force break
-                        x.Length.Should().Be(2)
-                    ),
-                    "some reason"
-                )
+        fun () -> "asd".Should().Satisfy((fun x -> x.Length.Should().Be(2)), "some reason")
         |> assertExnMsg
             """
 "asd"

@@ -1,7 +1,6 @@
 ﻿module internal Faqt.SubjectName
 
 open System
-open System.Collections.Generic
 open System.IO
 open System.IO.Compression
 open System.Reflection.Metadata
@@ -109,7 +108,7 @@ let getFileLines = memoize File.ReadAllLines
 let private transformationPlaceholder = "..."
 
 
-let get assemblyPath sourceFilePath (assertions: IList<string>) lineNo =
+let get assemblyPath sourceFilePath (assertions: string list) lineNo =
     try
         let sourceCodeLines =
             try
@@ -119,7 +118,7 @@ let get assemblyPath sourceFilePath (assertions: IList<string>) lineNo =
                     .ReplaceLineEndings("\n")
                     .Split("\n")
 
-        let lastAssertion = assertions[assertions.Count - 1]
+        let lastAssertion = assertions[assertions.Length - 1]
         let lastAssertionCount = assertions |> Seq.filter ((=) lastAssertion) |> Seq.length
 
         sourceCodeLines

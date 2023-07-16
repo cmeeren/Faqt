@@ -242,6 +242,51 @@ let ``And.Which: Picks correct assertion among multiple with matching name`` () 
 
 
 [<Fact>]
+let ``Single-line Satisfy`` () =
+    fun () -> "asd".Should().Satisfy(fun x -> x.Length.Should().Be(2))
+    // Subject name in inner failure should ideally be "x.Length". Update if this is ever supported.
+    |> assertExnMsg
+        """
+"asd"
+    should satisfy the supplied assertion, but the assertion failed with the following message:
+
+x.Length
+    should be
+2
+    but was
+3
+"""
+
+
+[<Fact>]
+let ``Single-line SatisfyAny`` () =
+    fun () ->
+        "asd"
+            .Should()
+            .SatisfyAny([ (fun s1 -> s1.Should().Be("a")); (fun s2 -> s2.Should().NotBe("asd")) ])
+    |> assertExnMsg
+        """
+"asd"
+    should satisfy at least one of the 2 supplied assertions, but none were satisfied.
+
+[Assertion 1/2]
+
+s1
+    should be
+"a"
+    but was
+"asd"
+
+[Assertion 2/2]
+
+s2
+    should not be
+"asd"
+    but the values were equal.
+"""
+
+
+[<Fact>]
 let ``Literal URLs are supported`` () =
     fun () -> "http://test.example.com".Should().Fail()
     |> assertExnMsgSubjectName "\"http://test.example.com\""
@@ -314,20 +359,3 @@ let ``Known limitation: Multiline bracketed expressions are not handled correctl
             .Should()
             .Fail()
     |> assertExnMsgSubjectName "subject"
-
-
-[<Fact>]
-let ``Known limitation: Single-line Satisfy is not handled correctly`` () =
-    fun () -> "asd".Should().Satisfy(fun x -> x.Length.Should().Be(2))
-    // Subject name in inner failure should ideally be "x.Length". Update if this is ever supported.
-    |> assertExnMsg
-        """
-"asd"
-    should satisfy the supplied assertion, but the assertion failed with the following message:
-
-"asd"
-    should be
-2
-    but was
-3
-"""

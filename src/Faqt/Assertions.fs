@@ -17,9 +17,8 @@ type Assertions =
     /// chains, for example if asserting on different parts of a value.
     [<Extension>]
     static member Satisfy(t: Testable<'a>, assertion: 'a -> 'ignored, ?because) : And<'a> =
-        use _ = t.Assert()
-
         try
+            use x = t.Assert(true)
             assertion t.Subject |> ignore
             And(t)
         with :? AssertionFailedException as ex ->
@@ -32,7 +31,7 @@ type Assertions =
 
     [<Extension>]
     static member SatisfyAny(t: Testable<'a>, assertions: seq<'a -> 'ignored>, ?because) : And<'a> =
-        use _ = t.Assert()
+        use _ = t.Assert(true)
         let assertions = assertions |> Seq.toArray
 
         let exceptions =

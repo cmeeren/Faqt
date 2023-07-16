@@ -15,19 +15,27 @@ type AssertionFailedException(message: string) =
 type Testable<'a> internal (subject: 'a, callerFilePath: string, callerLineNo: int, callerAssembly: Assembly) =
 
     [<ThreadStatic; DefaultValue>]
-    static val mutable private assertions: Dictionary<Assembly * string * int, ResizeArray<string>>
+    static val mutable private assertions: Dictionary<Assembly * string * int, string list>
 
     [<ThreadStatic; DefaultValue>]
     static val mutable private isAsserting: Dictionary<Assembly * string * int, bool>
 
+    // TODO: simplify logic using Stack?
 
     static let addAssertion key assertion =
         if isNull Testable.assertions then
             Testable.assertions <- Dictionary()
 
         match Testable.assertions.TryGetValue key with
-        | false, _ -> Testable.assertions[key] <- ResizeArray([ assertion ])
-        | true, assertions -> assertions.Add(assertion)
+        | false, _ -> Testable.assertions[key] <- [ assertion ]
+        | true, assertions -> Testable.assertions[key] <- assertions @ [ assertion ]
+
+
+    static let setAssertions key assertions =
+        if isNull Testable.assertions then
+            Testable.assertions <- Dictionary()
+
+        Testable.assertions[key] <- assertions
 
 
     static let setIsAsserting key value =
@@ -51,17 +59,33 @@ type Testable<'a> internal (subject: 'a, callerFilePath: string, callerLineNo: i
         Testable(subject, continueFrom.CallerFilePath, continueFrom.CallerLineNo, continueFrom.CallerAssembly)
 
 
-    member _.Assert([<CallerMemberName; Optional; DefaultParameterValue("")>] assertion: string) =
+    /// Call this at the start of your assertions, and make sure to dispose the returned value at the end. This is
+    /// needed to track important state necessary for subject names to work. If your assertion calls user code that is
+    /// expected to call their own assertions (like `Satisfy`), call `t.Assert(true)` instead, and make sure it's
+    /// disposed before you call `Fail`.
+    member this.Assert
+        (
+            [<Optional; DefaultParameterValue(false)>] trackSubAssertions,
+            [<CallerMemberName; Optional; DefaultParameterValue("")>] assertion: string
+        ) =
         let key = callerAssembly, callerFilePath, callerLineNo
 
         if getIsAsserting key then
             IDisposable.noOp
         else
-            setIsAsserting key true
+            if not trackSubAssertions then
+                setIsAsserting key true
+
             addAssertion key assertion
+            let currentAssertions = this.Assertions
 
             { new IDisposable with
-                member _.Dispose() = setIsAsserting key false
+                member _.Dispose() =
+                    if not trackSubAssertions then
+                        setIsAsserting key false
+
+                    if trackSubAssertions then
+                        setAssertions key currentAssertions
             }
 
     /// Returns the subject being tested. Aliases: Whose, Which.
@@ -77,7 +101,11 @@ type Testable<'a> internal (subject: 'a, callerFilePath: string, callerLineNo: i
     member internal _.CallerAssembly = callerAssembly
 
     member internal _.Assertions =
-        Testable.assertions[(callerAssembly, callerFilePath, callerLineNo)]
+        let key = callerAssembly, callerFilePath, callerLineNo
+
+        match Testable.assertions.TryGetValue key with
+        | true, xs -> xs
+        | false, _ -> []
 
 
 /// A type which allows chaining assertions.
