@@ -11,7 +11,6 @@ type AssertionFailedException(message: string) =
     inherit Exception(message)
 
 
-[<Struct>]
 type Testable<'a> internal (subject: 'a, callerFilePath: string, callerLineNo: int, callerAssembly: Assembly) =
 
     internal new(subject: 'a, continueFrom: Testable<'a>) =
