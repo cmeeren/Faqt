@@ -201,7 +201,6 @@ theoretically be solved entirely by parsing the F# source code using FSharp.Comp
 regex-based processing (though note that this has its own drawbacks; it was initially tried and abandoned in the early
 stages of Faqt):
 
-* TODO: Mention single-line calls to `Satisfy` and `SatisfyAny`
 * Assertion chains must start on a new line, or right after `fun ... ->`.
 * Chains do not contain string literals containing `//` (an exception is made for `://` which is used in URLs).
 * Chains do not contain multi-line strings.
