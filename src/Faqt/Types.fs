@@ -51,7 +51,7 @@ type Testable<'a> internal (subject: 'a, callerFilePath: string, callerLineNo: i
 
         match Testable.isAsserting.TryGetValue key with
         | true, x -> x
-        | false, _ -> false // TODO: Should this ever happen?
+        | false, _ -> false
 
 
     // TODO: Can we remove this?
