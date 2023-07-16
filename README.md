@@ -202,9 +202,9 @@ regex-based processing (though note that this has its own drawbacks; it was init
 stages of Faqt):
 
 * Assertion chains must start on a new line, or right after `fun ... ->`.
-* Chains do not contain string literals containing `//` (an exception is made for `://` which is used in URLs).
-* Chains do not contain multi-line strings.
-* Chains do not contain multi-line parenthesized/bracketed expressions.
+* Chains must not contain string literals containing `//` (an exception is made for `://` which is used in URLs).
+* Chains must not contain multi-line strings.
+* Chains must not contain multi-line parenthesized/bracketed expressions.
 
-If these assumptions are broken, the worst that happens is that the subject name is incorrect (or in the worst case is
-replaced by the generic string `"subject"` if something catastrophic occurs).
+If these assumptions are broken, the worst that happens is that the subject name is incorrect or replaced by the generic
+string `"subject"`.
