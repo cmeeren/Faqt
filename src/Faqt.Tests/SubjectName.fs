@@ -318,8 +318,8 @@ let ``Known limitation: Multiline bracketed expressions are not handled correctl
 
 [<Fact>]
 let ``Known limitation: Single-line Satisfy is not handled correctly`` () =
-    fun () -> "asd".Should().Satisfy((fun x -> x.Length.Should().Be(2)))
-    // Subject name in inner failure should ideally be "x". Update if this is ever supported.
+    fun () -> "asd".Should().Satisfy(fun x -> x.Length.Should().Be(2))
+    // Subject name in inner failure should ideally be "x.Length". Update if this is ever supported.
     |> assertExnMsg
         """
 "asd"
