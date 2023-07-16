@@ -133,11 +133,7 @@ Here are the important points:
   example by specifying more concrete types (such as `Testable<'a option>` in order to have your extension only work
   for `option`-wrapped types).
 
-* Accept whichever arguments you need for your assertion, and end with `?because` and `?methodNameOverride`. The latter
-  is used when other assertions call your assertions in their implementation, and is required in order for the automatic
-  subject name (the first part of the assertion message) to work in those cases. If you write ad-hoc assertions that
-  only you will use, and you know no other assertions will call your assertion, feel free to drop `methodNameOverride` (
-  and pass `None` in its position in the call to `Fail`).
+* Accept whichever arguments you need for your assertion, and end with `?because`.
 
 * First in your method, call `use _ = t.Assert()`. This is needed to track important state necessary for subject
   names to work.
