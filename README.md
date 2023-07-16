@@ -33,7 +33,7 @@ let calculateFreeShipping customer =
         .Whose.ContactInfo.Should()
         .BeSome()
         .Whose.Name.LastName.Should()
-        .Be("Armstrong", "only customers named Armstrong gets free shipping")
+        .Be("Armstrong", "only customers named Armstrong get free shipping")
 ```
 
 (The example is formatted using [Fantomas](https://fsprojects.github.io/fantomas/), which line-breaks fluent chains at
@@ -68,7 +68,7 @@ If `LastName` is not `Armstrong`:
 customer...ContactInfo...Name.LastName
     should be
 "Armstrong"
-    because only customers named Armstrong gets free shipping, but was
+    because only customers named Armstrong get free shipping, but was
 "Aldrin"
 ```
 
