@@ -111,7 +111,7 @@ module SatisfyAny =
                 .SatisfyAny(
                     [
                         (fun s1 -> s1.Length.Should().Be(2))
-                        (fun s1 -> s1.Length.Should().NotBe(3))
+                        (fun s2 -> s2.Length.Should().NotBe(3))
                     ]
                 )
         |> assertExnMsg
@@ -129,7 +129,7 @@ s1.Length
 
 [Assertion 2/2]
 
-s1.Length
+s2.Length
     should not be
 3
     but the values were equal.
