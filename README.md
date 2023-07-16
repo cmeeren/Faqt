@@ -115,6 +115,8 @@ type Assertions =
 
     [<Extension>]
     static member Be(t: Testable<'a>, expected: 'a, ?because, ?methodNameOverride) : And<'a> =
+        use _ = t.Assert()
+
         if t.Subject <> expected then
             Fail(t, because, methodNameOverride)
                 .Throw("{subject}\n\tshould be\n{0}\n\t{because}but was\n{actual}", format expected)
@@ -137,11 +139,14 @@ Here are the important points:
   only you will use, and you know no other assertions will call your assertion, feel free to drop `methodNameOverride` (
   and pass `None` in its position in the call to `Fail`).
 
+* First in your method, call `use _ = t.Assert()`. This is needed to track important state necessary for subject
+  names to work.
+
 * If your condition is not met, call
 
    ```f#
    Fail(t, because, methodNameOverride)
-   	.Throw("<message template>", param1, param2, ...)
+       .Throw("<message template>", param1, param2, ...)
    ```
 
 * The message template is up you, but for consistency it should ideally adhere to the following conventions:
