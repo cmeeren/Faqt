@@ -73,9 +73,11 @@ customer...ContactInfo...Name.LastName
 ```
 
 As you can see, the first line tells you which part of the code fails (and `...` is used when using derived state from
-an assertion). **Yes, this works even in production, on CI with `DeterministicSourcePaths`, and otherwise when your
-source files are not available, as long as you use `<DebugType>embedded</DebugType>`
-and `<EmbedAllSources>true</EmbedAllSources>`. It's magic!**
+an assertion).
+
+**Yes, this works even in production, on CI with `DeterministicSourcePaths`, and otherwise when your source files are
+not available, as long as you use `<DebugType>embedded</DebugType>` and `<EmbedAllSources>true</EmbedAllSources>`. It's
+magic!**
 
 ## Faqt in a nutshell
 
@@ -83,18 +85,19 @@ As expected by the discerning F# developer, Faqt is:
 
 - **Readable:** Assertions read like natural language.
 - **Concise:** Verbosity in the syntax is kept to an absolute minimum.
-- **Usable:** Faqt comes with batteries included - many useful assertions, including aliases (like `BeTrue()`
-  for `Be(true)` on booleans, and `BeSome` for `BeOfCase(Some)` on `option` values).
+- **Usable:** Faqt comes with batteries included, and contains many useful assertions, including aliases
+  (like `BeTrue()` for `Be(true)` on booleans, and `BeSome` for `BeOfCase(Some)` on `option` values).
 - **Safe:** Assertions are as type-safe as F# allows.
 - **Extendable:** No assertion? No problem! Writing your own assertions is very simple (details below).
 - **Informative:** The assertion failure messages are designed to give you all the information you need in an
-  easy-to-parse format.
-- **Discoverable:** The fluent syntax means you can just type a dot to discover all possible assertions.
+  easy-to-read format.
+- **Discoverable:** The fluent syntax means you can just type a dot to discover all possible assertions and actinos on
+  the current value.
 - **Composable:** You can chain assertions with `And`, `Whose`, `Which`, and `Subject`, assert on derived values like
   with `BeSome()`, split out assertion chains with `Satisfy`, and require one of several sub-assertions
   with `SatisfyAny`.
-- **Configurable:**: You can configure how values are formatted in the assertion message on a type-by-type basis, and
-  specify a default formatter (e.g. for outputting as JSON).
+- **Configurable:** You can configure how values are formatted in the assertion message on a type-by-type basis, and
+  specify a default formatter (e.g. for serializing objects to JSON for display).
 - **Production-ready:** Faqt is very well tested and will not break your code, whether test or production.
 
 ## Writing your own assertions
@@ -136,46 +139,31 @@ thoroughly once than piecewise here and there.
 * Accept whichever arguments you need for your assertion, and end with `?because`.
 
 * First in your method, call `use _ = t.Assert()`. This is needed to track important state necessary for subject
-  names to work. If your assertion calls user code that is expected to call their own assertions (like `Satisfy`),
-  call `t.Assert(true)` instead, and make sure it's disposed before you call `Fail`.
+  names to work. If your assertion calls user code that is expected to call their own assertions (like is the case
+  with`Satisfy`), call `t.Assert(true)` instead, and make sure the returned value is disposed before you call `Fail`.
 
 * If your condition is not met, call
 
    ```f#
-   Fail(t, because, methodNameOverride)
-       .Throw("<message template>", param1, param2, ...)
+   Fail(t, because).Throw("<message template>", param1, param2, ...)
    ```
 
 * The message template is up you, but for consistency it should ideally adhere to the following conventions:
 
   * The general structure should be something like “{subject} should … {because}, but …”.
   * Use `{subject}`, `{because}`, and `{actual}` as placeholders for the subject name, the user-supplied reason, and the
-    current value being tested (`t.Suject`), respectively. (Not all assertions need `{actual}`.)
+    current value being tested (`t.Subject`), respectively. (Not all assertions need `{actual}`.)
   * Use `{0}`, `{1}`, etc. as needed for any values passed as parameters after the template. These parameters must
-    be `string`; use the `format` function (in the opened `Formatting` module) to format values for display.
+    be of type `string`; use the `format` function (in the opened `Formatting` module) to format values for display.
   * Don’t use string interpolation to insert values you don’t have control over (for example, values that could contain
     the placeholders mentioned above).
   * Place `{subject}`, `{actual}`, and all other important values on separate lines. All other text should be indented
     using `\t`.
-  * Ensure that your message is rendered correctly if `{because}` is replaced with an empty string (regarding whitespace
-    before and/or comma + space after `{because}`). Faqt will insert a space before and space + comma after `{because}`
-    if needed.
+  * Ensure that your message is rendered correctly if `{because}` is replaced with an empty string. Faqt will insert a
+    space before `{because}` and/or a comma + space after `{because}` if needed.
 
 * If your assertion extracts derived state that can be used for further assertions,
   return `AndDerived(t, derivedState)`. Otherwise return `And(t)`.
-
-* If your assertions calls another assertion, you must pass `methodNameOverride` explicitly. For example, here is
-  the `BeSome` assertion, which is an alias of `BeOfCase(Some)`:
-
-    ```f#
-    [<Extension>]
-    static member BeSome(t: Testable<'a option>, ?because, ?methodNameOverride) =
-        t.BeOfCase(
-            Some,
-            ?because = because,
-            methodNameOverride = defaultArg methodNameOverride (nameof Assertions.BeSome)
-        )
-    ```
 
 * If your assertion calls `Should` at any point, make sure you pass the original `Testable` as an argument, since it
   contains important state relating to the end user’s original assertion call. For example, the above `BeSome`
@@ -198,8 +186,8 @@ chain, and thread-local state. It has a few limitations.
 
 Most of the limitations below may be able to be ad-hoc improved for specific situations (raise an issue), or
 theoretically be solved entirely by parsing the F# source code using FSharp.Compiler.Service instead of simple
-regex-based processing (though note that this has its own drawbacks; it was initially tried and abandoned in the early
-stages of Faqt):
+regex-based processing. (Note though that this has its own drawbacks; it was initially tried and abandoned in the early
+stages of Faqt.)
 
 * Assertion chains must start on a new line, or right after `fun ... ->`.
 * Chains must not contain string literals containing `//` (an exception is made for `://` which is used in URLs).
