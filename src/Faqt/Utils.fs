@@ -96,6 +96,19 @@ module String =
         Regex.Replace(str, pattern, replacement)
 
 
+    let regexRemoveAfterNth (n: int) ([<StringSyntax(StringSyntaxAttribute.Regex)>] pattern: string) (str: string) =
+        let index = Regex.Matches(str, pattern) |> Seq.item (n - 1) |> (fun m -> m.Index)
+        str.Substring(0, index)
+
+
     let formatSimple args str =
         (str, Seq.indexed args)
         ||> Seq.fold (fun str (i, arg) -> str |> replace $"{{%i{i}}}" arg)
+
+
+module IDisposable =
+
+    let noOp =
+        { new IDisposable with
+            member _.Dispose() = ()
+        }

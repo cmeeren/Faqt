@@ -10,35 +10,50 @@ module Satisfy =
 
     [<Fact>]
     let ``Passes if the inner assertion passes and can be chained with And`` () =
-        "asd".Should().Satisfy(fun s1 -> s1.Length.Should().Be(3))
-        |> ignore<And<string>>
+        "asd".Length.Should().Satisfy(fun x -> x.ToString().Length.Should().Be(1))
+        |> ignore<And<int>>
 
 
     [<Fact>]
     let ``Fails with expected message if the inner assertion fails`` () =
-        fun () -> "asd".Should().Satisfy(fun s1 -> s1.Length.Should().Be(2))
+        fun () ->
+            "asd"
+                .Length.Should()
+                .Satisfy(fun x ->
+                    // Comment to force break
+                    x.ToString().Length.Should().Be(2)
+                )
         |> assertExnMsg
             """
-"asd"
+"asd".Length
     should satisfy the supplied assertion, but the assertion failed with the following message:
 
-s1.Length
+x.ToString().Length
     should be
 2
     but was
-3
+1
 """
 
 
     [<Fact>]
     let ``Fails with expected message with because`` () =
-        fun () -> "asd".Should().Satisfy((fun s1 -> s1.Length.Should().Be(2)), "some reason")
+        fun () ->
+            "asd"
+                .Should()
+                .Satisfy(
+                    (fun x ->
+                        // Comment to force break
+                        x.Length.Should().Be(2)
+                    ),
+                    "some reason"
+                )
         |> assertExnMsg
             """
 "asd"
     should satisfy the supplied assertion because some reason, but the assertion failed with the following message:
 
-s1.Length
+x.Length
     should be
 2
     but was

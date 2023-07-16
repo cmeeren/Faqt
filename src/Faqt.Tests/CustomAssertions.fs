@@ -12,16 +12,17 @@ type private Assertions =
 
 
     [<Extension>]
-    static member DelegatingFail(t: Testable<'a>, ?methodNameOverride) : And<'a> =
-        t.Subject
-            .Should(t)
-            .Fail(defaultArg methodNameOverride (nameof Assertions.DelegatingFail))
+    static member DelegatingFail(t: Testable<'a>) : And<'a> =
+        use _ = t.Assert()
+        t.Subject.Should(t).Fail()
 
 
     [<Extension>]
-    static member NotInvade(t: Testable<string>, target: string, ?because, ?methodNameOverride) : And<string> =
+    static member NotInvade(t: Testable<string>, target: string, ?because) : And<string> =
+        use _ = t.Assert()
+
         if t.Subject = "Russia" && target = "Ukraine" then
-            Fail(t, because, methodNameOverride)
+            Fail(t, because)
                 .Throw(
                     "\tExpected\n{subject}\n\tto not invade\n{0}\n\t{because}but an invasion was found to be taking place by\n{actual}",
                     format target

@@ -17,36 +17,44 @@ type Assertions =
 
 
     [<Extension>]
-    static member TestDerived(t: Testable<'a>, pass, ?methodNameOverride) : AndDerived<'a, 'a> =
+    static member TestDerived(t: Testable<'a>, pass) : AndDerived<'a, 'a> =
+        use _ = t.Assert()
+
         if not pass then
-            Fail(t, None, methodNameOverride).Throw("{subject}")
+            Fail(t, None).Throw("{subject}")
 
         AndDerived(t, t.Subject)
 
 
     [<Extension>]
-    static member Test(t: Testable<'a>, pass, ?methodNameOverride) : And<'a> =
+    static member Test(t: Testable<'a>, pass) : And<'a> =
+        use _ = t.Assert()
+
         if not pass then
-            Fail(t, None, methodNameOverride).Throw("{subject}")
+            Fail(t, None).Throw("{subject}")
 
         And(t)
 
 
     [<Extension>]
-    static member PassDerived(t: Testable<'a>, ?methodNameOverride) : AndDerived<'a, 'a> =
-        t.TestDerived(true, defaultArg methodNameOverride (nameof Assertions.PassDerived))
+    static member PassDerived(t: Testable<'a>) : AndDerived<'a, 'a> =
+        use _ = t.Assert()
+        t.TestDerived(true)
 
 
     [<Extension>]
-    static member Pass(t: Testable<'a>, ?methodNameOverride) : And<'a> =
-        t.Test(true, defaultArg methodNameOverride (nameof Assertions.Pass))
+    static member Pass(t: Testable<'a>) : And<'a> =
+        use _ = t.Assert()
+        t.Test(true)
 
 
     [<Extension>]
-    static member FailDerived(t: Testable<'a>, ?methodNameOverride) : AndDerived<'a, 'a> =
-        t.TestDerived(false, defaultArg methodNameOverride (nameof Assertions.FailDerived))
+    static member FailDerived(t: Testable<'a>) : AndDerived<'a, 'a> =
+        use _ = t.Assert()
+        t.TestDerived(false)
 
 
     [<Extension>]
-    static member Fail(t: Testable<'a>, ?methodNameOverride) : And<'a> =
-        t.Test(false, defaultArg methodNameOverride (nameof Assertions.Fail))
+    static member Fail(t: Testable<'a>) : And<'a> =
+        use _ = t.Assert()
+        t.Test(false)

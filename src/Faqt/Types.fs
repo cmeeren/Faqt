@@ -1,6 +1,7 @@
 ﻿namespace Faqt
 
 open System
+open System.Collections.Generic
 open System.Reflection
 open System.Runtime.CompilerServices
 open System.Runtime.InteropServices
@@ -13,8 +14,55 @@ type AssertionFailedException(message: string) =
 
 type Testable<'a> internal (subject: 'a, callerFilePath: string, callerLineNo: int, callerAssembly: Assembly) =
 
+    [<ThreadStatic; DefaultValue>]
+    static val mutable private assertions: Dictionary<Assembly * string * int, ResizeArray<string>>
+
+    [<ThreadStatic; DefaultValue>]
+    static val mutable private isAsserting: Dictionary<Assembly * string * int, bool>
+
+
+    static let addAssertion key assertion =
+        if isNull Testable.assertions then
+            Testable.assertions <- Dictionary()
+
+        match Testable.assertions.TryGetValue key with
+        | false, _ -> Testable.assertions[key] <- ResizeArray([ assertion ])
+        | true, assertions -> assertions.Add(assertion)
+
+
+    static let setIsAsserting key value =
+        if isNull Testable.isAsserting then
+            Testable.isAsserting <- Dictionary()
+
+        Testable.isAsserting[key] <- value
+
+
+    static let getIsAsserting key =
+        if isNull Testable.isAsserting then
+            Testable.isAsserting <- Dictionary()
+
+        match Testable.isAsserting.TryGetValue key with
+        | true, x -> x
+        | false, _ -> false // TODO: Should this ever happen?
+
+
+    // TODO: Can we remove this?
     internal new(subject: 'a, continueFrom: Testable<'a>) =
         Testable(subject, continueFrom.CallerFilePath, continueFrom.CallerLineNo, continueFrom.CallerAssembly)
+
+
+    member _.Assert([<CallerMemberName; Optional; DefaultParameterValue("")>] assertion: string) =
+        let key = callerAssembly, callerFilePath, callerLineNo
+
+        if getIsAsserting key then
+            IDisposable.noOp
+        else
+            setIsAsserting key true
+            addAssertion key assertion
+
+            { new IDisposable with
+                member _.Dispose() = setIsAsserting key false
+            }
 
     /// Returns the subject being tested. Aliases: Whose, Which.
     member _.Subject: 'a = subject
@@ -27,6 +75,9 @@ type Testable<'a> internal (subject: 'a, callerFilePath: string, callerLineNo: i
     member internal _.CallerLineNo = callerLineNo
 
     member internal _.CallerAssembly = callerAssembly
+
+    member internal _.Assertions =
+        Testable.assertions[(callerAssembly, callerFilePath, callerLineNo)]
 
 
 /// A type which allows chaining assertions.

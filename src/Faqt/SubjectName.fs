@@ -1,6 +1,7 @@
 ﻿module internal Faqt.SubjectName
 
 open System
+open System.Collections.Generic
 open System.IO
 open System.IO.Compression
 open System.Reflection.Metadata
@@ -108,7 +109,7 @@ let getFileLines = memoize File.ReadAllLines
 let private transformationPlaceholder = "..."
 
 
-let get assemblyPath sourceFilePath methodName lineNo =
+let get assemblyPath sourceFilePath (assertions: IList<string>) lineNo =
     try
         let sourceCodeLines =
             try
@@ -117,6 +118,9 @@ let get assemblyPath sourceFilePath methodName lineNo =
                 (EmbeddedSource.get assemblyPath sourceFilePath)
                     .ReplaceLineEndings("\n")
                     .Split("\n")
+
+        let lastAssertion = assertions[assertions.Count - 1]
+        let lastAssertionCount = assertions |> Seq.filter ((=) lastAssertion) |> Seq.length
 
         sourceCodeLines
         |> Seq.skip (lineNo - 1)
@@ -147,7 +151,7 @@ let get assemblyPath sourceFilePath methodName lineNo =
         // method, we don't know anyway which invocation failed, since the stack frame only contains the location of the
         // start of the chain, so we only support deriving the subject name from the part of the expression up to the first
         // call to this method.
-        |> String.regexReplace $"\.{Regex.Escape methodName} *\(.*" ""
+        |> String.regexRemoveAfterNth lastAssertionCount $"\.{Regex.Escape lastAssertion} *\("
 
         // Replace Should...Whose and Should...Which with transformation placeholder, since it's assumed the code
         // contains something returning AndDerived. Make an exception for And.Whose and And.Which, since they are

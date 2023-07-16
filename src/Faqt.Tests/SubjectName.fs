@@ -210,7 +210,7 @@ let ``Testable.Whose`` () =
 
 
 [<Fact>]
-let ``Known limitation: And.Whose: Only first assertion with the matching name is considered`` () =
+let ``And.Whose: Picks correct assertion among multiple with matching name`` () =
     fun () ->
         let thisIsAVariableName = ""
 
@@ -219,12 +219,14 @@ let ``Known limitation: And.Whose: Only first assertion with the matching name i
             .TestDerived(true)
             .Whose.Length.Should()
             .TestDerived(false)
-    // Subject name should ideally be "thisIsAVariableName...Length". Update if this is ever supported.
-    |> assertExnMsgSubjectName "thisIsAVariableName"
+            .And.Whose.ToString()
+            .Should()
+            .TestDerived(true)
+    |> assertExnMsgSubjectName "thisIsAVariableName...Length"
 
 
 [<Fact>]
-let ``Known limitation: And.Which: Only first assertion with the matching name is considered`` () =
+let ``And.Which: Picks correct assertion among multiple with matching name`` () =
     fun () ->
         let thisIsAVariableName = ""
 
@@ -233,8 +235,10 @@ let ``Known limitation: And.Which: Only first assertion with the matching name i
             .TestDerived(true)
             .Which.Length.Should()
             .TestDerived(false)
-    // Subject name should ideally be "thisIsAVariableName...Length". Update if this is ever supported.
-    |> assertExnMsgSubjectName "thisIsAVariableName"
+            .And.Whose.ToString()
+            .Should()
+            .TestDerived(true)
+    |> assertExnMsgSubjectName "thisIsAVariableName...Length"
 
 
 [<Fact>]
@@ -246,8 +250,8 @@ let ``Literal URLs are supported`` () =
 [<Fact>]
 let ``Known limitation: Contents of strings after // are removed (except ://)`` () =
     fun () -> "this is// a test".Should().Fail()
-    // Subject name should ideally be "http://test.example.com". Update if this is ever supported.
-    |> assertExnMsgSubjectName "\"this is"
+    // Subject name should ideally be "this is// a test". Update if this is ever supported.
+    |> assertExnMsgSubjectName "subject"
 
 
 [<Fact>]
@@ -257,7 +261,7 @@ let ``Known limitation: Literal multiline strings are not handled correctly 1`` 
 is a test"
             .Should()
             .Fail()
-    |> assertExnMsgSubjectName "\"this"
+    |> assertExnMsgSubjectName "subject"
 
 
 [<Fact>]
@@ -309,4 +313,21 @@ let ``Known limitation: Multiline bracketed expressions are not handled correctl
             )
             .Should()
             .Fail()
-    |> assertExnMsgSubjectName "\"string\".Split("
+    |> assertExnMsgSubjectName "subject"
+
+
+[<Fact>]
+let ``Known limitation: Single-line Satisfy is not handled correctly`` () =
+    fun () -> "asd".Should().Satisfy((fun x -> x.Length.Should().Be(2)))
+    // Subject name in inner failure should ideally be "x". Update if this is ever supported.
+    |> assertExnMsg
+        """
+"asd"
+    should satisfy the supplied assertion, but the assertion failed with the following message:
+
+"asd"
+    should be
+2
+    but was
+3
+"""

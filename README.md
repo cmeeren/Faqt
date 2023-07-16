@@ -191,20 +191,15 @@ Subject name and limitations
 (This is not likely to interest most users.)
 
 The automatic subject name (the first part of the assertion message) is based on clever use of caller info attributes,
-parsing sources from either local files or embedded resources, and simple regex-based processing/replacement of the call
-chain. It has a few limitations.
+parsing sources from either local files or embedded resources, simple regex-based processing/replacement of the call
+chain, and thread-local state. It has a few limitations.
 
-Fundamental limitations that there probably isn’t a way around:
+Most of the limitations below may be able to be ad-hoc improved for specific situations (raise an issue), or
+theoretically be solved entirely by parsing the F# source code using FSharp.Compiler.Service instead of simple
+regex-based processing (though note that this has its own drawbacks; it was initially tried and abandoned in the early
+stages of Faqt):
 
-* If an assertion chain has multiple assertions with the same method name, only the first one will be considered when
-  getting the subject name. This is because the caller information attributes (and stack traces, which were also
-  attempted and abandoned early on) only refer to the start of the chain, so there is no way for Faqt to know which of
-  them failed.
-
-Assumptions that could be ad-hoc improved (raise an issue) or theoretically solved entirely by parsing the F# source
-code using FSharp.Compiler.Service instead of simple regex-based processing (though note that this has its own
-drawbacks; it was initially tried and abandoned in the early stages of Faqt):
-
+* TODO: Mention single-line calls to `Satisfy` and `SatisfyAny`
 * Assertion chains must start on a new line, or right after `fun ... ->`.
 * Chains do not contain string literals containing `//` (an exception is made for `://` which is used in URLs).
 * Chains do not contain multi-line strings.

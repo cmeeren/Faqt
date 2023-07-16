@@ -2,18 +2,11 @@
 
 open System
 open System.Runtime.CompilerServices
-open System.Runtime.InteropServices
 open Faqt
 
 
 /// Helper type for formatting and throwing assertion failures.
-type Fail<'a>
-    (
-        t: Testable<'a>,
-        because: string option,
-        methodNameOverride: string option,
-        [<CallerMemberName; Optional; DefaultParameterValue("")>] methodName
-    ) =
+type Fail<'a>(t: Testable<'a>, because: string option) =
 
 
     let bc (because: string option) prefixSpace suffixComma : string =
@@ -39,10 +32,8 @@ type Fail<'a>
     /// contain a whitespace character immediately preceding the token. Finally, it will be suffixed with ", " if the
     /// template does not contain ", " immediately following the token.
     member _.Throw(template, [<ParamArray>] formattedValues: string[]) =
-        let methodName = defaultArg methodNameOverride methodName
-
         let subjectName =
-            SubjectName.get t.CallerAssembly.Location t.CallerFilePath methodName t.CallerLineNo
+            SubjectName.get t.CallerAssembly.Location t.CallerFilePath t.Assertions t.CallerLineNo
 
         // We want to replace {subject}, {actual}, and {because} with values we have no control over, and which may
         // contain formatting tokens such as {0}, {1}, etc. We do not want those replaced in String.formatSimple; only
