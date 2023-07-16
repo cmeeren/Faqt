@@ -54,7 +54,6 @@ type Testable<'a> internal (subject: 'a, callerFilePath: string, callerLineNo: i
         | false, _ -> false
 
 
-    // TODO: Can we remove this?
     internal new(subject: 'a, continueFrom: Testable<'a>) =
         Testable(subject, continueFrom.CallerFilePath, continueFrom.CallerLineNo, continueFrom.CallerAssembly)
 
