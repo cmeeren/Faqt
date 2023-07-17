@@ -259,11 +259,11 @@ x.Length
 
 
 [<Fact>]
-let ``Single-line SatisfyAny`` () =
+let ``Single-line SatisfyAny, same assertion`` () =
     fun () ->
         "asd"
             .Should()
-            .SatisfyAny([ (fun s1 -> s1.Should().Be("a")); (fun s2 -> s2.Should().NotBe("asd")) ])
+            .SatisfyAny([ (fun s1 -> s1.Should().Be("a")); (fun s2 -> s2.Should().Be("b")) ])
     |> assertExnMsg
         """
 "asd"
@@ -280,9 +280,10 @@ s1
 [Assertion 2/2]
 
 s2
-    should not be
+    should be
+"b"
+    but was
 "asd"
-    but the values were equal.
 """
 
 
