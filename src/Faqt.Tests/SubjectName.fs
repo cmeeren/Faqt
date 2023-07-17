@@ -87,7 +87,7 @@ let ``And-chained assertions, same name, single line, first fails`` () =
 let ``And-chained assertions, same name, single line, second fails`` () =
     fun () ->
         let thisIsAVariableName = 1
-        thisIsAVariableName.Should().Fail().And.Fail()
+        thisIsAVariableName.Should().Test(true).And.Test(false)
     |> assertExnMsgSubjectName "thisIsAVariableName"
 
 
@@ -103,7 +103,7 @@ let ``And-chained assertions, different names, single line, first fails`` () =
 let ``And-chained assertions, different names, single line, second fails`` () =
     fun () ->
         let thisIsAVariableName = 1
-        thisIsAVariableName.Should().FailDerived().And.Fail()
+        thisIsAVariableName.Should().Pass().And.Fail()
     |> assertExnMsgSubjectName "thisIsAVariableName"
 
 
