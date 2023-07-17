@@ -80,6 +80,7 @@ type Testable<'a> internal (subject: 'a, callerFilePath: string, callerLineNo: i
 
             { new IDisposable with
                 member _.Dispose() =
+                    // TODO: Add test that demonstrates that this condition is necessary, or remove
                     if not trackSubAssertions then
                         setIsAsserting key false
 
