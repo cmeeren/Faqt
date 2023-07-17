@@ -287,6 +287,17 @@ s2
 
 
 [<Fact>]
+let ``Multiple consecutive assertions on same thread`` () =
+    fun () ->
+        let var1 = 1
+        var1.Should().Pass().And.Subject.ToString().Length.Should().Pass() |> ignore
+
+        let var2 = 1
+        var2.Should().Pass().And.Subject.ToString().Length.Should().Fail()
+    |> assertExnMsgSubjectName "var2.ToString().Length"
+
+
+[<Fact>]
 let ``Literal URLs are supported`` () =
     fun () -> "http://test.example.com".Should().Fail()
     |> assertExnMsgSubjectName "\"http://test.example.com\""
