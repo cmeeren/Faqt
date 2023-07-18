@@ -140,7 +140,7 @@ thoroughly once than piecewise here and there.
 
 * First in your method, call `use _ = t.Assert()`. This is needed to track important state necessary for subject
   names to work. If your assertion calls user code that is expected to call their own assertions (like is the case
-  with`Satisfy`), call `t.Assert(true)` instead, and make sure the returned value is disposed before you call `Fail`.
+  with `Satisfy`), call `t.Assert(true)` instead.
 
 * If your condition is not met, call
 

@@ -12,80 +12,106 @@ type AssertionFailedException(message: string) =
     inherit Exception(message)
 
 
+type private AssertionChainCallsite = {
+    Assembly: Assembly
+    File: String
+    Line: int
+}
+
+
+type private AssertionInfo = {
+    Method: string
+    SupportsChildAssertions: bool
+}
+
+
+// TODO: Move state to a different type, and simplify this?
+// TODO: Assembly as first argument
+// TODO: Test three chains with triple Satisfy with triple assertion with same name, fail the middle one
+// TODO: Test Satisfy inside Satisfy (or a similar test fake)
+// TODO: Replace some Satisfy calls with test fake
 type Testable<'a> internal (subject: 'a, callerFilePath: string, callerLineNo: int, callerAssembly: Assembly) =
 
+    do
+        if isNull Testable.activeUserAssertions then
+            Testable.activeUserAssertions <- Dictionary()
+
+        if isNull Testable.topLevelAssertionHistory then
+            Testable.topLevelAssertionHistory <- Dictionary()
+
+    // TODO: Clean up items when empty
     [<ThreadStatic; DefaultValue>]
-    static val mutable private assertions: Dictionary<Assembly * string * int, string list>
+    static val mutable private activeUserAssertions: Dictionary<AssertionChainCallsite, AssertionInfo list>
 
+    // TODO: Cleanup?
     [<ThreadStatic; DefaultValue>]
-    static val mutable private isAsserting: Dictionary<Assembly * string * int, bool>
+    static val mutable private topLevelAssertionHistory: Dictionary<AssertionChainCallsite, string list>
 
-    // TODO: simplify logic using Stack?
+    static let pushAssertion callsite method supportsChildAssertions =
 
-    static let addAssertion key assertion =
-        if isNull Testable.assertions then
-            Testable.assertions <- Dictionary()
+        let assertions =
+            match Testable.activeUserAssertions.TryGetValue callsite with
+            | false, _ -> []
+            | true, xs -> xs
 
-        match Testable.assertions.TryGetValue key with
-        | false, _ -> Testable.assertions[key] <- [ assertion ]
-        | true, assertions -> Testable.assertions[key] <- assertions @ [ assertion ]
+        Testable.activeUserAssertions[callsite] <-
+            {
+                Method = method
+                SupportsChildAssertions = supportsChildAssertions
+            }
+            :: assertions
+
+    static let tryPopAssertion callsite =
+        match Testable.activeUserAssertions.TryGetValue callsite with
+        | false, _ -> ()
+        | true, [] -> ()
+        | true, hd :: tl ->
+            Testable.activeUserAssertions[callsite] <- tl
+
+            match Testable.topLevelAssertionHistory.TryGetValue callsite with
+            | false, _ -> Testable.topLevelAssertionHistory[callsite] <- [ hd.Method ]
+            | true, xs -> Testable.topLevelAssertionHistory[callsite] <- hd.Method :: xs
 
 
-    static let setAssertions key assertions =
-        if isNull Testable.assertions then
-            Testable.assertions <- Dictionary()
-
-        Testable.assertions[key] <- assertions
-
-
-    static let setIsAsserting key value =
-        if isNull Testable.isAsserting then
-            Testable.isAsserting <- Dictionary()
-
-        Testable.isAsserting[key] <- value
-
-
-    static let getIsAsserting key =
-        if isNull Testable.isAsserting then
-            Testable.isAsserting <- Dictionary()
-
-        match Testable.isAsserting.TryGetValue key with
-        | true, x -> x
-        | false, _ -> false
+    let canPushAssertion callsite =
+        match Testable.activeUserAssertions with
+        | null -> true
+        | dict ->
+            match dict.TryGetValue callsite with
+            | false, _ -> true
+            | true, [] -> true
+            | true, hd :: _ -> hd.SupportsChildAssertions
 
 
     internal new(subject: 'a, continueFrom: Testable<'a>) =
         Testable(subject, continueFrom.CallerFilePath, continueFrom.CallerLineNo, continueFrom.CallerAssembly)
 
 
+    member private _.Callsite = {
+        Assembly = callerAssembly
+        File = callerFilePath
+        Line = callerLineNo
+    }
+
+
     /// Call this at the start of your assertions, and make sure to dispose the returned value at the end. This is
     /// needed to track important state necessary for subject names to work. If your assertion calls user code that is
-    /// expected to call their own assertions (like `Satisfy`), call `t.Assert(true)` instead, and make sure it's
-    /// disposed before you call `Fail`.
+    /// expected to call their own assertions (like `Satisfy`), call `t.Assert(true)` instead. In that case, do not
+    /// call other assertions directly in the implementation; the next assertion is assumed to be called by the user.
     member this.Assert
         (
-            [<Optional; DefaultParameterValue(false)>] trackSubAssertions,
-            [<CallerMemberName; Optional; DefaultParameterValue("")>] assertion: string
+            // TODO: supportsChildAssertions - rename? And/or perhaps make this member private and surface two distinct members?
+            [<Optional; DefaultParameterValue(false)>] supportsChildAssertions,
+            [<CallerMemberName; Optional; DefaultParameterValue("")>] assertionMethod: string
         ) =
-        let key = callerAssembly, callerFilePath, callerLineNo
 
-        if getIsAsserting key then
+        if not (canPushAssertion this.Callsite) then
             IDisposable.noOp
         else
-            if not trackSubAssertions then
-                setIsAsserting key true
-
-            addAssertion key assertion
-            let currentAssertions = this.Assertions
+            pushAssertion this.Callsite assertionMethod supportsChildAssertions
 
             { new IDisposable with
-                member _.Dispose() =
-                    // TODO: Add test that demonstrates that this condition is necessary, or remove
-                    if not trackSubAssertions then
-                        setIsAsserting key false
-
-                    if trackSubAssertions then
-                        setAssertions key currentAssertions
+                member _.Dispose() = tryPopAssertion this.Callsite
             }
 
     /// Returns the subject being tested. Aliases: Whose, Which.
@@ -100,12 +126,18 @@ type Testable<'a> internal (subject: 'a, callerFilePath: string, callerLineNo: i
 
     member internal _.CallerAssembly = callerAssembly
 
-    member internal _.Assertions =
-        let key = callerAssembly, callerFilePath, callerLineNo
+    member internal this.CurrentChainAssertionHistory =
+        let topLevelAssertions =
+            match Testable.topLevelAssertionHistory.TryGetValue this.Callsite with
+            | true, xs -> xs |> List.rev
+            | false, _ -> []
 
-        match Testable.assertions.TryGetValue key with
-        | true, xs -> xs
-        | false, _ -> []
+        let activeAssertions =
+            match Testable.activeUserAssertions.TryGetValue this.Callsite with
+            | true, xs -> xs |> List.map (fun x -> x.Method) |> List.rev
+            | false, _ -> []
+
+        topLevelAssertions @ activeAssertions
 
 
 /// A type which allows chaining assertions.
