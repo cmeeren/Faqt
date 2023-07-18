@@ -26,11 +26,10 @@ type private AssertionInfo = {
 
 
 // TODO: Move state to a different type, and simplify this?
-// TODO: Assembly as first argument
 // TODO: Test three chains with triple Satisfy with triple assertion with same name, fail the middle one
 // TODO: Test Satisfy inside Satisfy (or a similar test fake)
 // TODO: Replace some Satisfy calls with test fake
-type Testable<'a> internal (subject: 'a, callerFilePath: string, callerLineNo: int, callerAssembly: Assembly) =
+type Testable<'a> internal (subject: 'a, callerAssembly: Assembly, callerFilePath: string, callerLineNo: int) =
 
     do
         if isNull Testable.activeUserAssertions then
@@ -84,7 +83,7 @@ type Testable<'a> internal (subject: 'a, callerFilePath: string, callerLineNo: i
 
 
     internal new(subject: 'a, continueFrom: Testable<'a>) =
-        Testable(subject, continueFrom.CallerFilePath, continueFrom.CallerLineNo, continueFrom.CallerAssembly)
+        Testable(subject, continueFrom.CallerAssembly, continueFrom.CallerFilePath, continueFrom.CallerLineNo)
 
 
     member private _.Callsite = {
@@ -120,11 +119,11 @@ type Testable<'a> internal (subject: 'a, callerFilePath: string, callerLineNo: i
     /// Returns the subject being tested. Aliases: Subject, Which.
     member _.Whose: 'a = subject
 
+    member internal _.CallerAssembly = callerAssembly
+
     member internal _.CallerFilePath = callerFilePath
 
     member internal _.CallerLineNo = callerLineNo
-
-    member internal _.CallerAssembly = callerAssembly
 
     member internal this.CurrentChainAssertionHistory =
         let topLevelAssertions =
@@ -180,4 +179,4 @@ type TestableExtensions =
             [<CallerFilePath; Optional; DefaultParameterValue("")>] fn: string,
             [<CallerLineNumber; Optional; DefaultParameterValue(0)>] lno: int
         ) : Testable<'a> =
-        Testable(this, fn, lno, Assembly.GetCallingAssembly())
+        Testable(this, Assembly.GetCallingAssembly(), fn, lno)
