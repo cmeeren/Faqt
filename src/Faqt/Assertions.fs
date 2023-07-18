@@ -30,6 +30,7 @@ type Assertions =
                 )
 
 
+    /// Asserts that the subject satisfies at least one of the specified assertions.
     [<Extension>]
     static member SatisfyAny(t: Testable<'a>, assertions: seq<'a -> 'ignored>, ?because) : And<'a> =
         use _ = t.Assert(true)
