@@ -4,7 +4,7 @@
     <TargetFramework>net7.0</TargetFramework>
     <Version>0.1.0</Version>
     <Authors>Christer van der Meeren</Authors>
-    <Description>A fluent assertion library F#.</Description>
+    <Description>A fluent assertion library for F#.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageTags>F# fluent assertion assertions mstest xunit nunit unit test testing preconditions postconditions invariants fluentassertions shouldly</PackageTags>
     <PackageIcon>faqt-logo-128x128.png</PackageIcon>
