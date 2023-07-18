@@ -226,6 +226,32 @@ let ``And.Whose: Picks correct assertion among multiple with matching name`` () 
 
 
 [<Fact>]
+let ``And.Whose: Picks correct assertion among multiple with matching name in Satisfy`` () =
+    fun () ->
+        let thisIsAVariableName = ""
+
+        thisIsAVariableName
+            .Should()
+            .Satisfy(fun x ->
+                x
+                    .Should()
+                    .TestDerived(true)
+                    .Whose.Length.Should()
+                    .TestDerived(false)
+                    .And.Whose.ToString()
+                    .Should()
+                    .TestDerived(true)
+            )
+    |> assertExnMsg
+        """
+thisIsAVariableName
+    should satisfy the supplied assertion, but the assertion failed with the following message:
+
+x...Length
+"""
+
+
+[<Fact>]
 let ``And.Which: Picks correct assertion among multiple with matching name`` () =
     fun () ->
         let thisIsAVariableName = ""
