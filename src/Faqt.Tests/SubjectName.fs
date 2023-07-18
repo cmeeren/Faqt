@@ -232,7 +232,7 @@ let ``And.Whose: Picks correct assertion among multiple with matching name in Sa
 
         thisIsAVariableName
             .Should()
-            .Satisfy(fun x ->
+            .TestSatisfy(fun x ->
                 x
                     .Should()
                     .TestDerived(true)
@@ -245,8 +245,6 @@ let ``And.Whose: Picks correct assertion among multiple with matching name in Sa
     |> assertExnMsg
         """
 thisIsAVariableName
-    should satisfy the supplied assertion, but the assertion failed with the following message:
-
 x...Length
 """
 
@@ -269,18 +267,12 @@ let ``And.Which: Picks correct assertion among multiple with matching name`` () 
 
 [<Fact>]
 let ``Single-line Satisfy`` () =
-    fun () -> "asd".Should().Satisfy(fun x -> x.Length.Should().Be(2))
+    fun () -> "asd".Should().TestSatisfy(fun x -> x.Length.Should().Fail())
     // Subject name in inner failure should ideally be "x.Length". Update if this is ever supported.
     |> assertExnMsg
         """
 "asd"
-    should satisfy the supplied assertion, but the assertion failed with the following message:
-
 x.Length
-    should be
-2
-    but was
-3
 """
 
 
@@ -289,27 +281,12 @@ let ``Single-line SatisfyAny, same assertion`` () =
     fun () ->
         "asd"
             .Should()
-            .SatisfyAny([ (fun s1 -> s1.Should().Be("a")); (fun s2 -> s2.Should().Be("b")) ])
+            .TestSatisfyAny([ (fun s1 -> s1.Should().Fail()); (fun s2 -> s2.Should().Fail()) ])
     |> assertExnMsg
         """
 "asd"
-    should satisfy at least one of the 2 supplied assertions, but none were satisfied.
-
-[Assertion 1/2]
-
 s1
-    should be
-"a"
-    but was
-"asd"
-
-[Assertion 2/2]
-
 s2
-    should be
-"b"
-    but was
-"asd"
 """
 
 

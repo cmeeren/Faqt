@@ -37,6 +37,41 @@ type Assertions =
 
 
     [<Extension>]
+    static member TestSatisfy(t: Testable<'a>, assertion) : And<'a> =
+        use x = t.Assert(true)
+
+        try
+            assertion t.Subject |> ignore
+            And(t)
+        with :? AssertionFailedException as ex ->
+            Fail(t, None).Throw("{subject}{0}", ex.Message)
+
+
+    [<Extension>]
+    static member TestSatisfyAny(t: Testable<'a>, assertions: seq<'a -> 'ignored>) : And<'a> =
+        use _ = t.Assert(true)
+        let assertions = assertions |> Seq.toArray
+
+        let exceptions =
+            assertions
+            |> Array.choose (fun f ->
+                try
+                    f t.Subject |> ignore
+                    None
+                with :? AssertionFailedException as ex ->
+                    Some ex
+            )
+
+        if exceptions.Length = assertions.Length then
+            let assertionFailuresString =
+                exceptions |> Seq.map (fun ex -> ex.Message) |> String.concat ""
+
+            Fail(t, None).Throw("{subject}{0}", assertionFailuresString)
+
+        And(t)
+
+
+    [<Extension>]
     static member PassDerived(t: Testable<'a>) : AndDerived<'a, 'a> =
         use _ = t.Assert()
         t.TestDerived(true)

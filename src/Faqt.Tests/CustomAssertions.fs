@@ -20,7 +20,7 @@ type private Assertions =
     [<Extension>]
     static member DelegatingFailSatisfy(t: Testable<int>) : And<int> =
         use _ = t.Assert()
-        t.Satisfy(fun x -> x.Should().Be(2))
+        t.TestSatisfy(fun x -> x.Should().Fail())
 
 
     [<Extension>]
@@ -49,13 +49,7 @@ let ``DelegatingFailSatisfy gives expected subject name`` () =
     |> assertExnMsg
         """
 (1)
-    should satisfy the supplied assertion, but the assertion failed with the following message:
-
 x
-    should be
-2
-    but was
-1
 """
 
 
