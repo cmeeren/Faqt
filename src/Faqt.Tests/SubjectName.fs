@@ -435,3 +435,9 @@ let ``Known limitation: Nested multi-line Satisfy does not work correctly`` () =
 s2
 ss2
 """
+
+
+[<Fact>]
+let ``Known limitation: Assertion chains must start on a new line or after lambda`` () =
+    fun () -> ignore ("asd".Should().Fail())
+    |> assertExnMsg "ignore (\"asd\""
