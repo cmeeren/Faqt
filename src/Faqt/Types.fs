@@ -89,7 +89,7 @@ type private CallChain() =
                 member _.Dispose() = tryPopAssertion callsite
             }
 
-    static member ChainAssertionHistory(callsite) =
+    static member AssertionHistory(callsite) =
         let topLevelAssertions =
             match CallChain.topLevelAssertionHistory.TryGetValue callsite with
             | true, xs -> xs |> List.rev
@@ -141,8 +141,8 @@ type Testable<'a> internal (subject: 'a, callerAssembly: Assembly, callerFilePat
         Line = callerLineNo
     }
 
-    member internal this.CurrentChainAssertionHistory =
-        CallChain.ChainAssertionHistory this.CallChainOrigin
+    member internal this.CallChainAssertionHistory =
+        CallChain.AssertionHistory this.CallChainOrigin
 
 
 /// A type which allows chaining assertions.
