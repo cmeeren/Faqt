@@ -27,11 +27,9 @@ type private AssertionInfo = {
 
 type private CallChain() =
 
-    // TODO: Clean up items when empty
     [<ThreadStatic; DefaultValue>]
     static val mutable private activeUserAssertions: Dictionary<CallChainOrigin, AssertionInfo list>
 
-    // TODO: Cleanup?
     [<ThreadStatic; DefaultValue>]
     static val mutable private topLevelAssertionHistory: Dictionary<CallChainOrigin, string list>
 
