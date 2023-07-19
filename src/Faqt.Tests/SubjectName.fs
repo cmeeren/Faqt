@@ -266,6 +266,22 @@ x.Length
 
 
 [<Fact>]
+let ``Multi-line Satisfy`` () =
+    fun () ->
+        "asd"
+            .Should()
+            .TestSatisfy(fun x ->
+                // Comment to force break
+                x.Length.Should().Fail()
+            )
+    |> assertExnMsg
+        """
+"asd"
+x.Length
+"""
+
+
+[<Fact>]
 let ``Single-line SatisfyAny, same assertion`` () =
     fun () ->
         "asd"
