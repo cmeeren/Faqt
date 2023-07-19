@@ -3,7 +3,7 @@
 open System.Runtime.CompilerServices
 open System.Runtime.InteropServices
 open Faqt
-open AssertionHelpers
+open Faqt.AssertionHelpers
 open Formatting
 open Xunit
 
