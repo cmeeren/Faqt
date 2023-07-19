@@ -543,26 +543,7 @@ let ``Known limitation: Multiline bracketed expressions are not handled correctl
     fun () ->
         "string"
             .Split(
-                'a',
-                'a',
-                'a',
-                'a',
-                'a',
-                'a',
-                'a',
-                'a',
-                'a',
-                'a',
-                'a',
-                'a',
-                'a',
-                'a',
-                'a',
-                'a',
-                'a',
-                'a',
-                'a',
-                'a',
+                // Comment to force break
                 'a'
             )
             .Should()
