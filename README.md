@@ -115,13 +115,13 @@ open Formatting
 [<Extension>]
 type Assertions =
 
+    /// Asserts that the subject is the specified value, using the default equality comparison (=).
     [<Extension>]
     static member Be(t: Testable<'a>, expected: 'a, ?because) : And<'a> =
         use _ = t.Assert()
 
         if t.Subject <> expected then
-            Fail(t, because)
-                .Throw("{subject}\n\tshould be\n{0}\n\t{because}but was\n{actual}", format expected)
+            t.Fail("{subject}\n\tshould be\n{0}\n\t{because}but was\n{actual}", because, format expected)
 
         And(t)
 ```
@@ -132,20 +132,20 @@ thoroughly once than piecewise here and there.
 * Implement the assertion as
   an [extension method](https://learn.microsoft.com/en-us/dotnet/fsharp/language-reference/type-extensions#extension-methods)
   for `Testable` (the first argument), with whatever constraints you need. The constraints could be implicitly imposed
-  by F#, as above where it requires `equality` on `a` due to the use of `<>`, or they could be explicitly specified, for
-  example by specifying more concrete types (such as `Testable<'a option>` in order to have your extension only work
+  by F#, as above where it requires `equality` on `'a` due to the use of `<>`, or they could be explicitly specified,
+  for example by specifying more concrete types (such as `Testable<'a option>` in order to have your extension only work
   for `option`-wrapped types).
 
 * Accept whichever arguments you need for your assertion, and end with `?because`.
 
 * First in your method, call `use _ = t.Assert()`. This is needed to track important state necessary for subject
   names to work. If your assertion calls user code that is expected to call their own assertions (like is the case
-  with `Satisfy`), call `t.Assert(true)` instead.
+  with `Satisfy` and similar), call `t.Assert(true)` instead.
 
 * If your condition is not met, call
 
    ```f#
-   Fail(t, because).Throw("<message template>", param1, param2, ...)
+   t.Fail("<message template>", because, param1, param2, ...)
    ```
 
 * The message template is up you, but for consistency it should ideally adhere to the following conventions:
@@ -157,23 +157,18 @@ thoroughly once than piecewise here and there.
     be of type `string`; use the `format` function (in the opened `Formatting` module) to format values for display.
   * Don’t use string interpolation to insert values you don’t have control over (for example, values that could contain
     the placeholders mentioned above).
-  * Place `{subject}`, `{actual}`, and all other important values on separate lines. All other text should be indented
+  * Place `{subject}`, `{actual}`, and other important values on separate lines. All other text should be indented
     using `\t`.
   * Ensure that your message is rendered correctly if `{because}` is replaced with an empty string. Faqt will insert a
-    space before `{because}` and/or a comma + space after `{because}` if needed.
+    space before `{because}` and/or a comma + space after `{because}` as needed.
 
 * If your assertion extracts derived state that can be used for further assertions,
-  return `AndDerived(t, derivedState)`. Otherwise return `And(t)`.
+  return `AndDerived(t, derivedState)`. Otherwise return `And(t)`. Prefer `AndDerived` over `And` if at all relevant.
+  For example, if you implement an assertion called `ContainsElementsMatching(predicate)`, return the matched elements
+  as the derived state, so that the user has the option to continue asserting on them.
 
 * If your assertion calls `Should` at any point, make sure you pass the original `Testable` as an argument, since it
-  contains important state relating to the end user’s original assertion call. For example, the above `BeSome`
-  implementation could (somewhat artificially) be implemented like this:
-
-  ```f#
-  [<Extension>]
-  static member BeSome(t: Testable<'a option>, ?because, ?methodNameOverride) =
-      t.Subject.Should(t).BeOfCase((* same as previous example *))
-  ```
+  contains important state relating to the end user’s original assertion call.
 
 FAQ
 ---
