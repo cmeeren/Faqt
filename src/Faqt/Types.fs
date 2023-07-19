@@ -105,9 +105,6 @@ type Testable<'a> internal (subject: 'a, callerAssembly: Assembly, callerFilePat
 
     do CallChain.EnsureInitialized()
 
-    internal new(subject: 'a, continueFrom: Testable<'a>) =
-        Testable(subject, continueFrom.CallerAssembly, continueFrom.CallerFilePath, continueFrom.CallerLineNo)
-
     /// Call this at the start of your assertions, and make sure to dispose the returned value at the end. This is
     /// needed to track important state necessary for subject names to work. If your assertion calls user code that is
     /// expected to call their own assertions (like `Satisfy`), call `t.Assert(true)` instead. In that case, do not
@@ -125,11 +122,11 @@ type Testable<'a> internal (subject: 'a, callerAssembly: Assembly, callerFilePat
     /// Returns the subject being tested. Aliases: Subject, Which.
     member _.Whose: 'a = subject
 
-    member private _.CallerAssembly = callerAssembly
+    member internal _.CallerAssembly = callerAssembly
 
-    member private _.CallerFilePath = callerFilePath
+    member internal _.CallerFilePath = callerFilePath
 
-    member private _.CallerLineNo = callerLineNo
+    member internal _.CallerLineNo = callerLineNo
 
     member internal _.CallChainOrigin = {
         Assembly = callerAssembly
