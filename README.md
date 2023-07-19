@@ -117,7 +117,7 @@ type Assertions =
 
     /// Asserts that the subject is the specified value, using the default equality comparison (=).
     [<Extension>]
-    static member Be(t: Testable<'a>, expected: 'a, ?because) : And<'a> =
+    static member Be(t: Testable<'a>, expected: 'a, [<Optional; DefaultParameterValue("")>] because: string) : And<'a> =
         use _ = t.Assert()
 
         if t.Subject <> expected then
@@ -136,7 +136,9 @@ thoroughly once than piecewise here and there.
   for example by specifying more concrete types (such as `Testable<'a option>` in order to have your extension only work
   for `option`-wrapped types).
 
-* Accept whichever arguments you need for your assertion, and end with `?because`.
+* Accept whichever arguments you need for your assertion, and end
+  with `[<Optional; DefaultParameterValue("")>] because: string`. (The choice to use `Optional` instead of the
+  F#-specific `?because` is to better support C#.)
 
 * First in your method, call `use _ = t.Assert()`. This is needed to track important state necessary for subject
   names to work. If your assertion calls user code that is expected to call their own assertions (like is the case
