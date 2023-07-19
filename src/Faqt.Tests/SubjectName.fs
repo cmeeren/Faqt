@@ -348,6 +348,19 @@ let ``Multiple consecutive assertions on same thread`` () =
 
 
 [<Fact>]
+let ``Multiline bracketed expressions`` () =
+    fun () ->
+        "string"
+            .Split(
+                // Comment to force break
+                'a'
+            )
+            .Should()
+            .Fail()
+    |> assertExnMsg "\"string\".Split('a')"
+
+
+[<Fact>]
 let ``Literal URLs are supported`` () =
     fun () -> "http://test.example.com".Should().Fail()
     |> assertExnMsg "\"http://test.example.com\""
@@ -371,17 +384,17 @@ let ``Known limitation: Contents of strings after // are removed, multi-line`` (
 
 
 [<Fact>]
-let ``Known limitation: Literal multiline strings are not handled correctly 1`` () =
+let ``Known limitation: Literal multiline strings are concatenated to a single line 1`` () =
     fun () ->
         "this
 is a test"
             .Should()
             .Fail()
-    |> assertExnMsg "subject"
+    |> assertExnMsg "\"thisis a test\""
 
 
 [<Fact>]
-let ``Known limitation: Literal multiline strings are not handled correctly 2`` () =
+let ``Known limitation: Literal multiline strings are concatenated to a single line 2`` () =
     fun () ->
         "this
     .is a test"
