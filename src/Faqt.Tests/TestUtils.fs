@@ -21,7 +21,7 @@ type Assertions =
         use _ = t.Assert()
 
         if not pass then
-            Fail(t, None).Throw("{subject}")
+            t.Fail("{subject}", None)
 
         AndDerived(t, t.Subject)
 
@@ -31,7 +31,7 @@ type Assertions =
         use _ = t.Assert()
 
         if not pass then
-            Fail(t, None).Throw("{subject}")
+            t.Fail("{subject}", None)
 
         And(t)
 
@@ -44,7 +44,7 @@ type Assertions =
             assertion t.Subject |> ignore
             And(t)
         with :? AssertionFailedException as ex ->
-            Fail(t, None).Throw("{subject}{0}", ex.Message)
+            t.Fail("{subject}{0}", None, ex.Message)
 
 
     [<Extension>]
@@ -66,7 +66,7 @@ type Assertions =
             let assertionFailuresString =
                 exceptions |> Seq.map (fun ex -> ex.Message) |> String.concat ""
 
-            Fail(t, None).Throw("{subject}{0}", assertionFailuresString)
+            t.Fail("{subject}{0}", None, assertionFailuresString)
 
         And(t)
 

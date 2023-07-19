@@ -23,11 +23,11 @@ type Assertions =
             assertion t.Subject |> ignore
             And(t)
         with :? AssertionFailedException as ex ->
-            Fail(t, because)
-                .Throw(
-                    "{subject}\n\tshould satisfy the supplied assertion{because}, but the assertion failed with the following message:\n{0}",
-                    ex.Message
-                )
+            t.Fail(
+                "{subject}\n\tshould satisfy the supplied assertion{because}, but the assertion failed with the following message:\n{0}",
+                because,
+                ex.Message
+            )
 
 
     /// Asserts that the subject satisfies at least one of the specified assertions.
@@ -52,12 +52,12 @@ type Assertions =
                 |> Seq.mapi (fun i ex -> $"\n\n[Assertion %i{i + 1}/%i{assertions.Length}]\n%s{ex.Message}")
                 |> String.concat ""
 
-            Fail(t, because)
-                .Throw(
-                    "{subject}\n\tshould satisfy at least one of the {0} supplied assertions{because}, but none were satisfied.{1}",
-                    string assertions.Length,
-                    assertionFailuresString
-                )
+            t.Fail(
+                "{subject}\n\tshould satisfy at least one of the {0} supplied assertions{because}, but none were satisfied.{1}",
+                because,
+                string assertions.Length,
+                assertionFailuresString
+            )
 
         And(t)
 
@@ -68,8 +68,7 @@ type Assertions =
         use _ = t.Assert()
 
         if t.Subject <> expected then
-            Fail(t, because)
-                .Throw("{subject}\n\tshould be\n{0}\n\t{because}but was\n{actual}", format expected)
+            t.Fail("{subject}\n\tshould be\n{0}\n\t{because}but was\n{actual}", because, format expected)
 
         And(t)
 
@@ -80,8 +79,7 @@ type Assertions =
         use _ = t.Assert()
 
         if t.Subject = expected then
-            Fail(t, because)
-                .Throw("{subject}\n\tshould not be\n{0}\n\t{because}but the values were equal.", format expected)
+            t.Fail("{subject}\n\tshould not be\n{0}\n\t{because}but the values were equal.", because, format expected)
 
         And(t)
 
@@ -92,8 +90,7 @@ type Assertions =
         use _ = t.Assert()
 
         if not (isNull t.Subject) then
-            Fail(t, because)
-                .Throw("{subject}\n\tshould be null{because}, but was\n{actual}")
+            t.Fail("{subject}\n\tshould be null{because}, but was\n{actual}", because)
 
         And(t)
 
@@ -104,8 +101,7 @@ type Assertions =
         use _ = t.Assert()
 
         if isNull t.Subject then
-            Fail(t, because)
-                .Throw("{subject}\n\tshould not be null{because}, but was null.")
+            t.Fail("{subject}\n\tshould not be null{because}, but was null.", because)
 
         And(t)
 
@@ -128,8 +124,7 @@ type Assertions =
             | NewUnionCase(caseInfo, _) when
                 caseInfo.Tag <> FSharpValue.PreComputeUnionTagReaderCached typeof<'a> t.Subject
                 ->
-                Fail(t, because)
-                    .Throw("{subject}\n\tshould be of case\n{0}\n\t{because}but was\n{actual}", caseInfo.Name)
+                t.Fail("{subject}\n\tshould be of case\n{0}\n\t{because}but was\n{actual}", because, caseInfo.Name)
 
             | NewUnionCase(caseInfo, _) ->
                 let fieldValues = FSharpValue.PreComputeUnionReaderCached caseInfo t.Subject
@@ -160,8 +155,7 @@ type Assertions =
 
         match caseConstructor with
         | NewUnionCase(caseInfo, _) when caseInfo.Tag <> FSharpValue.PreComputeUnionTagReaderCached typeof<'a> t.Subject ->
-            Fail(t, because)
-                .Throw("{subject}\n\tshould be of case\n{0}\n\t{because}but was\n{actual}", caseInfo.Name)
+            t.Fail("{subject}\n\tshould be of case\n{0}\n\t{because}but was\n{actual}", because, caseInfo.Name)
         | NewUnionCase _ -> And(t)
         | _ -> invalidOp $"The specified expression is not a case constructor for %s{typeof<'a>.FullName}"
 

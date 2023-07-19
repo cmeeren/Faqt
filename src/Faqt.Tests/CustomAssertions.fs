@@ -28,11 +28,11 @@ type private Assertions =
         use _ = t.Assert()
 
         if t.Subject = "Russia" && target = "Ukraine" then
-            Fail(t, because)
-                .Throw(
-                    "\tExpected\n{subject}\n\tto not invade\n{0}\n\t{because}but an invasion was found to be taking place by\n{actual}",
-                    format target
-                )
+            t.Fail(
+                "\tExpected\n{subject}\n\tto not invade\n{0}\n\t{because}but an invasion was found to be taking place by\n{actual}",
+                because,
+                format target
+            )
 
         And(t)
 
