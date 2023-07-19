@@ -26,9 +26,6 @@ type private AssertionInfo = {
 
 
 // TODO: Move state to a different type, and simplify this?
-// TODO: Test three chains with triple Satisfy with triple assertion with same name, fail the middle one
-// TODO: Test Satisfy inside Satisfy (or a similar test fake)
-// TODO: Replace some Satisfy calls with test fake
 type Testable<'a> internal (subject: 'a, callerAssembly: Assembly, callerFilePath: string, callerLineNo: int) =
 
     do
