@@ -132,24 +132,24 @@ let get assemblyPath sourceFilePath (assertions: string list) lineNo =
         )
         |> Seq.map (fun (_, line) ->
             line
-            // Known limitation: This will also change string contents (and ``quoted`` identifiers). A workaround is added
-            // to preserve URL string literals. To remove this limitation fully, the source code must be parsed properly,
-            // requiring this code to be completely rewritten (and likely end up more complex) using e.g.
+            // Known limitation: This will also change string contents (and ``quoted`` identifiers). A workaround is
+            // added to preserve URL string literals. To remove this limitation fully, the source code must be parsed
+            // properly, requiring this code to be completely rewritten (and likely end up more complex) using e.g.
             // FSharp.Compiler.Service (this was tested and abandoned early on). Alternatively, one could go through all
-            // lines and all characters manually and track whether we're in a string (remembering verbatim strings, escaped
-            // quotes, etc.), and only remove comments outside of strings. For now, it has been decided to live with this
-            // limitation and, potentially adding ad-hoc workarounds for other common patterns.
+            // lines and all characters manually and track whether we're in a string (remembering verbatim strings,
+            // escaped quotes, etc.), and only remove comments outside of strings. For now, it has been decided to live
+            // with this limitation and, potentially adding ad-hoc workarounds for other common patterns.
             |> String.regexReplace "(?<!:)//.+" ""
             |> String.trim
         )
         |> Seq.filter (not << String.IsNullOrWhiteSpace)
         |> String.concat ""
 
-        // Remove the first occurrence of the assertion method name and everything after it, so we only consider the code
-        // before the assertion when deriving the subject name. If there are multiple invocations of the same assertion
-        // method, we don't know anyway which invocation failed, since the stack frame only contains the location of the
-        // start of the chain, so we only support deriving the subject name from the part of the expression up to the first
-        // call to this method.
+        // Remove the first occurrence of the assertion method name and everything after it, so we only consider the
+        // code before the assertion when deriving the subject name. If there are multiple invocations of the same
+        // assertion method, we don't know anyway which invocation failed, since the stack frame only contains the
+        // location of the start of the chain, so we only support deriving the subject name from the part of the
+        // expression up to the first call to this method.
         |> String.regexRemoveAfterNth lastAssertionCount $"\.{Regex.Escape lastAssertion} *\("
 
         // Replace Should...Whose and Should...Which with transformation placeholder, since it's assumed the code
