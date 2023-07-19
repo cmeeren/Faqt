@@ -258,7 +258,6 @@ let ``And.Which: Picks correct assertion among multiple with matching name`` () 
 [<Fact>]
 let ``Single-line Satisfy`` () =
     fun () -> "asd".Should().TestSatisfy(fun x -> x.Length.Should().Fail())
-    // Subject name in inner failure should ideally be "x.Length". Update if this is ever supported.
     |> assertExnMsg
         """
 "asd"
