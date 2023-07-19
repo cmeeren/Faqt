@@ -103,7 +103,6 @@ type private CallChain() =
         topLevelAssertions @ activeAssertions
 
 
-// TODO: Move state to a different type, and simplify this?
 type Testable<'a> internal (subject: 'a, callerAssembly: Assembly, callerFilePath: string, callerLineNo: int) =
 
     do CallChain.EnsureInitialized()
