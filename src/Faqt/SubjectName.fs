@@ -108,13 +108,13 @@ let getFileLines = memoize File.ReadAllLines
 let private transformationPlaceholder = "..."
 
 
-let get assemblyPath sourceFilePath (assertions: string list) lineNo =
+let get origin (assertions: string list) =
     try
         let sourceCodeLines =
             try
-                getFileLines sourceFilePath
+                getFileLines origin.File
             with _ ->
-                (EmbeddedSource.get assemblyPath sourceFilePath)
+                (EmbeddedSource.get origin.Assembly.Location origin.File)
                     .ReplaceLineEndings("\n")
                     .Split("\n")
 
@@ -123,7 +123,7 @@ let get assemblyPath sourceFilePath (assertions: string list) lineNo =
         let lastAssertionCount = assertionCounts[lastAssertion]
 
         sourceCodeLines
-        |> Seq.skip (lineNo - 1)
+        |> Seq.skip (origin.Line - 1)
         |> Seq.scan
             (fun (countsLeft: Map<_, _>, _) line ->
                 if countsLeft.Values |> Seq.forall ((=) 0) then

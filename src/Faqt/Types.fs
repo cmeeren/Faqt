@@ -12,9 +12,9 @@ type AssertionFailedException(message: string) =
     inherit Exception(message)
 
 
-type private CallChainOrigin = {
+type internal CallChainOrigin = {
     Assembly: Assembly
-    File: String
+    File: string
     Line: int
 }
 
@@ -106,12 +106,6 @@ type private CallChain() =
 // TODO: Move state to a different type, and simplify this?
 type Testable<'a> internal (subject: 'a, callerAssembly: Assembly, callerFilePath: string, callerLineNo: int) =
 
-    let callsite = {
-        Assembly = callerAssembly
-        File = callerFilePath
-        Line = callerLineNo
-    }
-
     do CallChain.EnsureInitialized()
 
     internal new(subject: 'a, continueFrom: Testable<'a>) =
@@ -127,7 +121,7 @@ type Testable<'a> internal (subject: 'a, callerAssembly: Assembly, callerFilePat
             [<Optional; DefaultParameterValue(false)>] supportsChildAssertions,
             [<CallerMemberName; Optional; DefaultParameterValue("")>] assertionMethod: string
         ) =
-        CallChain.Assert(callsite, assertionMethod, supportsChildAssertions)
+        CallChain.Assert(this.CallChainOrigin, assertionMethod, supportsChildAssertions)
 
     /// Returns the subject being tested. Aliases: Whose, Which.
     member _.Subject: 'a = subject
@@ -135,14 +129,20 @@ type Testable<'a> internal (subject: 'a, callerAssembly: Assembly, callerFilePat
     /// Returns the subject being tested. Aliases: Subject, Which.
     member _.Whose: 'a = subject
 
-    member internal _.CallerAssembly = callerAssembly
+    member private _.CallerAssembly = callerAssembly
 
-    member internal _.CallerFilePath = callerFilePath
+    member private _.CallerFilePath = callerFilePath
 
-    member internal _.CallerLineNo = callerLineNo
+    member private _.CallerLineNo = callerLineNo
+
+    member internal _.CallChainOrigin = {
+        Assembly = callerAssembly
+        File = callerFilePath
+        Line = callerLineNo
+    }
 
     member internal this.CurrentChainAssertionHistory =
-        CallChain.ChainAssertionHistory callsite
+        CallChain.ChainAssertionHistory this.CallChainOrigin
 
 
 /// A type which allows chaining assertions.
