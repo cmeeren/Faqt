@@ -144,14 +144,9 @@ let get assemblyPath sourceFilePath (assertions: string list) lineNo =
         |> Seq.takeWhile (fun (_, line) -> line.IsSome)
         |> Seq.map (fun (_, line) ->
             line.Value
-            // Known limitation: This will also change string contents (and ``quoted`` identifiers). A workaround is
-            // added to preserve URL string literals. To remove this limitation fully, the source code must be parsed
-            // properly, requiring this code to be completely rewritten (and likely end up more complex) using e.g.
-            // FSharp.Compiler.Service (this was tested and abandoned early on). Alternatively, one could go through all
-            // lines and all characters manually and track whether we're in a string (remembering verbatim strings,
-            // escaped quotes, etc.), and only remove comments outside of strings. For now, it has been decided to live
-            // with this limitation and, potentially adding ad-hoc workarounds for other common patterns.
-            |> String.regexReplace "(?<!:)//.+" ""
+            // Remove comments. Try to preserve strings. Known limitation: This will remove lines starting with // from
+            // multi-line strings. On a line-by-line basis, they are indistinguishable from comment lines.
+            |> String.regexReplace "(?<!(\"|``).*?)//.+" ""
             |> String.trim
         )
         |> Seq.filter (not << String.IsNullOrWhiteSpace)

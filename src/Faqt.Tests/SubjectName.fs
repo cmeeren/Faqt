@@ -367,14 +367,27 @@ let ``Literal URLs are supported`` () =
 
 
 [<Fact>]
-let ``Known limitation: Contents of strings after // are removed, single-line`` () =
+let ``Single-line strings with // are untouched`` () =
     fun () -> "this is// a test".Should().Fail()
-    // Subject name should ideally be "this is// a test". Update if this is ever supported.
-    |> assertExnMsg "subject"
+    |> assertExnMsg "\"this is// a test\""
 
 
 [<Fact>]
-let ``Known limitation: Contents of strings after // are removed, multi-line`` () =
+let ``Single-line triple-quoted strings with // are untouched`` () =
+    fun () -> """this is// a test""".Should().Fail()
+    |> assertExnMsg "\"\"\"this is// a test\"\"\""
+
+
+[<Fact>]
+let ``Quoted identifiers with // are untouched`` () =
+    fun () ->
+        let ``// some identifier`` = 1
+        ``// some identifier``.Should().Fail()
+    |> assertExnMsg "``// some identifier``"
+
+
+[<Fact>]
+let ``Known limitation: Lines of multi-line strings that start with // are removed`` () =
     fun () ->
         "this
     //is a test"
