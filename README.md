@@ -175,22 +175,24 @@ thoroughly once than piecewise here and there.
       t.Subject.Should(t).BeOfCase((* same as previous example *))
   ```
 
-Subject name and limitations
-----------------------------
+FAQ
+---
 
-(This is not likely to interest most users.)
+### Why is the subject name not correct?
 
-The automatic subject name (the first part of the assertion message) is based on clever use of caller info attributes,
-parsing sources from either local files or embedded resources, simple regex-based processing/replacement of the call
-chain, and thread-local state. It has a few limitations.
+The automatic subject name (the first part of the assertion message) is correct in most situations, but there are edge
+cases where it may produce unexpected results:
 
-Most of the limitations below may be able to be ad-hoc improved for specific situations (raise an issue), or
-theoretically be solved entirely by parsing the F# source code using FSharp.Compiler.Service instead of simple
-regex-based processing. (Note though that this has its own drawbacks; it was initially tried and abandoned in the early
-stages of Faqt.)
+* The name is incorrect if the assertion chain does not start on a new line or at the start of a lambda (`fun ... ->`).
+* Multi-line strings literals will be concatenated.
+* Lines starting with `//` in multi-line string literals will be removed.
+* Nested `Satisfy` or other assertions that support "child assertions" may give incorrect names.
 
-* Assertion chains must start on a new line, or right after `fun ... ->`.
-* In multi-line strings, lines that start with `//` are removed.
+If you have encountered a case not listed above, please raise an issue. If I can't or won't fix it, I can at the very
+least document it as a known limitation.
 
-If these assumptions are broken, the worst that happens is that the subject name is incorrect or replaced by the generic
-string `"subject"`.
+These limitations are due to the implementation of automatic subject names. It is based on clever use of caller info
+attributes, parsing source code from either local files or embedded resources, thread-local state, and simple
+regex-based processing/replacement of the call chain based on which assertions have been encountered so far.
+
+If you would like to help make the automatic subject name functionality more robust, please raise an issue.
