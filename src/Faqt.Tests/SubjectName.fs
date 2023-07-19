@@ -502,7 +502,7 @@ let ``Literal URLs are supported`` () =
 
 
 [<Fact>]
-let ``Known limitation: Contents of strings after // are removed (except ://)`` () =
+let ``Known limitation: Contents of strings after // are removed, single-line`` () =
     fun () -> "this is// a test".Should().Fail()
     // Subject name should ideally be "this is// a test". Update if this is ever supported.
     |> assertExnMsg "subject"
