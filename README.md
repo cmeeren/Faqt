@@ -1,13 +1,14 @@
 Faqt
 ====
 
-**Fantastic fluent assertions your F# tests and domain pre-/post-conditions/invariants.**
+**Fantastic fluent assertions your F# (and C#) tests and domain pre-/post-conditions/invariants.**
 
 <img src="https://raw.githubusercontent.com/cmeeren/Faqt/main/logo/faqt-logo-docs.png" width="300" align="right" />
 
 Faqt improves on the best of [FluentAssertions](https://github.com/fluentassertions/fluentassertions)
 and [Shouldly](https://github.com/shouldly/shouldly) and serves it steaming hot on a silver platter
-to the discerning F# developer. **It aims to the best assertion library for F#.** If you don't agree, I consider that a
+to the discerning F# developer. (Can also be used for C#.) **It aims to the best assertion library for F#.** If you
+don't agree, I consider that a
 bug - please raise an issue.
 
 ### Work in progress, 1.0 to be released late August 2023
