@@ -12,7 +12,7 @@ type AssertionFailedException(message: string) =
     inherit Exception(message)
 
 
-type private AssertionChainCallsite = {
+type private CallChainOrigin = {
     Assembly: Assembly
     File: String
     Line: int
@@ -29,11 +29,11 @@ type private CallChain() =
 
     // TODO: Clean up items when empty
     [<ThreadStatic; DefaultValue>]
-    static val mutable private activeUserAssertions: Dictionary<AssertionChainCallsite, AssertionInfo list>
+    static val mutable private activeUserAssertions: Dictionary<CallChainOrigin, AssertionInfo list>
 
     // TODO: Cleanup?
     [<ThreadStatic; DefaultValue>]
-    static val mutable private topLevelAssertionHistory: Dictionary<AssertionChainCallsite, string list>
+    static val mutable private topLevelAssertionHistory: Dictionary<CallChainOrigin, string list>
 
     static let pushAssertion callsite method supportsChildAssertions =
 
