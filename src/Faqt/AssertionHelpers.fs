@@ -27,12 +27,14 @@ type TestableExtensions =
         (
             this: Testable<'a>,
             template: string,
-            because: string option,
+            because: string,
             [<ParamArray>] formattedValues: string[]
         ) =
 
-        let bc (because: string option) prefixSpace suffixComma : string =
+        let bc (because: string) prefixSpace suffixComma : string =
             because
+            |> Some
+            |> Option.filter (not << String.IsNullOrEmpty)
             |> Option.map (
                 String.removePrefix "because "
                 >> String.trim

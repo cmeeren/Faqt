@@ -1,6 +1,7 @@
 ﻿namespace Faqt
 
 open System.Runtime.CompilerServices
+open System.Runtime.InteropServices
 open Microsoft.FSharp.Quotations
 open Microsoft.FSharp.Quotations.Patterns
 open Microsoft.FSharp.Reflection
@@ -16,7 +17,12 @@ type Assertions =
     /// assertions, but Satisfy (combined with And) can be useful if you want to fluently perform multiple assertion
     /// chains, for example if asserting on different parts of a value.
     [<Extension>]
-    static member Satisfy(t: Testable<'a>, assertion: 'a -> 'ignored, ?because) : And<'a> =
+    static member Satisfy
+        (
+            t: Testable<'a>,
+            assertion: 'a -> 'ignored,
+            [<Optional; DefaultParameterValue("")>] because: string
+        ) : And<'a> =
         use x = t.Assert(true)
 
         try
@@ -32,7 +38,12 @@ type Assertions =
 
     /// Asserts that the subject satisfies at least one of the specified assertions.
     [<Extension>]
-    static member SatisfyAny(t: Testable<'a>, assertions: seq<'a -> 'ignored>, ?because) : And<'a> =
+    static member SatisfyAny
+        (
+            t: Testable<'a>,
+            assertions: seq<'a -> 'ignored>,
+            [<Optional; DefaultParameterValue("")>] because: string
+        ) : And<'a> =
         use _ = t.Assert(true)
         let assertions = assertions |> Seq.toArray
 
@@ -64,7 +75,7 @@ type Assertions =
 
     /// Asserts that the subject is the specified value, using the default equality comparison (=).
     [<Extension>]
-    static member Be(t: Testable<'a>, expected: 'a, ?because) : And<'a> =
+    static member Be(t: Testable<'a>, expected: 'a, [<Optional; DefaultParameterValue("")>] because: string) : And<'a> =
         use _ = t.Assert()
 
         if t.Subject <> expected then
@@ -75,7 +86,12 @@ type Assertions =
 
     /// Asserts that the subject is not the specified value, using default equality comparison (=).
     [<Extension>]
-    static member NotBe(t: Testable<'a>, expected: 'a, ?because) : And<'a> =
+    static member NotBe
+        (
+            t: Testable<'a>,
+            expected: 'a,
+            [<Optional; DefaultParameterValue("")>] because: string
+        ) : And<'a> =
         use _ = t.Assert()
 
         if t.Subject = expected then
@@ -86,7 +102,7 @@ type Assertions =
 
     /// Asserts that the subject is null.
     [<Extension>]
-    static member BeNull(t: Testable<'a>, ?because) : And<'a> =
+    static member BeNull(t: Testable<'a>, [<Optional; DefaultParameterValue("")>] because: string) : And<'a> =
         use _ = t.Assert()
 
         if not (isNull t.Subject) then
@@ -97,7 +113,7 @@ type Assertions =
 
     /// Asserts that the subject is not null.
     [<Extension>]
-    static member NotBeNull(t: Testable<'a>, ?because) : And<'a> =
+    static member NotBeNull(t: Testable<'a>, [<Optional; DefaultParameterValue("")>] because: string) : And<'a> =
         use _ = t.Assert()
 
         if isNull t.Subject then
@@ -113,7 +129,7 @@ type Assertions =
         (
             t: Testable<'a>,
             [<ReflectedDefinition>] caseConstructor: Quotations.Expr<'b -> 'a>,
-            ?because
+            [<Optional; DefaultParameterValue("")>] because: string
         ) : AndDerived<'a, 'b> =
         use _ = t.Assert()
 
@@ -149,7 +165,7 @@ type Assertions =
         (
             t: Testable<'a>,
             [<ReflectedDefinition>] caseConstructor: Quotations.Expr<'a>,
-            ?because
+            [<Optional; DefaultParameterValue("")>] because: string
         ) : And<'a> =
         use _ = t.Assert()
 
@@ -162,14 +178,22 @@ type Assertions =
 
     /// Asserts that the subject is Some, and allows continuing to assert on the inner value. Alias of BeOfCase(Some).
     [<Extension>]
-    static member BeSome(t: Testable<'a option>, ?because) : AndDerived<'a option, 'a> =
+    static member BeSome
+        (
+            t: Testable<'a option>,
+            [<Optional; DefaultParameterValue("")>] because: string
+        ) : AndDerived<'a option, 'a> =
         use _ = t.Assert()
-        t.BeOfCase(Some, ?because = because)
+        t.BeOfCase(Some, because)
 
 
     /// Asserts that the subject is None. Alias of BeOfCase(None), and equivalent to Be(None) (but with a different
     /// error message).
     [<Extension>]
-    static member BeNone(t: Testable<'a option>, ?because) : And<'a option> =
+    static member BeNone
+        (
+            t: Testable<'a option>,
+            [<Optional; DefaultParameterValue("")>] because: string
+        ) : And<'a option> =
         use _ = t.Assert()
-        t.BeOfCase(None, ?because = because)
+        t.BeOfCase(None, because)
