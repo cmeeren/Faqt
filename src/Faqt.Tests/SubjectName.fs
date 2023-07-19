@@ -509,6 +509,16 @@ let ``Known limitation: Contents of strings after // are removed, single-line`` 
 
 
 [<Fact>]
+let ``Known limitation: Contents of strings after // are removed, multi-line`` () =
+    fun () ->
+        "this
+    //is a test"
+            .Should()
+            .Fail()
+    |> assertExnMsg "\"this"
+
+
+[<Fact>]
 let ``Known limitation: Literal multiline strings are not handled correctly 1`` () =
     fun () ->
         "this
@@ -526,26 +536,3 @@ let ``Known limitation: Literal multiline strings are not handled correctly 2`` 
             .Should()
             .Fail()
     |> assertExnMsg "\"this.is a test\""
-
-
-[<Fact>]
-let ``Known limitation: Literal multiline strings are not handled correctly 3`` () =
-    fun () ->
-        "this
-    //is a test"
-            .Should()
-            .Fail()
-    |> assertExnMsg "\"this"
-
-
-[<Fact>]
-let ``Known limitation: Multiline bracketed expressions are not handled correctly`` () =
-    fun () ->
-        "string"
-            .Split(
-                // Comment to force break
-                'a'
-            )
-            .Should()
-            .Fail()
-    |> assertExnMsg "subject"
