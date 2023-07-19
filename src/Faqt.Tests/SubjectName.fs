@@ -348,154 +348,6 @@ let ``Multiple consecutive assertions on same thread`` () =
 
 
 [<Fact>]
-let ``Triple chains with triple Satisfy with Satisfy with triple assertions with same name, middle fails`` () =
-    fun () ->
-        "asd1"
-            .Should()
-            .TestSatisfy(fun s1 ->
-                s1
-                    .Should()
-                    .TestSatisfy(fun ss1 ->
-                        ss1
-                            .Should()
-                            .TestDerived(true)
-                            .Which.Length.Should()
-                            .TestDerived(true)
-                            .Which.ToString()
-                            .Should()
-                            .TestDerived(true)
-                    )
-            )
-            .And.TestSatisfy(fun s2 ->
-                s2
-                    .Should()
-                    .TestSatisfy(fun ss2 ->
-                        ss2
-                            .Should()
-                            .TestDerived(true)
-                            .Which.Length.Should()
-                            .TestDerived(true)
-                            .Which.ToString()
-                            .Should()
-                            .TestDerived(true)
-                    )
-            )
-            .And.TestSatisfy(fun s3 ->
-                s3
-                    .Should()
-                    .TestSatisfy(fun ss3 ->
-                        ss3
-                            .Should()
-                            .TestDerived(true)
-                            .Which.Length.Should()
-                            .TestDerived(true)
-                            .Which.ToString()
-                            .Should()
-                            .TestDerived(true)
-                    )
-            )
-        |> ignore
-
-        "asd2"
-            .Should()
-            .TestSatisfy(fun s4 ->
-                s4
-                    .Should()
-                    .TestSatisfy(fun ss4 ->
-                        ss4
-                            .Should()
-                            .TestDerived(true)
-                            .Which.Length.Should()
-                            .TestDerived(true)
-                            .Which.ToString()
-                            .Should()
-                            .TestDerived(true)
-                    )
-            )
-            .And.TestSatisfy(fun s5 ->
-                s5
-                    .Should()
-                    .TestSatisfy(fun ss5 ->
-                        ss5
-                            .Should()
-                            .TestDerived(true)
-                            .Which.Length.Should()
-                            .TestDerived(false)
-                            .Which.ToString()
-                            .Should()
-                            .TestDerived(true)
-                    )
-            )
-            .And.TestSatisfy(fun s6 ->
-                s6
-                    .Should()
-                    .TestSatisfy(fun ss6 ->
-                        ss6
-                            .Should()
-                            .TestDerived(true)
-                            .Which.Length.Should()
-                            .TestDerived(true)
-                            .Which.ToString()
-                            .Should()
-                            .TestDerived(true)
-                    )
-            )
-        |> ignore
-
-        "asd3"
-            .Should()
-            .TestSatisfy(fun s7 ->
-                s7
-                    .Should()
-                    .TestSatisfy(fun ss7 ->
-                        ss7
-                            .Should()
-                            .TestDerived(true)
-                            .Which.Length.Should()
-                            .TestDerived(true)
-                            .Which.ToString()
-                            .Should()
-                            .TestDerived(true)
-                    )
-            )
-            .And.TestSatisfy(fun s8 ->
-                s8
-                    .Should()
-                    .TestSatisfy(fun ss8 ->
-                        ss8
-                            .Should()
-                            .TestDerived(true)
-                            .Which.Length.Should()
-                            .TestDerived(true)
-                            .Which.ToString()
-                            .Should()
-                            .TestDerived(true)
-                    )
-            )
-            .And.TestSatisfy(fun s9 ->
-                s9
-                    .Should()
-                    .TestSatisfy(fun ss9 ->
-                        ss9
-                            .Should()
-                            .TestDerived(true)
-                            .Which.Length.Should()
-                            .TestDerived(true)
-                            .Which.ToString()
-                            .Should()
-                            .TestDerived(true)
-                    )
-            )
-        |> ignore
-    |> assertExnMsg
-        """
-"asd2"
-s5
-ss5...Length
-"""
-
-
-[<Fact>]
 let ``Literal URLs are supported`` () =
     fun () -> "http://test.example.com".Should().Fail()
     |> assertExnMsg "\"http://test.example.com\""
@@ -536,3 +388,24 @@ let ``Known limitation: Literal multiline strings are not handled correctly 2`` 
             .Should()
             .Fail()
     |> assertExnMsg "\"this.is a test\""
+
+
+[<Fact>]
+let ``Known limitation: Nested multi-line Satisfy does not work correctly`` () =
+    fun () ->
+        "asd"
+            .Should()
+            .TestSatisfy(fun s1 ->
+                // Comment to force break
+                s1.Should().TestSatisfy(fun ss1 -> ss1.Should().Pass())
+            )
+            .And.TestSatisfy(fun s2 ->
+                // Comment to force break
+                s2.Should().TestSatisfy(fun ss2 -> ss2.Should().Fail())
+            )
+    |> assertExnMsg
+        """
+"asd".TestSatisfy(fun s1 ->s1
+s2
+ss2
+"""
