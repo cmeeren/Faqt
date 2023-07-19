@@ -316,6 +316,27 @@ s2
 
 
 [<Fact>]
+let ``Multi-line SatisfyAny, same assertion`` () =
+    fun () ->
+        "asd"
+            .Should()
+            .TestSatisfyAny(
+                [
+                    // Comment to force break
+                    (fun s1 -> s1.Should().Fail())
+                    // Comment to force break
+                    (fun s2 -> s2.Should().Fail())
+                ]
+            )
+    |> assertExnMsg
+        """
+"asd"
+s1
+s2
+"""
+
+
+[<Fact>]
 let ``Multiple consecutive assertions on same thread`` () =
     fun () ->
         let var1 = 1
