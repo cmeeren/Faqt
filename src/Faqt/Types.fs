@@ -116,7 +116,6 @@ type Testable<'a> internal (subject: 'a, callerAssembly: Assembly, callerFilePat
     /// call other assertions directly in the implementation; the next assertion is assumed to be called by the user.
     member this.Assert
         (
-            // TODO: supportsChildAssertions - rename (also in CallChain)? And/or perhaps make this member private and surface two distinct members?
             [<Optional; DefaultParameterValue(false)>] supportsChildAssertions,
             [<CallerMemberName; Optional; DefaultParameterValue("")>] assertionMethod: string
         ) =
