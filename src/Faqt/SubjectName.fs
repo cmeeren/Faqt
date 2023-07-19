@@ -118,20 +118,32 @@ let get assemblyPath sourceFilePath (assertions: string list) lineNo =
                     .ReplaceLineEndings("\n")
                     .Split("\n")
 
+        let assertionCounts = assertions |> List.countBy id |> Map.ofList
         let lastAssertion = assertions[assertions.Length - 1]
-        let lastAssertionCount = assertions |> Seq.filter ((=) lastAssertion) |> Seq.length
+        let lastAssertionCount = assertionCounts[lastAssertion]
 
         sourceCodeLines
         |> Seq.skip (lineNo - 1)
-        |> Seq.indexed
-        |> Seq.takeWhile (fun (i, line) ->
-            let line = line.Trim()
-            // Known limitation: This does not handle multi-line expressions well (e.g., multiline method calls or strings).
-            // In general, lines after the opening delimiter will not be considered.
-            i = 0 || line.StartsWith(".") || line.StartsWith("//")
-        )
+        |> Seq.scan
+            (fun (countsLeft: Map<_, _>, _) line ->
+                if countsLeft.Values |> Seq.forall ((=) 0) then
+                    countsLeft, None
+                else
+                    let newCountsLeft =
+                        countsLeft
+                        |> Map.toSeq
+                        |> Seq.map (fun (assertion, currentCount) ->
+                            let countInThisLine = Regex.Matches(line, $"\.{Regex.Escape assertion} *\(").Count
+                            assertion, currentCount - countInThisLine
+                        )
+                        |> Map.ofSeq
+
+                    newCountsLeft, Some line
+            )
+            (assertionCounts, Some "")
+        |> Seq.takeWhile (fun (_, line) -> line.IsSome)
         |> Seq.map (fun (_, line) ->
-            line
+            line.Value
             // Known limitation: This will also change string contents (and ``quoted`` identifiers). A workaround is
             // added to preserve URL string literals. To remove this limitation fully, the source code must be parsed
             // properly, requiring this code to be completely rewritten (and likely end up more complex) using e.g.
