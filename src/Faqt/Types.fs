@@ -164,13 +164,13 @@ type TestableExtensions =
     static member Should
         (
             this: 'a,
-            [<CallerFilePath; Optional; DefaultParameterValue("")>] fn: string,
-            [<CallerLineNumber; Optional; DefaultParameterValue(0)>] lno: int
+            [<CallerFilePath; Optional; DefaultParameterValue("")>] filePath: string,
+            [<CallerLineNumber; Optional; DefaultParameterValue(0)>] lineNumber: int
         ) : Testable<'a> =
         let origin = {
             AssemblyPath = Assembly.GetCallingAssembly().Location
-            SourceFilePath = fn
-            LineNumber = lno
+            SourceFilePath = filePath
+            LineNumber = lineNumber
         }
 
         Testable(this, origin)
