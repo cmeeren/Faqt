@@ -78,7 +78,7 @@ customer...ContactInfo...Name.LastName
 As you can see, the first line tells you which part of the code fails (and `...` is inserted when using derived state
 from an assertion).
 
-**Yes, this works even in Release mode or when source files are not available!** See requirements below.
+**Yes, this works even in Release mode or when source files are not available!** See the very simple requirements below.
 
 ## Installation and requirements
 
