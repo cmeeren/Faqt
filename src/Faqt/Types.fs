@@ -109,12 +109,12 @@ type Testable<'a> internal (subject: 'a, origin: CallChainOrigin) =
     /// needed to track important state necessary for subject names to work. If your assertion calls user code that is
     /// expected to call their own assertions (like `Satisfy`), call `t.Assert(true)` instead. In that case, do not
     /// call other assertions directly in the implementation; the next assertion is assumed to be called by the user.
-    member this.Assert
+    member _.Assert
         (
             [<Optional; DefaultParameterValue(false)>] supportsChildAssertions,
             [<CallerMemberName; Optional; DefaultParameterValue("")>] assertionMethod: string
         ) =
-        CallChain.Assert(this.CallChainOrigin, assertionMethod, supportsChildAssertions)
+        CallChain.Assert(origin, assertionMethod, supportsChildAssertions)
 
     /// Returns the subject being tested. Aliases: Whose, Which.
     member _.Subject: 'a = subject
@@ -124,7 +124,7 @@ type Testable<'a> internal (subject: 'a, origin: CallChainOrigin) =
 
     member internal _.CallChainOrigin = origin
 
-    member internal this.CallChainAssertionHistory = CallChain.AssertionHistory origin
+    member internal _.CallChainAssertionHistory = CallChain.AssertionHistory origin
 
 
 /// A type which allows chaining assertions.
