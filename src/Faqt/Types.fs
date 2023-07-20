@@ -68,7 +68,7 @@ type private CallChain() =
             | true, [] -> true
             | true, hd :: _ -> hd.SupportsChildAssertions
 
-    static member EnsureInitialized() =
+    static member private EnsureInitialized() =
         if isNull CallChain.activeUserAssertions then
             CallChain.activeUserAssertions <- Dictionary()
 
@@ -77,6 +77,7 @@ type private CallChain() =
 
 
     static member Assert(callsite, assertionMethod, supportsChildAssertions) =
+        CallChain.EnsureInitialized()
 
         if not (canPushAssertion callsite) then
             IDisposable.noOp
@@ -102,8 +103,6 @@ type private CallChain() =
 
 
 type Testable<'a> internal (subject: 'a, origin: CallChainOrigin) =
-
-    do CallChain.EnsureInitialized()
 
     /// Call this at the start of your assertions, and make sure to dispose the returned value at the end. This is
     /// needed to track important state necessary for subject names to work. If your assertion calls user code that is
