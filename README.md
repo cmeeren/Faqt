@@ -18,6 +18,24 @@ If you don't agree, I consider that a bug - please raise an issue. 😉
 Faqt is currently a work in progress. All "infrastructure" and supporting features are in place; most of the actual
 assertions remain to be implemented. A feature complete 1.0 version will hopefully be released during August 2023.
 
+## Table of contents
+
+<!-- TOC -->
+
+* [A motivating example](#a-motivating-example)
+* [Installation and requirements](#installation-and-requirements)
+* [Faqt in a nutshell](#faqt-in-a-nutshell)
+* [Writing your own assertions](#writing-your-own-assertions)
+* [Multiple assertion chains without `|> ignore`](#multiple-assertion-chains-without--ignore)
+* [FAQ](#faq)
+  * [Which testing frameworks does Faqt work with?](#which-testing-frameworks-does-faqt-work-with)
+  * [Why is the subject name not correct in my specific example?](#why-is-the-subject-name-not-correct-in-my-specific-example)
+  * [Why not FluentAssertions?](#why-not-fluentassertions)
+  * [Why not Shouldly?](#why-not-shouldly)
+  * [Can I use Faqt from C#?](#can-i-use-faqt-from-c)
+
+<!-- TOC -->
+
 ## A motivating example
 
 Here is an example of what you can do with Faqt. Simply use `Should()` to start asserting, whether in a unit test or for
