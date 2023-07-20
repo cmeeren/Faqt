@@ -235,17 +235,18 @@ FluentAssertions is a fantastic library, and very much the inspiration for Faqt.
 trouble for F#. Here are the reasons I decided to make Faqt instead of just using FluentAssertions:
 
 * The `because` parameter cannot be omitted when used from
-  F# ([#2225](https://github.com/fluentassertions/fluentassertions/issues/2225))
+  F# ([#2225](https://github.com/fluentassertions/fluentassertions/issues/2225)).
 * Several assertions (specifically, those that accept an `Action<_>`) require `ignore` when used from
-  F# ([#2226](https://github.com/fluentassertions/fluentassertions/issues/2226))
+  F# ([#2226](https://github.com/fluentassertions/fluentassertions/issues/2226)).
 * The subject name does not consider transformations in the assertion
-  chain ([#2223](https://github.com/fluentassertions/fluentassertions/issues/2223))
-* Improving F# usage issues (particularly the point about the `because` parameter) were (understandably) deemed out of
-  scope for FluentAssertions
+  chain ([#2223](https://github.com/fluentassertions/fluentassertions/issues/2223)).
+* Improving F# usage issues (particularly the point about the `because` parameter)
+  were [deemed out of scope](https://github.com/fluentassertions/fluentassertions/issues/2225#issuecomment-1636733116)
+  for FluentAssertions.
 * The one-line assertion messages are harder to parse than more structured output, especially for complex objects and
-  collections
+  collections.
 * Some assertions run contrary to expectations of F# (or even C#)
-  developers ([discussion](https://github.com/fluentassertions/fluentassertions/discussions/2143#discussioncomment-5525582))
+  developers ([discussion](https://github.com/fluentassertions/fluentassertions/discussions/2143#discussioncomment-5525582)).
 
 Note that Faqt does not aim for feature parity with FluentAssertions. For example, Faqt does not execute and report on
 multiple assertions simultaneously; like almost all assertion libraries, it stops at the first failure ("monadic"
