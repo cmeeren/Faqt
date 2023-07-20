@@ -1,7 +1,6 @@
 ﻿module ``Custom assertions``
 
 open System.Runtime.CompilerServices
-open System.Runtime.InteropServices
 open Faqt
 open AssertionHelpers
 open Formatting
@@ -25,12 +24,7 @@ type private Assertions =
 
 
     [<Extension>]
-    static member NotInvade
-        (
-            t: Testable<string>,
-            target: string,
-            [<Optional; DefaultParameterValue("")>] because: string
-        ) : And<string> =
+    static member NotInvade(t: Testable<string>, target: string, ?because) : And<string> =
         use _ = t.Assert()
 
         if t.Subject = "Russia" && target = "Ukraine" then
