@@ -86,10 +86,12 @@ from an assertion).
 2. If you use path mapping (e.g., CI builds with `DeterministicSourcePaths` enabled) or want to execute assertions where
    source files are not available (e.g. in production), enable the following settings on all projects that call
    assertions (either in the `.fsproj` files or in `Directory.Build.props`):
+
    ```xml
    <DebugType>embedded</DebugType>
    <EmbedAllSources>true</EmbedAllSources>
    ```
+
    Note that `DebugType=embeded` is automatically set
    by [DotNet.ReproducibleBuilds](https://github.com/dotnet/reproducible-builds) if you use that.
 
