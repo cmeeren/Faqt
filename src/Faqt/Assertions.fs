@@ -178,7 +178,8 @@ type Assertions =
 
 
     /// Asserts that the subject is of the specified case, and allows continuing to assert on the value of that case.
-    /// Note that it is not necessary to use explicit quotations; call it as `.BeOfCase(MyDuCase)`.
+    /// Note that it is not necessary to use explicit quotations; call it as `.BeOfCase(MyDuCase)`. This overload (for
+    /// data-less cases) is equivalent to Be(MyDuCase) (but with a different error message).
     [<Extension>]
     static member BeOfCase
         (
