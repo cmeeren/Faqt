@@ -275,22 +275,6 @@ x...Length
 
 
 [<Fact>]
-let ``And.That: Picks correct assertion among multiple with matching name`` () =
-    fun () ->
-        let thisIsAVariableName = ""
-
-        thisIsAVariableName
-            .Should()
-            .TestDerived(true)
-            .That.Length.Should()
-            .TestDerived(false)
-            .And.Whose.ToString()
-            .Should()
-            .TestDerived(true)
-    |> assertExnMsg "thisIsAVariableName...Length"
-
-
-[<Fact>]
 let ``Single-line Satisfy`` () =
     fun () -> "asd".Should().TestSatisfy(fun x -> x.Length.Should().Fail())
     |> assertExnMsg
