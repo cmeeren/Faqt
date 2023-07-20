@@ -109,14 +109,8 @@ let ``Whose, single line, first fails`` () =
 let ``Whose, single line, second fails`` () =
     fun () ->
         let thisIsAVariableName = "1"
-
-        thisIsAVariableName
-            .Should()
-            .PassDerived()
-            .Whose.Length.GetType()
-            .Should()
-            .Fail()
-    |> assertExnMsg "thisIsAVariableName...Length.GetType()"
+        thisIsAVariableName.Should().PassDerived().Whose.Length.Should().Fail()
+    |> assertExnMsg "thisIsAVariableName...Length"
 
 
 [<Fact>]
