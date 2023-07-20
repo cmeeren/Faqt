@@ -200,6 +200,27 @@ If you want all the details, here they are:
 * If your assertion calls `Should` at any point, make sure you use the overload that takes the original `Testable` as an
   argument (`.Should(t)`), since it contains important state relating to the end user’s original assertion call.
 
+## Multiple assertion chains without `|> ignore`
+
+Since assertions return `And` or `AndDerived`, F# will warn you if an assertion chain is not the last line of an
+expression. You have to `|> ignore` all lines (except the last) in order to remove this warning.
+
+For convenience, you can `open Faqt.Operators` and use the `%` prefix operator:
+
+```f#
+%x.Should().Be("a")
+%y.Should().Be("b")
+```
+
+Note that the `%` operator is simply an alias for `ignore` and is defined like this:
+
+```f#
+let inline (~%) x = ignore x
+```
+
+If you want to use another operator, you can define your own just as easily.
+See [this StackOverflow answer](https://stackoverflow.com/a/34188952/2978652) for valid prefix operators.
+
 ## FAQ
 
 ### Which testing frameworks does Faqt work with?
