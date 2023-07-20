@@ -62,6 +62,41 @@ type Assertions =
         And(t)
 
 
+    /// Asserts that the subject satisfies all of the specified assertions.
+    [<Extension>]
+    static member SatisfyAll(t: Testable<'a>, assertions: seq<'a -> 'ignored>, ?because) : And<'a> =
+        use _ = t.Assert(true)
+        let assertions = assertions |> Seq.toArray
+
+        let exceptions =
+            assertions
+            |> Seq.indexed
+            |> Seq.choose (fun (i, f) ->
+                try
+                    f t.Subject |> ignore
+                    None
+                with :? AssertionFailedException as ex ->
+                    Some(i, ex)
+            )
+            |> Seq.toArray
+
+        if exceptions.Length > 0 then
+            let assertionFailuresString =
+                exceptions
+                |> Seq.map (fun (i, ex) -> $"\n\n[Assertion %i{i + 1}/%i{assertions.Length}]\n%s{ex.Message}")
+                |> String.concat ""
+
+            t.Fail(
+                "{subject}\n\tshould satisfy all of the {0} supplied assertions{because}, but {1} failed.{2}",
+                because,
+                string assertions.Length,
+                string exceptions.Length,
+                assertionFailuresString
+            )
+
+        And(t)
+
+
     /// Asserts that the subject is the specified value, using the default equality comparison (=).
     [<Extension>]
     static member Be(t: Testable<'a>, expected: 'a, ?because) : And<'a> =
