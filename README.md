@@ -75,8 +75,8 @@ customer...ContactInfo...Name.LastName
 "Aldrin"
 ```
 
-As you can see, the first line tells you which part of the code fails (and `...` is used when using derived state from
-an assertion).
+As you can see, the first line tells you which part of the code fails (and `...` is inserted when using derived state
+from an assertion).
 
 **Yes, this works even in Release mode or when source files are not available!** See requirements below.
 
