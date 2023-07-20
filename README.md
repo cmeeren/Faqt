@@ -116,9 +116,10 @@ As expected by the discerning F# developer, Faqt is:
 - **Discoverable:** The fluent syntax means you can just type a dot to discover all possible assertions and actions on
   the current value.
 - **Composable:** As far as possible, assertions are orthogonal (they check one thing only). For example, an assertion
-  for collection elements does not fail if the collection is empty. You can chain assertions
-  with `And`, `Whose`, `WhoseValue`, `That`, and `Subject`, assert on derived values like with `BeSome()`, split out
-  assertion chains with `Satisfy`, and require one of several sub-assertions with `SatisfyAny`.
+  for verifying that a collection only contains items that match a predicate does not fail if the collection is empty.
+  You can chain assertions with `And`, `Whose`, `WhoseValue`, `That`, and `Subject`, assert on derived values like
+  with `BeSome()`, split out assertion chains with `Satisfy`, and require one of several sub-assertions
+  with `SatisfyAny`.
 - **Configurable:** You can configure how values are formatted in the assertion message on a type-by-type basis, and
   specify a default formatter (e.g. for serializing objects to JSON for display).
 - **Production-ready:** Faqt is very well tested and will not break your code, whether test or production.
