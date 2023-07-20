@@ -92,6 +92,12 @@ from an assertion).
    <EmbedAllSources>true</EmbedAllSources>
    ```
 
+   Alternatively, enable them by passing the following parameters to your `dotnet build`/`test`/`publish` commands:
+
+   ```
+   -p:DeterministicSourcePaths=true -p:EmbedAllSources=true
+   ```
+
    Note that `DebugType=embeded` is automatically set
    by [DotNet.ReproducibleBuilds](https://github.com/dotnet/reproducible-builds) if you use that.
 
