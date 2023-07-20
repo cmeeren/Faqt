@@ -113,7 +113,7 @@ As expected by the discerning F# developer, Faqt is:
 - **Extensible:** No assertion? No problem! Writing your own assertions is very simple (details below).
 - **Informative:** The assertion failure messages are designed to give you all the information you need in a consistent
   and easy-to-read format.
-- **Discoverable:** The fluent syntax means you can just type a dot to discover all possible assertions and actinos on
+- **Discoverable:** The fluent syntax means you can just type a dot to discover all possible assertions and actions on
   the current value.
 - **Composable:** As far as possible, assertions are orthogonal (they check one thing only). For example, an assertion
   for collection elements does not fail if the collection is empty. You can chain assertions
