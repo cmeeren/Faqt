@@ -175,7 +175,8 @@ thoroughly once than piecewise here and there.
 
 ### Which testing frameworks does Faqt work with?
 
-All of them. Faqt is agnostic to the test framework; it simply throws a custom exception when an assertion fails.
+All of them. XUnit, NUnit, MSTest, NSpec, MSpec, Expecto, you name it. Faqt is agnostic to the test framework; it simply
+throws a custom exception when an assertion fails.
 
 ### Why is the subject name not correct?
 
