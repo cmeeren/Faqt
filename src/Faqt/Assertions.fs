@@ -12,7 +12,7 @@ open Formatting
 type Assertions =
 
 
-    /// Asserts that the subject satisfies the specified assertion. Often you can just use And for making multiple
+    /// Asserts that the subject satisfies the supplied assertion. Often you can just use And for making multiple
     /// assertions, but Satisfy (combined with And) can be useful if you want to fluently perform multiple assertion
     /// chains, for example if asserting on different parts of a value.
     [<Extension>]
@@ -30,7 +30,7 @@ type Assertions =
             )
 
 
-    /// Asserts that the subject satisfies at least one of the specified assertions.
+    /// Asserts that the subject satisfies at least one of the supplied assertions.
     [<Extension>]
     static member SatisfyAny(t: Testable<'a>, assertions: seq<'a -> 'ignored>, ?because) : And<'a> =
         use _ = t.Assert(true)
@@ -62,7 +62,7 @@ type Assertions =
         And(t)
 
 
-    /// Asserts that the subject satisfies all of the specified assertions.
+    /// Asserts that the subject satisfies all of the supplied assertions.
     [<Extension>]
     static member SatisfyAll(t: Testable<'a>, assertions: seq<'a -> 'ignored>, ?because) : And<'a> =
         use _ = t.Assert(true)
