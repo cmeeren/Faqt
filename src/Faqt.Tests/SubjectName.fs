@@ -142,7 +142,6 @@ let ``That, single line, first fails`` () =
 let ``That, single line, second fails`` () =
     fun () ->
         let thisIsAVariableName = "1"
-
         thisIsAVariableName.Should().PassDerived().That.Length.GetType().Should().Fail()
     |> assertExnMsg "thisIsAVariableName...Length.GetType()"
 
