@@ -55,14 +55,14 @@ module Whose =
         (Some "asd").Should().BeSome().Whose.Length.Should().Be(3)
 
 
-module Which =
+module That =
 
 
     [<Fact>]
     let ``Returns the derived value`` () =
-        Assert.Equal("asd", "asd".Should().PassDerived().Which)
+        Assert.Equal("asd", "asd".Should().PassDerived().That)
 
 
     [<Fact>]
     let ``Realistic example usage`` () =
-        (Some "asd").Should().BeSome().Which.Should().NotBeNull()
+        (Some "asd").Should().BeSome().That.Should().NotBeNull()

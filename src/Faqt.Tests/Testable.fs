@@ -30,7 +30,7 @@ module Whose =
         (Some "asd")
             .Should()
             .BeSome()
-            .Which.Should()
+            .That.Should()
             .Be("asd")
             .And.Whose.Length.Should()
             .Be(3)

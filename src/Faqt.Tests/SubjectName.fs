@@ -137,38 +137,33 @@ let ``Multiple Whose`` () =
 
 
 [<Fact>]
-let ``Which, single line, first fails`` () =
+let ``That, single line, first fails`` () =
     fun () ->
         let thisIsAVariableName = "asd"
-        thisIsAVariableName.Should().FailDerived().Which.Length.Should().Pass()
+        thisIsAVariableName.Should().FailDerived().That.Length.Should().Pass()
     |> assertExnMsg "thisIsAVariableName"
 
 
 [<Fact>]
-let ``Which, single line, second fails`` () =
+let ``That, single line, second fails`` () =
     fun () ->
         let thisIsAVariableName = "1"
 
-        thisIsAVariableName
-            .Should()
-            .PassDerived()
-            .Which.Length.GetType()
-            .Should()
-            .Fail()
+        thisIsAVariableName.Should().PassDerived().That.Length.GetType().Should().Fail()
     |> assertExnMsg "thisIsAVariableName...Length.GetType()"
 
 
 [<Fact>]
-let ``Multiple Which`` () =
+let ``Multiple That`` () =
     fun () ->
         let thisIsAVariableName = "1"
 
         thisIsAVariableName
             .Should()
             .PassDerived()
-            .Which.Length.Should()
+            .That.Length.Should()
             .PassDerived()
-            .Which.ToString()
+            .That.ToString()
             .GetType()
             .Should()
             .Fail()
@@ -179,7 +174,7 @@ let ``Multiple Which`` () =
 let ``Whose, same child assertion, first fails`` () =
     fun () ->
         let thisIsAVariableName = ""
-        thisIsAVariableName.Should().FailDerived().Which.Should().FailDerived()
+        thisIsAVariableName.Should().FailDerived().That.Should().FailDerived()
     |> assertExnMsg "thisIsAVariableName"
 
 
@@ -240,14 +235,14 @@ x...Length
 
 
 [<Fact>]
-let ``And.Which: Picks correct assertion among multiple with matching name`` () =
+let ``And.That: Picks correct assertion among multiple with matching name`` () =
     fun () ->
         let thisIsAVariableName = ""
 
         thisIsAVariableName
             .Should()
             .TestDerived(true)
-            .Which.Length.Should()
+            .That.Length.Should()
             .TestDerived(false)
             .And.Whose.ToString()
             .Should()

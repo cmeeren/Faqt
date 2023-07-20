@@ -366,7 +366,7 @@ module BeOfCase =
 
     [<Fact>]
     let ``SingleFieldInt passes and allows asserting on inner value`` () =
-        (SingleFieldInt 1).Should().BeOfCase(SingleFieldInt).Which.Should().Be(1)
+        (SingleFieldInt 1).Should().BeOfCase(SingleFieldInt).That.Should().Be(1)
 
 
     [<Fact>]
@@ -374,7 +374,7 @@ module BeOfCase =
         (SingleFieldRecord { A = 1; B = "a" })
             .Should()
             .BeOfCase(SingleFieldRecord)
-            .Which.Should()
+            .That.Should()
             .Be({ A = 1; B = "a" })
 
 
@@ -383,7 +383,7 @@ module BeOfCase =
         (SingleFieldAnonymousRecord {| X = "a"; Y = 1 |})
             .Should()
             .BeOfCase(SingleFieldAnonymousRecord)
-            .Which.Should()
+            .That.Should()
             .Be({| X = "a"; Y = 1 |})
 
 
@@ -392,7 +392,7 @@ module BeOfCase =
         MultipleAnonymousFields(1, "a")
             .Should()
             .BeOfCase(MultipleAnonymousFields)
-            .Which.Should()
+            .That.Should()
             .Be((1, "a"))
 
 
@@ -401,7 +401,7 @@ module BeOfCase =
         MultipleNamedFields(1, "a")
             .Should()
             .BeOfCase(MultipleNamedFields)
-            .Which.Should()
+            .That.Should()
             .Be((1, "a"))
 
 
@@ -462,7 +462,7 @@ module BeSome =
 
     [<Fact>]
     let ``Passes for Some and allows asserting on inner value`` () =
-        (Some 1).Should().BeSome().Which.Should().Be(1)
+        (Some 1).Should().BeSome().That.Should().Be(1)
 
 
     [<Fact>]

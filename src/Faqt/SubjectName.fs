@@ -159,17 +159,17 @@ let get origin (assertions: string list) =
         // expression up to the first call to this method.
         |> String.regexRemoveAfterNth lastAssertionCount $"\.{Regex.Escape lastAssertion} *\("
 
-        // Replace Should...Whose and Should...Which with transformation placeholder, since it's assumed the code
-        // contains something returning AndDerived. Make an exception for And.Whose and And.Which, since they are
-        // methods on Testable, not AndDerived. (Note that Testable.Which doesn't exist currently. It can be added as an
+        // Replace Should...Whose and Should...That with transformation placeholder, since it's assumed the code
+        // contains something returning AndDerived. Make an exception for And.Whose and And.That, since they are
+        // methods on Testable, not AndDerived. (Note that Testable.That doesn't exist currently. It can be added as an
         // alias of Testable.Whose if needed, but there should exist a realistic use-case for it first.)
-        |> String.regexReplace "\.Should\(\)\..+?\.(?<!And\.)(Whose|Which)\." transformationPlaceholder
+        |> String.regexReplace "\.Should\(\)\..+?\.(?<!And\.)(Whose|That)\." transformationPlaceholder
 
         // Remove Should...And; this code doesn't change the subject.
         |> String.regexReplace "\.Should *\(\)\..+?\.And" ""
 
-        // Remove remaining Subject/Whose/Which; they are methods on Testable and don't change the subject.
-        |> String.regexReplace "\.(Subject|Whose|Which)\." "."
+        // Remove remaining Subject/Whose/That; they are methods on Testable and don't change the subject.
+        |> String.regexReplace "\.(Subject|Whose|That)\." "."
 
         // Remove remaining calls to Should.
         |> String.regexReplace "\.Should *\(\)" ""
