@@ -101,7 +101,7 @@ type private CallChain() =
         topLevelAssertions @ activeAssertions
 
 
-type Testable<'a> internal (subject: 'a, callerAssembly: Assembly, callerFilePath: string, callerLineNo: int) =
+type Testable<'a> internal (subject: 'a, origin: CallChainOrigin) =
 
     do CallChain.EnsureInitialized()
 
@@ -122,20 +122,9 @@ type Testable<'a> internal (subject: 'a, callerAssembly: Assembly, callerFilePat
     /// Returns the subject being tested. Aliases: Subject, Which.
     member _.Whose: 'a = subject
 
-    member internal _.CallerAssembly = callerAssembly
+    member internal _.CallChainOrigin = origin
 
-    member internal _.CallerFilePath = callerFilePath
-
-    member internal _.CallerLineNo = callerLineNo
-
-    member internal _.CallChainOrigin = {
-        Assembly = callerAssembly
-        File = callerFilePath
-        Line = callerLineNo
-    }
-
-    member internal this.CallChainAssertionHistory =
-        CallChain.AssertionHistory this.CallChainOrigin
+    member internal this.CallChainAssertionHistory = CallChain.AssertionHistory origin
 
 
 /// A type which allows chaining assertions.
@@ -178,4 +167,10 @@ type TestableExtensions =
             [<CallerFilePath; Optional; DefaultParameterValue("")>] fn: string,
             [<CallerLineNumber; Optional; DefaultParameterValue(0)>] lno: int
         ) : Testable<'a> =
-        Testable(this, Assembly.GetCallingAssembly(), fn, lno)
+        let origin = {
+            Assembly = Assembly.GetCallingAssembly()
+            File = fn
+            Line = lno
+        }
+
+        Testable(this, origin)

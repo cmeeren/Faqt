@@ -12,7 +12,7 @@ type TestableExtensions =
     /// Use this overload when calling Should() in custom assertions.
     [<Extension>]
     static member Should(this: 'a, continueFrom: Testable<'b>) : Testable<'a> =
-        Testable(this, continueFrom.CallerAssembly, continueFrom.CallerFilePath, continueFrom.CallerLineNo)
+        Testable(this, continueFrom.CallChainOrigin)
 
 
     /// Fail the assertion with the given template and args. The template may contain the tokens "{subject}",
