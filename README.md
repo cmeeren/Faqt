@@ -135,7 +135,7 @@ thoroughly once than piecewise here and there.
   by F#, as above where it requires `equality` on `'a` due to the use of `<>`, or they could be explicitly specified,
   for example by specifying more concrete types (such as `Testable<'a option>` in order to have your extension only work
   for `option`-wrapped types).
-
+~~~~
 * Accept whichever arguments you need for your assertion, and end
   with `[<Optional; DefaultParameterValue("")>] because: string`. (The choice to use `Optional` instead of the
   F#-specific `?because` is to better support C#.)
