@@ -191,8 +191,8 @@ thoroughly once than piecewise here and there.
   For example, if you implement an assertion called `ContainsElementsMatching(predicate)`, return the matched elements
   as the derived state, so that the user has the option to continue asserting on them.
 
-* If your assertion calls `Should` at any point, make sure you pass the original `Testable` as an argument, since it
-  contains important state relating to the end user’s original assertion call.
+* If your assertion calls `Should` at any point, make sure you use the overload that passes the original `Testable` as
+  an argument (`.Should(t)`), since it contains important state relating to the end user’s original assertion call.
 
 ## FAQ
 
