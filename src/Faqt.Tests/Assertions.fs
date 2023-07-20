@@ -10,39 +10,31 @@ module Satisfy =
 
     [<Fact>]
     let ``Passes if the inner assertion passes and can be chained with And`` () =
-        "asd".Length.Should().Satisfy(fun x -> x.ToString().Length.Should().Be(1))
+        "asd".Length.Should().Satisfy(fun x -> x.ToString().Length.Should().Pass())
         |> ignore<And<int>>
 
 
     [<Fact>]
     let ``Fails with expected message if the inner assertion fails`` () =
-        fun () -> "asd".Length.Should().Satisfy(fun x -> x.ToString().Length.Should().Be(2))
+        fun () -> "asd".Length.Should().Satisfy(fun x -> x.ToString().Length.Should().Fail())
         |> assertExnMsg
             """
 "asd".Length
     should satisfy the supplied assertion, but the assertion failed with the following message:
 
 x.ToString().Length
-    should be
-2
-    but was
-1
 """
 
 
     [<Fact>]
     let ``Fails with expected message with because`` () =
-        fun () -> "asd".Should().Satisfy((fun x -> x.Length.Should().Be(2)), "some reason")
+        fun () -> "asd".Should().Satisfy((fun x -> x.Length.Should().Fail()), "some reason")
         |> assertExnMsg
             """
 "asd"
     should satisfy the supplied assertion because some reason, but the assertion failed with the following message:
 
 x.Length
-    should be
-2
-    but was
-3
 """
 
 
@@ -53,12 +45,7 @@ module SatisfyAny =
     let ``Passes if all of the inner assertions passes and can be chained with And`` () =
         "asd"
             .Should()
-            .SatisfyAny(
-                [
-                    (fun s1 -> s1.Length.Should().Be(3))
-                    (fun s1 -> s1.Length.Should().NotBe(2))
-                ]
-            )
+            .SatisfyAny([ (fun s1 -> s1.Length.Should().Pass()); (fun s2 -> s2.Length.Should().Pass()) ])
         |> ignore<And<string>>
 
 
@@ -66,26 +53,14 @@ module SatisfyAny =
     let ``Passes if only one of the inner assertions passes 1`` () =
         "asd"
             .Should()
-            .SatisfyAny(
-                [
-                    (fun s1 -> s1.Length.Should().Be(2))
-                    (fun s1 -> s1.Length.Should().NotBe(2))
-                ]
-            )
-        |> ignore<And<string>>
+            .SatisfyAny([ (fun s1 -> s1.Length.Should().Fail()); (fun s2 -> s2.Length.Should().Pass()) ])
 
 
     [<Fact>]
     let ``Passes if only one of the inner assertions passes 2`` () =
         "asd"
             .Should()
-            .SatisfyAny(
-                [
-                    (fun s1 -> s1.Length.Should().Be(3))
-                    (fun s1 -> s1.Length.Should().NotBe(3))
-                ]
-            )
-        |> ignore<And<string>>
+            .SatisfyAny([ (fun s1 -> s1.Length.Should().Pass()); (fun s2 -> s2.Length.Should().Fail()) ])
 
 
     [<Fact>]
@@ -93,12 +68,7 @@ module SatisfyAny =
         fun () ->
             "asd"
                 .Should()
-                .SatisfyAny(
-                    [
-                        (fun s1 -> s1.Length.Should().Be(2))
-                        (fun s2 -> s2.Length.Should().NotBe(3))
-                    ]
-                )
+                .SatisfyAny([ (fun s1 -> s1.Length.Should().Fail()); (fun s2 -> s2.Length.Should().Fail()) ])
         |> assertExnMsg
             """
 "asd"
@@ -107,17 +77,10 @@ module SatisfyAny =
 [Assertion 1/2]
 
 s1.Length
-    should be
-2
-    but was
-3
 
 [Assertion 2/2]
 
 s2.Length
-    should not be
-3
-    but the values were equal.
 """
 
 
