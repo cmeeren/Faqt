@@ -173,6 +173,14 @@ let ``Whose, same child assertion, first fails`` () =
 
 
 [<Fact>]
+let ``Whose, same child assertion, second fails`` () =
+    fun () ->
+        let x = ""
+        x.Should().TestDerived(true).Whose.Length.Should().TestDerived(false)
+    |> assertExnMsg "x...Length"
+
+
+[<Fact>]
 let ``Testable.Subject`` () =
     fun () ->
         let thisIsAVariableName = "1"
