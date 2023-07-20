@@ -207,7 +207,7 @@ If you want all the details, here they are:
 All of them. XUnit, NUnit, MSTest, NSpec, MSpec, Expecto, you name it. Faqt is agnostic to the test framework; it simply
 throws a custom exception when an assertion fails.
 
-### Why is the subject name not correct?
+### Why is the subject name not correct in my specific example?
 
 The automatic subject name (the first part of the assertion message) is correct in most situations, but there are edge
 cases where it may produce unexpected results:
