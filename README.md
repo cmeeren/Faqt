@@ -79,6 +79,16 @@ an assertion).
 not available, as long as you use `<DebugType>embedded</DebugType>` and `<EmbedAllSources>true</EmbedAllSources>`. It's
 magic!**
 
+## Installation and requirements
+
+1. Install Faqt [from NuGet](https://www.nuget.org/packages/Faqt). Faqt supports .NET 5.0 and higher.
+2. If you run deterministic CI builds or want to execute assertions where source files are not available (e.g. in
+   production), enable the following settings on the projects that call assertions (either in `.fsproj` files
+   or `Directory.Build.props`):
+  * `<DebugType>embedded</DebugType>` (this is automatically set
+    by [DotNet.ReproducibleBuilds](https://github.com/dotnet/reproducible-builds) if you use that)
+  * `<EmbedAllSources>true</EmbedAllSources>`
+
 ## Faqt in a nutshell
 
 As expected by the discerning F# developer, Faqt is:
