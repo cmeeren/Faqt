@@ -210,6 +210,10 @@ trouble for F#. Here are the reasons I decided to make Faqt instead of just usin
 * Some assertions run contrary to expectations of F# (or even C#)
   developers ([discussion](https://github.com/fluentassertions/fluentassertions/discussions/2143#discussioncomment-5525582))
 
+Note that Faqt does not aim for feature parity with FluentAssertions. For example, Faqt does not execute and report on
+multiple assertions simultaneously; like almost all assertion libraries, it stops at the first failure ("monadic"
+instead of "applicative" behavior).
+
 ### Why not Shouldly?
 
 I will admit I have not used Shouldly myself, but its feature set (ignoring the actual assertions) seem to be a subset
