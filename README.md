@@ -75,19 +75,20 @@ customer...ContactInfo...Name.LastName
 As you can see, the first line tells you which part of the code fails (and `...` is used when using derived state from
 an assertion).
 
-**Yes, this works even in production, on CI with `DeterministicSourcePaths`, and otherwise when your source files are
-not available, as long as you use `<DebugType>embedded</DebugType>` and `<EmbedAllSources>true</EmbedAllSources>`. It's
-magic!**
+**Yes, this works even in Release mode or when source files are not available!** See requirements below.
 
 ## Installation and requirements
 
 1. Install Faqt [from NuGet](https://www.nuget.org/packages/Faqt). Faqt supports .NET 5.0 and higher.
-2. If you run deterministic CI builds or want to execute assertions where source files are not available (e.g. in
-   production), enable the following settings on the projects that call assertions (either in `.fsproj` files
-   or `Directory.Build.props`):
-  * `<DebugType>embedded</DebugType>` (this is automatically set
-    by [DotNet.ReproducibleBuilds](https://github.com/dotnet/reproducible-builds) if you use that)
-  * `<EmbedAllSources>true</EmbedAllSources>`
+2. If you use path mapping (e.g., CI builds with `DeterministicSourcePaths` enabled) or want to execute assertions where
+   source files are not available (e.g. in production), enable the following settings on all projects that call
+   assertions (either in the `.fsproj` files or in `Directory.Build.props`):
+   ```xml
+   <DebugType>embedded</DebugType>
+   <EmbedAllSources>true</EmbedAllSources>
+   ```
+   Note that `DebugType=embeded` is automatically set
+   by [DotNet.ReproducibleBuilds](https://github.com/dotnet/reproducible-builds) if you use that.
 
 ## Faqt in a nutshell
 
