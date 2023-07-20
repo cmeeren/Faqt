@@ -191,3 +191,33 @@ attributes, parsing source code from either local files or embedded resources, t
 regex-based processing/replacement of the call chain based on which assertions have been encountered so far.
 
 If you would like to help make the automatic subject name functionality more robust, please raise an issue.
+
+### Why not FluentAssertions?
+
+FluentAssertions is a fantastic library, and very much the inspiration for Faqt. Unfortunately, its API design causes
+trouble for F#. Here are the reasons I decided to make Faqt instead of just using FluentAssertions:
+
+* The `because` parameter cannot be omitted when used from
+  F# ([#2225](https://github.com/fluentassertions/fluentassertions/issues/2225))
+* Several assertions (specifically, those that accept an `Action<_>`) require `ignore` when used from
+  F# ([#2226](https://github.com/fluentassertions/fluentassertions/issues/2226))
+* The subject name does not consider transformations in the assertion
+  chain ([#2223](https://github.com/fluentassertions/fluentassertions/issues/2223))
+* Improving F# usage issues (particularly the point about the `because` parameter) were (understandably) deemed out of
+  scope for FluentAssertions
+* The one-line assertion messages are harder to parse than more structured output, especially for complex objects and
+  collections
+* Some assertions run contrary to expectations of F# (or even C#)
+  developers ([discussion](https://github.com/fluentassertions/fluentassertions/discussions/2143#discussioncomment-5525582))
+
+### Why not Shouldly?
+
+I will admit I have not used Shouldly myself, but its feature set (ignoring the actual assertions) seem to be a subset
+of that of FluentAssertions. For example, it does not support chaining assertions. However, I like its easy-to-read
+assertion failure messages, and have used those as inspiration for Faqt's assertion messages.
+
+### Can I use Faqt from C#?
+
+Feel free, but know that Faqt is designed only for F#. The subject names only work correctly for F#, and the API and
+design and assertion choices are based on F# idioms and expected usage. Any support for C# is incidental, and improving
+or even preserving C# support is out of scope for Faqt.
