@@ -121,7 +121,7 @@ As expected by the discerning F# developer, Faqt is:
   with `BeSome()`, split out assertion chains with `Satisfy`, and require one of several sub-assertions
   with `SatisfyAny`.
 - **Configurable:** You can configure how values are formatted in the assertion message on a type-by-type basis, and
-  specify a default formatter (e.g. for serializing objects to JSON for display).
+  specify a default formatter (e.g. for displaying all values as serialized JSON by default).
 - **Production-ready:** Faqt is very well tested and will not break your code, whether test or production.
 
 ## Writing your own assertions
