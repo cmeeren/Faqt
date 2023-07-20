@@ -12,7 +12,9 @@
     <Compile Include="AndDerived.fs" />
     <Compile Include="CustomAssertions.fs" />
     <Compile Include="Operators.fs" />
-    <Compile Include="Assertions.fs" />
+    <Compile Include="HigherOrderAssertions.fs" />
+    <Compile Include="BasicAssertions.fs" />
+    <Compile Include="UnionAssertions.fs" />
   </ItemGroup>
 
   <ItemGroup>
