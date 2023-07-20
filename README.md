@@ -170,8 +170,7 @@ thoroughly once than piecewise here and there.
 * If your assertion calls `Should` at any point, make sure you pass the original `Testable` as an argument, since it
   contains important state relating to the end user’s original assertion call.
 
-FAQ
----
+## FAQ
 
 ### Why is the subject name not correct?
 
