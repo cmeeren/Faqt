@@ -241,7 +241,7 @@ trouble for F#. Here are the reasons I decided to make Faqt instead of just usin
 * The subject name does not consider transformations in the assertion
   chain ([#2223](https://github.com/fluentassertions/fluentassertions/issues/2223)).
 * Improving F# usage issues (particularly the point about the `because` parameter)
-  were [deemed out of scope](https://github.com/fluentassertions/fluentassertions/issues/2225#issuecomment-1636733116)
+  was [deemed out of scope](https://github.com/fluentassertions/fluentassertions/issues/2225#issuecomment-1636733116)
   for FluentAssertions.
 * The one-line assertion messages are harder to parse than more structured output, especially for complex objects and
   collections.
