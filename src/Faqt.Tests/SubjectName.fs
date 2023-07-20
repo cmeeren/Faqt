@@ -164,6 +164,45 @@ let ``Multiple That`` () =
 
 
 [<Fact>]
+let ``WhoseValue, single line, first fails`` () =
+    fun () ->
+        let thisIsAVariableName = "asd"
+        thisIsAVariableName.Should().FailDerived().WhoseValue.Length.Should().Pass()
+    |> assertExnMsg "thisIsAVariableName"
+
+
+[<Fact>]
+let ``WhoseValue, single line, second fails`` () =
+    fun () ->
+        let thisIsAVariableName = "1"
+
+        thisIsAVariableName
+            .Should()
+            .PassDerived()
+            .WhoseValue.Length.GetType()
+            .Should()
+            .Fail()
+    |> assertExnMsg "thisIsAVariableName...Length.GetType()"
+
+
+[<Fact>]
+let ``Multiple WhoseValue`` () =
+    fun () ->
+        let thisIsAVariableName = "1"
+
+        thisIsAVariableName
+            .Should()
+            .PassDerived()
+            .WhoseValue.Length.Should()
+            .PassDerived()
+            .WhoseValue.ToString()
+            .GetType()
+            .Should()
+            .Fail()
+    |> assertExnMsg "thisIsAVariableName...Length...ToString().GetType()"
+
+
+[<Fact>]
 let ``Whose, same child assertion, first fails`` () =
     fun () ->
         let thisIsAVariableName = ""

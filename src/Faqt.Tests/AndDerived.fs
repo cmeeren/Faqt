@@ -66,3 +66,16 @@ module That =
     [<Fact>]
     let ``Realistic example usage`` () =
         (Some "asd").Should().BeSome().That.Should().NotBeNull()
+
+
+module WhoseValue =
+
+
+    [<Fact>]
+    let ``Returns the derived value`` () =
+        Assert.Equal("asd", "asd".Should().PassDerived().WhoseValue)
+
+
+    [<Fact>]
+    let ``Realistic example usage`` () =
+        (Some "asd").Should().BeSome().WhoseValue.Should().NotBeNull()

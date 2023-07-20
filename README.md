@@ -93,8 +93,8 @@ As expected by the discerning F# developer, Faqt is:
   easy-to-read format.
 - **Discoverable:** The fluent syntax means you can just type a dot to discover all possible assertions and actinos on
   the current value.
-- **Composable:** You can chain assertions with `And`, `Whose`, `That`, and `Subject`, assert on derived values like
-  with `BeSome()`, split out assertion chains with `Satisfy`, and require one of several sub-assertions
+- **Composable:** You can chain assertions with `And`, `Whose`, `WhoseValue`, `That`, and `Subject`, assert on derived
+  values like with `BeSome()`, split out assertion chains with `Satisfy`, and require one of several sub-assertions
   with `SatisfyAny`.
 - **Configurable:** You can configure how values are formatted in the assertion message on a type-by-type basis, and
   specify a default formatter (e.g. for serializing objects to JSON for display).
