@@ -173,6 +173,10 @@ thoroughly once than piecewise here and there.
 
 ## FAQ
 
+### Which testing frameworks does Faqt work with?
+
+All of them. Faqt is agnostic to the test framework; it simply throws a custom exception when an assertion fails.
+
 ### Why is the subject name not correct?
 
 The automatic subject name (the first part of the assertion message) is correct in most situations, but there are edge
