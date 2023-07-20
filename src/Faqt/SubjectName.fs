@@ -112,9 +112,9 @@ let get origin (assertions: string list) =
     try
         let sourceCodeLines =
             try
-                getFileLines origin.File
+                getFileLines origin.SourceFilePath
             with _ ->
-                (EmbeddedSource.get origin.Assembly origin.File)
+                (EmbeddedSource.get origin.AssemblyPath origin.SourceFilePath)
                     .ReplaceLineEndings("\n")
                     .Split("\n")
 
@@ -123,7 +123,7 @@ let get origin (assertions: string list) =
         let lastAssertionCount = assertionCounts[lastAssertion]
 
         sourceCodeLines
-        |> Seq.skip (origin.Line - 1)
+        |> Seq.skip (origin.LineNumber - 1)
         |> Seq.scan
             (fun (countsLeft: Map<_, _>, _) line ->
                 if countsLeft.Values |> Seq.forall ((=) 0) then
