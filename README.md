@@ -118,8 +118,7 @@ As expected by the discerning F# developer, Faqt is:
 - **Composable:** As far as possible, assertions are orthogonal (they check one thing only). For example, an assertion
   for verifying that a collection only contains items that match a predicate does not fail if the collection is empty.
   You can chain assertions with `And`, `Whose`, `WhoseValue`, `That`, and `Subject`, assert on derived values like
-  with `BeSome()`, split out assertion chains with `Satisfy`, and require one of several sub-assertions
-  with `SatisfyAny`.
+  with `BeSome()`, and compose assertions with higher-order assertions like `Satisfy`, `SatisfyAll`, and `SatisfyAny`.
 - **Configurable:** You can configure how values are formatted in the assertion message on a type-by-type basis, and
   specify a default formatter (e.g. for displaying all values as serialized JSON by default).
 - **Production-ready:** Faqt is very well tested and is highly unlikely to break your code, whether test or production.
@@ -165,7 +164,7 @@ thoroughly once than piecewise here and there.
 
 * First in your method, call `use _ = t.Assert()`. This is needed to track important state necessary for subject
   names to work. If your assertion calls user code that is expected to call their own assertions (like is the case
-  with `Satisfy` and similar), call `t.Assert(true)` instead.
+  with `Satisfy` and similar higher-order assertions), call `t.Assert(true)` instead.
 
 * If your condition is not met, call
 
