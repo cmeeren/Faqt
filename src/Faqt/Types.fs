@@ -102,6 +102,7 @@ type private CallChain() =
         topLevelAssertions @ activeAssertions
 
 
+[<Struct>]
 type Testable<'a> internal (subject: 'a, origin: CallChainOrigin) =
 
     /// Call this at the start of your assertions, and make sure to dispose the returned value at the end. This is
