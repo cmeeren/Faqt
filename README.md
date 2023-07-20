@@ -150,8 +150,14 @@ type Assertions =
         And(t)
 ```
 
-Here are the important points. Don’t be discouraged by how detailed the explanation below is; it’s better to explain it
-thoroughly once than piecewise here and there.
+Simple, right? Here are additional quick remarks that are not shown above:
+
+* If it's a higher-order assertion that calls user code that calls other assertions, use `t.Assert(true)` instead
+  of `t.Assert()`.
+* Return `AndDerived(t, derivedState)` instead of `And(t)` if your assertion extracts derived state.
+* If your assertion calls `Should`, make sure to the `Should(t)` overload.
+
+If you want all the details, here they are:
 
 * Implement the assertion as
   an [extension method](https://learn.microsoft.com/en-us/dotnet/fsharp/language-reference/type-extensions#extension-methods)
@@ -163,8 +169,8 @@ thoroughly once than piecewise here and there.
 * Accept whichever arguments you need for your assertion, and end with `?because`.
 
 * First in your method, call `use _ = t.Assert()`. This is needed to track important state necessary for subject
-  names to work. If your assertion calls user code that is expected to call their own assertions (like is the case
-  with `Satisfy` and similar higher-order assertions), call `t.Assert(true)` instead.
+  names to work. If your assertion is a higher-order assertion (like `Satisfy`) that calls user code that is expected to
+  call other assertions, call `t.Assert(true)` instead.
 
 * If your condition is not met, call
 
