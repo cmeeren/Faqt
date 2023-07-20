@@ -148,10 +148,10 @@ type AndDerived<'a, 'b>(testable: Testable<'a>, derived: 'b) =
     /// Returns the subject being tested.
     member _.Subject: 'a = testable.Subject
 
-    /// Returns the value derived if the previous assertion succeeds. Alias: Which.
+    /// Returns the value derived if the previous assertion succeeds. Alias of Which.
     member _.Whose: 'b = derived
 
-    /// Returns the value derived if the previous assertion succeeds. Alias: Whose.
+    /// Returns the value derived if the previous assertion succeeds. Alias of Whose.
     member _.Which: 'b = derived
 
 
