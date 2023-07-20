@@ -83,7 +83,7 @@ magic!**
 
 As expected by the discerning F# developer, Faqt is:
 
-- **Readable:** Assertions read like natural language.
+- **Readable:** Assertions read like natural language and clearly reveal their intention.
 - **Concise:** Verbosity in the syntax is kept to an absolute minimum.
 - **Usable:** Faqt comes with batteries included, and contains many useful assertions, including aliases
   (like `BeTrue()` for `Be(true)` on booleans, and `BeSome` for `BeOfCase(Some)` on `option` values).
