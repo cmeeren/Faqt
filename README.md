@@ -212,10 +212,11 @@ throws a custom exception when an assertion fails.
 The automatic subject name (the first part of the assertion message) is correct in most situations, but there are edge
 cases where it may produce unexpected results:
 
-* The name is incorrect if the assertion chain does not start on a new line or at the start of a lambda (`fun ... ->`).
+* The subject name is incorrect if the assertion chain does not start on a new line or at the start of a
+  lambda (`fun ... ->`).
 * Multi-line strings literals will be concatenated.
 * Lines starting with `//` in multi-line string literals will be removed.
-* Nested `Satisfy` or other assertions that support "child assertions" may give incorrect names.
+* Nested `Satisfy` or other higher-order assertions may give incorrect subject names.
 
 If you have encountered a case not listed above, please raise an issue. If I can't or won't fix it, I can at the very
 least document it as a known limitation.
