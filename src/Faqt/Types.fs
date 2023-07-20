@@ -116,10 +116,10 @@ type Testable<'a> internal (subject: 'a, origin: CallChainOrigin) =
         ) =
         CallChain.Assert(origin, assertionMethod, supportsChildAssertions)
 
-    /// Returns the subject being tested. Aliases: Whose, Which.
+    /// Returns the subject being tested. Alias of Whose.
     member _.Subject: 'a = subject
 
-    /// Returns the subject being tested. Aliases: Subject, Which.
+    /// Returns the subject being tested. Alias of Subject.
     member _.Whose: 'a = subject
 
     member internal _.CallChainOrigin = origin
