@@ -115,7 +115,7 @@ let get origin (assertions: string list) =
                 getFileLines origin.SourceFilePath
             with _ ->
                 (EmbeddedSource.get origin.AssemblyPath origin.SourceFilePath)
-                    .ReplaceLineEndings("\n")
+                    .Replace("\r\n", "\n")
                     .Split("\n")
 
         let assertionCounts = assertions |> List.countBy id |> Map.ofList

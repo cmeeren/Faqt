@@ -4,7 +4,9 @@ module internal Faqt.Utils
 open System
 open System.Collections.Concurrent
 open System.Collections.Generic
+#if NET7_0_OR_GREATER
 open System.Diagnostics.CodeAnalysis
+#endif
 open System.Text.RegularExpressions
 open Microsoft.FSharp.Reflection
 
@@ -89,15 +91,27 @@ module String =
 
 
     let regexReplace
-        ([<StringSyntax(StringSyntaxAttribute.Regex)>] pattern: string)
+        (
+#if NET7_0_OR_GREATER
+        [<StringSyntax(StringSyntaxAttribute.Regex)>]
+#endif
+        pattern: string)
         (replacement: string)
         (str: string)
         =
         Regex.Replace(str, pattern, replacement)
 
 
-    let regexRemoveAfterNth (n: int) ([<StringSyntax(StringSyntaxAttribute.Regex)>] pattern: string) (str: string) =
-        let index = Regex.Matches(str, pattern) |> Seq.item (n - 1) |> (fun m -> m.Index)
+    let regexRemoveAfterNth
+        (n: int)
+        (
+#if NET7_0_OR_GREATER
+        [<StringSyntax(StringSyntaxAttribute.Regex)>]
+#endif
+        pattern: string)
+        (str: string)
+        =
+        let index = Regex.Matches(str, pattern).Item(n - 1).Index
         str.Substring(0, index)
 
 
