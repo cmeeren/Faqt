@@ -168,7 +168,7 @@ let ``Multiple That`` () =
 let ``Whose, same child assertion, first fails`` () =
     fun () ->
         let thisIsAVariableName = ""
-        thisIsAVariableName.Should().FailDerived().That.Should().FailDerived()
+        thisIsAVariableName.Should().FailDerived().Whose.Length.Should().FailDerived()
     |> assertExnMsg "thisIsAVariableName"
 
 
