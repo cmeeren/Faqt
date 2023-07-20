@@ -127,7 +127,8 @@ As expected by the discerning F# developer, Faqt is:
 ## Writing your own assertions
 
 Writing your own assertions is easy! They are implemented exactly like Faqt’s built-in assertions, so you can always
-look at those for inspiration.
+look at those for inspiration (see all files ending with `Assertions`
+in [this folder](https://github.com/cmeeren/Faqt/tree/main/src/Faqt)).
 
 Let’s look at the implementation for Faqt’s simplest assertion, `Be`:
 
