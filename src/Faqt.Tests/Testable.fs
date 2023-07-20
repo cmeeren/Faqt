@@ -31,6 +31,6 @@ module Whose =
             .Should()
             .BeSome()
             .That.Should()
-            .Be("asd")
+            .NotBe("a")
             .And.Whose.Length.Should()
             .Be(3)
