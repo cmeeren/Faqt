@@ -151,7 +151,8 @@ type AndDerived<'a, 'b>(testable: Testable<'a>, derived: 'b) =
     /// Returns the value derived if the previous assertion succeeds. Aliases: WhoseValue, That.
     member _.Whose: 'b = derived
 
-    /// Returns the value derived if the previous assertion succeeds. Aliases: Whose, That.
+    /// Returns the value derived if the previous assertion succeeds. This fits well if wanting to continue asserting on
+    /// the DU case data returned by e.g. BeOfCase or BeSome. Aliases: Whose, That.
     member _.WhoseValue: 'b = derived
 
     /// Returns the value derived if the previous assertion succeeds. Aliases: Whose, WhoseValue.
