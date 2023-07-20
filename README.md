@@ -183,8 +183,8 @@ thoroughly once than piecewise here and there.
     the placeholders mentioned above).
   * Place `{subject}`, `{actual}`, and other important values on separate lines. All other text should be indented
     using `\t`.
-  * Ensure that your message is rendered correctly if `{because}` is replaced with an empty string. Faqt will insert a
-    space before `{because}` and/or a comma + space after `{because}` as needed.
+  * Ensure that your message is rendered correctly if `{because}` is replaced with an empty string. If needed, Faqt will
+    automatically insert a space before `{because}` and/or a comma + space after `{because}`.
 
 * If your assertion extracts derived state that can be used for further assertions,
   return `AndDerived(t, derivedState)`. Otherwise return `And(t)`. Prefer `AndDerived` over `And` if at all relevant.
