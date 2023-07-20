@@ -260,6 +260,6 @@ assertion failure messages, and have used those as inspiration for Faqt's assert
 
 ### Can I use Faqt from C#?
 
-Feel free, but know that Faqt is designed only for F#. The subject names only work correctly for F#, and the API and
-design and assertion choices are based on F# idioms and expected usage. Any support for C# is incidental, and improving
-or even preserving C# support is out of scope for Faqt.
+Feel free, but know that Faqt is designed only for F#. The subject names only work correctly for F#, and the API design
+and assertion choices are based on F# idioms and expected usage. Any support for C# is incidental, and improving or even
+preserving C# support is out of scope for Faqt.
