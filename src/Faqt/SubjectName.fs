@@ -114,7 +114,7 @@ let get origin (assertions: string list) =
             try
                 getFileLines origin.File
             with _ ->
-                (EmbeddedSource.get origin.Assembly.Location origin.File)
+                (EmbeddedSource.get origin.Assembly origin.File)
                     .ReplaceLineEndings("\n")
                     .Split("\n")
 

@@ -13,7 +13,7 @@ type AssertionFailedException(message: string) =
 
 
 type internal CallChainOrigin = {
-    Assembly: Assembly
+    Assembly: string
     File: string
     Line: int
 }
@@ -168,7 +168,7 @@ type TestableExtensions =
             [<CallerLineNumber; Optional; DefaultParameterValue(0)>] lno: int
         ) : Testable<'a> =
         let origin = {
-            Assembly = Assembly.GetCallingAssembly()
+            Assembly = Assembly.GetCallingAssembly().Location
             File = fn
             Line = lno
         }
