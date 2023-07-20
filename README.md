@@ -1,7 +1,7 @@
 Faqt
 ====
 
-**Fantastic fluent assertions your F# tests and domain pre-/post-conditions/invariants.**
+**Fantastic fluent assertions for your F# tests and domain pre-/post-conditions/invariants.**
 
 <img src="https://raw.githubusercontent.com/cmeeren/Faqt/main/logo/faqt-logo-docs.png" width="300" align="right" />
 
