@@ -3,7 +3,7 @@ module TestUtils
 
 open System.Runtime.CompilerServices
 open Faqt
-open Faqt.AssertionHelpers
+open AssertionHelpers
 open Xunit
 
 

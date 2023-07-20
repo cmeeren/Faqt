@@ -1,4 +1,4 @@
-﻿namespace Faqt.AssertionHelpers
+﻿module Faqt.AssertionHelpers
 
 open System
 open System.Runtime.CompilerServices
@@ -29,7 +29,7 @@ type TestableExtensions =
             template: string,
             because: string,
             [<ParamArray>] formattedValues: string[]
-        ) : 'b =
+        ) =
 
         let bc (because: string) prefixSpace suffixComma : string =
             because

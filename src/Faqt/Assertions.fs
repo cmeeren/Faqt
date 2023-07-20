@@ -5,7 +5,7 @@ open System.Runtime.InteropServices
 open Microsoft.FSharp.Quotations
 open Microsoft.FSharp.Quotations.Patterns
 open Microsoft.FSharp.Reflection
-open Faqt.AssertionHelpers
+open AssertionHelpers
 open Formatting
 
 
