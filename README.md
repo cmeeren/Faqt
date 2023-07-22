@@ -113,7 +113,7 @@ from an assertion).
    Alternatively, enable them by passing the following parameters to your `dotnet build`/`test`/`publish` commands:
 
    ```
-   -p:DeterministicSourcePaths=true -p:EmbedAllSources=true
+   -p:DebugType=embedded -p:EmbedAllSources=true
    ```
 
    Note that `DebugType=embeded` is automatically set
