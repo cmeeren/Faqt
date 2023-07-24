@@ -11,6 +11,10 @@
     <PackageReleaseNotes>https://github.com/cmeeren/Faqt/blob/main/RELEASE_NOTES.md</PackageReleaseNotes>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <NoWarn>NETSDK1138;$(NoWarn)</NoWarn>
+  </PropertyGroup>
+
   <ItemGroup>
     <None Include="faqt-logo-128x128.png" Pack="True" PackagePath="" Visible="false" />
     <Compile Include="Utils.fs" />
