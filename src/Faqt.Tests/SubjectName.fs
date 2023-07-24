@@ -53,6 +53,14 @@ let ``Simple parenthesized expression`` () =
 
 
 [<Fact>]
+let ``Assertions with explicit type parameters`` () =
+    fun () ->
+        let thisIsAVariableName = 1
+        thisIsAVariableName.Should().Test<int>(false)
+    |> assertExnMsg "thisIsAVariableName"
+
+
+[<Fact>]
 let ``Comments`` () =
     fun () ->
         let thisIsAVariableName = "1"

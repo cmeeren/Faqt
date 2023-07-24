@@ -27,7 +27,7 @@ type Assertions =
 
 
     [<Extension>]
-    static member Test(t: Testable<'a>, pass) : And<'a> =
+    static member Test<'a>(t: Testable<'a>, pass) : And<'a> =
         use _ = t.Assert()
 
         if not pass then

@@ -227,7 +227,9 @@ module internal SubjectName =
                             countsLeft
                             |> Map.toSeq
                             |> Seq.map (fun (assertion, currentCount) ->
-                                let countInThisLine = Regex.Matches(line, $"\.{Regex.Escape assertion} *\(").Count
+                                let countInThisLine =
+                                    Regex.Matches(line, $"\.{Regex.Escape assertion}( *\<.*\>)? *\(").Count
+
                                 assertion, currentCount - countInThisLine
                             )
                             |> Map.ofSeq
@@ -251,7 +253,7 @@ module internal SubjectName =
             // assertion method, we don't know anyway which invocation failed, since the stack frame only contains the
             // location of the start of the chain, so we only support deriving the subject name from the part of the
             // expression up to the first call to this method.
-            |> String.regexRemoveAfterNth lastAssertionCount $"\.{Regex.Escape lastAssertion} *\("
+            |> String.regexRemoveAfterNth lastAssertionCount $"\.{Regex.Escape lastAssertion}( *\<.*\>)? *\("
 
             // Replace Should...Whose, Should...WhoseValue, and Should...That with the transformation placeholder, since
             // it's assumed the code contains something returning AndDerived. Make an exception if prefixed by And, since
