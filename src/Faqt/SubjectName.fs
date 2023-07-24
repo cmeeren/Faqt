@@ -1,6 +1,7 @@
-﻿module internal Faqt.SubjectName
+﻿namespace Faqt
 
 open System
+open System.Collections.Generic
 open System.IO
 open System.IO.Compression
 open System.Reflection.Metadata
@@ -10,7 +11,97 @@ open System.Text.RegularExpressions
 open Faqt
 
 
-module EmbeddedSource =
+type internal CallChainOrigin = {
+    AssemblyPath: string
+    SourceFilePath: string
+    LineNumber: int
+}
+
+
+type private AssertionInfo = {
+    Method: string
+    SupportsChildAssertions: bool
+}
+
+
+type internal CallChain() =
+
+    [<ThreadStatic; DefaultValue>]
+    static val mutable private activeUserAssertions: Dictionary<CallChainOrigin, AssertionInfo list>
+
+    [<ThreadStatic; DefaultValue>]
+    static val mutable private topLevelAssertionHistory: Dictionary<CallChainOrigin, string list>
+
+    static let pushAssertion callsite method supportsChildAssertions =
+
+        let assertions =
+            match CallChain.activeUserAssertions.TryGetValue callsite with
+            | false, _ -> []
+            | true, xs -> xs
+
+        CallChain.activeUserAssertions[callsite] <-
+            {
+                Method = method
+                SupportsChildAssertions = supportsChildAssertions
+            }
+            :: assertions
+
+    static let tryPopAssertion callsite =
+        match CallChain.activeUserAssertions.TryGetValue callsite with
+        | false, _ -> ()
+        | true, [] -> ()
+        | true, hd :: tl ->
+            CallChain.activeUserAssertions[callsite] <- tl
+
+            match CallChain.topLevelAssertionHistory.TryGetValue callsite with
+            | false, _ -> CallChain.topLevelAssertionHistory[callsite] <- [ hd.Method ]
+            | true, xs -> CallChain.topLevelAssertionHistory[callsite] <- hd.Method :: xs
+
+
+    static let canPushAssertion callsite =
+        match CallChain.activeUserAssertions with
+        | null -> true
+        | dict ->
+            match dict.TryGetValue callsite with
+            | false, _ -> true
+            | true, [] -> true
+            | true, hd :: _ -> hd.SupportsChildAssertions
+
+    static member private EnsureInitialized() =
+        if isNull CallChain.activeUserAssertions then
+            CallChain.activeUserAssertions <- Dictionary()
+
+        if isNull CallChain.topLevelAssertionHistory then
+            CallChain.topLevelAssertionHistory <- Dictionary()
+
+
+    static member Assert(callsite, assertionMethod, supportsChildAssertions) =
+        CallChain.EnsureInitialized()
+
+        if not (canPushAssertion callsite) then
+            IDisposable.noOp
+        else
+            pushAssertion callsite assertionMethod supportsChildAssertions
+
+            { new IDisposable with
+                member _.Dispose() = tryPopAssertion callsite
+            }
+
+    static member AssertionHistory(callsite) =
+        let topLevelAssertions =
+            match CallChain.topLevelAssertionHistory.TryGetValue callsite with
+            | true, xs -> xs |> List.rev
+            | false, _ -> []
+
+        let activeAssertions =
+            match CallChain.activeUserAssertions.TryGetValue callsite with
+            | true, xs -> xs |> List.map (fun x -> x.Method) |> List.rev
+            | false, _ -> []
+
+        topLevelAssertions @ activeAssertions
+
+
+module internal EmbeddedSource =
 
 
     module PortableCustomDebugInfoKinds =
@@ -102,82 +193,85 @@ module EmbeddedSource =
         )
 
 
-let getFileLines = memoize File.ReadAllLines
+module internal SubjectName =
 
 
-let private transformationPlaceholder = "..."
+    let getFileLines = memoize File.ReadAllLines
 
 
-let get origin (assertions: string list) =
-    try
-        let sourceCodeLines =
-            try
-                getFileLines origin.SourceFilePath
-            with _ ->
-                (EmbeddedSource.get origin.AssemblyPath origin.SourceFilePath)
-                    .Replace("\r\n", "\n")
-                    .Split("\n")
+    let private transformationPlaceholder = "..."
 
-        let assertionCounts = assertions |> List.countBy id |> Map.ofList
-        let lastAssertion = assertions[assertions.Length - 1]
-        let lastAssertionCount = assertionCounts[lastAssertion]
 
-        sourceCodeLines
-        |> Seq.skip (origin.LineNumber - 1)
-        |> Seq.scan
-            (fun (countsLeft: Map<_, _>, _) line ->
-                if countsLeft.Values |> Seq.forall ((=) 0) then
-                    countsLeft, None
-                else
-                    let newCountsLeft =
-                        countsLeft
-                        |> Map.toSeq
-                        |> Seq.map (fun (assertion, currentCount) ->
-                            let countInThisLine = Regex.Matches(line, $"\.{Regex.Escape assertion} *\(").Count
-                            assertion, currentCount - countInThisLine
-                        )
-                        |> Map.ofSeq
+    let get origin (assertions: string list) =
+        try
+            let sourceCodeLines =
+                try
+                    getFileLines origin.SourceFilePath
+                with _ ->
+                    (EmbeddedSource.get origin.AssemblyPath origin.SourceFilePath)
+                        .Replace("\r\n", "\n")
+                        .Split("\n")
 
-                    newCountsLeft, Some line
+            let assertionCounts = assertions |> List.countBy id |> Map.ofList
+            let lastAssertion = assertions[assertions.Length - 1]
+            let lastAssertionCount = assertionCounts[lastAssertion]
+
+            sourceCodeLines
+            |> Seq.skip (origin.LineNumber - 1)
+            |> Seq.scan
+                (fun (countsLeft: Map<_, _>, _) line ->
+                    if countsLeft.Values |> Seq.forall ((=) 0) then
+                        countsLeft, None
+                    else
+                        let newCountsLeft =
+                            countsLeft
+                            |> Map.toSeq
+                            |> Seq.map (fun (assertion, currentCount) ->
+                                let countInThisLine = Regex.Matches(line, $"\.{Regex.Escape assertion} *\(").Count
+                                assertion, currentCount - countInThisLine
+                            )
+                            |> Map.ofSeq
+
+                        newCountsLeft, Some line
+                )
+                (assertionCounts, Some "")
+            |> Seq.takeWhile (fun (_, line) -> line.IsSome)
+            |> Seq.map (fun (_, line) ->
+                line.Value
+                // Remove comments. Try to preserve strings. Known limitation: This will remove lines starting with // from
+                // multi-line strings. On a line-by-line basis, they are indistinguishable from comment lines.
+                |> String.regexReplace "(?<!(\"|``).*?)//.+" ""
+                |> String.trim
             )
-            (assertionCounts, Some "")
-        |> Seq.takeWhile (fun (_, line) -> line.IsSome)
-        |> Seq.map (fun (_, line) ->
-            line.Value
-            // Remove comments. Try to preserve strings. Known limitation: This will remove lines starting with // from
-            // multi-line strings. On a line-by-line basis, they are indistinguishable from comment lines.
-            |> String.regexReplace "(?<!(\"|``).*?)//.+" ""
+            |> Seq.filter (not << String.IsNullOrWhiteSpace)
+            |> String.concat ""
+
+            // Remove the first occurrence of the assertion method name and everything after it, so we only consider the
+            // code before the assertion when deriving the subject name. If there are multiple invocations of the same
+            // assertion method, we don't know anyway which invocation failed, since the stack frame only contains the
+            // location of the start of the chain, so we only support deriving the subject name from the part of the
+            // expression up to the first call to this method.
+            |> String.regexRemoveAfterNth lastAssertionCount $"\.{Regex.Escape lastAssertion} *\("
+
+            // Replace Should...Whose, Should...WhoseValue, and Should...That with the transformation placeholder, since
+            // it's assumed the code contains something returning AndDerived. Make an exception if prefixed by And, since
+            // that would be methods on Testable, not AndDerived. (Not all of those methods exist on Testable yet, but may
+            // be added if realistic use-cases arrive.)
+            |> String.regexReplace "\.Should\(\)\..+?\.(?<!And\.)(Whose|WhoseValue|That)\." transformationPlaceholder
+
+            // Remove Should...And; this code doesn't change the subject.
+            |> String.regexReplace "\.Should *\(\)\..+?\.And" ""
+
+            // Remove remaining Subject/Whose/WhoseValue/That; they are methods on Testable and don't change the subject.
+            // (Not all of those methods exist on Testable yet, but may be added if realistic use-cases arrive.)
+            |> String.regexReplace "\.(Subject|Whose|WhoseValue|That)\." "."
+
+            // Remove remaining calls to Should.
+            |> String.regexReplace "\.Should *\(\)" ""
+
+            // Remove "...fun ... ->" from start of line (e.g. in single-line chains in Satisfy)
+            |> String.regexReplace ".*fun .+? -> " ""
+
             |> String.trim
-        )
-        |> Seq.filter (not << String.IsNullOrWhiteSpace)
-        |> String.concat ""
-
-        // Remove the first occurrence of the assertion method name and everything after it, so we only consider the
-        // code before the assertion when deriving the subject name. If there are multiple invocations of the same
-        // assertion method, we don't know anyway which invocation failed, since the stack frame only contains the
-        // location of the start of the chain, so we only support deriving the subject name from the part of the
-        // expression up to the first call to this method.
-        |> String.regexRemoveAfterNth lastAssertionCount $"\.{Regex.Escape lastAssertion} *\("
-
-        // Replace Should...Whose, Should...WhoseValue, and Should...That with the transformation placeholder, since
-        // it's assumed the code contains something returning AndDerived. Make an exception if prefixed by And, since
-        // that would be methods on Testable, not AndDerived. (Not all of those methods exist on Testable yet, but may
-        // be added if realistic use-cases arrive.)
-        |> String.regexReplace "\.Should\(\)\..+?\.(?<!And\.)(Whose|WhoseValue|That)\." transformationPlaceholder
-
-        // Remove Should...And; this code doesn't change the subject.
-        |> String.regexReplace "\.Should *\(\)\..+?\.And" ""
-
-        // Remove remaining Subject/Whose/WhoseValue/That; they are methods on Testable and don't change the subject.
-        // (Not all of those methods exist on Testable yet, but may be added if realistic use-cases arrive.)
-        |> String.regexReplace "\.(Subject|Whose|WhoseValue|That)\." "."
-
-        // Remove remaining calls to Should.
-        |> String.regexReplace "\.Should *\(\)" ""
-
-        // Remove "...fun ... ->" from start of line (e.g. in single-line chains in Satisfy)
-        |> String.regexReplace ".*fun .+? -> " ""
-
-        |> String.trim
-    with ex ->
-        "subject"
+        with ex ->
+            "subject"

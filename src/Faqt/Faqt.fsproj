@@ -18,11 +18,10 @@
   <ItemGroup>
     <None Include="faqt-logo-128x128.png" Pack="True" PackagePath="" Visible="false" />
     <Compile Include="Utils.fs" />
-    <Compile Include="Types.fs" />
     <Compile Include="SubjectName.fs" />
-    <Compile Include="Operators.fs" />
     <Compile Include="Formatting.fs" />
-    <Compile Include="AssertionHelpers.fs" />
+    <Compile Include="Types.fs" />
+    <Compile Include="Operators.fs" />
     <Compile Include="HigherOrderAssertions.fs" />
     <Compile Include="BasicAssertions.fs" />
     <Compile Include="UnionAssertions.fs" />
