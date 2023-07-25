@@ -73,6 +73,72 @@ x
 """
 
 
+module ``Be with custom comparer`` =
+
+
+    [<Fact>]
+    let ``Passes if isEqual returns true and can be chained with AndDerived with expected value`` () =
+        let isEqual _ _ = true
+
+        (1)
+            .Should()
+            .Be("asd", isEqual)
+            .Id<AndDerived<int, string>>()
+            .WhoseValue.Should()
+            .Be("asd")
+
+
+    [<Fact>]
+    let ``Fails with expected message if isEqual returns false`` () =
+        let isEqual _ _ = false
+
+        fun () ->
+            let x = 1
+            x.Should().Be(2, isEqual)
+        |> assertExnMsg
+            """
+x
+    should be
+2
+    but the specified equality comparer returned false when comparing it to
+1
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if isEqual returns false even if values are equal using (=)`` () =
+        let isEqual _ _ = false
+
+        fun () ->
+            let x = 1
+            x.Should().Be(1, isEqual)
+        |> assertExnMsg
+            """
+x
+    should be
+1
+    but the specified equality comparer returned false when comparing it to
+1
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because`` () =
+        let isEqual _ _ = false
+
+        fun () ->
+            let x = 1
+            x.Should().Be(1, isEqual, "some reason")
+        |> assertExnMsg
+            """
+x
+    should be
+1
+    because some reason, but the specified equality comparer returned false when comparing it to
+1
+"""
+
+
 module NotBe =
 
 
@@ -132,6 +198,49 @@ x
     should not be
 1
     because some reason, but the values were equal.
+"""
+
+
+module ``NotBe with custom comparer`` =
+
+
+    [<Fact>]
+    let ``Passes if isEqual returns false and can be chained with And`` () =
+        let isEqual _ _ = false
+        (1).Should().NotBe("asd", isEqual).Id<And<int>>().And.Be(1)
+
+
+    [<Fact>]
+    let ``Fails with expected message if isEqual returns true, even if the values are not equal using (=)`` () =
+        let isEqual _ _ = true
+
+        fun () ->
+            let x = 1
+            x.Should().NotBe(2, isEqual)
+        |> assertExnMsg
+            """
+x
+    should not be
+2
+    but the specified equality comparer returned true when comparing it to
+1
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because`` () =
+        let isEqual _ _ = true
+
+        fun () ->
+            let x = 1
+            x.Should().NotBe(1, isEqual, "some reason")
+        |> assertExnMsg
+            """
+x
+    should not be
+1
+    because some reason, but the specified equality comparer returned true when comparing it to
+1
 """
 
 

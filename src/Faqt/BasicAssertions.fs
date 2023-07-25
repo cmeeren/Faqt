@@ -10,6 +10,21 @@ open Formatting
 type BasicAssertions =
 
 
+    /// Asserts that the subject is the specified value, using the specified equality comparison.
+    [<Extension>]
+    static member Be(t: Testable<'a>, expected: 'b, isEqual: 'a -> 'b -> bool, ?because) : AndDerived<'a, 'b> =
+        use _ = t.Assert()
+
+        if not (isEqual t.Subject expected) then
+            t.Fail(
+                "{subject}\n\tshould be\n{0}\n\t{because}but the specified equality comparer returned false when comparing it to\n{actual}",
+                because,
+                format expected
+            )
+
+        AndDerived(t, expected)
+
+
     /// Asserts that the subject is the specified value, using the default equality comparison (=).
     [<Extension>]
     static member Be(t: Testable<'a>, expected: 'a, ?because) : And<'a> =
@@ -17,6 +32,21 @@ type BasicAssertions =
 
         if t.Subject <> expected then
             t.Fail("{subject}\n\tshould be\n{0}\n\t{because}but was\n{actual}", because, format expected)
+
+        And(t)
+
+
+    /// Asserts that the subject is not the specified value, using default equality comparison (=).
+    [<Extension>]
+    static member NotBe(t: Testable<'a>, expected: 'b, isEqual: 'a -> 'b -> bool, ?because) : And<'a> =
+        use _ = t.Assert()
+
+        if isEqual t.Subject expected then
+            t.Fail(
+                "{subject}\n\tshould not be\n{0}\n\t{because}but the specified equality comparer returned true when comparing it to\n{actual}",
+                because,
+                format expected
+            )
 
         And(t)
 
