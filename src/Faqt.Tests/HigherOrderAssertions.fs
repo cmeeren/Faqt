@@ -9,8 +9,11 @@ module Satisfy =
 
     [<Fact>]
     let ``Passes if the inner assertion passes and can be chained with And`` () =
-        "asd".Length.Should().Satisfy(fun x -> x.ToString().Length.Should().Pass())
-        |> ignore<And<int>>
+        "asd"
+            .Should()
+            .Satisfy(fun x -> x.Should().Pass())
+            .Id<And<string>>()
+            .And.Be("asd")
 
 
     [<Fact>]
@@ -51,7 +54,8 @@ module SatisfyAll =
                     (fun s3 -> s3.Length.Should().Pass())
                 ]
             )
-        |> ignore<And<string>>
+            .Id<And<string>>()
+            .And.Be("asd")
 
 
     [<Fact>]
@@ -121,7 +125,8 @@ module SatisfyAny =
         "asd"
             .Should()
             .SatisfyAny([ (fun s1 -> s1.Length.Should().Pass()); (fun s2 -> s2.Length.Should().Pass()) ])
-        |> ignore<And<string>>
+            .Id<And<string>>()
+            .And.Be("asd")
 
 
     [<Fact>]

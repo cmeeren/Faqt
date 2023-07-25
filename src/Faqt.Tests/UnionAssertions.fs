@@ -21,47 +21,56 @@ module BeOfCase =
 
 
     [<Fact>]
-    let ``NoFields passes can be chained with And`` () =
-        NoFields.Should().BeOfCase(NoFields) |> ignore<And<MyDu>>
+    let ``NoFields passes and can be chained with And`` () =
+        NoFields.Should().BeOfCase(NoFields).Id<And<MyDu>>().And.Be(NoFields)
 
 
     [<Fact>]
-    let ``SingleFieldInt passes and allows asserting on inner value`` () =
-        (SingleFieldInt 1).Should().BeOfCase(SingleFieldInt).WhoseValue.Should().Be(1)
+    let ``SingleFieldInt passes and can be chained with AndDerived with inner value`` () =
+        (SingleFieldInt 1)
+            .Should()
+            .BeOfCase(SingleFieldInt)
+            .Id<AndDerived<MyDu, int>>()
+            .WhoseValue.Should()
+            .Be(1)
 
 
     [<Fact>]
-    let ``SingleFieldRecord passes and allows asserting on inner value`` () =
+    let ``SingleFieldRecord passes and can be chained with AndDerived with inner value`` () =
         (SingleFieldRecord { A = 1; B = "a" })
             .Should()
             .BeOfCase(SingleFieldRecord)
+            .Id<AndDerived<MyDu, RecordFieldData>>()
             .WhoseValue.Should()
             .Be({ A = 1; B = "a" })
 
 
     [<Fact>]
-    let ``SingleFieldAnonymousRecord passes and allows asserting on inner value`` () =
+    let ``SingleFieldAnonymousRecord passes and can be chained with AndDerived with inner value`` () =
         (SingleFieldAnonymousRecord {| X = "a"; Y = 1 |})
             .Should()
             .BeOfCase(SingleFieldAnonymousRecord)
+            .Id<AndDerived<MyDu, {| X: string; Y: int |}>>()
             .WhoseValue.Should()
             .Be({| X = "a"; Y = 1 |})
 
 
     [<Fact>]
-    let ``MultipleAnonymousFields passes and allows asserting on inner value`` () =
+    let ``MultipleAnonymousFields passes and can be chained with AndDerived with inner value`` () =
         MultipleAnonymousFields(1, "a")
             .Should()
             .BeOfCase(MultipleAnonymousFields)
+            .Id<AndDerived<MyDu, int * string>>()
             .WhoseValue.Should()
             .Be((1, "a"))
 
 
     [<Fact>]
-    let ``MultipleNamedFields passes and allows asserting on inner value`` () =
+    let ``MultipleNamedFields passes and can be chained with AndDerived with inner value`` () =
         MultipleNamedFields(1, "a")
             .Should()
             .BeOfCase(MultipleNamedFields)
+            .Id<AndDerived<MyDu, int * string>>()
             .WhoseValue.Should()
             .Be((1, "a"))
 
@@ -122,8 +131,13 @@ module BeSome =
 
 
     [<Fact>]
-    let ``Passes for Some and allows asserting on inner value`` () =
-        (Some 1).Should().BeSome().WhoseValue.Should().Be(1)
+    let ``Passes for Some and can be chained with AndDerived with inner value`` () =
+        (Some 1)
+            .Should()
+            .BeSome()
+            .Id<AndDerived<int option, int>>()
+            .WhoseValue.Should()
+            .Be(1)
 
 
     [<Fact>]
@@ -161,7 +175,7 @@ module BeNone =
 
     [<Fact>]
     let ``Passes for None and can be chained with And`` () =
-        Option<int>.None.Should().BeNone() |> ignore<And<int option>>
+        Option<int>.None.Should().BeNone().Id<And<int option>>().And.Be(None)
 
 
     [<Fact>]

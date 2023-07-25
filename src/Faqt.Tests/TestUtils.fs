@@ -13,6 +13,14 @@ let assertExnMsg (msg: string) (f: unit -> 'a) =
 
 
 [<Extension>]
+type MiscExtensions =
+
+
+    [<Extension; RequiresExplicitTypeArguments>]
+    static member Id<'a>(x: 'a) : 'a = x
+
+
+[<Extension>]
 type Assertions =
 
 

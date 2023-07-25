@@ -9,14 +9,18 @@ module Be =
 
     [<Fact>]
     let ``Passes for equal integers and can be chained with And`` () =
-        let x = 1
-        x.Should().Be(1) |> ignore<And<int>>
+        (1).Should().Be(1).Id<And<int>>().And.Be(1)
 
 
     [<Fact>]
-    let ``Passes for equal custom type`` () =
+    let ``Passes for equal custom type and can be chained with And`` () =
         let x = {| A = 1; B = "foo" |}
-        x.Should().Be({| A = 1; B = "foo" |})
+
+        x
+            .Should()
+            .Be({| A = 1; B = "foo" |})
+            .Id<And<{| A: int; B: string |}>>()
+            .And.Be({| A = 1; B = "foo" |})
 
 
     [<Fact>]
@@ -71,14 +75,18 @@ module NotBe =
 
     [<Fact>]
     let ``Passes for unequal integers and can be chained with And`` () =
-        let x = 1
-        x.Should().NotBe(2) |> ignore<And<int>>
+        (1).Should().NotBe(2).Id<And<int>>().And.Be(1)
 
 
     [<Fact>]
-    let ``Passes for unequal custom type`` () =
+    let ``Passes for unequal custom type and can be chained with And`` () =
         let x = {| A = 1; B = "foo" |}
-        x.Should().NotBe({| A = 2; B = "bar" |})
+
+        x
+            .Should()
+            .NotBe({| A = 2; B = "bar" |})
+            .Id<And<{| A: int; B: string |}>>()
+            .And.Be({| A = 1; B = "foo" |})
 
 
     [<Fact>]
@@ -129,8 +137,7 @@ module BeNull =
 
     [<Fact>]
     let ``Passes for null and can be chained with And`` () =
-        let x: string = null
-        x.Should().BeNull() |> ignore<And<string>>
+        (null: string).Should().BeNull().Id<And<string>>().And.BeNull()
 
 
     [<Fact>]
@@ -164,8 +171,7 @@ module NotBeNull =
 
     [<Fact>]
     let ``Passes for non-null and can be chained with And`` () =
-        let x = "asd"
-        x.Should().NotBeNull() |> ignore<And<string>>
+        "asd".Should().NotBeNull().Id<And<string>>().And.Be("asd")
 
 
     [<Fact>]
