@@ -62,6 +62,29 @@ type BasicAssertions =
         And(t)
 
 
+    /// Asserts that the subject is not reference equal to the specified value (which must not be null).
+    [<Extension>]
+    static member NotBeSameAs(t: Testable<'a>, expected: 'a, ?because) : And<'a> =
+        if isNull (box expected) then
+            raise <| ArgumentNullException(nameof expected)
+
+        use _ = t.Assert()
+
+        if
+            not (isNull (box t.Subject))
+            && LanguagePrimitives.PhysicalEquality t.Subject expected
+        then
+            t.Fail(
+                "{subject}\n\tshould not be reference equal to\n{0} {1}\n{2}\n\t{because}but was the same reference.",
+                because,
+                (LanguagePrimitives.PhysicalHash expected).ToString(),
+                typeof<'a>.AssertionName,
+                format expected
+            )
+
+        And(t)
+
+
     /// Asserts that the subject is null.
     [<Extension>]
     static member BeNull(t: Testable<'a>, ?because) : And<'a> =

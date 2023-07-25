@@ -142,6 +142,56 @@ x
 """
 
 
+module NotBeSameAs =
+
+
+    [<Fact>]
+    let ``Passes for non-reference equal values and can be chained with And`` () =
+        "asd".Should().NotBeSameAs("foo").Id<And<string>>().And.Be("asd")
+
+
+    [<Fact>]
+    let ``Passes for null`` () =
+        null.Should().NotBeSameAs("foo").Id<And<string>>()
+
+
+    [<Fact>]
+    let ``Throws ArgumentNullException for null argument`` () =
+        Assert.Throws<ArgumentNullException>(fun () -> "a".Should().NotBeSameAs(null) |> ignore)
+
+
+    [<Fact>]
+    let ``Fails with expected message for reference-equal values of generic type`` () =
+        let x = Map.empty.Add("a", 1)
+        let y = x
+
+        fun () -> x.Should().NotBeSameAs(y)
+        |> assertExnMsg
+            $"""
+x
+    should not be reference equal to
+%i{LanguagePrimitives.PhysicalHash y} Microsoft.FSharp.Collections.FSharpMap<System.String, System.Int32>
+map [("a", 1)]
+    but was the same reference.
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because`` () =
+        let x = "a"
+        let y = x
+
+        fun () -> x.Should().NotBeSameAs(y, "some reason")
+        |> assertExnMsg
+            $"""
+x
+    should not be reference equal to
+%i{LanguagePrimitives.PhysicalHash y} System.String
+"a"
+    because some reason, but was the same reference.
+"""
+
+
 module NotBe =
 
 
