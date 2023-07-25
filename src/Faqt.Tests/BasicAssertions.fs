@@ -73,6 +73,75 @@ x
 """
 
 
+module BeSameAs =
+
+
+    [<Fact>]
+    let ``Passes for reference equal values and can be chained with And`` () =
+        let x = "asd"
+        let y = x
+        x.Should().BeSameAs(y).Id<And<string>>().And.Be("asd")
+
+
+    [<Fact>]
+    let ``Throws ArgumentNullException for null argument`` () =
+        Assert.Throws<ArgumentNullException>(fun () -> "a".Should().BeSameAs(null) |> ignore)
+
+
+    [<Fact>]
+    let ``Fails with expected message for null`` () =
+        let x = null
+        let y = "asd"
+
+        fun () -> x.Should().BeSameAs(y)
+        |> assertExnMsg
+            $"""
+x
+    should be reference equal to
+%i{LanguagePrimitives.PhysicalHash y} System.String
+"asd"
+    but was
+null
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message for non-reference-equal values of generic type even if they are equal`` () =
+        let x = Map.empty.Add("a", 1)
+        let y = Map.empty.Add("a", 1)
+        Assert.True((x = y)) // Sanity check
+
+        fun () -> x.Should().BeSameAs(y)
+        |> assertExnMsg
+            $"""
+x
+    should be reference equal to
+%i{LanguagePrimitives.PhysicalHash y} Microsoft.FSharp.Collections.FSharpMap<System.String, System.Int32>
+map [("a", 1)]
+    but was
+%i{LanguagePrimitives.PhysicalHash x} Microsoft.FSharp.Collections.FSharpMap<System.String, System.Int32>
+map [("a", 1)]
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because`` () =
+        let x = "a"
+        let y = "b"
+
+        fun () -> x.Should().BeSameAs(y, "some reason")
+        |> assertExnMsg
+            $"""
+x
+    should be reference equal to
+%i{LanguagePrimitives.PhysicalHash y} System.String
+"b"
+    because some reason, but was
+%i{LanguagePrimitives.PhysicalHash x} System.String
+"a"
+"""
+
+
 module NotBe =
 
 
