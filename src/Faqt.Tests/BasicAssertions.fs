@@ -73,6 +73,68 @@ x
 """
 
 
+module NotBe =
+
+
+    [<Fact>]
+    let ``Passes for unequal integers and can be chained with And`` () =
+        (1).Should().NotBe(2).Id<And<int>>().And.Be(1)
+
+
+    [<Fact>]
+    let ``Passes for unequal custom type and can be chained with And`` () =
+        let x = {| A = 1; B = "foo" |}
+
+        x
+            .Should()
+            .NotBe({| A = 2; B = "bar" |})
+            .Id<And<{| A: int; B: string |}>>()
+            .And.Be({| A = 1; B = "foo" |})
+
+
+    [<Fact>]
+    let ``Fails with expected message for equal integers`` () =
+        fun () ->
+            let x = 1
+            x.Should().NotBe(x)
+        |> assertExnMsg
+            """
+x
+    should not be
+1
+    but the values were equal.
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message for equal custom type`` () =
+        fun () ->
+            let x = {| A = 1; B = "foo" |}
+            x.Should().NotBe(x)
+        |> assertExnMsg
+            """
+x
+    should not be
+{ A = 1
+  B = "foo" }
+    but the values were equal.
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because`` () =
+        fun () ->
+            let x = 1
+            x.Should().NotBe(x, "some reason")
+        |> assertExnMsg
+            """
+x
+    should not be
+1
+    because some reason, but the values were equal.
+"""
+
+
 module BeSameAs =
 
 
@@ -189,68 +251,6 @@ x
 %i{LanguagePrimitives.PhysicalHash y} System.String
 "a"
     because some reason, but was the same reference.
-"""
-
-
-module NotBe =
-
-
-    [<Fact>]
-    let ``Passes for unequal integers and can be chained with And`` () =
-        (1).Should().NotBe(2).Id<And<int>>().And.Be(1)
-
-
-    [<Fact>]
-    let ``Passes for unequal custom type and can be chained with And`` () =
-        let x = {| A = 1; B = "foo" |}
-
-        x
-            .Should()
-            .NotBe({| A = 2; B = "bar" |})
-            .Id<And<{| A: int; B: string |}>>()
-            .And.Be({| A = 1; B = "foo" |})
-
-
-    [<Fact>]
-    let ``Fails with expected message for equal integers`` () =
-        fun () ->
-            let x = 1
-            x.Should().NotBe(x)
-        |> assertExnMsg
-            """
-x
-    should not be
-1
-    but the values were equal.
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message for equal custom type`` () =
-        fun () ->
-            let x = {| A = 1; B = "foo" |}
-            x.Should().NotBe(x)
-        |> assertExnMsg
-            """
-x
-    should not be
-{ A = 1
-  B = "foo" }
-    but the values were equal.
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message with because`` () =
-        fun () ->
-            let x = 1
-            x.Should().NotBe(x, "some reason")
-        |> assertExnMsg
-            """
-x
-    should not be
-1
-    because some reason, but the values were equal.
 """
 
 
