@@ -1,5 +1,8 @@
 ﻿module BasicAssertions
 
+open System
+open System.Collections.Generic
+open System.IO
 open Faqt
 open Xunit
 
@@ -195,4 +198,426 @@ x
             """
 x
     should not be null because some reason, but was null.
+"""
+
+
+module ``BeOfType non-generic`` =
+
+
+    [<Fact>]
+    let ``Passes for instance of specified type and can be chained with And`` () =
+        "asd".Should().BeOfType(typeof<string>).Id<And<string>>().And.Be("asd")
+
+
+    [<Fact>]
+    let ``Passes for boxed instance of specified type and can be chained with And`` () =
+        (box "asd").Should().BeOfType(typeof<string>).Id<And<obj>>().And.Be("asd")
+
+
+    [<Fact>]
+    let ``Fails with expected message if null`` () =
+        fun () ->
+            let (x: string) = null
+            x.Should().BeOfType(typeof<string>)
+        |> assertExnMsg
+            """
+x
+    should be of type
+System.String
+    but was
+null
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message for different types`` () =
+        fun () ->
+            let x = "asd"
+            x.Should().BeOfType(typeof<int>)
+        |> assertExnMsg
+            """
+x
+    should be of type
+System.Int32
+    but was
+System.String
+    with data
+"asd"
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if non-generic interface, even if type implements it`` () =
+        fun () ->
+            let x = new MemoryStream()
+            x :> IDisposable |> ignore // Sanity check to avoid false negatives
+            x.Should().BeOfType(typeof<IDisposable>)
+        |> assertExnMsg
+            """
+x
+    should be of type
+System.IDisposable
+    but was
+System.IO.MemoryStream
+    with data
+System.IO.MemoryStream
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if generic interface, even if type implements it`` () =
+        fun () ->
+            let x: Map<string, int> = Map.empty
+            x :> IDictionary<string, int> |> ignore // Sanity check to avoid false negatives
+            x.Should().BeOfType(typeof<IDictionary<string, int>>)
+        |> assertExnMsg
+            """
+x
+    should be of type
+System.Collections.Generic.IDictionary<System.String, System.Int32>
+    but was
+Microsoft.FSharp.Collections.FSharpMap<System.String, System.Int32>
+    with data
+map []
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if sub-type`` () =
+        fun () ->
+            let x = new MemoryStream()
+            x :> Stream |> ignore // Sanity check to avoid false negatives
+            x.Should().BeOfType(typeof<Stream>)
+        |> assertExnMsg
+            """
+x
+    should be of type
+System.IO.Stream
+    but was
+System.IO.MemoryStream
+    with data
+System.IO.MemoryStream
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because`` () =
+        fun () ->
+            let x = "asd"
+            x.Should().BeOfType(typeof<int>, "some reason")
+        |> assertExnMsg
+            """
+x
+    should be of type
+System.Int32
+    because some reason, but was
+System.String
+    with data
+"asd"
+"""
+
+
+module ``BeOfType generic`` =
+
+
+    [<Fact>]
+    let ``Passes for instance of specified type and can be chained with AndDerived with cast value`` () =
+        "asd"
+            .Should()
+            .BeOfType<string>()
+            .Id<AndDerived<string, string>>()
+            .WhoseValue.Should()
+            .Be("asd")
+
+
+    [<Fact>]
+    let ``Passes for boxed instance of specified type and can be chained with AndDerived with cast value`` () =
+        (box "asd")
+            .Should()
+            .BeOfType<string>()
+            .Id<AndDerived<obj, string>>()
+            .WhoseValue.Should()
+            .Be("asd")
+
+
+    [<Fact>]
+    let ``Fails with expected message if null`` () =
+        fun () ->
+            let (x: string) = null
+            x.Should().BeOfType<string>()
+        |> assertExnMsg
+            """
+x
+    should be of type
+System.String
+    but was
+null
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message for different types`` () =
+        fun () ->
+            let x = "asd"
+            x.Should().BeOfType<int>()
+        |> assertExnMsg
+            """
+x
+    should be of type
+System.Int32
+    but was
+System.String
+    with data
+"asd"
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if non-generic interface, even if type implements it`` () =
+        fun () ->
+            let x = new MemoryStream()
+            x :> IDisposable |> ignore // Sanity check to avoid false negatives
+            x.Should().BeOfType<IDisposable>()
+        |> assertExnMsg
+            """
+x
+    should be of type
+System.IDisposable
+    but was
+System.IO.MemoryStream
+    with data
+System.IO.MemoryStream
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if generic interface, even if type implements it`` () =
+        fun () ->
+            let x: Map<string, int> = Map.empty
+            x :> IDictionary<string, int> |> ignore // Sanity check to avoid false negatives
+            x.Should().BeOfType<IDictionary<string, int>>()
+        |> assertExnMsg
+            """
+x
+    should be of type
+System.Collections.Generic.IDictionary<System.String, System.Int32>
+    but was
+Microsoft.FSharp.Collections.FSharpMap<System.String, System.Int32>
+    with data
+map []
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if sub-type`` () =
+        fun () ->
+            let x = new MemoryStream()
+            x :> Stream |> ignore // Sanity check to avoid false negatives
+            x.Should().BeOfType<Stream>()
+        |> assertExnMsg
+            """
+x
+    should be of type
+System.IO.Stream
+    but was
+System.IO.MemoryStream
+    with data
+System.IO.MemoryStream
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because`` () =
+        fun () ->
+            let x = "asd"
+            x.Should().BeOfType<int>("some reason")
+        |> assertExnMsg
+            """
+x
+    should be of type
+System.Int32
+    because some reason, but was
+System.String
+    with data
+"asd"
+"""
+
+
+module ``BeAssignableTo non-generic`` =
+
+
+    [<Fact>]
+    let ``Passes for instance of specified type and can be chained with And`` () =
+        "asd".Should().BeAssignableTo(typeof<string>).Id<And<string>>().And.Be("asd")
+
+
+    [<Fact>]
+    let ``Passes for boxed instance of specified type and can be chained with And`` () =
+        (box "asd").Should().BeAssignableTo(typeof<string>).Id<And<obj>>().And.Be("asd")
+
+
+    [<Fact>]
+    let ``Passes for instance of type that implements specified interface`` () =
+        let x = new MemoryStream()
+        x.Should().BeAssignableTo(typeof<IDisposable>)
+
+
+    [<Fact>]
+    let ``Passes for boxed instance of type that implements specified interface`` () =
+        let x = new MemoryStream()
+        (box x).Should().BeAssignableTo(typeof<IDisposable>)
+
+
+    [<Fact>]
+    let ``Passes for instance of subtype of specified type`` () =
+        let x = new MemoryStream()
+        x.Should().BeAssignableTo(typeof<Stream>)
+
+
+    [<Fact>]
+    let ``Passes for boxed instance of subtype of specified type`` () =
+        let x = new MemoryStream()
+        (box x).Should().BeAssignableTo(typeof<Stream>)
+
+
+    [<Fact>]
+    let ``Fails with expected message if null`` () =
+        fun () ->
+            let (x: string) = null
+            x.Should().BeAssignableTo(typeof<string>)
+        |> assertExnMsg
+            """
+x
+    should be assignable to
+System.String
+    but was
+null
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message for incompatible types`` () =
+        fun () ->
+            let x = "asd"
+            x.Should().BeAssignableTo(typeof<int>)
+        |> assertExnMsg
+            """
+x
+    should be assignable to
+System.Int32
+    but was
+System.String
+    with data
+"asd"
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because`` () =
+        fun () ->
+            let x = "asd"
+            x.Should().BeAssignableTo(typeof<int>, "some reason")
+        |> assertExnMsg
+            """
+x
+    should be assignable to
+System.Int32
+    because some reason, but was
+System.String
+    with data
+"asd"
+"""
+
+
+module ``BeAssignableTo generic`` =
+
+
+    [<Fact>]
+    let ``Passes for instance of specified type and can be chained with AndDerived with cast value`` () =
+        "asd"
+            .Should()
+            .BeAssignableTo<string>()
+            .Id<AndDerived<string, string>>()
+            .And.Be("asd")
+
+
+    [<Fact>]
+    let ``Passes for boxed instance of specified type and can be chained with AndDerived with cast value`` () =
+        (box "asd")
+            .Should()
+            .BeAssignableTo<string>()
+            .Id<AndDerived<obj, string>>()
+            .And.Be("asd")
+
+
+    [<Fact>]
+    let ``Passes for instance of type that implements specified interface`` () =
+        let x = new MemoryStream()
+        x.Should().BeAssignableTo<IDisposable>()
+
+
+    [<Fact>]
+    let ``Passes for boxed instance of type that implements specified interface`` () =
+        let x = new MemoryStream()
+        (box x).Should().BeAssignableTo<IDisposable>()
+
+
+    [<Fact>]
+    let ``Passes for instance of subtype of specified type`` () =
+        let x = new MemoryStream()
+        x.Should().BeAssignableTo<Stream>()
+
+
+    [<Fact>]
+    let ``Passes for boxed instance of subtype of specified type`` () =
+        let x = new MemoryStream()
+        (box x).Should().BeAssignableTo<Stream>()
+
+
+    [<Fact>]
+    let ``Fails with expected message if null`` () =
+        fun () ->
+            let (x: string) = null
+            x.Should().BeAssignableTo<string>()
+        |> assertExnMsg
+            """
+x
+    should be assignable to
+System.String
+    but was
+null
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message for incompatible types`` () =
+        fun () ->
+            let x = "asd"
+            x.Should().BeAssignableTo<int>()
+        |> assertExnMsg
+            """
+x
+    should be assignable to
+System.Int32
+    but was
+System.String
+    with data
+"asd"
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because`` () =
+        fun () ->
+            let x = "asd"
+            x.Should().BeAssignableTo<int>("some reason")
+        |> assertExnMsg
+            """
+x
+    should be assignable to
+System.Int32
+    because some reason, but was
+System.String
+    with data
+"asd"
 """

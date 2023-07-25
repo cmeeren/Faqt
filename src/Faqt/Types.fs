@@ -160,3 +160,83 @@ type TestableExtensions =
         }
 
         Testable(this, origin)
+
+
+open AssertionHelpers
+
+
+// Note: The type checking assertions below are implemented as intrinsic extension methods so we can get away with only
+// one explicit method type parameter.
+type Testable<'a> with
+
+
+    /// Asserts that the runtime type of the subject is the exact specified type. See 'BeAssignableTo' for allowing
+    /// subtypes and interface implementations.
+    member this.BeOfType(expectedType: Type, ?because) : And<'a> =
+        use _ = this.Assert()
+
+        if isNull (box this.Subject) then
+            this.Fail(
+                "{subject}\n\tshould be of type\n{0}\n\t{because}but was\nnull",
+                because,
+                expectedType.AssertionName
+            )
+        else
+            let actualType = this.Subject.GetType()
+
+            if actualType = expectedType then
+                And(this)
+            else
+                this.Fail(
+                    "{subject}\n\tshould be of type\n{0}\n\t{because}but was\n{1}\n\twith data\n{2}",
+                    because,
+                    expectedType.AssertionName,
+                    actualType.AssertionName,
+                    Formatting.format this.Subject
+                )
+
+
+    /// Asserts that the runtime type of the subject is the exact specified type. See 'BeAssignableTo' for allowing
+    /// subtypes and interface implementations.
+    [<RequiresExplicitTypeArguments>]
+    member this.BeOfType<'b>(?because) : AndDerived<'a, 'b> =
+        use _ = this.Assert()
+        this.BeOfType(typeof<'b>, ?because = because) |> ignore
+        AndDerived(this, box this.Subject :?> 'b)
+
+
+    /// Asserts that the runtime type of the subject is assignable to the specified type (i.e., it must either be the
+    /// specified type, be a subtype of the specified type, or implement the specified interface). See 'BeOfType' for
+    /// requiring an exact type.
+    member this.BeAssignableTo(expectedType: Type, ?because) : And<'a> =
+        use _ = this.Assert()
+
+        if isNull (box this.Subject) then
+            this.Fail(
+                "{subject}\n\tshould be assignable to\n{0}\n\t{because}but was\nnull",
+                because,
+                expectedType.AssertionName
+            )
+        else
+            let actualType = this.Subject.GetType()
+
+            if actualType.IsAssignableTo(expectedType) then
+                And(this)
+            else
+                this.Fail(
+                    "{subject}\n\tshould be assignable to\n{0}\n\t{because}but was\n{1}\n\twith data\n{2}",
+                    because,
+                    expectedType.AssertionName,
+                    actualType.AssertionName,
+                    Formatting.format this.Subject
+                )
+
+
+    /// Asserts that the runtime type of the subject is assignable to the specified type (i.e., it must either be the
+    /// specified type, be a subtype of the specified type, or implement the specified interface). See 'BeOfType' for
+    /// requiring an exact type.
+    [<RequiresExplicitTypeArguments>]
+    member this.BeAssignableTo<'b>(?because) : AndDerived<'a, 'b> =
+        use _ = this.Assert()
+        this.BeAssignableTo(typeof<'b>, ?because = because) |> ignore
+        AndDerived(this, box this.Subject :?> 'b)

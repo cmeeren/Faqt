@@ -72,6 +72,21 @@ type FSharpType with
     static member MakeCaseTupleTypeCached(unionCaseInfo) = makeCaseTupleTypeCached unionCaseInfo
 
 
+type Type with
+
+
+    member this.AssertionName =
+        if this.IsGenericType then
+            let fullNameWithoutGenerics = this.FullName.Substring(0, this.FullName.IndexOf("`"))
+
+            this.GenericTypeArguments
+            |> Seq.map (fun t -> t.AssertionName)
+            |> String.concat ", "
+            |> fun s -> fullNameWithoutGenerics + "<" + s + ">"
+        else
+            this.FullName
+
+
 module String =
 
 
