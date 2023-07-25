@@ -55,6 +55,10 @@ module SatisfyAll =
 
 
     [<Fact>]
+    let ``Passes if assertion list is empty`` () = "asd".Should().SatisfyAll([])
+
+
+    [<Fact>]
     let ``Fails with expected message if at least one of the inner assertions fail`` () =
         fun () ->
             "asd"
@@ -118,6 +122,10 @@ module SatisfyAny =
             .Should()
             .SatisfyAny([ (fun s1 -> s1.Length.Should().Pass()); (fun s2 -> s2.Length.Should().Pass()) ])
         |> ignore<And<string>>
+
+
+    [<Fact>]
+    let ``Passes if assertion list is empty`` () = "asd".Should().SatisfyAny([])
 
 
     [<Fact>]

@@ -42,7 +42,7 @@ type HigherOrderAssertions =
                     Some ex
             )
 
-        if exceptions.Length = assertions.Length then
+        if assertions.Length > 0 && exceptions.Length = assertions.Length then
             let assertionFailuresString =
                 exceptions
                 |> Seq.mapi (fun i ex -> $"\n\n[Assertion %i{i + 1}/%i{assertions.Length}]\n%s{ex.Message}")
