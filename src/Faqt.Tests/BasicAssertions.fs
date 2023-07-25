@@ -255,13 +255,13 @@ module BeSameAs =
 
 
     [<Fact>]
-    let ``Throws ArgumentNullException for null argument`` () =
-        Assert.Throws<ArgumentNullException>(fun () -> "a".Should().BeSameAs(null) |> ignore)
+    let ``Passes if both subject and expected are null references`` () =
+        (null: string).Should().BeSameAs(null).Id<And<string>>().And.BeNull()
 
 
     [<Fact>]
-    let ``Fails with expected message for null`` () =
-        let x = null
+    let ``Fails with expected message if only subject is null`` () =
+        let x: string = null
         let y = "asd"
 
         fun () -> x.Should().BeSameAs(y)
@@ -273,6 +273,23 @@ x
 "asd"
     but was
 null
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if only expected is null`` () =
+        let x = "asd"
+        let y: string = null
+
+        fun () -> x.Should().BeSameAs(y)
+        |> assertExnMsg
+            $"""
+x
+    should be reference equal to
+null
+    but was
+%i{LanguagePrimitives.PhysicalHash x} System.String
+"asd"
 """
 
 
@@ -322,13 +339,25 @@ module NotBeSameAs =
 
 
     [<Fact>]
-    let ``Passes for null`` () =
-        null.Should().NotBeSameAs("foo").Id<And<string>>()
+    let ``Passes if only subject is null reference`` () = null.Should().NotBeSameAs("asd")
 
 
     [<Fact>]
-    let ``Throws ArgumentNullException for null argument`` () =
-        Assert.Throws<ArgumentNullException>(fun () -> "a".Should().NotBeSameAs(null) |> ignore)
+    let ``Passes if only expected is null reference`` () = "asd".Should().NotBeSameAs(null)
+
+
+    [<Fact>]
+    let ``Fails with expected message if both subject and expected are null references`` () =
+        fun () ->
+            let x = null
+            x.Should().NotBeSameAs(null)
+        |> assertExnMsg
+            """
+x
+    should not be reference equal to
+null
+    but was the same reference.
+"""
 
 
     [<Fact>]

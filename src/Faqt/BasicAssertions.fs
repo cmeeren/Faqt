@@ -1,6 +1,5 @@
 ﻿namespace Faqt
 
-open System
 open System.Runtime.CompilerServices
 open AssertionHelpers
 open Formatting
@@ -65,28 +64,26 @@ type BasicAssertions =
     /// Asserts that the subject is reference equal to the specified value (which must not be null).
     [<Extension>]
     static member BeSameAs(t: Testable<'a>, expected: 'a, ?because) : And<'a> =
-        if isNull (box expected) then
-            raise <| ArgumentNullException(nameof expected)
-
         use _ = t.Assert()
 
-        if isNull (box t.Subject) then
+        if not (LanguagePrimitives.PhysicalEquality t.Subject expected) then
+            let expectedStr =
+                if isNull (box expected) then
+                    "null"
+                else
+                    $"%i{LanguagePrimitives.PhysicalHash expected} %s{expected.GetType().AssertionName}\n%s{format expected}"
+
+            let actualStr =
+                if isNull (box t.Subject) then
+                    "null"
+                else
+                    $"%i{LanguagePrimitives.PhysicalHash t.Subject} %s{t.Subject.GetType().AssertionName}\n%s{format t.Subject}"
+
             t.Fail(
-                "{subject}\n\tshould be reference equal to\n{0} {1}\n{2}\n\t{because}but was\nnull",
+                "{subject}\n\tshould be reference equal to\n{0}\n\t{because}but was\n{1}",
                 because,
-                (LanguagePrimitives.PhysicalHash expected).ToString(),
-                typeof<'a>.AssertionName,
-                format expected
-            )
-        elif not (LanguagePrimitives.PhysicalEquality t.Subject expected) then
-            t.Fail(
-                "{subject}\n\tshould be reference equal to\n{0} {1}\n{2}\n\t{because}but was\n{3} {4}\n{actual}",
-                because,
-                (LanguagePrimitives.PhysicalHash expected).ToString(),
-                typeof<'a>.AssertionName,
-                format expected,
-                (LanguagePrimitives.PhysicalHash t.Subject).ToString(),
-                t.Subject.GetType().AssertionName
+                expectedStr,
+                actualStr
             )
 
         And(t)
@@ -95,21 +92,19 @@ type BasicAssertions =
     /// Asserts that the subject is not reference equal to the specified value (which must not be null).
     [<Extension>]
     static member NotBeSameAs(t: Testable<'a>, expected: 'a, ?because) : And<'a> =
-        if isNull (box expected) then
-            raise <| ArgumentNullException(nameof expected)
-
         use _ = t.Assert()
 
-        if
-            not (isNull (box t.Subject))
-            && LanguagePrimitives.PhysicalEquality t.Subject expected
-        then
+        if LanguagePrimitives.PhysicalEquality t.Subject expected then
+            let expectedStr =
+                if isNull (box expected) then
+                    "null"
+                else
+                    $"%i{LanguagePrimitives.PhysicalHash expected} %s{expected.GetType().AssertionName}\n%s{format expected}"
+
             t.Fail(
-                "{subject}\n\tshould not be reference equal to\n{0} {1}\n{2}\n\t{because}but was the same reference.",
+                "{subject}\n\tshould not be reference equal to\n{0}\n\t{because}but was the same reference.",
                 because,
-                (LanguagePrimitives.PhysicalHash expected).ToString(),
-                typeof<'a>.AssertionName,
-                format expected
+                expectedStr
             )
 
         And(t)
