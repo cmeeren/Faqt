@@ -265,8 +265,7 @@ attributes, parsing source code from either local files or embedded resources, t
 regex-based processing/replacement of the call chain based on which assertions have been encountered so far.
 
 If you would like to help make the automatic subject name functionality more robust, please raise an issue. You can find
-the relevant code in [Types.fs](https://github.com/cmeeren/Faqt/blob/main/src/Faqt/Types.fs) (thread-local state)
-and [SubjectName.fs](https://github.com/cmeeren/Faqt/blob/main/src/Faqt/SubjectName.fs) (everything else).
+the relevant code in [SubjectName.fs](https://github.com/cmeeren/Faqt/blob/main/src/Faqt/SubjectName.fs).
 
 ### Why not FluentAssertions?
 
