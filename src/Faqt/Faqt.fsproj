@@ -24,6 +24,7 @@
     <Compile Include="Operators.fs" />
     <Compile Include="HigherOrderAssertions.fs" />
     <Compile Include="BasicAssertions.fs" />
+    <Compile Include="ComparisonAssertions.fs" />
     <Compile Include="UnionAssertions.fs" />
   </ItemGroup>
 
