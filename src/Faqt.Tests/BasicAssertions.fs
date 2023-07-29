@@ -878,3 +878,281 @@ System.String
     with data
 "asd"
 """
+
+
+module Transform =
+
+
+    [<Fact>]
+    let ``Passes when parsing string integer using int and can be chained with AndDerived with transformed value`` () =
+        "1"
+            .Should()
+            .Transform(int)
+            .Id<AndDerived<string, int>>()
+            .WhoseValue.Should()
+            .Be(1)
+
+
+    [<Fact>]
+    let ``Fails with expected message when function throws`` () =
+        fun () -> "a".Should().Transform(fun _ -> failwith "foo")
+        |> assertExnMsg
+            """
+"a"
+    should be successfully transformed by the specified function, but failed with the following exception:
+System.Exception: foo
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because`` () =
+        fun () -> "a".Should().Transform(int, "some reason")
+        |> assertExnMsg
+            """
+"a"
+    should be successfully transformed by the specified function because some reason, but failed with the following exception:
+System.FormatException: The input string 'a' was not in a correct format.
+"""
+
+
+module ``TryTransform option`` =
+
+
+    [<Fact>]
+    let ``Passes when function returns Some`` () =
+        "1"
+            .Should()
+            .TryTransform(int >> Some)
+            .Id<AndDerived<string, int>>()
+            .WhoseValue.Should()
+            .Be(1)
+
+
+    [<Fact>]
+    let ``Fails with expected message when function returns None`` () =
+        fun () -> "a".Should().TryTransform(fun _ -> Option<string>.None)
+        |> assertExnMsg
+            """
+"a"
+    should be successfully transformed by the specified function, but the function returned
+None
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message when function throws`` () =
+        fun () -> "a".Should().TryTransform(fun _ -> failwith<string option> "foo")
+        |> assertExnMsg
+            """
+"a"
+    should be successfully transformed by the specified function, but failed with the following exception:
+System.Exception: foo
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because when returning None`` () =
+        fun () -> "a".Should().TryTransform((fun _ -> Option<string>.None), "some reason")
+        |> assertExnMsg
+            """
+"a"
+    should be successfully transformed by the specified function because some reason, but the function returned
+None
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because when function throws`` () =
+        fun () ->
+            "a"
+                .Should()
+                .TryTransform((fun _ -> failwith<string option> "foo"), "some reason")
+        |> assertExnMsg
+            """
+"a"
+    should be successfully transformed by the specified function because some reason, but failed with the following exception:
+System.Exception: foo
+"""
+
+
+module ``TryTransform voption`` =
+
+
+    [<Fact>]
+    let ``Passes when function returns ValueSome`` () =
+        "1"
+            .Should()
+            .TryTransform(int >> ValueSome)
+            .Id<AndDerived<string, int>>()
+            .WhoseValue.Should()
+            .Be(1)
+
+
+    [<Fact>]
+    let ``Fails with expected message when function returns ValueNone`` () =
+        fun () -> "a".Should().TryTransform(fun _ -> ValueOption<string>.ValueNone)
+        |> assertExnMsg
+            """
+"a"
+    should be successfully transformed by the specified function, but the function returned
+ValueNone
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message when function throws`` () =
+        fun () -> "a".Should().TryTransform(fun _ -> failwith<string voption> "foo")
+        |> assertExnMsg
+            """
+"a"
+    should be successfully transformed by the specified function, but failed with the following exception:
+System.Exception: foo
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because when returning ValueNone`` () =
+        fun () ->
+            "a"
+                .Should()
+                .TryTransform((fun _ -> ValueOption<string>.ValueNone), "ValueSome reason")
+        |> assertExnMsg
+            """
+"a"
+    should be successfully transformed by the specified function because ValueSome reason, but the function returned
+ValueNone
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because when function throws`` () =
+        fun () ->
+            "a"
+                .Should()
+                .TryTransform((fun _ -> failwith<string voption> "foo"), "ValueSome reason")
+        |> assertExnMsg
+            """
+"a"
+    should be successfully transformed by the specified function because ValueSome reason, but failed with the following exception:
+System.Exception: foo
+"""
+
+
+module ``TryTransform Result`` =
+
+
+    [<Fact>]
+    let ``Passes when function returns Ok`` () =
+        "1"
+            .Should()
+            .TryTransform(int >> Ok)
+            .Id<AndDerived<string, int>>()
+            .WhoseValue.Should()
+            .Be(1)
+
+
+    [<Fact>]
+    let ``Fails with expected message when function returns Error`` () =
+        fun () -> "a".Should().TryTransform(fun _ -> Result<string, _>.Error "foo")
+        |> assertExnMsg
+            """
+"a"
+    should be successfully transformed by the specified function, but the function returned
+Error "foo"
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message when function throws`` () =
+        fun () -> "a".Should().TryTransform(fun _ -> failwith<Result<string, string>> "foo")
+        |> assertExnMsg
+            """
+"a"
+    should be successfully transformed by the specified function, but failed with the following exception:
+System.Exception: foo
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because when returning Error`` () =
+        fun () ->
+            "a"
+                .Should()
+                .TryTransform((fun _ -> Result<string, _>.Error "foo"), "some reason")
+        |> assertExnMsg
+            """
+"a"
+    should be successfully transformed by the specified function because some reason, but the function returned
+Error "foo"
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because when function throws`` () =
+        fun () ->
+            "a"
+                .Should()
+                .TryTransform((fun _ -> failwith<Result<string, string>> "foo"), "some reason")
+        |> assertExnMsg
+            """
+"a"
+    should be successfully transformed by the specified function because some reason, but failed with the following exception:
+System.Exception: foo
+"""
+
+
+module ``TryTransform parse`` =
+
+
+    [<Fact>]
+    let ``Passes when function returns true`` () =
+        "1"
+            .Should()
+            .TryTransform(fun s -> Int32.TryParse s)
+            .Id<AndDerived<string, int>>()
+            .WhoseValue.Should()
+            .Be(1)
+
+
+    [<Fact>]
+    let ``Fails with expected message when function returns false`` () =
+        fun () -> "a".Should().TryTransform(fun s -> Int32.TryParse s)
+        |> assertExnMsg
+            """
+"a"
+    should be successfully transformed by the specified function, but the function returned
+false
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message when function throws`` () =
+        fun () -> "a".Should().TryTransform(fun _ -> failwith<bool * int> "foo")
+        |> assertExnMsg
+            """
+"a"
+    should be successfully transformed by the specified function, but failed with the following exception:
+System.Exception: foo
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because when returning false`` () =
+        fun () -> "a".Should().TryTransform((fun s -> Int32.TryParse s), "some reason")
+        |> assertExnMsg
+            """
+"a"
+    should be successfully transformed by the specified function because some reason, but the function returned
+false
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because when function throws`` () =
+        fun () -> "a".Should().TryTransform((fun _ -> failwith<bool * int> "foo"), "some reason")
+        |> assertExnMsg
+            """
+"a"
+    should be successfully transformed by the specified function because some reason, but failed with the following exception:
+System.Exception: foo
+"""
