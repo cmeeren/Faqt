@@ -16,6 +16,7 @@
     <Compile Include="BasicAssertions.fs" />
     <Compile Include="ComparisonAssertions.fs" />
     <Compile Include="UnionAssertions.fs" />
+    <Compile Include="BoolAssertions.fs" />
   </ItemGroup>
 
   <ItemGroup>
