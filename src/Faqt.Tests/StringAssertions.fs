@@ -88,12 +88,7 @@ module BeEmpty =
 
 
     [<Fact>]
-    let ``Fails if string is not empty`` () =
-        Assert.Throws<AssertionFailedException>(fun () -> "a".Should().BeEmpty() |> ignore)
-
-
-    [<Fact>]
-    let ``Fails with expected message`` () =
+    let ``Fails with expected message if not empty`` () =
         fun () ->
             let x = "a"
             x.Should().BeEmpty()
