@@ -152,6 +152,10 @@ module NotBeEmpty =
 
 
     [<Fact>]
+    let ``Passes if string is null`` () = (null: string).Should().NotBeEmpty()
+
+
+    [<Fact>]
     let ``Fails with expected message if empty`` () =
         fun () ->
             let x = ""
@@ -164,19 +168,6 @@ x
 
 
     [<Fact>]
-    let ``Fails with expected message if null`` () =
-        fun () ->
-            let x: string = null
-            x.Should().NotBeEmpty()
-        |> assertExnMsg
-            """
-x
-    should not be empty, but was
-<null>
-"""
-
-
-    [<Fact>]
     let ``Fails with expected message if empty with because`` () =
         fun () ->
             let x = ""
@@ -185,17 +176,4 @@ x
             """
 x
     should not be empty because some reason, but was empty.
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message if null with because`` () =
-        fun () ->
-            let x: string = null
-            x.Should().NotBeEmpty("some reason")
-        |> assertExnMsg
-            """
-x
-    should not be empty because some reason, but was
-<null>
 """
