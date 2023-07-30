@@ -7,6 +7,23 @@ open AssertionHelpers
 open Formatting
 
 
+[<AutoOpen>]
+module private Helpers =
+
+    let getStringComparisonStr (comparisonType: StringComparison) =
+        let cultureSuffix =
+            match comparisonType with
+            | StringComparison.CurrentCulture
+            | StringComparison.CurrentCultureIgnoreCase ->
+                if CultureInfo.CurrentCulture.Name = "" then
+                    " (invariant culture)"
+                else
+                    $" (culture {CultureInfo.CurrentCulture.Name})"
+            | _ -> ""
+
+        "StringComparison." + comparisonType.ToString() + cultureSuffix
+
+
 [<Extension>]
 type StringAssertions =
 
@@ -126,3 +143,32 @@ type StringAssertions =
     static member BeLowerCase(t: Testable<string>, ?because) : And<string> =
         use _ = t.Assert()
         t.BeLowerCase(CultureInfo.InvariantCulture, ?because = because)
+
+
+    /// Asserts that the subject contains the specified string using the specified string comparison type.
+    [<Extension>]
+    static member Contain
+        (
+            t: Testable<string>,
+            substring: string,
+            comparisonType: StringComparison,
+            ?because
+        ) : And<string> =
+        use _ = t.Assert()
+
+        if isNull t.Subject || not (t.Subject.Contains(substring, comparisonType)) then
+            t.Fail(
+                "{subject}\n\tshould contain\n{0}\n\tusing {1}{because}, but was\n{actual}",
+                because,
+                format substring,
+                getStringComparisonStr comparisonType
+            )
+
+        And(t)
+
+
+    /// Asserts that the subject contains the specified string using ordinal string comparison.
+    [<Extension>]
+    static member Contain(t: Testable<string>, substring: string, ?because) : And<string> =
+        use _ = t.Assert()
+        t.Contain(substring, StringComparison.Ordinal, ?because = because)

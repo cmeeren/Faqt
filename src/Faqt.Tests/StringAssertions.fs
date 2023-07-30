@@ -1,5 +1,6 @@
 ﻿module StringAssertions
 
+open System
 open System.Globalization
 open Faqt
 open Xunit
@@ -558,5 +559,195 @@ x
             """
 x
     should be lower-case according to the invariant culture because some reason, but was
+<null>
+"""
+
+
+module ``Contain with StringComparison`` =
+
+
+    [<Fact>]
+    let ``Can be chained with And`` () =
+        "asd"
+            .Should()
+            .Contain("s", StringComparison.Ordinal)
+            .Id<And<string>>()
+            .And.Be("asd")
+
+
+    [<Fact>]
+    let ``Passes if string contains substring`` () =
+        "asd".Should().Contain("s", StringComparison.Ordinal)
+
+
+    [<Fact>]
+    let ``Passes if string contains substring using StringComparison.OrdinalIgnoreCase`` () =
+        "asd".Should().Contain("S", StringComparison.OrdinalIgnoreCase)
+
+
+    [<Fact>]
+    let ``Fails with expected message if string does not contain substring`` () =
+        fun () ->
+            let x = "asd"
+            x.Should().Contain("S", StringComparison.Ordinal)
+        |> assertExnMsg
+            """
+x
+    should contain
+"S"
+    using StringComparison.Ordinal, but was
+"asd"
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if string does not contain using StringComparison.CurrentCulture with nb-NO`` () =
+        use _ = CultureInfo.withCurrentCulture "nb-NO"
+
+        fun () ->
+            let x = "asd"
+            x.Should().Contain("f", StringComparison.CurrentCulture)
+        |> assertExnMsg
+            """
+x
+    should contain
+"f"
+    using StringComparison.CurrentCulture (culture nb-NO), but was
+"asd"
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if string does not contain using StringComparison.CurrentCulture with invariant culture``
+        ()
+        =
+        use _ = CultureInfo.withCurrentCulture ""
+
+        fun () ->
+            let x = "asd"
+            x.Should().Contain("f", StringComparison.CurrentCulture)
+        |> assertExnMsg
+            """
+x
+    should contain
+"f"
+    using StringComparison.CurrentCulture (invariant culture), but was
+"asd"
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if null`` () =
+        fun () ->
+            let x: string = null
+            x.Should().Contain("f", StringComparison.Ordinal)
+        |> assertExnMsg
+            """
+x
+    should contain
+"f"
+    using StringComparison.Ordinal, but was
+<null>
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because`` () =
+        fun () ->
+            let x = "asd"
+            x.Should().Contain("f", StringComparison.Ordinal, "some reason")
+        |> assertExnMsg
+            """
+x
+    should contain
+"f"
+    using StringComparison.Ordinal because some reason, but was
+"asd"
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if null with because`` () =
+        fun () ->
+            let x: string = null
+            x.Should().Contain("f", StringComparison.Ordinal, "some reason")
+        |> assertExnMsg
+            """
+x
+    should contain
+"f"
+    using StringComparison.Ordinal because some reason, but was
+<null>
+"""
+
+
+module ``Contain without StringComparison`` =
+
+
+    [<Fact>]
+    let ``Can be chained with And`` () =
+        "asd".Should().Contain("s").Id<And<string>>().And.Be("asd")
+
+
+    [<Fact>]
+    let ``Passes if string contains substring`` () = "asd".Should().Contain("s")
+
+
+    [<Fact>]
+    let ``Fails with expected message if string does not contain substring`` () =
+        fun () ->
+            let x = "asd"
+            x.Should().Contain("S")
+        |> assertExnMsg
+            """
+x
+    should contain
+"S"
+    using StringComparison.Ordinal, but was
+"asd"
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if null`` () =
+        fun () ->
+            let x: string = null
+            x.Should().Contain("f")
+        |> assertExnMsg
+            """
+x
+    should contain
+"f"
+    using StringComparison.Ordinal, but was
+<null>
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because`` () =
+        fun () ->
+            let x = "asd"
+            x.Should().Contain("f", "some reason")
+        |> assertExnMsg
+            """
+x
+    should contain
+"f"
+    using StringComparison.Ordinal because some reason, but was
+"asd"
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if null with because`` () =
+        fun () ->
+            let x: string = null
+            x.Should().Contain("f", "some reason")
+        |> assertExnMsg
+            """
+x
+    should contain
+"f"
+    using StringComparison.Ordinal because some reason, but was
 <null>
 """
