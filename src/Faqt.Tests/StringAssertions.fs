@@ -1,5 +1,6 @@
 ﻿module StringAssertions
 
+open System.Globalization
 open Faqt
 open Xunit
 
@@ -220,7 +221,6 @@ x
 "a"
 """
 
-
 module NotBeNullOrEmpty =
 
 
@@ -279,5 +279,164 @@ x
             """
 x
     should not be null or empty because some reason, but was
+<null>
+"""
+
+
+module ``BeUpperCase with culture`` =
+
+
+    [<Fact>]
+    let ``Can be chained with And`` () =
+        "A"
+            .Should()
+            .BeUpperCase(CultureInfo.InvariantCulture)
+            .Id<And<string>>()
+            .And.Be("A")
+
+
+    [<Fact>]
+    let ``Passes if string does not contain lower-case characters`` () =
+        "A 1".Should().BeUpperCase(CultureInfo.InvariantCulture)
+
+
+    [<Fact>]
+    let ``Fails with expected message if subject contains lower-case characters, CultureInfo.InvariantCulture`` () =
+        fun () ->
+            let x = "Aa"
+            x.Should().BeUpperCase(CultureInfo.InvariantCulture)
+        |> assertExnMsg
+            """
+x
+    should be upper-case according to the invariant culture, but was
+"Aa"
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if subject contains lower-case characters, CultureInfo("")`` () =
+        fun () ->
+            let x = "Aa"
+            x.Should().BeUpperCase(CultureInfo(""))
+        |> assertExnMsg
+            """
+x
+    should be upper-case according to the invariant culture, but was
+"Aa"
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if subject contains lower-case characters, CultureInfo("nb-NO")`` () =
+        fun () ->
+            let x = "Aa"
+            x.Should().BeUpperCase(CultureInfo("nb-NO"))
+        |> assertExnMsg
+            """
+x
+    should be upper-case according to culture nb-NO, but was
+"Aa"
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if null`` () =
+        fun () ->
+            let x: string = null
+            x.Should().BeUpperCase(CultureInfo.InvariantCulture)
+        |> assertExnMsg
+            """
+x
+    should be upper-case according to the invariant culture, but was
+<null>
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because`` () =
+        fun () ->
+            let x = "Aa"
+            x.Should().BeUpperCase(CultureInfo.InvariantCulture, "some reason")
+        |> assertExnMsg
+            """
+x
+    should be upper-case according to the invariant culture because some reason, but was
+"Aa"
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if null with because`` () =
+        fun () ->
+            let x: string = null
+            x.Should().BeUpperCase(CultureInfo.InvariantCulture, "some reason")
+        |> assertExnMsg
+            """
+x
+    should be upper-case according to the invariant culture because some reason, but was
+<null>
+"""
+
+
+module ``BeUpperCase without culture`` =
+
+
+    [<Fact>]
+    let ``Can be chained with And`` () =
+        "A".Should().BeUpperCase().Id<And<string>>().And.Be("A")
+
+
+    [<Fact>]
+    let ``Passes if string does not contain lower-case characters`` () = "A 1".Should().BeUpperCase()
+
+
+    [<Fact>]
+    let ``Fails with expected message if subject contains lower-case characters, `` () =
+        fun () ->
+            let x = "Aa"
+            x.Should().BeUpperCase()
+        |> assertExnMsg
+            """
+x
+    should be upper-case according to the invariant culture, but was
+"Aa"
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if null`` () =
+        fun () ->
+            let x: string = null
+            x.Should().BeUpperCase()
+        |> assertExnMsg
+            """
+x
+    should be upper-case according to the invariant culture, but was
+<null>
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because`` () =
+        fun () ->
+            let x = "Aa"
+            x.Should().BeUpperCase("some reason")
+        |> assertExnMsg
+            """
+x
+    should be upper-case according to the invariant culture because some reason, but was
+"Aa"
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if null with because`` () =
+        fun () ->
+            let x: string = null
+            x.Should().BeUpperCase("some reason")
+        |> assertExnMsg
+            """
+x
+    should be upper-case according to the invariant culture because some reason, but was
 <null>
 """
