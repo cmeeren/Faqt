@@ -352,7 +352,7 @@ module ``BeUpperCase without culture`` =
 
 
     [<Fact>]
-    let ``Fails with expected message if subject contains lower-case characters, `` () =
+    let ``Fails with expected message if subject contains lower-case characters`` () =
         fun () ->
             let x = "Aa"
             x.Should().BeUpperCase()
