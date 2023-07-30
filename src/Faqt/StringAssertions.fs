@@ -1,5 +1,6 @@
 ﻿namespace Faqt
 
+open System
 open System.Runtime.CompilerServices
 open AssertionHelpers
 open Formatting
@@ -49,5 +50,31 @@ type StringAssertions =
 
         if not (isNull t.Subject) && t.Subject.Length = 0 then
             t.Fail("{subject}\n\tshould not be empty{because}, but was empty.", because)
+
+        And(t)
+
+
+    // TODO: Remove this after the corresponding IEnumerable method has been implemented?
+    /// Asserts that the subject is null or empty.
+    [<Extension>]
+    static member BeNullOrEmpty(t: Testable<string>, ?because) : And<string> =
+        use _ = t.Assert()
+
+        if not (String.IsNullOrEmpty t.Subject) then
+            t.Fail("{subject}\n\tshould be null or empty{because}, but was\n{actual}", because)
+
+        And(t)
+
+
+    // TODO: Remove this after the corresponding IEnumerable method has been implemented?
+    /// Asserts that the subject is not null or empty.
+    [<Extension>]
+    static member NotBeNullOrEmpty(t: Testable<string>, ?because) : And<string> =
+        use _ = t.Assert()
+
+        if isNull t.Subject then
+            t.Fail("{subject}\n\tshould not be null or empty{because}, but was\n{actual}", because)
+        elif t.Subject.Length = 0 then
+            t.Fail("{subject}\n\tshould not be null or empty{because}, but was empty.", because)
 
         And(t)

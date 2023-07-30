@@ -177,3 +177,107 @@ x
 x
     should not be empty because some reason, but was empty.
 """
+
+
+module BeNullOrEmpty =
+
+
+    [<Fact>]
+    let ``Can be chained with And`` () =
+        "".Should().BeNullOrEmpty().Id<And<string>>().And.Be("")
+
+
+    [<Fact>]
+    let ``Passes if string is empty`` () = "".Should().BeNullOrEmpty()
+
+
+    [<Fact>]
+    let ``Passes if string is null`` () = (null: string).Should().BeNullOrEmpty()
+
+
+    [<Fact>]
+    let ``Fails with expected message if not empty`` () =
+        fun () ->
+            let x = "a"
+            x.Should().BeNullOrEmpty()
+        |> assertExnMsg
+            """
+x
+    should be null or empty, but was
+"a"
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if empty with because`` () =
+        fun () ->
+            let x = "a"
+            x.Should().BeNullOrEmpty("some reason")
+        |> assertExnMsg
+            """
+x
+    should be null or empty because some reason, but was
+"a"
+"""
+
+
+module NotBeNullOrEmpty =
+
+
+    [<Fact>]
+    let ``Can be chained with And`` () =
+        "a".Should().NotBeNullOrEmpty().Id<And<string>>().And.Be("a")
+
+
+    [<Fact>]
+    let ``Passes if string is not empty`` () = "a".Should().NotBeNullOrEmpty()
+
+
+    [<Fact>]
+    let ``Fails with expected message if empty`` () =
+        fun () ->
+            let x = ""
+            x.Should().NotBeNullOrEmpty()
+        |> assertExnMsg
+            """
+x
+    should not be null or empty, but was empty.
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if null`` () =
+        fun () ->
+            let x: string = null
+            x.Should().NotBeNullOrEmpty()
+        |> assertExnMsg
+            """
+x
+    should not be null or empty, but was
+<null>
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if empty with because`` () =
+        fun () ->
+            let x = ""
+            x.Should().NotBeNullOrEmpty("some reason")
+        |> assertExnMsg
+            """
+x
+    should not be null or empty because some reason, but was empty.
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if null with because`` () =
+        fun () ->
+            let x: string = null
+            x.Should().NotBeNullOrEmpty("some reason")
+        |> assertExnMsg
+            """
+x
+    should not be null or empty because some reason, but was
+<null>
+"""
