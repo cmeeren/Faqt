@@ -156,6 +156,9 @@ type StringAssertions =
         ) : And<string> =
         use _ = t.Assert()
 
+        if isNull substring then
+            nullArg (nameof substring)
+
         if isNull t.Subject || not (t.Subject.Contains(substring, comparisonType)) then
             t.Fail(
                 "{subject}\n\tshould contain\n{0}\n\tusing {1}{because}, but was\n{actual}",
@@ -185,6 +188,9 @@ type StringAssertions =
             ?because
         ) : And<string> =
         use _ = t.Assert()
+
+        if isNull substring then
+            nullArg (nameof substring)
 
         if not (isNull t.Subject) && t.Subject.Contains(substring, comparisonType) then
             t.Fail(
