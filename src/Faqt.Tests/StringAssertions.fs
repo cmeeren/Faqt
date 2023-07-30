@@ -601,7 +601,9 @@ x
 
 
     [<Fact>]
-    let ``Fails with expected message if string does not contain substring using StringComparison.CurrentCulture with nb-NO`` () =
+    let ``Fails with expected message if string does not contain substring using StringComparison.CurrentCulture with nb-NO``
+        ()
+        =
         use _ = CultureInfo.withCurrentCulture "nb-NO"
 
         fun () ->
@@ -750,4 +752,145 @@ x
 "f"
     using StringComparison.Ordinal because some reason, but was
 <null>
+"""
+
+
+module ``NotContain with StringComparison`` =
+
+
+    [<Fact>]
+    let ``Can be chained with And`` () =
+        "asd"
+            .Should()
+            .NotContain("f", StringComparison.Ordinal)
+            .Id<And<string>>()
+            .And.Be("asd")
+
+
+    [<Fact>]
+    let ``Passes if string does not contain substring`` () =
+        "asd".Should().NotContain("S", StringComparison.Ordinal)
+
+
+    [<Fact>]
+    let ``Passes if string does not contain substring using StringComparison.OrdinalIgnoreCase`` () =
+        "asd".Should().NotContain("f", StringComparison.OrdinalIgnoreCase)
+
+
+    [<Fact>]
+    let ``Passes if subject is null`` () =
+        (null: string).Should().NotContain("d", StringComparison.OrdinalIgnoreCase)
+
+
+    [<Fact>]
+    let ``Fails with expected message if string contains substring`` () =
+        fun () ->
+            let x = "asd"
+            x.Should().NotContain("s", StringComparison.Ordinal)
+        |> assertExnMsg
+            """
+x
+    should not contain
+"s"
+    using StringComparison.Ordinal, but was
+"asd"
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if string contains substring using StringComparison.CurrentCulture with nb-NO``
+        ()
+        =
+        use _ = CultureInfo.withCurrentCulture "nb-NO"
+
+        fun () ->
+            let x = "asd"
+            x.Should().NotContain("s", StringComparison.CurrentCulture)
+        |> assertExnMsg
+            """
+x
+    should not contain
+"s"
+    using StringComparison.CurrentCulture (culture nb-NO), but was
+"asd"
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if string does not contain substring using StringComparison.CurrentCulture with invariant culture``
+        ()
+        =
+        use _ = CultureInfo.withCurrentCulture ""
+
+        fun () ->
+            let x = "asd"
+            x.Should().NotContain("s", StringComparison.CurrentCulture)
+        |> assertExnMsg
+            """
+x
+    should not contain
+"s"
+    using StringComparison.CurrentCulture (invariant culture), but was
+"asd"
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because`` () =
+        fun () ->
+            let x = "asd"
+            x.Should().NotContain("s", StringComparison.Ordinal, "some reason")
+        |> assertExnMsg
+            """
+x
+    should not contain
+"s"
+    using StringComparison.Ordinal because some reason, but was
+"asd"
+"""
+
+
+module ``NotContain without StringComparison`` =
+
+
+    [<Fact>]
+    let ``Can be chained with And`` () =
+        "asd".Should().NotContain("f").Id<And<string>>().And.Be("asd")
+
+
+    [<Fact>]
+    let ``Passes if string does not contain substring`` () = "asd".Should().NotContain("f")
+
+
+    [<Fact>]
+    let ``Passes if subject is null`` () = (null: string).Should().NotContain("f")
+
+
+    [<Fact>]
+    let ``Fails with expected message if string contains substring`` () =
+        fun () ->
+            let x = "asd"
+            x.Should().NotContain("s")
+        |> assertExnMsg
+            """
+x
+    should not contain
+"s"
+    using StringComparison.Ordinal, but was
+"asd"
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because`` () =
+        fun () ->
+            let x = "asd"
+            x.Should().NotContain("s", "some reason")
+        |> assertExnMsg
+            """
+x
+    should not contain
+"s"
+    using StringComparison.Ordinal because some reason, but was
+"asd"
 """

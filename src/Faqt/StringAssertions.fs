@@ -172,3 +172,34 @@ type StringAssertions =
     static member Contain(t: Testable<string>, substring: string, ?because) : And<string> =
         use _ = t.Assert()
         t.Contain(substring, StringComparison.Ordinal, ?because = because)
+
+
+    // Asserts that the subject does not contain the specified string using the specified string comparison type. Passes
+    // if the subject is null.
+    [<Extension>]
+    static member NotContain
+        (
+            t: Testable<string>,
+            substring: string,
+            comparisonType: StringComparison,
+            ?because
+        ) : And<string> =
+        use _ = t.Assert()
+
+        if not (isNull t.Subject) && t.Subject.Contains(substring, comparisonType) then
+            t.Fail(
+                "{subject}\n\tshould not contain\n{0}\n\tusing {1}{because}, but was\n{actual}",
+                because,
+                format substring,
+                getStringComparisonStr comparisonType
+            )
+
+        And(t)
+
+
+    // Asserts that the subject does not contain the specified string using ordinal string comparison. Passes if the
+    // subject is null.
+    [<Extension>]
+    static member NotContain(t: Testable<string>, substring: string, ?because) : And<string> =
+        use _ = t.Assert()
+        t.NotContain(substring, StringComparison.Ordinal, ?because = because)
