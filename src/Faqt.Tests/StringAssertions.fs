@@ -401,3 +401,162 @@ x
     should be upper-case according to the invariant culture because some reason, but was
 <null>
 """
+
+
+module ``BeLowerCase with culture`` =
+
+
+    [<Fact>]
+    let ``Can be chained with And`` () =
+        "a"
+            .Should()
+            .BeLowerCase(CultureInfo.InvariantCulture)
+            .Id<And<string>>()
+            .And.Be("a")
+
+
+    [<Fact>]
+    let ``Passes if string does not contain upper-case characters`` () =
+        "a 1".Should().BeLowerCase(CultureInfo.InvariantCulture)
+
+
+    [<Fact>]
+    let ``Fails with expected message if subject contains upper-case characters, CultureInfo.InvariantCulture`` () =
+        fun () ->
+            let x = "Aa"
+            x.Should().BeLowerCase(CultureInfo.InvariantCulture)
+        |> assertExnMsg
+            """
+x
+    should be lower-case according to the invariant culture, but was
+"Aa"
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if subject contains upper-case characters, CultureInfo("")`` () =
+        fun () ->
+            let x = "Aa"
+            x.Should().BeLowerCase(CultureInfo(""))
+        |> assertExnMsg
+            """
+x
+    should be lower-case according to the invariant culture, but was
+"Aa"
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if subject contains upper-case characters, CultureInfo("nb-NO")`` () =
+        fun () ->
+            let x = "Aa"
+            x.Should().BeLowerCase(CultureInfo("nb-NO"))
+        |> assertExnMsg
+            """
+x
+    should be lower-case according to culture nb-NO, but was
+"Aa"
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if null`` () =
+        fun () ->
+            let x: string = null
+            x.Should().BeLowerCase(CultureInfo.InvariantCulture)
+        |> assertExnMsg
+            """
+x
+    should be lower-case according to the invariant culture, but was
+<null>
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because`` () =
+        fun () ->
+            let x = "Aa"
+            x.Should().BeLowerCase(CultureInfo.InvariantCulture, "some reason")
+        |> assertExnMsg
+            """
+x
+    should be lower-case according to the invariant culture because some reason, but was
+"Aa"
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if null with because`` () =
+        fun () ->
+            let x: string = null
+            x.Should().BeLowerCase(CultureInfo.InvariantCulture, "some reason")
+        |> assertExnMsg
+            """
+x
+    should be lower-case according to the invariant culture because some reason, but was
+<null>
+"""
+
+
+module ``BeLowerCase without culture`` =
+
+
+    [<Fact>]
+    let ``Can be chained with And`` () =
+        "a".Should().BeLowerCase().Id<And<string>>().And.Be("a")
+
+
+    [<Fact>]
+    let ``Passes if string does not contain upper-case characters`` () = "a 1".Should().BeLowerCase()
+
+
+    [<Fact>]
+    let ``Fails with expected message if subject contains upper-case characters`` () =
+        fun () ->
+            let x = "Aa"
+            x.Should().BeLowerCase()
+        |> assertExnMsg
+            """
+x
+    should be lower-case according to the invariant culture, but was
+"Aa"
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if null`` () =
+        fun () ->
+            let x: string = null
+            x.Should().BeLowerCase()
+        |> assertExnMsg
+            """
+x
+    should be lower-case according to the invariant culture, but was
+<null>
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because`` () =
+        fun () ->
+            let x = "Aa"
+            x.Should().BeLowerCase("some reason")
+        |> assertExnMsg
+            """
+x
+    should be lower-case according to the invariant culture because some reason, but was
+"Aa"
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if null with because`` () =
+        fun () ->
+            let x: string = null
+            x.Should().BeLowerCase("some reason")
+        |> assertExnMsg
+            """
+x
+    should be lower-case according to the invariant culture because some reason, but was
+<null>
+"""

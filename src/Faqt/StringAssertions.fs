@@ -96,3 +96,33 @@ type StringAssertions =
     static member BeUpperCase(t: Testable<string>, ?because) : And<string> =
         use _ = t.Assert()
         t.BeUpperCase(CultureInfo.InvariantCulture, ?because = because)
+
+
+    /// Asserts that the subject is lower-case (i.e., that it is unchanged when calling ToLower with the specified
+    /// culture).
+    [<Extension>]
+    static member BeLowerCase(t: Testable<string>, culture: CultureInfo, ?because) : And<string> =
+        use _ = t.Assert()
+
+        let cultureStr =
+            if culture.Name = "" then
+                "the invariant culture"
+            else
+                "culture " + culture.Name
+
+        if isNull t.Subject || t.Subject <> t.Subject.ToLower(culture) then
+            t.Fail(
+                "{subject}\n\tshould be lower-case according to {0}{because}, but was\n{actual}",
+                because,
+                cultureStr
+            )
+
+        And(t)
+
+
+    /// Asserts that the subject is lower-case according to the invariant culture (i.e., that it is unchanged when
+    /// calling ToLowerInvariant).
+    [<Extension>]
+    static member BeLowerCase(t: Testable<string>, ?because) : And<string> =
+        use _ = t.Assert()
+        t.BeLowerCase(CultureInfo.InvariantCulture, ?because = because)
