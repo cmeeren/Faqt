@@ -29,7 +29,7 @@ type StringAssertions =
 
 
     // TODO: Remove this after the corresponding IEnumerable method has been implemented?
-    /// Asserts that the subject is empty. Equivalent to HaveLength(0) (but with a different error message).
+    /// Asserts that the subject is empty. Equivalent to HaveLength(0) and Be("") (but with a different error message).
     [<Extension>]
     static member BeEmpty(t: Testable<string>, ?because) : And<string> =
         use _ = t.Assert()
