@@ -1,6 +1,8 @@
 ﻿[<AutoOpen>]
 module TestUtils
 
+open System
+open System.Globalization
 open System.Runtime.CompilerServices
 open Faqt
 open AssertionHelpers
@@ -10,6 +12,18 @@ open Xunit
 let assertExnMsg (msg: string) (f: unit -> 'a) =
     let ex = Assert.Throws<AssertionFailedException>(f >> ignore)
     Assert.Equal(msg.ReplaceLineEndings("\n").Trim(), ex.Message.ReplaceLineEndings("\n").Trim().Replace("\t", "    "))
+
+
+module CultureInfo =
+
+    let withCurrentCulture (cultureName: string) =
+        let ci = CultureInfo(cultureName)
+        let oldCi = CultureInfo.CurrentCulture
+        CultureInfo.CurrentCulture <- ci
+
+        { new IDisposable with
+            member _.Dispose() = CultureInfo.CurrentCulture <- oldCi
+        }
 
 
 [<Extension>]
