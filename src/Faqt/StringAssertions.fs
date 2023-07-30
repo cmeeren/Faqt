@@ -43,13 +43,14 @@ type StringAssertions =
 
 
     // TODO: Remove this after the corresponding IEnumerable method has been implemented?
-    /// Asserts that the subject is not empty. Passes if the subject is null (use NotBeNullOrEmpty to also fail for
-    /// nulls). Equivalent to NotBe("") (but with a different error message).
+    /// Asserts that the subject is not empty. Equivalent to NotBe("") (but with a different error message).
     [<Extension>]
     static member NotBeEmpty(t: Testable<string>, ?because) : And<string> =
         use _ = t.Assert()
 
-        if not (isNull t.Subject) && t.Subject.Length = 0 then
+        if isNull t.Subject then
+            t.Fail("{subject}\n\tshould not be empty{because}, but was\n{actual}", because)
+        elif t.Subject.Length = 0 then
             t.Fail("{subject}\n\tshould not be empty{because}, but was empty.", because)
 
         And(t)
