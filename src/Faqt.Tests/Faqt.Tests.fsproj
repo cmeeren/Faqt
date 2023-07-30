@@ -18,6 +18,7 @@
     <Compile Include="UnionAssertions.fs" />
     <Compile Include="BoolAssertions.fs" />
     <Compile Include="NullableAssertions.fs" />
+    <Compile Include="StringAssertions.fs" />
   </ItemGroup>
 
   <ItemGroup>
