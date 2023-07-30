@@ -601,7 +601,7 @@ x
 
 
     [<Fact>]
-    let ``Fails with expected message if string does not contain using StringComparison.CurrentCulture with nb-NO`` () =
+    let ``Fails with expected message if string does not contain substring using StringComparison.CurrentCulture with nb-NO`` () =
         use _ = CultureInfo.withCurrentCulture "nb-NO"
 
         fun () ->
@@ -618,7 +618,7 @@ x
 
 
     [<Fact>]
-    let ``Fails with expected message if string does not contain using StringComparison.CurrentCulture with invariant culture``
+    let ``Fails with expected message if string does not contain substring using StringComparison.CurrentCulture with invariant culture``
         ()
         =
         use _ = CultureInfo.withCurrentCulture ""
