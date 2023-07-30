@@ -79,3 +79,17 @@ type UnionAssertions =
     static member BeNone(t: Testable<'a option>, ?because) : And<'a option> =
         use _ = t.Assert()
         t.BeOfCase(None, ?because = because)
+
+
+    /// Asserts that the subject is Ok, and allows continuing to assert on the inner value. Alias of BeOfCase(Ok).
+    [<Extension>]
+    static member BeOk(t: Testable<Result<'a, 'b>>, ?because) : AndDerived<Result<'a, 'b>, 'a> =
+        use _ = t.Assert()
+        t.BeOfCase(Ok, ?because = because)
+
+
+    /// Asserts that the subject is Error, and allows continuing to assert on the inner value. Alias of BeOfCase(Error).
+    [<Extension>]
+    static member BeError(t: Testable<Result<'a, 'b>>, ?because) : AndDerived<Result<'a, 'b>, 'b> =
+        use _ = t.Assert()
+        t.BeOfCase(Error, ?because = because)

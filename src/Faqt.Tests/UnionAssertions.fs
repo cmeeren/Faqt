@@ -206,3 +206,89 @@ None
     because some reason, but was
 Some 1
 """
+
+
+module BeOk =
+
+
+    [<Fact>]
+    let ``Passes for Ok and can be chained with AndDerived with inner value`` () =
+        (Ok 1)
+            .Should()
+            .BeOk()
+            .Id<AndDerived<Result<int, _>, int>>()
+            .WhoseValue.Should()
+            .Be(1)
+
+
+    [<Fact>]
+    let ``Fails with expected message for Error`` () =
+        fun () ->
+            let x = Error "asd"
+            x.Should().BeOk()
+        |> assertExnMsg
+            """
+x
+    should be of case
+Ok
+    but was
+Error "asd"
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because`` () =
+        fun () ->
+            let x = Error "asd"
+            x.Should().BeOk("some reason")
+        |> assertExnMsg
+            """
+x
+    should be of case
+Ok
+    because some reason, but was
+Error "asd"
+"""
+
+
+module BeError =
+
+
+    [<Fact>]
+    let ``Passes for Error and can be chained with AndDerived with inner value`` () =
+        (Error 1)
+            .Should()
+            .BeError()
+            .Id<AndDerived<Result<_, int>, int>>()
+            .WhoseValue.Should()
+            .Be(1)
+
+
+    [<Fact>]
+    let ``Fails with expected message for Ok`` () =
+        fun () ->
+            let x = Ok "asd"
+            x.Should().BeError()
+        |> assertExnMsg
+            """
+x
+    should be of case
+Error
+    but was
+Ok "asd"
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because`` () =
+        fun () ->
+            let x = Ok "asd"
+            x.Should().BeError("some reason")
+        |> assertExnMsg
+            """
+x
+    should be of case
+Error
+    because some reason, but was
+Ok "asd"
+"""
