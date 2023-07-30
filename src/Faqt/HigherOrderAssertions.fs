@@ -26,6 +26,28 @@ type HigherOrderAssertions =
             )
 
 
+    /// Asserts that the subject does not satisfy the supplied assertion. If using this in performance critical
+    /// scenarios, note that in general, assertions are optimized for success, not failure.
+    [<Extension>]
+    static member NotSatisfy(t: Testable<'a>, assertion: 'a -> 'ignored, ?because) : And<'a> =
+        use x = t.Assert(true)
+
+        let succeeded =
+            try
+                assertion t.Subject |> ignore
+                true
+            with :? AssertionFailedException ->
+                false
+
+        if succeeded then
+            t.Fail(
+                "{subject}\n\tshould not satisfy the supplied assertion{because}, but the assertion succeeded.",
+                because
+            )
+
+        And(t)
+
+
     /// Asserts that the subject satisfies at least one of the supplied assertions.
     [<Extension>]
     static member SatisfyAny(t: Testable<'a>, assertions: seq<'a -> 'ignored>, ?because) : And<'a> =

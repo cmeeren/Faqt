@@ -40,6 +40,38 @@ x.Length
 """
 
 
+module NotSatisfy =
+
+
+    [<Fact>]
+    let ``Passes if the inner assertion fails and can be chained with And`` () =
+        "asd"
+            .Should()
+            .NotSatisfy(fun x -> x.Should().Fail())
+            .Id<And<string>>()
+            .And.Be("asd")
+
+
+    [<Fact>]
+    let ``Fails with expected message if the inner assertion passes`` () =
+        fun () -> "asd".Should().NotSatisfy(fun x -> x.Should().Pass())
+        |> assertExnMsg
+            """
+"asd"
+    should not satisfy the supplied assertion, but the assertion succeeded.
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because`` () =
+        fun () -> "asd".Should().NotSatisfy((fun x -> x.Length.Should().Pass()), "some reason")
+        |> assertExnMsg
+            """
+"asd"
+    should not satisfy the supplied assertion because some reason, but the assertion succeeded.
+"""
+
+
 module SatisfyAll =
 
 
