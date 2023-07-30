@@ -38,6 +38,8 @@ x
 1
     but was
 ""
+    with length
+0
 """
 
 
@@ -68,4 +70,6 @@ x
 1
     because some reason, but was
 ""
+    with length
+0
 """
