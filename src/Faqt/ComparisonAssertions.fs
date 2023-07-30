@@ -17,7 +17,11 @@ type ComparisonAssertions =
         // This implementation requires comparison as well as op_Subtraction both ways. Changing this may break clients.
         // Alternative implementations could require op_Subtraction only one way, but additionally require Abs or ~-
         // (negation).
-        if t.Subject - expected > tolerance || expected - t.Subject > tolerance then
+        if
+            isNull (box t.Subject)
+            || t.Subject - expected > tolerance
+            || expected - t.Subject > tolerance
+        then
             t.Fail(
                 "{subject}\n\tshould be\n{0} ± {1}\n\t{because}but was\n{actual}",
                 because,
@@ -36,7 +40,10 @@ type ComparisonAssertions =
         // This implementation requires comparison as well as op_Subtraction both ways. Changing this may break clients.
         // Alternative implementations could require op_Subtraction only one way, but additionally require Abs or ~-
         // (negation).
-        if not (t.Subject - expected > tolerance || expected - t.Subject > tolerance) then
+        if
+            isNull (box t.Subject)
+            || not (t.Subject - expected > tolerance || expected - t.Subject > tolerance)
+        then
             t.Fail(
                 "{subject}\n\tshould not be\n{0} ± {1}\n\t{because}but was\n{actual}",
                 because,
@@ -49,7 +56,7 @@ type ComparisonAssertions =
 
     [<Extension>]
     static member inline private Compare(t: Testable<'a>, op, opText, expected, because) =
-        if not (op t.Subject expected) then
+        if isNull (box t.Subject) || not (op t.Subject expected) then
             t.Fail("{subject}\n\tshould be {0}\n{1}\n\t{because}but was\n{actual}", because, opText, format expected)
 
         And(t)
@@ -88,7 +95,7 @@ type ComparisonAssertions =
     static member inline BePositive(t: Testable<'a>, ?because) : And<'a> =
         use _ = t.Assert()
 
-        if t.Subject <= LanguagePrimitives.GenericZero then
+        if isNull (box t.Subject) || t.Subject <= LanguagePrimitives.GenericZero then
             t.Fail("{subject}\n\tshould be positive{because}, but was\n{actual}", because)
 
         And(t)
@@ -99,7 +106,7 @@ type ComparisonAssertions =
     static member inline BeNegative(t: Testable<'a>, ?because) : And<'a> =
         use _ = t.Assert()
 
-        if t.Subject >= LanguagePrimitives.GenericZero then
+        if isNull (box t.Subject) || t.Subject >= LanguagePrimitives.GenericZero then
             t.Fail("{subject}\n\tshould be negative{because}, but was\n{actual}", because)
 
         And(t)
@@ -110,7 +117,7 @@ type ComparisonAssertions =
     static member inline BeNonNegative(t: Testable<'a>, ?because) : And<'a> =
         use _ = t.Assert()
 
-        if t.Subject < LanguagePrimitives.GenericZero then
+        if isNull (box t.Subject) || t.Subject < LanguagePrimitives.GenericZero then
             t.Fail("{subject}\n\tshould be non-negative{because}, but was\n{actual}", because)
 
         And(t)
@@ -121,7 +128,7 @@ type ComparisonAssertions =
     static member inline BeNonPositive(t: Testable<'a>, ?because) : And<'a> =
         use _ = t.Assert()
 
-        if t.Subject > LanguagePrimitives.GenericZero then
+        if isNull (box t.Subject) || t.Subject > LanguagePrimitives.GenericZero then
             t.Fail("{subject}\n\tshould be non-positive{because}, but was\n{actual}", because)
 
         And(t)
@@ -132,7 +139,7 @@ type ComparisonAssertions =
     static member inline BeInRange(t: Testable<'a>, lower: 'a, upper: 'a, ?because) : And<'a> =
         use _ = t.Assert()
 
-        if t.Subject < lower || t.Subject > upper then
+        if isNull (box t.Subject) || t.Subject < lower || t.Subject > upper then
             t.Fail(
                 "{subject}\n\tshould be in the range\n[{0}, {1}]\n\t{because}but was\n{actual}",
                 because,
