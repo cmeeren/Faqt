@@ -27,6 +27,10 @@ module Be =
 
 
     [<Fact>]
+    let ``Passes if both subject and expected is null`` () = (null: string).Should().Be(null)
+
+
+    [<Fact>]
     let ``Fails with expected message for unequal integers`` () =
         fun () ->
             let x = 1
@@ -59,6 +63,36 @@ x
 
 
     [<Fact>]
+    let ``Fails with expected message if only subject is null`` () =
+        fun () ->
+            let x: string = null
+            x.Should().Be("")
+        |> assertExnMsg
+            """
+x
+    should be
+""
+    but was
+<null>
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if only expected is null`` () =
+        fun () ->
+            let x = ""
+            x.Should().Be(null)
+        |> assertExnMsg
+            """
+x
+    should be
+<null>
+    but was
+""
+"""
+
+
+    [<Fact>]
     let ``Fails with expected message with because`` () =
         fun () ->
             let x = 1
@@ -86,6 +120,18 @@ module ``Be with custom comparer`` =
             .Id<AndDerived<int, string>>()
             .WhoseValue.Should()
             .Be("asd")
+
+
+    [<Fact>]
+    let ``Handles null subject`` () =
+        let isEqual _ _ = true
+        (null: String).Should().Be("asd", isEqual)
+
+
+    [<Fact>]
+    let ``Handles null expected`` () =
+        let isEqual _ _ = true
+        (1).Should().Be((null: string), isEqual)
 
 
     [<Fact>]
@@ -159,6 +205,14 @@ module NotBe =
 
 
     [<Fact>]
+    let ``Passes if only subject is null`` () = (null: string).Should().NotBe("")
+
+
+    [<Fact>]
+    let ``Passes if only expected is null`` () = "".Should().NotBe(null)
+
+
+    [<Fact>]
     let ``Fails with expected message for equal integers`` () =
         fun () ->
             let x = 1
@@ -188,6 +242,20 @@ x
 
 
     [<Fact>]
+    let ``Fails with expected message if both subject and expected is null`` () =
+        fun () ->
+            let x: string = null
+            x.Should().NotBe(null)
+        |> assertExnMsg
+            """
+x
+    should not be
+<null>
+    but the values were equal.
+"""
+
+
+    [<Fact>]
     let ``Fails with expected message with because`` () =
         fun () ->
             let x = 1
@@ -208,6 +276,18 @@ module ``NotBe with custom comparer`` =
     let ``Passes if isEqual returns false and can be chained with And`` () =
         let isEqual _ _ = false
         (1).Should().NotBe("asd", isEqual).Id<And<int>>().And.Be(1)
+
+
+    [<Fact>]
+    let ``Handles null subject`` () =
+        let isEqual _ _ = false
+        (null: String).Should().NotBe("asd", isEqual)
+
+
+    [<Fact>]
+    let ``Handles null expected`` () =
+        let isEqual _ _ = false
+        (1).Should().NotBe((null: string), isEqual)
 
 
     [<Fact>]
