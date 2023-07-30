@@ -68,20 +68,6 @@ type StringAssertions =
         And(t)
 
 
-    // TODO: Remove this after the corresponding IEnumerable method has been implemented?
-    /// Asserts that the subject is not null or empty.
-    [<Extension>]
-    static member NotBeNullOrEmpty(t: Testable<string>, ?because) : And<string> =
-        use _ = t.Assert()
-
-        if isNull t.Subject then
-            t.Fail("{subject}\n\tshould not be null or empty{because}, but was\n{actual}", because)
-        elif t.Subject.Length = 0 then
-            t.Fail("{subject}\n\tshould not be null or empty{because}, but was empty.", because)
-
-        And(t)
-
-
     /// Asserts that the subject is upper-case (i.e., that it is unchanged when calling ToUpper with the specified
     /// culture).
     [<Extension>]

@@ -243,67 +243,6 @@ x
 "a"
 """
 
-module NotBeNullOrEmpty =
-
-
-    [<Fact>]
-    let ``Can be chained with And`` () =
-        "a".Should().NotBeNullOrEmpty().Id<And<string>>().And.Be("a")
-
-
-    [<Fact>]
-    let ``Passes if string is not empty`` () = "a".Should().NotBeNullOrEmpty()
-
-
-    [<Fact>]
-    let ``Fails with expected message if empty`` () =
-        fun () ->
-            let x = ""
-            x.Should().NotBeNullOrEmpty()
-        |> assertExnMsg
-            """
-x
-    should not be null or empty, but was empty.
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message if null`` () =
-        fun () ->
-            let x: string = null
-            x.Should().NotBeNullOrEmpty()
-        |> assertExnMsg
-            """
-x
-    should not be null or empty, but was
-<null>
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message if empty with because`` () =
-        fun () ->
-            let x = ""
-            x.Should().NotBeNullOrEmpty("some reason")
-        |> assertExnMsg
-            """
-x
-    should not be null or empty because some reason, but was empty.
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message if null with because`` () =
-        fun () ->
-            let x: string = null
-            x.Should().NotBeNullOrEmpty("some reason")
-        |> assertExnMsg
-            """
-x
-    should not be null or empty because some reason, but was
-<null>
-"""
-
 
 module ``BeUpperCase with culture`` =
 
