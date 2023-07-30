@@ -114,7 +114,7 @@ x
 
 
     [<Fact>]
-    let ``Fails with expected message with because`` () =
+    let ``Fails with expected message if empty with because`` () =
         fun () ->
             let x = "a"
             x.Should().BeEmpty("some reason")
@@ -123,6 +123,19 @@ x
 x
     should be empty because some reason, but was
 "a"
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if null with because`` () =
+        fun () ->
+            let x: string = null
+            x.Should().BeEmpty("some reason")
+        |> assertExnMsg
+            """
+x
+    should be empty because some reason, but was
+<null>
 """
 
 
