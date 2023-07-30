@@ -73,3 +73,59 @@ x
     with length
 0
 """
+
+
+module BeEmpty =
+
+
+    [<Fact>]
+    let ``Can be chained with And`` () =
+        "".Should().BeEmpty().Id<And<string>>().And.Be("")
+
+
+    [<Fact>]
+    let ``Passes if string is empty`` () = "".Should().BeEmpty()
+
+
+    [<Fact>]
+    let ``Fails if string is not empty`` () =
+        Assert.Throws<AssertionFailedException>(fun () -> "a".Should().BeEmpty() |> ignore)
+
+
+    [<Fact>]
+    let ``Fails with expected message`` () =
+        fun () ->
+            let x = "a"
+            x.Should().BeEmpty()
+        |> assertExnMsg
+            """
+x
+    should be empty, but was
+"a"
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if null`` () =
+        fun () ->
+            let x: string = null
+            x.Should().BeEmpty()
+        |> assertExnMsg
+            """
+x
+    should be empty, but was
+<null>
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because`` () =
+        fun () ->
+            let x = "a"
+            x.Should().BeEmpty("some reason")
+        |> assertExnMsg
+            """
+x
+    should be empty because some reason, but was
+"a"
+"""

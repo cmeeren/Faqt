@@ -26,3 +26,15 @@ type StringAssertions =
             )
 
         And(t)
+
+
+    // TODO: Remove this after the corresponding IEnumerable method has been implemented?
+    /// Asserts that the subject is empty. Equivalent to HaveLength(0) (but with a different error message).
+    [<Extension>]
+    static member BeEmpty(t: Testable<string>, ?because) : And<string> =
+        use _ = t.Assert()
+
+        if isNull t.Subject || t.Subject.Length <> 0 then
+            t.Fail("{subject}\n\tshould be empty{because}, but was\n{actual}", because)
+
+        And(t)
