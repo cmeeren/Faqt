@@ -42,6 +42,21 @@ x
 
 
     [<Fact>]
+    let ``Fails with expected message if null`` () =
+        fun () ->
+            let x: string = null
+            x.Should().HaveLength(1)
+        |> assertExnMsg
+            """
+x
+    should have length
+1
+    but was
+<null>
+"""
+
+
+    [<Fact>]
     let ``Fails with expected message with because`` () =
         fun () ->
             let x = ""

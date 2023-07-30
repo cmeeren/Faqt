@@ -15,7 +15,7 @@ type StringAssertions =
     static member HaveLength(t: Testable<string>, expected: int, ?because) : And<string> =
         use _ = t.Assert()
 
-        if t.Subject.Length <> expected then
+        if isNull t.Subject || t.Subject.Length <> expected then
             t.Fail("{subject}\n\tshould have length\n{0}\n\t{because}but was\n{actual}", because, format expected)
 
         And(t)
