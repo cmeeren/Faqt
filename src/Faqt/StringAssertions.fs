@@ -375,3 +375,10 @@ type StringAssertions =
             )
 
         And(t)
+
+
+    /// Asserts that the subject matches the specified regex pattern.
+    [<Extension>]
+    static member MatchRegex(t: Testable<string>, pattern: string, ?because) : And<string> =
+        use _ = t.Assert()
+        t.MatchRegex(pattern, RegexOptions.None, ?because = because)
