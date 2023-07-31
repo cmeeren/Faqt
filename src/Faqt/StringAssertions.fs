@@ -209,3 +209,69 @@ type StringAssertions =
     static member NotContain(t: Testable<string>, substring: string, ?because) : And<string> =
         use _ = t.Assert()
         t.NotContain(substring, StringComparison.Ordinal, ?because = because)
+
+
+    /// Asserts that the subject starts with the specified string using the specified string comparison type.
+    [<Extension>]
+    static member StartWith
+        (
+            t: Testable<string>,
+            substring: string,
+            comparisonType: StringComparison,
+            ?because
+        ) : And<string> =
+        use _ = t.Assert()
+
+        if isNull substring then
+            nullArg (nameof substring)
+
+        if isNull t.Subject || not (t.Subject.StartsWith(substring, comparisonType)) then
+            t.Fail(
+                "{subject}\n\tshould start with\n{0}\n\tusing {1}{because}, but was\n{actual}",
+                because,
+                format substring,
+                getStringComparisonStr comparisonType
+            )
+
+        And(t)
+
+
+    /// Asserts that the subject starts with the specified string using ordinal string comparison.
+    [<Extension>]
+    static member StartWith(t: Testable<string>, substring: string, ?because) : And<string> =
+        use _ = t.Assert()
+        t.StartWith(substring, StringComparison.Ordinal, ?because = because)
+
+
+    /// Asserts that the subject does not start with the specified string using the specified string comparison type.
+    /// Passes if the subject is null.
+    [<Extension>]
+    static member NotStartWith
+        (
+            t: Testable<string>,
+            substring: string,
+            comparisonType: StringComparison,
+            ?because
+        ) : And<string> =
+        use _ = t.Assert()
+
+        if isNull substring then
+            nullArg (nameof substring)
+
+        if not (isNull t.Subject) && t.Subject.StartsWith(substring, comparisonType) then
+            t.Fail(
+                "{subject}\n\tshould not start with\n{0}\n\tusing {1}{because}, but was\n{actual}",
+                because,
+                format substring,
+                getStringComparisonStr comparisonType
+            )
+
+        And(t)
+
+
+    /// Asserts that the subject does not start with the specified string using ordinal string comparison. Passes if the
+    /// subject is null.
+    [<Extension>]
+    static member NotStartWith(t: Testable<string>, substring: string, ?because) : And<string> =
+        use _ = t.Assert()
+        t.NotStartWith(substring, StringComparison.Ordinal, ?because = because)

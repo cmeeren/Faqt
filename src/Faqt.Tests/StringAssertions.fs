@@ -914,3 +914,359 @@ x
     using StringComparison.Ordinal because some reason, but was
 "asd"
 """
+
+
+module ``StartWith with StringComparison`` =
+
+
+    [<Fact>]
+    let ``Can be chained with And`` () =
+        "asd"
+            .Should()
+            .StartWith("a", StringComparison.Ordinal)
+            .Id<And<string>>()
+            .And.Be("asd")
+
+
+    [<Fact>]
+    let ``Passes if string starts with substring`` () =
+        "asd".Should().StartWith("a", StringComparison.Ordinal)
+
+
+    [<Fact>]
+    let ``Passes if string starts with substring using StringComparison.OrdinalIgnoreCase`` () =
+        "asd".Should().StartWith("A", StringComparison.OrdinalIgnoreCase)
+
+
+    [<Fact>]
+    let ``Throws ArgumentNullException if substring is null`` () =
+        Assert.Throws<ArgumentNullException>(fun () -> "".Should().StartWith(null, StringComparison.Ordinal) |> ignore)
+
+
+    [<Fact>]
+    let ``Fails with expected message if string does not start with substring`` () =
+        fun () ->
+            let x = "asd"
+            x.Should().StartWith("A", StringComparison.Ordinal)
+        |> assertExnMsg
+            """
+x
+    should start with
+"A"
+    using StringComparison.Ordinal, but was
+"asd"
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if string does not start with substring using StringComparison.CurrentCulture with nb-NO``
+        ()
+        =
+        use _ = CultureInfo.withCurrentCulture "nb-NO"
+
+        fun () ->
+            let x = "asd"
+            x.Should().StartWith("A", StringComparison.CurrentCulture)
+        |> assertExnMsg
+            """
+x
+    should start with
+"A"
+    using StringComparison.CurrentCulture (culture nb-NO), but was
+"asd"
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if string does not start with substring using StringComparison.CurrentCulture with invariant culture``
+        ()
+        =
+        use _ = CultureInfo.withCurrentCulture ""
+
+        fun () ->
+            let x = "asd"
+            x.Should().StartWith("A", StringComparison.CurrentCulture)
+        |> assertExnMsg
+            """
+x
+    should start with
+"A"
+    using StringComparison.CurrentCulture (invariant culture), but was
+"asd"
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if null`` () =
+        fun () ->
+            let x: string = null
+            x.Should().StartWith("A", StringComparison.Ordinal)
+        |> assertExnMsg
+            """
+x
+    should start with
+"A"
+    using StringComparison.Ordinal, but was
+<null>
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because`` () =
+        fun () ->
+            let x = "asd"
+            x.Should().StartWith("A", StringComparison.Ordinal, "some reason")
+        |> assertExnMsg
+            """
+x
+    should start with
+"A"
+    using StringComparison.Ordinal because some reason, but was
+"asd"
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if null with because`` () =
+        fun () ->
+            let x: string = null
+            x.Should().StartWith("A", StringComparison.Ordinal, "some reason")
+        |> assertExnMsg
+            """
+x
+    should start with
+"A"
+    using StringComparison.Ordinal because some reason, but was
+<null>
+"""
+
+
+module ``StartWith without StringComparison`` =
+
+
+    [<Fact>]
+    let ``Can be chained with And`` () =
+        "asd".Should().StartWith("a").Id<And<string>>().And.Be("asd")
+
+
+    [<Fact>]
+    let ``Passes if string starts with substring`` () = "asd".Should().StartWith("a")
+
+
+    [<Fact>]
+    let ``Throws ArgumentNullException if substring is null`` () =
+        Assert.Throws<ArgumentNullException>(fun () -> "".Should().StartWith(null) |> ignore)
+
+
+    [<Fact>]
+    let ``Fails with expected message if string does not start with substring`` () =
+        fun () ->
+            let x = "asd"
+            x.Should().StartWith("A")
+        |> assertExnMsg
+            """
+x
+    should start with
+"A"
+    using StringComparison.Ordinal, but was
+"asd"
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if null`` () =
+        fun () ->
+            let x: string = null
+            x.Should().StartWith("A")
+        |> assertExnMsg
+            """
+x
+    should start with
+"A"
+    using StringComparison.Ordinal, but was
+<null>
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because`` () =
+        fun () ->
+            let x = "asd"
+            x.Should().StartWith("A", "some reason")
+        |> assertExnMsg
+            """
+x
+    should start with
+"A"
+    using StringComparison.Ordinal because some reason, but was
+"asd"
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if null with because`` () =
+        fun () ->
+            let x: string = null
+            x.Should().StartWith("A", "some reason")
+        |> assertExnMsg
+            """
+x
+    should start with
+"A"
+    using StringComparison.Ordinal because some reason, but was
+<null>
+"""
+
+
+module ``NotStartWith with StringComparison`` =
+
+
+    [<Fact>]
+    let ``Can be chained with And`` () =
+        "asd"
+            .Should()
+            .NotStartWith("A", StringComparison.Ordinal)
+            .Id<And<string>>()
+            .And.Be("asd")
+
+
+    [<Fact>]
+    let ``Passes if string does not start with substring`` () =
+        "asd".Should().NotStartWith("A", StringComparison.Ordinal)
+
+
+    [<Fact>]
+    let ``Passes if string does not start with substring using StringComparison.OrdinalIgnoreCase`` () =
+        "asd".Should().NotStartWith("f", StringComparison.OrdinalIgnoreCase)
+
+
+    [<Fact>]
+    let ``Passes if subject is null`` () =
+        (null: string).Should().NotStartWith("A", StringComparison.Ordinal)
+
+
+    [<Fact>]
+    let ``Throws ArgumentNullException if substring is null`` () =
+        Assert.Throws<ArgumentNullException>(fun () ->
+            "".Should().NotStartWith(null, StringComparison.Ordinal) |> ignore
+        )
+
+
+    [<Fact>]
+    let ``Fails with expected message if string starts with substring`` () =
+        fun () ->
+            let x = "asd"
+            x.Should().NotStartWith("a", StringComparison.Ordinal)
+        |> assertExnMsg
+            """
+x
+    should not start with
+"a"
+    using StringComparison.Ordinal, but was
+"asd"
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if string starts with substring using StringComparison.CurrentCulture with nb-NO``
+        ()
+        =
+        use _ = CultureInfo.withCurrentCulture "nb-NO"
+
+        fun () ->
+            let x = "asd"
+            x.Should().NotStartWith("a", StringComparison.CurrentCulture)
+        |> assertExnMsg
+            """
+x
+    should not start with
+"a"
+    using StringComparison.CurrentCulture (culture nb-NO), but was
+"asd"
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if string does not start with substring using StringComparison.CurrentCulture with invariant culture``
+        ()
+        =
+        use _ = CultureInfo.withCurrentCulture ""
+
+        fun () ->
+            let x = "asd"
+            x.Should().NotStartWith("a", StringComparison.CurrentCulture)
+        |> assertExnMsg
+            """
+x
+    should not start with
+"a"
+    using StringComparison.CurrentCulture (invariant culture), but was
+"asd"
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because`` () =
+        fun () ->
+            let x = "asd"
+            x.Should().NotStartWith("a", StringComparison.Ordinal, "some reason")
+        |> assertExnMsg
+            """
+x
+    should not start with
+"a"
+    using StringComparison.Ordinal because some reason, but was
+"asd"
+"""
+
+
+module ``NotStartWith without StringComparison`` =
+
+
+    [<Fact>]
+    let ``Can be chained with And`` () =
+        "asd".Should().NotStartWith("A").Id<And<string>>().And.Be("asd")
+
+
+    [<Fact>]
+    let ``Passes if string does not start with substring`` () = "asd".Should().NotStartWith("A")
+
+
+    [<Fact>]
+    let ``Passes if subject is null`` () =
+        (null: string).Should().NotStartWith("A")
+
+
+    [<Fact>]
+    let ``Throws ArgumentNullException if substring is null`` () =
+        Assert.Throws<ArgumentNullException>(fun () -> "".Should().NotStartWith(null) |> ignore)
+
+
+    [<Fact>]
+    let ``Fails with expected message if string starts with substring`` () =
+        fun () ->
+            let x = "asd"
+            x.Should().NotStartWith("a")
+        |> assertExnMsg
+            """
+x
+    should not start with
+"a"
+    using StringComparison.Ordinal, but was
+"asd"
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because`` () =
+        fun () ->
+            let x = "asd"
+            x.Should().NotStartWith("a", "some reason")
+        |> assertExnMsg
+            """
+x
+    should not start with
+"a"
+    using StringComparison.Ordinal because some reason, but was
+"asd"
+"""
