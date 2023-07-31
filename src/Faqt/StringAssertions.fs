@@ -26,6 +26,10 @@ module private Helpers =
         "StringComparison." + comparisonType.ToString() + cultureSuffix
 
 
+    let getRegexOptionsStr (options: RegexOptions) =
+        "using RegexOptions." + options.ToString()
+
+
 [<Extension>]
 type StringAssertions =
 
@@ -352,10 +356,10 @@ type StringAssertions =
 
         if isNull t.Subject || not (regex.IsMatch(t.Subject)) then
             t.Fail(
-                "{subject}\n\tshould match the regex\n{0}\n\tusing RegexOptions.{1}{because}, but was\n{actual}",
+                "{subject}\n\tshould match the regex\n{0}\n\t{1}{because}, but was\n{actual}",
                 because,
                 regex.ToString(),
-                regex.Options.ToString()
+                getRegexOptionsStr regex.Options
             )
 
         And(t)
@@ -368,10 +372,10 @@ type StringAssertions =
 
         if isNull t.Subject || not (Regex.IsMatch(t.Subject, pattern, options)) then
             t.Fail(
-                "{subject}\n\tshould match the regex\n{0}\n\tusing RegexOptions.{1}{because}, but was\n{actual}",
+                "{subject}\n\tshould match the regex\n{0}\n\t{1}{because}, but was\n{actual}",
                 because,
                 pattern,
-                options.ToString()
+                getRegexOptionsStr options
             )
 
         And(t)
