@@ -3,6 +3,7 @@
 open System
 open System.Globalization
 open System.Runtime.CompilerServices
+open System.Text.RegularExpressions
 open AssertionHelpers
 open Formatting
 
@@ -341,3 +342,19 @@ type StringAssertions =
     static member NotEndWith(t: Testable<string>, substring: string, ?because) : And<string> =
         use _ = t.Assert()
         t.NotEndWith(substring, StringComparison.Ordinal, ?because = because)
+
+
+    /// Asserts that the subject matches the specified regex.
+    [<Extension>]
+    static member MatchRegex(t: Testable<string>, regex: Regex, ?because) : And<string> =
+        use _ = t.Assert()
+
+        if isNull t.Subject || not (regex.IsMatch(t.Subject)) then
+            t.Fail(
+                "{subject}\n\tshould match the regex\n{0}\n\tusing RegexOptions.{1}{because}, but was\n{actual}",
+                because,
+                regex.ToString(),
+                regex.Options.ToString()
+            )
+
+        And(t)
