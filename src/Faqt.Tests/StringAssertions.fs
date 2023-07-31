@@ -1717,3 +1717,98 @@ b.*
     using RegexOptions.None because some reason, but was
 <null>
 """
+
+
+module ``MatchRegex with string and options`` =
+
+
+    [<Fact>]
+    let ``Can be chained with And`` () =
+        "asd"
+            .Should()
+            .MatchRegex(".*", RegexOptions.None)
+            .Id<And<string>>()
+            .And.Be("asd")
+
+
+    [<Fact>]
+    let ``Passes if string matches regex`` () =
+        "asd".Should().MatchRegex("as.*", RegexOptions.None)
+
+
+    [<Fact>]
+    let ``Fails with expected message if string does not match regex`` () =
+        fun () ->
+            let x = "asd"
+            x.Should().MatchRegex("b.*", RegexOptions.None)
+        |> assertExnMsg
+            """
+x
+    should match the regex
+b.*
+    using RegexOptions.None, but was
+"asd"
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if string does not match regex using multiple RegexOptions`` () =
+        use _ = CultureInfo.withCurrentCulture "nb-NO"
+
+        fun () ->
+            let x = "asd"
+
+            x.Should().MatchRegex("b.*", RegexOptions.IgnoreCase ||| RegexOptions.Multiline)
+        |> assertExnMsg
+            """
+x
+    should match the regex
+b.*
+    using RegexOptions.IgnoreCase, Multiline, but was
+"asd"
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if null`` () =
+        fun () ->
+            let x: string = null
+            x.Should().MatchRegex("b.*", RegexOptions.None)
+        |> assertExnMsg
+            """
+x
+    should match the regex
+b.*
+    using RegexOptions.None, but was
+<null>
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because`` () =
+        fun () ->
+            let x = "asd"
+            x.Should().MatchRegex("b.*", RegexOptions.None, "some reason")
+        |> assertExnMsg
+            """
+x
+    should match the regex
+b.*
+    using RegexOptions.None because some reason, but was
+"asd"
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if null with because`` () =
+        fun () ->
+            let x: string = null
+            x.Should().MatchRegex("b.*", RegexOptions.None, "some reason")
+        |> assertExnMsg
+            """
+x
+    should match the regex
+b.*
+    using RegexOptions.None because some reason, but was
+<null>
+"""

@@ -358,3 +358,19 @@ type StringAssertions =
             )
 
         And(t)
+
+
+    /// Asserts that the subject matches the specified regex pattern using the specified options.
+    [<Extension>]
+    static member MatchRegex(t: Testable<string>, pattern: string, options: RegexOptions, ?because) : And<string> =
+        use _ = t.Assert()
+
+        if isNull t.Subject || not (Regex.IsMatch(t.Subject, pattern, options)) then
+            t.Fail(
+                "{subject}\n\tshould match the regex\n{0}\n\tusing RegexOptions.{1}{because}, but was\n{actual}",
+                because,
+                pattern,
+                options.ToString()
+            )
+
+        And(t)
