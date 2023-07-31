@@ -1649,13 +1649,13 @@ module ``MatchRegex with Regex`` =
 x
     should match the regex
 b.*
-    using RegexOptions.None, but was
+    but was
 "asd"
 """
 
 
     [<Fact>]
-    let ``Fails with expected message if string does not match regex using multiple RegexOptions`` () =
+    let ``Fails with expected message if string does not match regex using custom RegexOptions`` () =
         use _ = CultureInfo.withCurrentCulture "nb-NO"
 
         fun () ->
@@ -1684,7 +1684,7 @@ b.*
 x
     should match the regex
 b.*
-    using RegexOptions.None, but was
+    but was
 <null>
 """
 
@@ -1699,7 +1699,7 @@ b.*
 x
     should match the regex
 b.*
-    using RegexOptions.None because some reason, but was
+    because some reason, but was
 "asd"
 """
 
@@ -1714,7 +1714,7 @@ b.*
 x
     should match the regex
 b.*
-    using RegexOptions.None because some reason, but was
+    because some reason, but was
 <null>
 """
 
@@ -1746,7 +1746,7 @@ module ``MatchRegex with string and options`` =
 x
     should match the regex
 b.*
-    using RegexOptions.None, but was
+    but was
 "asd"
 """
 
@@ -1779,7 +1779,7 @@ b.*
 x
     should match the regex
 b.*
-    using RegexOptions.None, but was
+    but was
 <null>
 """
 
@@ -1794,7 +1794,7 @@ b.*
 x
     should match the regex
 b.*
-    using RegexOptions.None because some reason, but was
+    because some reason, but was
 "asd"
 """
 
@@ -1809,7 +1809,7 @@ b.*
 x
     should match the regex
 b.*
-    using RegexOptions.None because some reason, but was
+    because some reason, but was
 <null>
 """
 
@@ -1836,7 +1836,7 @@ module ``MatchRegex with string`` =
 x
     should match the regex
 b.*
-    using RegexOptions.None, but was
+    but was
 "asd"
 """
 
@@ -1851,7 +1851,7 @@ b.*
 x
     should match the regex
 b.*
-    using RegexOptions.None, but was
+    but was
 <null>
 """
 
@@ -1866,7 +1866,7 @@ b.*
 x
     should match the regex
 b.*
-    using RegexOptions.None because some reason, but was
+    because some reason, but was
 "asd"
 """
 
@@ -1881,6 +1881,6 @@ b.*
 x
     should match the regex
 b.*
-    using RegexOptions.None because some reason, but was
+    because some reason, but was
 <null>
 """

@@ -27,7 +27,7 @@ module private Helpers =
 
 
     let getRegexOptionsStr (options: RegexOptions) =
-        "using RegexOptions." + options.ToString()
+        "using RegexOptions." + options.ToString() + ", "
 
 
 [<Extension>]
@@ -355,12 +355,19 @@ type StringAssertions =
         use _ = t.Assert()
 
         if isNull t.Subject || not (regex.IsMatch(t.Subject)) then
-            t.Fail(
-                "{subject}\n\tshould match the regex\n{0}\n\t{1}{because}, but was\n{actual}",
-                because,
-                regex.ToString(),
-                getRegexOptionsStr regex.Options
-            )
+            if regex.Options = RegexOptions.None then
+                t.Fail(
+                    "{subject}\n\tshould match the regex\n{0}\n\t{because}but was\n{actual}",
+                    because,
+                    regex.ToString()
+                )
+            else
+                t.Fail(
+                    "{subject}\n\tshould match the regex\n{0}\n\t{1}{because}but was\n{actual}",
+                    because,
+                    regex.ToString(),
+                    getRegexOptionsStr regex.Options
+                )
 
         And(t)
 
@@ -371,12 +378,15 @@ type StringAssertions =
         use _ = t.Assert()
 
         if isNull t.Subject || not (Regex.IsMatch(t.Subject, pattern, options)) then
-            t.Fail(
-                "{subject}\n\tshould match the regex\n{0}\n\t{1}{because}, but was\n{actual}",
-                because,
-                pattern,
-                getRegexOptionsStr options
-            )
+            if options = RegexOptions.None then
+                t.Fail("{subject}\n\tshould match the regex\n{0}\n\t{because}but was\n{actual}", because, pattern)
+            else
+                t.Fail(
+                    "{subject}\n\tshould match the regex\n{0}\n\t{1}{because}but was\n{actual}",
+                    because,
+                    pattern,
+                    getRegexOptionsStr options
+                )
 
         And(t)
 
