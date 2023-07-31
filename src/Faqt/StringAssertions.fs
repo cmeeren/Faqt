@@ -275,3 +275,69 @@ type StringAssertions =
     static member NotStartWith(t: Testable<string>, substring: string, ?because) : And<string> =
         use _ = t.Assert()
         t.NotStartWith(substring, StringComparison.Ordinal, ?because = because)
+
+
+    /// Asserts that the subject ends with the specified string using the specified string comparison type.
+    [<Extension>]
+    static member EndWith
+        (
+            t: Testable<string>,
+            substring: string,
+            comparisonType: StringComparison,
+            ?because
+        ) : And<string> =
+        use _ = t.Assert()
+
+        if isNull substring then
+            nullArg (nameof substring)
+
+        if isNull t.Subject || not (t.Subject.EndsWith(substring, comparisonType)) then
+            t.Fail(
+                "{subject}\n\tshould end with\n{0}\n\tusing {1}{because}, but was\n{actual}",
+                because,
+                format substring,
+                getStringComparisonStr comparisonType
+            )
+
+        And(t)
+
+
+    /// Asserts that the subject ends with the specified string using ordinal string comparison.
+    [<Extension>]
+    static member EndWith(t: Testable<string>, substring: string, ?because) : And<string> =
+        use _ = t.Assert()
+        t.EndWith(substring, StringComparison.Ordinal, ?because = because)
+
+
+    /// Asserts that the subject does not end with the specified string using the specified string comparison type.
+    /// Passes if the subject is null.
+    [<Extension>]
+    static member NotEndWith
+        (
+            t: Testable<string>,
+            substring: string,
+            comparisonType: StringComparison,
+            ?because
+        ) : And<string> =
+        use _ = t.Assert()
+
+        if isNull substring then
+            nullArg (nameof substring)
+
+        if not (isNull t.Subject) && t.Subject.EndsWith(substring, comparisonType) then
+            t.Fail(
+                "{subject}\n\tshould not end with\n{0}\n\tusing {1}{because}, but was\n{actual}",
+                because,
+                format substring,
+                getStringComparisonStr comparisonType
+            )
+
+        And(t)
+
+
+    /// Asserts that the subject does not end with the specified string using ordinal string comparison. Passes if the
+    /// subject is null.
+    [<Extension>]
+    static member NotEndWith(t: Testable<string>, substring: string, ?because) : And<string> =
+        use _ = t.Assert()
+        t.NotEndWith(substring, StringComparison.Ordinal, ?because = because)

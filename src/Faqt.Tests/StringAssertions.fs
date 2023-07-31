@@ -1270,3 +1270,356 @@ x
     using StringComparison.Ordinal because some reason, but was
 "asd"
 """
+
+
+module ``EndWith with StringComparison`` =
+
+
+    [<Fact>]
+    let ``Can be chained with And`` () =
+        "asd"
+            .Should()
+            .EndWith("d", StringComparison.Ordinal)
+            .Id<And<string>>()
+            .And.Be("asd")
+
+
+    [<Fact>]
+    let ``Passes if string ends with substring`` () =
+        "asd".Should().EndWith("d", StringComparison.Ordinal)
+
+
+    [<Fact>]
+    let ``Passes if string ends with substring using StringComparison.OrdinalIgnoreCase`` () =
+        "asd".Should().EndWith("D", StringComparison.OrdinalIgnoreCase)
+
+
+    [<Fact>]
+    let ``Throws ArgumentNullException if substring is null`` () =
+        Assert.Throws<ArgumentNullException>(fun () -> "".Should().EndWith(null, StringComparison.Ordinal) |> ignore)
+
+
+    [<Fact>]
+    let ``Fails with expected message if string does not end with substring`` () =
+        fun () ->
+            let x = "asd"
+            x.Should().EndWith("D", StringComparison.Ordinal)
+        |> assertExnMsg
+            """
+x
+    should end with
+"D"
+    using StringComparison.Ordinal, but was
+"asd"
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if string does not end with substring using StringComparison.CurrentCulture with nb-NO``
+        ()
+        =
+        use _ = CultureInfo.withCurrentCulture "nb-NO"
+
+        fun () ->
+            let x = "asd"
+            x.Should().EndWith("D", StringComparison.CurrentCulture)
+        |> assertExnMsg
+            """
+x
+    should end with
+"D"
+    using StringComparison.CurrentCulture (culture nb-NO), but was
+"asd"
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if string does not end with substring using StringComparison.CurrentCulture with invariant culture``
+        ()
+        =
+        use _ = CultureInfo.withCurrentCulture ""
+
+        fun () ->
+            let x = "asd"
+            x.Should().EndWith("D", StringComparison.CurrentCulture)
+        |> assertExnMsg
+            """
+x
+    should end with
+"D"
+    using StringComparison.CurrentCulture (invariant culture), but was
+"asd"
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if null`` () =
+        fun () ->
+            let x: string = null
+            x.Should().EndWith("D", StringComparison.Ordinal)
+        |> assertExnMsg
+            """
+x
+    should end with
+"D"
+    using StringComparison.Ordinal, but was
+<null>
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because`` () =
+        fun () ->
+            let x = "asd"
+            x.Should().EndWith("D", StringComparison.Ordinal, "some reason")
+        |> assertExnMsg
+            """
+x
+    should end with
+"D"
+    using StringComparison.Ordinal because some reason, but was
+"asd"
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if null with because`` () =
+        fun () ->
+            let x: string = null
+            x.Should().EndWith("D", StringComparison.Ordinal, "some reason")
+        |> assertExnMsg
+            """
+x
+    should end with
+"D"
+    using StringComparison.Ordinal because some reason, but was
+<null>
+"""
+
+
+module ``EndWith without StringComparison`` =
+
+
+    [<Fact>]
+    let ``Can be chained with And`` () =
+        "asd".Should().EndWith("d").Id<And<string>>().And.Be("asd")
+
+
+    [<Fact>]
+    let ``Passes if string ends with substring`` () = "asd".Should().EndWith("d")
+
+
+    [<Fact>]
+    let ``Throws ArgumentNullException if substring is null`` () =
+        Assert.Throws<ArgumentNullException>(fun () -> "".Should().EndWith(null) |> ignore)
+
+
+    [<Fact>]
+    let ``Fails with expected message if string does not end with substring`` () =
+        fun () ->
+            let x = "asd"
+            x.Should().EndWith("D")
+        |> assertExnMsg
+            """
+x
+    should end with
+"D"
+    using StringComparison.Ordinal, but was
+"asd"
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if null`` () =
+        fun () ->
+            let x: string = null
+            x.Should().EndWith("D")
+        |> assertExnMsg
+            """
+x
+    should end with
+"D"
+    using StringComparison.Ordinal, but was
+<null>
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because`` () =
+        fun () ->
+            let x = "asd"
+            x.Should().EndWith("D", "some reason")
+        |> assertExnMsg
+            """
+x
+    should end with
+"D"
+    using StringComparison.Ordinal because some reason, but was
+"asd"
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if null with because`` () =
+        fun () ->
+            let x: string = null
+            x.Should().EndWith("D", "some reason")
+        |> assertExnMsg
+            """
+x
+    should end with
+"D"
+    using StringComparison.Ordinal because some reason, but was
+<null>
+"""
+
+
+module ``NotEndWith with StringComparison`` =
+
+
+    [<Fact>]
+    let ``Can be chained with And`` () =
+        "asd"
+            .Should()
+            .NotEndWith("D", StringComparison.Ordinal)
+            .Id<And<string>>()
+            .And.Be("asd")
+
+
+    [<Fact>]
+    let ``Passes if string does not end with substring`` () =
+        "asd".Should().NotEndWith("D", StringComparison.Ordinal)
+
+
+    [<Fact>]
+    let ``Passes if string does not end with substring using StringComparison.OrdinalIgnoreCase`` () =
+        "asd".Should().NotEndWith("f", StringComparison.OrdinalIgnoreCase)
+
+
+    [<Fact>]
+    let ``Passes if subject is null`` () =
+        (null: string).Should().NotEndWith("D", StringComparison.Ordinal)
+
+
+    [<Fact>]
+    let ``Throws ArgumentNullException if substring is null`` () =
+        Assert.Throws<ArgumentNullException>(fun () -> "".Should().NotEndWith(null, StringComparison.Ordinal) |> ignore)
+
+
+    [<Fact>]
+    let ``Fails with expected message if string ends with substring`` () =
+        fun () ->
+            let x = "asd"
+            x.Should().NotEndWith("d", StringComparison.Ordinal)
+        |> assertExnMsg
+            """
+x
+    should not end with
+"d"
+    using StringComparison.Ordinal, but was
+"asd"
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if string ends with substring using StringComparison.CurrentCulture with nb-NO``
+        ()
+        =
+        use _ = CultureInfo.withCurrentCulture "nb-NO"
+
+        fun () ->
+            let x = "asd"
+            x.Should().NotEndWith("d", StringComparison.CurrentCulture)
+        |> assertExnMsg
+            """
+x
+    should not end with
+"d"
+    using StringComparison.CurrentCulture (culture nb-NO), but was
+"asd"
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if string does not end with substring using StringComparison.CurrentCulture with invariant culture``
+        ()
+        =
+        use _ = CultureInfo.withCurrentCulture ""
+
+        fun () ->
+            let x = "asd"
+            x.Should().NotEndWith("d", StringComparison.CurrentCulture)
+        |> assertExnMsg
+            """
+x
+    should not end with
+"d"
+    using StringComparison.CurrentCulture (invariant culture), but was
+"asd"
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because`` () =
+        fun () ->
+            let x = "asd"
+            x.Should().NotEndWith("d", StringComparison.Ordinal, "some reason")
+        |> assertExnMsg
+            """
+x
+    should not end with
+"d"
+    using StringComparison.Ordinal because some reason, but was
+"asd"
+"""
+
+
+module ``NotEndWith without StringComparison`` =
+
+
+    [<Fact>]
+    let ``Can be chained with And`` () =
+        "asd".Should().NotEndWith("D").Id<And<string>>().And.Be("asd")
+
+
+    [<Fact>]
+    let ``Passes if string does not end with substring`` () = "asd".Should().NotEndWith("D")
+
+
+    [<Fact>]
+    let ``Passes if subject is null`` () = (null: string).Should().NotEndWith("D")
+
+
+    [<Fact>]
+    let ``Throws ArgumentNullException if substring is null`` () =
+        Assert.Throws<ArgumentNullException>(fun () -> "".Should().NotEndWith(null) |> ignore)
+
+
+    [<Fact>]
+    let ``Fails with expected message if string ends with substring`` () =
+        fun () ->
+            let x = "asd"
+            x.Should().NotEndWith("d")
+        |> assertExnMsg
+            """
+x
+    should not end with
+"d"
+    using StringComparison.Ordinal, but was
+"asd"
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because`` () =
+        fun () ->
+            let x = "asd"
+            x.Should().NotEndWith("d", "some reason")
+        |> assertExnMsg
+            """
+x
+    should not end with
+"d"
+    using StringComparison.Ordinal because some reason, but was
+"asd"
+"""
