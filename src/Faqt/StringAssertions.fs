@@ -1,6 +1,7 @@
 ﻿namespace Faqt
 
 open System
+open System.Diagnostics.CodeAnalysis
 open System.Globalization
 open System.Runtime.CompilerServices
 open System.Text.RegularExpressions
@@ -374,7 +375,16 @@ type StringAssertions =
 
     /// Asserts that the subject matches the specified regex pattern using the specified options.
     [<Extension>]
-    static member MatchRegex(t: Testable<string>, pattern: string, options: RegexOptions, ?because) : And<string> =
+    static member MatchRegex
+        (
+            t: Testable<string>,
+#if NET7_0_OR_GREATER
+            [<StringSyntax(StringSyntaxAttribute.Regex)>]
+#endif
+            pattern: string,
+            options: RegexOptions,
+            ?because
+        ) : And<string> =
         use _ = t.Assert()
 
         if isNull t.Subject || not (Regex.IsMatch(t.Subject, pattern, options)) then
@@ -393,7 +403,15 @@ type StringAssertions =
 
     /// Asserts that the subject matches the specified regex pattern.
     [<Extension>]
-    static member MatchRegex(t: Testable<string>, pattern: string, ?because) : And<string> =
+    static member MatchRegex
+        (
+            t: Testable<string>,
+#if NET7_0_OR_GREATER
+            [<StringSyntax(StringSyntaxAttribute.Regex)>]
+#endif
+            pattern: string,
+            ?because
+        ) : And<string> =
         use _ = t.Assert()
         t.MatchRegex(pattern, RegexOptions.None, ?because = because)
 
@@ -424,7 +442,16 @@ type StringAssertions =
     /// Asserts that the subject does not match the specified regex pattern using the specified options. Passes if the
     /// subject is null.
     [<Extension>]
-    static member NotMatchRegex(t: Testable<string>, pattern: string, options: RegexOptions, ?because) : And<string> =
+    static member NotMatchRegex
+        (
+            t: Testable<string>,
+#if NET7_0_OR_GREATER
+            [<StringSyntax(StringSyntaxAttribute.Regex)>]
+#endif
+            pattern: string,
+            options: RegexOptions,
+            ?because
+        ) : And<string> =
         use _ = t.Assert()
 
         if not (isNull t.Subject) && Regex.IsMatch(t.Subject, pattern, options) then
@@ -443,6 +470,14 @@ type StringAssertions =
 
     /// Asserts that the subject does not match the specified regex pattern. Passes if the subject is null.
     [<Extension>]
-    static member NotMatchRegex(t: Testable<string>, pattern: string, ?because) : And<string> =
+    static member NotMatchRegex
+        (
+            t: Testable<string>,
+#if NET7_0_OR_GREATER
+            [<StringSyntax(StringSyntaxAttribute.Regex)>]
+#endif
+            pattern: string,
+            ?because
+        ) : And<string> =
         use _ = t.Assert()
         t.NotMatchRegex(pattern, RegexOptions.None, ?because = because)
