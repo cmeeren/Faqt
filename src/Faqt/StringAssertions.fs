@@ -11,6 +11,7 @@ open Formatting
 [<AutoOpen>]
 module private Helpers =
 
+
     let getStringComparisonStr (comparisonType: StringComparison) =
         let cultureSuffix =
             match comparisonType with
