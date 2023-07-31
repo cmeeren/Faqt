@@ -1644,7 +1644,6 @@ module ``MatchRegex with Regex`` =
         fun () ->
             let x = "asd"
             x.Should().MatchRegex(Regex("b.*"))
-        // TODO
         |> assertExnMsg
             """
 x
@@ -1665,7 +1664,6 @@ b.*
             x
                 .Should()
                 .MatchRegex(Regex("b.*", RegexOptions.IgnoreCase ||| RegexOptions.Multiline))
-        // TODO
         |> assertExnMsg
             """
 x
