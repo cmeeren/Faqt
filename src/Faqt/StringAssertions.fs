@@ -396,3 +396,53 @@ type StringAssertions =
     static member MatchRegex(t: Testable<string>, pattern: string, ?because) : And<string> =
         use _ = t.Assert()
         t.MatchRegex(pattern, RegexOptions.None, ?because = because)
+
+
+    /// Asserts that the subject does not match the specified regex. Passes if the subject is null.
+    [<Extension>]
+    static member NotMatchRegex(t: Testable<string>, regex: Regex, ?because) : And<string> =
+        use _ = t.Assert()
+
+        if not (isNull t.Subject) && regex.IsMatch(t.Subject) then
+            if regex.Options = RegexOptions.None then
+                t.Fail(
+                    "{subject}\n\tshould not match the regex\n{0}\n\t{because}but was\n{actual}",
+                    because,
+                    regex.ToString()
+                )
+            else
+                t.Fail(
+                    "{subject}\n\tshould not match the regex\n{0}\n\t{1}{because}but was\n{actual}",
+                    because,
+                    regex.ToString(),
+                    getRegexOptionsStr regex.Options
+                )
+
+        And(t)
+
+
+    /// Asserts that the subject does not match the specified regex pattern using the specified options. Passes if the
+    /// subject is null.
+    [<Extension>]
+    static member NotMatchRegex(t: Testable<string>, pattern: string, options: RegexOptions, ?because) : And<string> =
+        use _ = t.Assert()
+
+        if not (isNull t.Subject) && Regex.IsMatch(t.Subject, pattern, options) then
+            if options = RegexOptions.None then
+                t.Fail("{subject}\n\tshould not match the regex\n{0}\n\t{because}but was\n{actual}", because, pattern)
+            else
+                t.Fail(
+                    "{subject}\n\tshould not match the regex\n{0}\n\t{1}{because}but was\n{actual}",
+                    because,
+                    pattern,
+                    getRegexOptionsStr options
+                )
+
+        And(t)
+
+
+    /// Asserts that the subject does not match the specified regex pattern. Passes if the subject is null.
+    [<Extension>]
+    static member NotMatchRegex(t: Testable<string>, pattern: string, ?because) : And<string> =
+        use _ = t.Assert()
+        t.NotMatchRegex(pattern, RegexOptions.None, ?because = because)

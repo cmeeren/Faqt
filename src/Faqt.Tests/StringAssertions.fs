@@ -1884,3 +1884,190 @@ b.*
     because some reason, but was
 <null>
 """
+
+
+module ``NotMatchRegex with Regex`` =
+
+
+    [<Fact>]
+    let ``Can be chained with And`` () =
+        "asd".Should().NotMatchRegex(Regex("f.*")).Id<And<string>>().And.Be("asd")
+
+
+    [<Fact>]
+    let ``Passes if string matches regex`` () =
+        "asd".Should().NotMatchRegex(Regex("f.*"))
+
+
+    [<Fact>]
+    let ``Passes if string is null`` () =
+        (null: string).Should().NotMatchRegex(Regex(".*"))
+
+
+    [<Fact>]
+    let ``Fails with expected message if string matches regex`` () =
+        fun () ->
+            let x = "asd"
+            x.Should().NotMatchRegex(Regex(".*"))
+        |> assertExnMsg
+            """
+x
+    should not match the regex
+.*
+    but was
+"asd"
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if string matches regex using custom RegexOptions`` () =
+        use _ = CultureInfo.withCurrentCulture "nb-NO"
+
+        fun () ->
+            let x = "asd"
+
+            x
+                .Should()
+                .NotMatchRegex(Regex(".*", RegexOptions.IgnoreCase ||| RegexOptions.Multiline))
+        |> assertExnMsg
+            """
+x
+    should not match the regex
+.*
+    using RegexOptions.IgnoreCase, Multiline, but was
+"asd"
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because`` () =
+        fun () ->
+            let x = "asd"
+            x.Should().NotMatchRegex(Regex(".*"), "some reason")
+        |> assertExnMsg
+            """
+x
+    should not match the regex
+.*
+    because some reason, but was
+"asd"
+"""
+
+
+module ``NotMatchRegex with string and options`` =
+
+
+    [<Fact>]
+    let ``Can be chained with And`` () =
+        "asd"
+            .Should()
+            .NotMatchRegex("f.*", RegexOptions.None)
+            .Id<And<string>>()
+            .And.Be("asd")
+
+
+    [<Fact>]
+    let ``Passes if string matches regex`` () =
+        "asd".Should().NotMatchRegex("f.*", RegexOptions.None)
+
+
+    [<Fact>]
+    let ``Passes if string is null`` () =
+        (null: string).Should().NotMatchRegex(".*", RegexOptions.None)
+
+
+    [<Fact>]
+    let ``Fails with expected message if string matches regex`` () =
+        fun () ->
+            let x = "asd"
+            x.Should().NotMatchRegex(".*", RegexOptions.None)
+        |> assertExnMsg
+            """
+x
+    should not match the regex
+.*
+    but was
+"asd"
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if string matches regex using multiple RegexOptions`` () =
+        use _ = CultureInfo.withCurrentCulture "nb-NO"
+
+        fun () ->
+            let x = "asd"
+
+            x
+                .Should()
+                .NotMatchRegex(".*", RegexOptions.IgnoreCase ||| RegexOptions.Multiline)
+        |> assertExnMsg
+            """
+x
+    should not match the regex
+.*
+    using RegexOptions.IgnoreCase, Multiline, but was
+"asd"
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because`` () =
+        fun () ->
+            let x = "asd"
+            x.Should().NotMatchRegex(".*", RegexOptions.None, "some reason")
+        |> assertExnMsg
+            """
+x
+    should not match the regex
+.*
+    because some reason, but was
+"asd"
+"""
+
+
+module ``NotMatchRegex with string`` =
+
+
+    [<Fact>]
+    let ``Can be chained with And`` () =
+        "asd".Should().NotMatchRegex("f.*").Id<And<string>>().And.Be("asd")
+
+
+    [<Fact>]
+    let ``Passes if string matches regex`` () = "asd".Should().NotMatchRegex("f.*")
+
+
+    [<Fact>]
+    let ``Passes if string is null`` () =
+        (null: string).Should().NotMatchRegex(".*")
+
+
+    [<Fact>]
+    let ``Fails with expected message if string matches regex`` () =
+        fun () ->
+            let x = "asd"
+            x.Should().NotMatchRegex(".*")
+        |> assertExnMsg
+            """
+x
+    should not match the regex
+.*
+    but was
+"asd"
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because`` () =
+        fun () ->
+            let x = "asd"
+            x.Should().NotMatchRegex(".*", "some reason")
+        |> assertExnMsg
+            """
+x
+    should not match the regex
+.*
+    because some reason, but was
+"asd"
+"""
