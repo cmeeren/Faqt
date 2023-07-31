@@ -789,7 +789,7 @@ module ``NotContain with StringComparison`` =
 
     [<Fact>]
     let ``Passes if subject is null`` () =
-        (null: string).Should().NotContain("d", StringComparison.OrdinalIgnoreCase)
+        (null: string).Should().NotContain("d", StringComparison.Ordinal)
 
 
     [<Fact>]
