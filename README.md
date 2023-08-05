@@ -173,7 +173,7 @@ Simple, right? Here are additional quick remarks that are not shown above:
 * If it's a higher-order assertion that calls user code that calls other assertions, use `t.Assert(true)` instead
   of `t.Assert()`.
 * Return `AndDerived(t, derivedState)` instead of `And(t)` if your assertion extracts derived state.
-* If your assertion calls `Should`, make sure to the `Should(t)` overload.
+* If your assertion calls `Should`, make sure to use the `Should(t)` overload.
 
 If you want all the details, here they are:
 
