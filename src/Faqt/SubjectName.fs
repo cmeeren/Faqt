@@ -33,6 +33,17 @@ type internal CallChain() =
     [<ThreadStatic; DefaultValue>]
     static val mutable private topLevelAssertionHistory: Dictionary<CallChainOrigin, AssertionInfo list>
 
+    static let getParentAssertionCallsite () =
+        CallChain.activeUserAssertions
+        |> Seq.filter (fun kvp ->
+            match kvp.Value with
+            | [] -> false
+            | hd :: _ -> hd.SupportsChildAssertions
+        )
+        |> Seq.sortByDescending (fun kvp -> kvp.Key.LineNumber)
+        |> Seq.tryHead
+        |> Option.map (fun kvp -> kvp.Key)
+
     static let pushAssertion callsite method supportsChildAssertions isSeqAssertion =
 
         let assertions =
@@ -59,18 +70,7 @@ type internal CallChain() =
             | false, _ -> CallChain.topLevelAssertionHistory[callsite] <- [ hd ]
             | true, xs -> CallChain.topLevelAssertionHistory[callsite] <- hd :: xs
 
-            let parentAssertionCallsite =
-                CallChain.activeUserAssertions
-                |> Seq.filter (fun kvp ->
-                    match kvp.Value with
-                    | [] -> false
-                    | hd :: _ -> hd.SupportsChildAssertions
-                )
-                |> Seq.sortByDescending (fun kvp -> kvp.Key.LineNumber)
-                |> Seq.tryHead
-                |> Option.map (fun kvp -> kvp.Key)
-
-            match parentAssertionCallsite with
+            match getParentAssertionCallsite () with
             | None -> ()
             | Some parentCallsite ->
                 match CallChain.topLevelAssertionHistory.TryGetValue parentCallsite with
