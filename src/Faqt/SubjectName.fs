@@ -57,6 +57,24 @@ type internal CallChain() =
             | false, _ -> CallChain.topLevelAssertionHistory[callsite] <- [ hd ]
             | true, xs -> CallChain.topLevelAssertionHistory[callsite] <- hd :: xs
 
+            let parentAssertionCallsite =
+                CallChain.activeUserAssertions
+                |> Seq.filter (fun kvp ->
+                    match kvp.Value with
+                    | [] -> false
+                    | hd :: _ -> hd.SupportsChildAssertions
+                )
+                |> Seq.sortByDescending (fun kvp -> kvp.Key.LineNumber)
+                |> Seq.tryHead
+                |> Option.map (fun kvp -> kvp.Key)
+
+            match parentAssertionCallsite with
+            | None -> ()
+            | Some parentCallsite ->
+                match CallChain.topLevelAssertionHistory.TryGetValue parentCallsite with
+                | false, _ -> CallChain.topLevelAssertionHistory[parentCallsite] <- [ hd ]
+                | true, xs -> CallChain.topLevelAssertionHistory[parentCallsite] <- hd :: xs
+
 
     static let canPushAssertion callsite =
         match CallChain.activeUserAssertions with

@@ -364,6 +364,20 @@ s2
 
 
 [<Fact>]
+let ``Assertions chained after higher-order assertions using the same assertion`` () =
+    fun () ->
+        "asd"
+            .Should()
+            .TestSatisfy(fun s1 -> s1.Should().Test(true))
+            .And.Subject.Length.Should()
+            .Test(false)
+    |> assertExnMsg
+        """
+"asd".Length
+"""
+
+
+[<Fact>]
 let ``Multiple consecutive assertions on same thread`` () =
     fun () ->
         let var1 = 1
@@ -458,7 +472,7 @@ let ``Known limitation: Nested multi-line Satisfy does not work correctly`` () =
             )
     |> assertExnMsg
         """
-"asd".TestSatisfy(fun s1 ->s1
+"asd".TestSatisfy(fun s2 ->s2
 s2
 ss2
 """
