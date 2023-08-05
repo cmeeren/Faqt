@@ -16,14 +16,21 @@ type Testable<'a> internal (subject: 'a, origin: CallChainOrigin) =
 
     /// Call this at the start of your assertions, and make sure to dispose the returned value at the end. This is
     /// needed to track important state necessary for subject names to work. If your assertion calls user code that is
-    /// expected to call their own assertions (like `Satisfy`), call `t.Assert(true)` instead. In that case, do not
-    /// call other assertions directly in the implementation; the next assertion is assumed to be called by the user.
+    /// expected to call their own assertions (like `Satisfy`), call `t.Assert(true)` instead. In that case, do not call
+    /// other assertions directly in the implementation; the next assertion is assumed to be called by the user. If
+    /// additionally you invoke user assertions for each item in a sequence, tall `t.Assert(true, true)` instead.
     member _.Assert
         (
             [<Optional; DefaultParameterValue(false)>] supportsChildAssertions,
+            [<Optional; DefaultParameterValue(false)>] isSeqAssertion,
             [<CallerMemberName; Optional; DefaultParameterValue("")>] assertionMethod: string
         ) =
-        CallChain.Assert(origin, assertionMethod, supportsChildAssertions)
+        CallChain.Assert(origin, assertionMethod, supportsChildAssertions, isSeqAssertion)
+
+    /// If your assertion invokes user-supplied assertions for each item in a sequence, call this before the assertion
+    /// invocation for each item, and make sure to dispose the returned value after the assertion invocation. This is
+    /// needed to track important state necessary for subject names to work.
+    member _.AssertItem() = CallChain.AssertItem(origin)
 
     /// Returns the subject being tested. Alias of Whose.
     member _.Subject: 'a = subject

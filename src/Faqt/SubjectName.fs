@@ -21,6 +21,7 @@ type internal CallChainOrigin = {
 type private AssertionInfo = {
     Method: string
     SupportsChildAssertions: bool
+    IsSeqAssertion: bool
 }
 
 
@@ -32,7 +33,7 @@ type internal CallChain() =
     [<ThreadStatic; DefaultValue>]
     static val mutable private topLevelAssertionHistory: Dictionary<CallChainOrigin, AssertionInfo list>
 
-    static let pushAssertion callsite method supportsChildAssertions =
+    static let pushAssertion callsite method supportsChildAssertions isSeqAssertion =
 
         let assertions =
             match CallChain.activeUserAssertions.TryGetValue callsite with
@@ -43,6 +44,7 @@ type internal CallChain() =
             {
                 Method = method
                 SupportsChildAssertions = supportsChildAssertions
+                IsSeqAssertion = isSeqAssertion
             }
             :: assertions
 
@@ -93,17 +95,34 @@ type internal CallChain() =
             CallChain.topLevelAssertionHistory <- Dictionary()
 
 
-    static member Assert(callsite, assertionMethod, supportsChildAssertions) =
+    static member Assert(callsite, assertionMethod, supportsChildAssertions, isSeqAssertion) =
         CallChain.EnsureInitialized()
 
         if not (canPushAssertion callsite) then
             IDisposable.noOp
         else
-            pushAssertion callsite assertionMethod supportsChildAssertions
+            pushAssertion callsite assertionMethod supportsChildAssertions isSeqAssertion
 
             { new IDisposable with
                 member _.Dispose() = tryPopAssertion callsite
             }
+
+
+    static member AssertItem(callsite) =
+        CallChain.EnsureInitialized()
+
+        match CallChain.topLevelAssertionHistory.TryGetValue callsite with
+        | false, _ -> ()
+        | true, xs ->
+            CallChain.topLevelAssertionHistory[callsite] <- xs |> List.skipWhile (fun x -> not x.IsSeqAssertion)
+
+        match CallChain.activeUserAssertions.TryGetValue callsite with
+        | false, _ -> ()
+        | true, xs -> CallChain.activeUserAssertions[callsite] <- xs |> List.skipWhile (fun x -> not x.IsSeqAssertion)
+
+        // Returning IDisposable and requiring usage with the 'use' keyword gives more flexibility in changing the
+        // implementation later, if needed.
+        IDisposable.noOp
 
     static member AssertionHistory(callsite) =
         let topLevelAssertions =

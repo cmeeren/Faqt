@@ -364,6 +364,46 @@ s2
 
 
 [<Fact>]
+let ``AllSatisfy, multiple failures`` () =
+    fun () -> [ 1; 2; 3 ].Should().TestAllSatisfy(fun s -> s.Should().Fail())
+    |> assertExnMsg
+        """
+[ 1; 2; 3 ]
+s
+s
+s
+"""
+
+
+[<Fact>]
+let ``AllSatisfy single and then chain with same assertion`` () =
+    fun () ->
+        [ 1 ]
+            .Should()
+            .TestAllSatisfy(fun s -> s.ToString().Should().Test(true))
+            .And.Subject.Length.Should()
+            .Test(false)
+    |> assertExnMsg
+        """
+[ 1 ].Length
+"""
+
+
+[<Fact>]
+let ``AllSatisfy multiple and then chain with same assertion`` () =
+    fun () ->
+        [ 1; 2; 3 ]
+            .Should()
+            .TestAllSatisfy(fun s -> s.ToString().Should().Test(true))
+            .And.Subject.Length.Should()
+            .Test(false)
+    |> assertExnMsg
+        """
+[ 1; 2; 3 ].Length
+"""
+
+
+[<Fact>]
 let ``Assertions chained after higher-order assertions using the same assertion`` () =
     fun () ->
         "asd"
@@ -475,6 +515,20 @@ let ``Known limitation: Nested multi-line Satisfy does not work correctly`` () =
 "asd".TestSatisfy(fun s2 ->s2
 s2
 ss2
+"""
+
+
+[<Fact>]
+let ``Known limitation: AllSatisfy with empty sequence does not work correctly`` () =
+    fun () ->
+        List<int>.Empty
+            .Should()
+            .TestAllSatisfy(fun s -> s.ToString().Should().Test(true))
+            .And.Subject.Length.Should()
+            .Test(false)
+    |> assertExnMsg
+        """
+s.ToString()
 """
 
 

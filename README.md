@@ -171,7 +171,9 @@ type Assertions =
 Simple, right? Here are additional quick remarks that are not shown above:
 
 * If it's a higher-order assertion that calls user code that calls other assertions, use `t.Assert(true)` instead
-  of `t.Assert()`.
+  of `t.Assert()`. If it's a higher-order assertion that calls other assertions for each item in an enumerable,
+  use `t.Assert(true, true)` and additionally call `use _ = t.AssertItem()` before each invocation of the user
+  assertion.
 * Return `AndDerived(t, derivedState)` instead of `And(t)` if your assertion extracts derived state.
 * If your assertion calls `Should`, make sure to use the `Should(t)` overload.
 
@@ -256,6 +258,7 @@ cases where it may produce unexpected results:
 * Multi-line strings literals will be concatenated.
 * Lines starting with `//` in multi-line string literals will be removed.
 * Nested `Satisfy` or other higher-order assertions may give incorrect subject names.
+* Chaining assertions after `AllSatisfy` may give incorrect subject names if the sequence is empty.
 
 If you have encountered a case not listed above, please raise an issue. If I can't or won't fix it, I can at the very
 least document it as a known limitation.

@@ -94,6 +94,31 @@ type Assertions =
 
 
     [<Extension>]
+    static member TestAllSatisfy(t: Testable<#seq<'a>>, assertion: 'a -> 'ignored) : And<_> =
+        use _ = t.Assert(true, true)
+
+        let exceptions =
+            t.Subject
+            |> Seq.choose (fun x ->
+                try
+                    use _ = t.AssertItem()
+                    assertion x |> ignore
+                    None
+                with :? AssertionFailedException as ex ->
+                    Some ex
+            )
+            |> Seq.toArray
+
+        if exceptions.Length > 0 then
+            let assertionFailuresString =
+                exceptions |> Seq.map (fun ex -> ex.Message) |> String.concat ""
+
+            t.Fail("{subject}{0}", None, assertionFailuresString)
+
+        And(t)
+
+
+    [<Extension>]
     static member PassDerived(t: Testable<'a>) : AndDerived<'a, 'a> =
         use _ = t.Assert()
         t.TestDerived(true)
