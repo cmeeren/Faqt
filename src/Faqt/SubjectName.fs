@@ -30,7 +30,7 @@ type internal CallChain() =
     static val mutable private activeUserAssertions: Dictionary<CallChainOrigin, AssertionInfo list>
 
     [<ThreadStatic; DefaultValue>]
-    static val mutable private topLevelAssertionHistory: Dictionary<CallChainOrigin, string list>
+    static val mutable private topLevelAssertionHistory: Dictionary<CallChainOrigin, AssertionInfo list>
 
     static let pushAssertion callsite method supportsChildAssertions =
 
@@ -54,8 +54,8 @@ type internal CallChain() =
             CallChain.activeUserAssertions[callsite] <- tl
 
             match CallChain.topLevelAssertionHistory.TryGetValue callsite with
-            | false, _ -> CallChain.topLevelAssertionHistory[callsite] <- [ hd.Method ]
-            | true, xs -> CallChain.topLevelAssertionHistory[callsite] <- hd.Method :: xs
+            | false, _ -> CallChain.topLevelAssertionHistory[callsite] <- [ hd ]
+            | true, xs -> CallChain.topLevelAssertionHistory[callsite] <- hd :: xs
 
 
     static let canPushAssertion callsite =
@@ -90,7 +90,7 @@ type internal CallChain() =
     static member AssertionHistory(callsite) =
         let topLevelAssertions =
             match CallChain.topLevelAssertionHistory.TryGetValue callsite with
-            | true, xs -> xs |> List.rev
+            | true, xs -> xs |> List.map (fun x -> x.Method) |> List.rev
             | false, _ -> []
 
         let activeAssertions =
