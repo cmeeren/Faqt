@@ -433,7 +433,7 @@ let ``Assertions chained after higher-order assertions using the same assertion`
 
 
 [<Fact>]
-let ``Multiple consecutive assertions on same thread`` () =
+let ``Multiple consecutive assertions on same thread, different callsites`` () =
     fun () ->
         let var1 = 1
         var1.Should().Pass().And.Subject.ToString().Length.Should().Pass() |> ignore
@@ -441,6 +441,16 @@ let ``Multiple consecutive assertions on same thread`` () =
         let var2 = 1
         var2.Should().Pass().And.Subject.ToString().Length.Should().Fail()
     |> assertExnMsg "var2.ToString().Length"
+
+
+[<Fact>]
+let ``Multiple consecutive assertions on same thread, same callsite`` () =
+    fun () ->
+        let x = 1
+
+        for i in [ 1..99 ] do
+            x.Should().Pass().And.Subject.ToString().Length.Should().Test(i < 99) |> ignore
+    |> assertExnMsg "x.ToString().Length"
 
 
 [<Fact>]
