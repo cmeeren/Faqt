@@ -364,12 +364,27 @@ s2
 
 
 [<Fact>]
-let ``AllSatisfy, multiple failures`` () =
+let ``AllSatisfy, multiple failures, single-line`` () =
     fun () -> [ 1; 2; 3 ].Should().TestAllSatisfy(fun s -> s.Should().Fail())
     |> assertExnMsg
         """
 [ 1; 2; 3 ]
 s
+s
+s
+"""
+
+
+[<Fact>]
+let ``AllSatisfy, multiple failures, multi-line`` () =
+    fun () ->
+        [ 1; 2 ]
+            .Should()
+            // Comment to force break
+            .TestAllSatisfy(fun s -> s.Should().Fail())
+    |> assertExnMsg
+        """
+[ 1; 2 ]
 s
 s
 """
