@@ -109,7 +109,7 @@ let ``And-chained assertions, different names, single line, second fails`` () =
 let ``Whose, single line, first fails`` () =
     fun () ->
         let thisIsAVariableName = "asd"
-        thisIsAVariableName.Should().FailDerived().Whose.Length.Should().Pass()
+        thisIsAVariableName.Should().FailDerived().Whose.Length.Should(()).Pass()
     |> assertExnMsg "thisIsAVariableName"
 
 
@@ -117,7 +117,7 @@ let ``Whose, single line, first fails`` () =
 let ``Whose, single line, second fails`` () =
     fun () ->
         let thisIsAVariableName = "1"
-        thisIsAVariableName.Should().PassDerived().Whose.Length.Should().Fail()
+        thisIsAVariableName.Should().PassDerived().Whose.Length.Should(()).Fail()
     |> assertExnMsg "thisIsAVariableName...Length"
 
 
@@ -129,11 +129,11 @@ let ``Multiple Whose`` () =
         thisIsAVariableName
             .Should()
             .PassDerived()
-            .Whose.Length.Should()
+            .Whose.Length.Should(())
             .PassDerived()
             .Whose.ToString()
             .GetType()
-            .Should()
+            .Should(())
             .Fail()
     |> assertExnMsg "thisIsAVariableName...Length...ToString().GetType()"
 
@@ -142,7 +142,7 @@ let ``Multiple Whose`` () =
 let ``That, single line, first fails`` () =
     fun () ->
         let thisIsAVariableName = "asd"
-        thisIsAVariableName.Should().FailDerived().That.Length.Should().Pass()
+        thisIsAVariableName.Should().FailDerived().That.Length.Should(()).Pass()
     |> assertExnMsg "thisIsAVariableName"
 
 
@@ -150,8 +150,8 @@ let ``That, single line, first fails`` () =
 let ``That, single line, second fails`` () =
     fun () ->
         let thisIsAVariableName = "1"
-        thisIsAVariableName.Should().PassDerived().That.Length.GetType().Should().Fail()
-    |> assertExnMsg "thisIsAVariableName...Length.GetType()"
+        thisIsAVariableName.Should().PassDerived().That.Length.Should(()).Fail()
+    |> assertExnMsg "thisIsAVariableName...Length"
 
 
 [<Fact>]
@@ -162,11 +162,11 @@ let ``Multiple That`` () =
         thisIsAVariableName
             .Should()
             .PassDerived()
-            .That.Length.Should()
+            .That.Length.Should(())
             .PassDerived()
             .That.ToString()
             .GetType()
-            .Should()
+            .Should(())
             .Fail()
     |> assertExnMsg "thisIsAVariableName...Length...ToString().GetType()"
 
@@ -175,7 +175,7 @@ let ``Multiple That`` () =
 let ``WhoseValue, single line, first fails`` () =
     fun () ->
         let thisIsAVariableName = "asd"
-        thisIsAVariableName.Should().FailDerived().WhoseValue.Length.Should().Pass()
+        thisIsAVariableName.Should().FailDerived().WhoseValue.Length.Should(()).Pass()
     |> assertExnMsg "thisIsAVariableName"
 
 
@@ -188,7 +188,7 @@ let ``WhoseValue, single line, second fails`` () =
             .Should()
             .PassDerived()
             .WhoseValue.Length.GetType()
-            .Should()
+            .Should(())
             .Fail()
     |> assertExnMsg "thisIsAVariableName...Length.GetType()"
 
@@ -201,11 +201,11 @@ let ``Multiple WhoseValue`` () =
         thisIsAVariableName
             .Should()
             .PassDerived()
-            .WhoseValue.Length.Should()
+            .WhoseValue.Length.Should(())
             .PassDerived()
             .WhoseValue.ToString()
             .GetType()
-            .Should()
+            .Should(())
             .Fail()
     |> assertExnMsg "thisIsAVariableName...Length...ToString().GetType()"
 
@@ -214,7 +214,7 @@ let ``Multiple WhoseValue`` () =
 let ``Whose, same child assertion, first fails`` () =
     fun () ->
         let thisIsAVariableName = ""
-        thisIsAVariableName.Should().FailDerived().Whose.Length.Should().FailDerived()
+        thisIsAVariableName.Should().FailDerived().Whose.Length.Should(()).FailDerived()
     |> assertExnMsg "thisIsAVariableName"
 
 
@@ -222,7 +222,7 @@ let ``Whose, same child assertion, first fails`` () =
 let ``Whose, same child assertion, second fails`` () =
     fun () ->
         let x = ""
-        x.Should().TestDerived(true).Whose.Length.Should().TestDerived(false)
+        x.Should().TestDerived(true).Whose.Length.Should(()).TestDerived(false)
     |> assertExnMsg "x...Length"
 
 
@@ -230,7 +230,7 @@ let ``Whose, same child assertion, second fails`` () =
 let ``Testable.Subject`` () =
     fun () ->
         let thisIsAVariableName = "1"
-        thisIsAVariableName.Should().Pass().And.Subject.Length.Should().Fail()
+        thisIsAVariableName.Should().Pass().And.Subject.Length.Should(()).Fail()
     |> assertExnMsg "thisIsAVariableName.Length"
 
 
@@ -238,7 +238,7 @@ let ``Testable.Subject`` () =
 let ``Testable.Whose`` () =
     fun () ->
         let thisIsAVariableName = "1"
-        thisIsAVariableName.Should().Pass().And.Whose.Length.Should().Fail()
+        thisIsAVariableName.Should().Pass().And.Whose.Length.Should(()).Fail()
     |> assertExnMsg "thisIsAVariableName.Length"
 
 
@@ -250,10 +250,10 @@ let ``And.Whose: Picks correct assertion among multiple with matching name`` () 
         thisIsAVariableName
             .Should()
             .TestDerived(true)
-            .Whose.Length.Should()
+            .Whose.Length.Should(())
             .TestDerived(false)
             .And.Whose.ToString()
-            .Should()
+            .Should(())
             .TestDerived(true)
     |> assertExnMsg "thisIsAVariableName...Length"
 
@@ -267,12 +267,12 @@ let ``And.Whose: Picks correct assertion among multiple with matching name in Sa
             .Should()
             .TestSatisfy(fun x ->
                 x
-                    .Should()
+                    .Should(())
                     .TestDerived(true)
-                    .Whose.Length.Should()
+                    .Whose.Length.Should(())
                     .TestDerived(false)
                     .And.Whose.ToString()
-                    .Should()
+                    .Should(())
                     .TestDerived(true)
             )
     |> assertExnMsg
@@ -325,20 +325,6 @@ let ``Multiple multi-line Satisfy, last fails`` () =
         """
 "asd"
 x2.Length
-"""
-
-
-[<Fact>]
-let ``Single-line SatisfyAny, same assertion`` () =
-    fun () ->
-        "asd"
-            .Should()
-            .TestSatisfyAny([ (fun s1 -> s1.Should().Fail()); (fun s2 -> s2.Should().Fail()) ])
-    |> assertExnMsg
-        """
-"asd"
-s1
-s2
 """
 
 
@@ -396,7 +382,7 @@ let ``AllSatisfy single and then chain with same assertion`` () =
         [ 1 ]
             .Should()
             .TestAllSatisfy(fun s -> s.ToString().Should().Test(true))
-            .And.Subject.Length.Should()
+            .And.Subject.Length.Should(())
             .Test(false)
     |> assertExnMsg
         """
@@ -410,7 +396,7 @@ let ``AllSatisfy multiple and then chain with same assertion`` () =
         [ 1; 2; 3 ]
             .Should()
             .TestAllSatisfy(fun s -> s.ToString().Should().Test(true))
-            .And.Subject.Length.Should()
+            .And.Subject.Length.Should(())
             .Test(false)
     |> assertExnMsg
         """
@@ -424,7 +410,7 @@ let ``Assertions chained after higher-order assertions using the same assertion`
         "asd"
             .Should()
             .TestSatisfy(fun s1 -> s1.Should().Test(true))
-            .And.Subject.Length.Should()
+            .And.Subject.Length.Should(())
             .Test(false)
     |> assertExnMsg
         """
@@ -436,10 +422,10 @@ let ``Assertions chained after higher-order assertions using the same assertion`
 let ``Multiple consecutive assertions on same thread, different callsites`` () =
     fun () ->
         let var1 = 1
-        var1.Should().Pass().And.Subject.ToString().Length.Should().Pass() |> ignore
+        var1.Should().Pass().And.Subject.ToString().Length.Should(()).Pass() |> ignore
 
         let var2 = 1
-        var2.Should().Pass().And.Subject.ToString().Length.Should().Fail()
+        var2.Should().Pass().And.Subject.ToString().Length.Should(()).Fail()
     |> assertExnMsg "var2.ToString().Length"
 
 
@@ -449,7 +435,8 @@ let ``Multiple consecutive assertions on same thread, same callsite`` () =
         let x = 1
 
         for i in [ 1..99 ] do
-            x.Should().Pass().And.Subject.ToString().Length.Should().Test(i < 99) |> ignore
+            x.Should().Pass().And.Subject.ToString().Length.Should(()).Test(i < 99)
+            |> ignore
     |> assertExnMsg "x.ToString().Length"
 
 
@@ -549,7 +536,7 @@ let ``Known limitation: AllSatisfy with empty sequence does not work correctly``
         List<int>.Empty
             .Should()
             .TestAllSatisfy(fun s -> s.ToString().Should().Test(true))
-            .And.Subject.Length.Should()
+            .And.Subject.Length.Should(())
             .Test(false)
     |> assertExnMsg
         """
@@ -561,3 +548,17 @@ s.ToString()
 let ``Known limitation: Assertion chains must start on a new line or after lambda`` () =
     fun () -> ignore ("asd".Should().Fail())
     |> assertExnMsg "ignore (\"asd\""
+
+
+[<Fact>]
+let ``Known limitation: Single-line SatisfyAny, same assertion does not work correctly`` () =
+    fun () ->
+        "asd"
+            .Should()
+            .TestSatisfyAny([ (fun s1 -> s1.Should().Fail()); (fun s2 -> s2.Should().Fail()) ])
+    |> assertExnMsg
+        """
+"asd"
+s1
+s1
+"""

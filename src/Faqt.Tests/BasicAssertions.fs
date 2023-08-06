@@ -118,7 +118,7 @@ module ``Be with custom comparer`` =
             .Should()
             .Be("asd", isEqual)
             .Id<AndDerived<int, string>>()
-            .WhoseValue.Should()
+            .WhoseValue.Should(())
             .Be("asd")
 
 
@@ -663,7 +663,7 @@ module ``BeOfType generic`` =
             .Should()
             .BeOfType<string>()
             .Id<AndDerived<string, string>>()
-            .WhoseValue.Should()
+            .WhoseValue.Should(())
             .Be("asd")
 
 
@@ -673,7 +673,7 @@ module ``BeOfType generic`` =
             .Should()
             .BeOfType<string>()
             .Id<AndDerived<obj, string>>()
-            .WhoseValue.Should()
+            .WhoseValue.Should(())
             .Be("asd")
 
 
@@ -969,7 +969,7 @@ module Transform =
             .Should()
             .Transform(int)
             .Id<AndDerived<string, int>>()
-            .WhoseValue.Should()
+            .WhoseValue.Should(())
             .Be(1)
 
 
@@ -1004,7 +1004,7 @@ module ``TryTransform option`` =
             .Should()
             .TryTransform(int >> Some)
             .Id<AndDerived<string, int>>()
-            .WhoseValue.Should()
+            .WhoseValue.Should(())
             .Be(1)
 
 
@@ -1064,7 +1064,7 @@ module ``TryTransform voption`` =
             .Should()
             .TryTransform(int >> ValueSome)
             .Id<AndDerived<string, int>>()
-            .WhoseValue.Should()
+            .WhoseValue.Should(())
             .Be(1)
 
 
@@ -1127,7 +1127,7 @@ module ``TryTransform Result`` =
             .Should()
             .TryTransform(int >> Ok)
             .Id<AndDerived<string, int>>()
-            .WhoseValue.Should()
+            .WhoseValue.Should(())
             .Be(1)
 
 
@@ -1190,7 +1190,7 @@ module ``TryTransform parse`` =
             .Should()
             .TryTransform(fun s -> Int32.TryParse s)
             .Id<AndDerived<string, int>>()
-            .WhoseValue.Should()
+            .WhoseValue.Should(())
             .Be(1)
 
 

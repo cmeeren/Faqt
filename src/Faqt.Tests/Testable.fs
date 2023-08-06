@@ -14,7 +14,7 @@ module Subject =
 
     [<Fact>]
     let ``Realistic example usage`` () =
-        "asd".Should().Be("asd").And.Subject.Length.Should().Be(3)
+        "asd".Should().Be("asd").And.Subject.Length.Should(()).Be(3)
 
 
 module Whose =
@@ -30,7 +30,7 @@ module Whose =
         (Some "asd")
             .Should()
             .BeSome()
-            .That.Should()
+            .That.Should(())
             .NotBe("a")
-            .And.Whose.Length.Should()
+            .And.Whose.Length.Should(())
             .Be(3)

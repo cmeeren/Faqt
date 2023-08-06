@@ -25,7 +25,7 @@ module And =
 
     [<Fact>]
     let ``Realistic example usage`` () =
-        "asd".Should().NotBeNull().And.Subject.Length.Should().Be(3)
+        "asd".Should().NotBeNull().And.Subject.Length.Should(()).Be(3)
 
 
 module Subject =
@@ -38,5 +38,7 @@ module Subject =
 
     [<Fact>]
     let ``Realistic example usage`` () =
-        let lengthValue = (Some "asd").Should().BeSome().Whose.Length.Should().Be(3).Subject
+        let lengthValue =
+            (Some "asd").Should().BeSome().Whose.Length.Should(()).Be(3).Subject
+
         ignore<int> lengthValue

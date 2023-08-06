@@ -25,7 +25,7 @@ module And =
 
     [<Fact>]
     let ``Realistic example usage`` () =
-        (Some "asd").Should().BeSome().And.Subject.Value.Should().Be("asd")
+        (Some "asd").Should().BeSome().And.Subject.Value.Should(()).Be("asd")
 
 
 module Subject =
@@ -52,7 +52,7 @@ module Whose =
 
     [<Fact>]
     let ``Realistic example usage`` () =
-        (Some "asd").Should().BeSome().Whose.Length.Should().Be(3)
+        (Some "asd").Should().BeSome().Whose.Length.Should(()).Be(3)
 
 
 module That =
@@ -65,7 +65,7 @@ module That =
 
     [<Fact>]
     let ``Realistic example usage`` () =
-        (Some "asd").Should().BeSome().That.Should().NotBeNull()
+        (Some "asd").Should().BeSome().That.Should(()).NotBeNull()
 
 
 module WhoseValue =
@@ -78,4 +78,4 @@ module WhoseValue =
 
     [<Fact>]
     let ``Realistic example usage`` () =
-        (Some "asd").Should().BeSome().WhoseValue.Should().NotBeNull()
+        (Some "asd").Should().BeSome().WhoseValue.Should(()).NotBeNull()

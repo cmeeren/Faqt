@@ -31,7 +31,7 @@ module BeOfCase =
             .Should()
             .BeOfCase(SingleFieldInt)
             .Id<AndDerived<MyDu, int>>()
-            .WhoseValue.Should()
+            .WhoseValue.Should(())
             .Be(1)
 
 
@@ -41,7 +41,7 @@ module BeOfCase =
             .Should()
             .BeOfCase(SingleFieldRecord)
             .Id<AndDerived<MyDu, RecordFieldData>>()
-            .WhoseValue.Should()
+            .WhoseValue.Should(())
             .Be({ A = 1; B = "a" })
 
 
@@ -51,7 +51,7 @@ module BeOfCase =
             .Should()
             .BeOfCase(SingleFieldAnonymousRecord)
             .Id<AndDerived<MyDu, {| X: string; Y: int |}>>()
-            .WhoseValue.Should()
+            .WhoseValue.Should(())
             .Be({| X = "a"; Y = 1 |})
 
 
@@ -61,7 +61,7 @@ module BeOfCase =
             .Should()
             .BeOfCase(MultipleAnonymousFields)
             .Id<AndDerived<MyDu, int * string>>()
-            .WhoseValue.Should()
+            .WhoseValue.Should(())
             .Be((1, "a"))
 
 
@@ -71,7 +71,7 @@ module BeOfCase =
             .Should()
             .BeOfCase(MultipleNamedFields)
             .Id<AndDerived<MyDu, int * string>>()
-            .WhoseValue.Should()
+            .WhoseValue.Should(())
             .Be((1, "a"))
 
 
@@ -136,7 +136,7 @@ module BeSome =
             .Should()
             .BeSome()
             .Id<AndDerived<int option, int>>()
-            .WhoseValue.Should()
+            .WhoseValue.Should(())
             .Be(1)
 
 
@@ -217,7 +217,7 @@ module BeOk =
             .Should()
             .BeOk()
             .Id<AndDerived<Result<int, _>, int>>()
-            .WhoseValue.Should()
+            .WhoseValue.Should(())
             .Be(1)
 
 
@@ -260,7 +260,7 @@ module BeError =
             .Should()
             .BeError()
             .Id<AndDerived<Result<_, int>, int>>()
-            .WhoseValue.Should()
+            .WhoseValue.Should(())
             .Be(1)
 
 

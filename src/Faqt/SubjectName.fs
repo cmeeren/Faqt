@@ -139,6 +139,14 @@ type internal CallChain() =
         topLevelAssertions @ activeAssertions
 
 
+    static member internal Reset(callsite) =
+        if
+            not (isNull CallChain.topLevelAssertionHistory)
+            && CallChain.topLevelAssertionHistory.ContainsKey(callsite)
+        then
+            CallChain.topLevelAssertionHistory.Remove(callsite) |> ignore
+
+
 module internal EmbeddedSource =
 
 
@@ -297,17 +305,19 @@ module internal SubjectName =
             // it's assumed the code contains something returning AndDerived. Make an exception if prefixed by And, since
             // that would be methods on Testable, not AndDerived. (Not all of those methods exist on Testable yet, but may
             // be added if realistic use-cases arrive.)
-            |> String.regexReplace "\.Should\(\)\..+?\.(?<!And\.)(Whose|WhoseValue|That)\." transformationPlaceholder
+            |> String.regexReplace
+                "\.Should\((\(\))?\)\..+?\.(?<!And\.)(Whose|WhoseValue|That)\."
+                transformationPlaceholder
 
             // Remove Should...And; this code doesn't change the subject.
-            |> String.regexReplace "\.Should *\(\)\..+?\.And" ""
+            |> String.regexReplace "\.Should *\((\(\))?\)\..+?\.And" ""
 
             // Remove remaining Subject/Whose/WhoseValue/That; they are methods on Testable and don't change the subject.
             // (Not all of those methods exist on Testable yet, but may be added if realistic use-cases arrive.)
             |> String.regexReplace "\.(Subject|Whose|WhoseValue|That)\." "."
 
             // Remove remaining calls to Should.
-            |> String.regexReplace "\.Should *\(\)" ""
+            |> String.regexReplace "\.Should *\((\(\))?\)" ""
 
             // Remove "...fun ... ->" from start of line (e.g. in single-line chains in Satisfy)
             |> String.regexReplace ".*fun .+? -> " ""

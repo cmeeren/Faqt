@@ -184,7 +184,13 @@ module SatisfyAny =
         fun () ->
             "asd"
                 .Should()
-                .SatisfyAny([ (fun s1 -> s1.Length.Should().Fail()); (fun s2 -> s2.Length.Should().Fail()) ])
+                .SatisfyAny(
+                    [
+                        // Comment to force break
+                        (fun s1 -> s1.Length.Should().Fail())
+                        (fun s2 -> s2.Length.Should().Fail())
+                    ]
+                )
         |> assertExnMsg
             """
 "asd"

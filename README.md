@@ -22,6 +22,7 @@ assertions remain to be implemented. A feature complete 1.0 version will hopeful
 
 <!-- TOC -->
 
+* [Table of contents](#table-of-contents)
 * [A motivating example](#a-motivating-example)
 * [Installation and requirements](#installation-and-requirements)
 * [Faqt in a nutshell](#faqt-in-a-nutshell)
@@ -30,6 +31,7 @@ assertions remain to be implemented. A feature complete 1.0 version will hopeful
 * [FAQ](#faq)
   * [Which testing frameworks does Faqt work with?](#which-testing-frameworks-does-faqt-work-with)
   * [Why is the subject name not correct in my specific example?](#why-is-the-subject-name-not-correct-in-my-specific-example)
+  * [Why do I have to use `Should(())` inside an assertion chain?](#why-do-i-have-to-use-should-inside-an-assertion-chain)
   * [Why not FluentAssertions?](#why-not-fluentassertions)
   * [Why not Shouldly?](#why-not-shouldly)
   * [Can I use Faqt from C#?](#can-i-use-faqt-from-c)
@@ -39,8 +41,9 @@ assertions remain to be implemented. A feature complete 1.0 version will hopeful
 ## A motivating example
 
 Here is an example of what you can do with Faqt. Simply use `Should()` to start asserting, whether in a unit test or for
-validating preconditions etc. in domain code (the latter is demonstrated below). Like FluentAssertions, all assertions
-support an optional "because" parameter that will be used in the output.
+validating preconditions etc. in domain code (the latter is demonstrated below). For subsequent calls to `Should` in the
+same chain, use `Should(())` (double parentheses - this is required for subject names to work properly). Like
+FluentAssertions, all assertions support an optional "because" parameter that will be used in the output.
 
 ```f#
 type Customer =
@@ -51,9 +54,9 @@ let calculateFreeShipping customer =
     customer
         .Should()
         .BeOfCase(Internal, "this function should only be called with internal customers")
-        .Whose.ContactInfo.Should()
+        .Whose.ContactInfo.Should(())
         .BeSome()
-        .Whose.Name.LastName.Should()
+        .Whose.Name.LastName.Should(())
         .Be("Armstrong", "only customers named Armstrong get free shipping")
 ```
 
@@ -259,6 +262,9 @@ cases where it may produce unexpected results:
 * Lines starting with `//` in multi-line string literals will be removed.
 * Nested `Satisfy` or other higher-order assertions may give incorrect subject names.
 * Chaining assertions after `AllSatisfy` may give incorrect subject names if the sequence is empty.
+* `SatisfyAny` or similar with multiple assertion chains all on one line containing the same assertion may give
+  incorrect subject names.
+* Assertion chains do not fully complete on a single thread.
 
 If you have encountered a case not listed above, please raise an issue. If I can't or won't fix it, I can at the very
 least document it as a known limitation.
@@ -269,6 +275,20 @@ regex-based processing/replacement of the call chain based on which assertions h
 
 If you would like to help make the automatic subject name functionality more robust, please raise an issue. You can find
 the relevant code in [SubjectName.fs](https://github.com/cmeeren/Faqt/blob/main/src/Faqt/SubjectName.fs).
+
+### Why do I have to use `Should(())` inside an assertion chain?
+
+This is due to how subject names are implemented, and the solution was chosen as the lesser of several evils. The
+details are probably boring, but in short, when an assertion fails, Faqt needs to know the chain of assertions
+encountered in the source code. This is stored in thread-local state. This state has to be reset when a new assertion
+chain starts. This is done in `Should()`. However, that would ruin the subject name for assertions after
+subsequent `Should()` calls in the chain.
+
+Alternative solutions would either require making the assertion syntax more verbose (e.g. by enclosing entire assertion
+chains in some method call, or wrapping them in a `use` statement in order to reset the thread-local state or avoid it
+entirely), or make the subject name inference incorrect in many more cases (e.g. by removing the tracking of the
+encountered assertion history altogether, thereby only giving correct subject names up to the first assertion of any
+given name in a chain).
 
 ### Why not FluentAssertions?
 

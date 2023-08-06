@@ -14,7 +14,7 @@ module HaveValue =
             .Should()
             .HaveValue()
             .Id<AndDerived<Nullable<int>, int>>()
-            .That.Should()
+            .That.Should(())
             .Be(1)
 
 
@@ -125,7 +125,7 @@ module NotBeNull =
             .Should()
             .NotBeNull()
             .Id<AndDerived<Nullable<int>, int>>()
-            .That.Should()
+            .That.Should(())
             .Be(1)
 
 

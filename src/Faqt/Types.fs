@@ -152,11 +152,34 @@ module AssertionHelpers =
 type TestableExtensions =
 
 
-    /// This is the entry point to performing assertions on this value.
+    /// This is the entry point to performing assertions on this value. Note that for subsequent calls to Should inside
+    /// an assertion chain, use the Should(()) overload instead. (This does not apply to the start of "child" expression
+    /// chains inside higher-order assertions like Satisfy, which should still use Should() like the start of the
+    /// top-level expression chain.)
     [<Extension>]
     static member Should
         (
             this: 'a,
+            [<CallerFilePath; Optional; DefaultParameterValue("")>] filePath: string,
+            [<CallerLineNumber; Optional; DefaultParameterValue(0)>] lineNumber: int
+        ) : Testable<'a> =
+        let origin = {
+            AssemblyPath = Assembly.GetCallingAssembly().Location
+            SourceFilePath = filePath
+            LineNumber = lineNumber
+        }
+
+        CallChain.Reset(origin)
+        Testable(this, origin)
+
+
+    /// Use this overload, i.e. .Should(()), for subsequent calls to Should in an assertion chain. (Use the normal
+    /// Should() to start "child" expression chains in higher-order assertions like Satisfy.)
+    [<Extension>]
+    static member Should
+        (
+            this: 'a,
+            _: unit,
             [<CallerFilePath; Optional; DefaultParameterValue("")>] filePath: string,
             [<CallerLineNumber; Optional; DefaultParameterValue(0)>] lineNumber: int
         ) : Testable<'a> =
