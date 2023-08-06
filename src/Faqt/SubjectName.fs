@@ -124,6 +124,7 @@ type internal CallChain() =
         // implementation later, if needed.
         IDisposable.noOp
 
+
     static member AssertionHistory(callsite) =
         let topLevelAssertions =
             match CallChain.topLevelAssertionHistory.TryGetValue callsite with
