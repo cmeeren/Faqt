@@ -132,7 +132,8 @@ type BasicAssertions =
         And(t)
 
 
-    /// Asserts that the subject can be transformed using the specified function.
+    /// Asserts that the subject can be transformed using the specified function (i.e., that the function does not
+    /// throw).
     [<Extension>]
     static member Transform(t: Testable<'a>, f: 'a -> 'b, ?because) : AndDerived<'a, 'b> =
         use _ = t.Assert()
