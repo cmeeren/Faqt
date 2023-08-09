@@ -569,3 +569,29 @@ let ``Known limitation: Single-line SatisfyAny, same assertion does not work cor
 s1
 s1
 """
+
+
+[<Fact>]
+let ``Known limitation: Nested AllSatisfy does not work correctly`` () =
+    fun () ->
+        let x = [ [ 11; 12; 13 ]; [ 21; 22; 23 ]; [ 31; 32; 33 ] ]
+
+        x
+            .Should()
+            .TestAllSatisfy(fun x1 -> x1.Should().TestAllSatisfy(fun x2 -> x2.Should().Fail()))
+    |> assertExnMsg
+        """
+subject
+
+x2
+x2
+x2
+
+x2
+x2
+x2
+
+x2
+x2
+x2
+"""

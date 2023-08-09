@@ -261,7 +261,7 @@ cases where it may produce unexpected results:
   lambda (`fun ... ->`).
 * Multi-line strings literals will be concatenated.
 * Lines starting with `//` in multi-line string literals will be removed.
-* Nested `Satisfy` or other higher-order assertions may give incorrect subject names.
+* Nested `Satisfy`, `AllSatisfy` or other higher-order assertions may give incorrect subject names.
 * Chaining assertions after `AllSatisfy` may give incorrect subject names if the sequence is empty.
 * `SatisfyAny` or similar with multiple assertion chains all on one line containing the same assertion may give
   incorrect subject names.
