@@ -150,7 +150,9 @@ Writing your own assertions is easy! They are implemented exactly like Faqt’s 
 look at those for inspiration (see all files ending with `Assertions`
 in [this folder](https://github.com/cmeeren/Faqt/tree/main/src/Faqt)).
 
-Let’s look at the implementation for Faqt’s simplest assertion, `Be`:
+All the details are further below, but first, we'll get a long way just by looking at some examples.
+
+Here is Faqt’s simplest assertion, `Be`:
 
 ```f#
 open Faqt
@@ -171,29 +173,99 @@ type Assertions =
         And(t)
 ```
 
-Simple, right? Here are additional quick remarks that are not shown above:
+Simple, right? Now let's look at an assertion that's just as simple, but uses derived state, where you return
+`AndDerived` instead of `And`:
 
-* If it's a higher-order assertion that calls user code that calls other assertions, use `t.Assert(true)` instead
-  of `t.Assert()`. If it's a higher-order assertion that calls other assertions for each item in an enumerable,
-  use `t.Assert(true, true)` and additionally call `use _ = t.AssertItem()` before each invocation of the user
-  assertion.
-* Return `AndDerived(t, derivedState)` instead of `And(t)` if your assertion extracts derived state.
-* If your assertion calls `Should`, make sure to use the `Should(t)` overload.
+```f#
+open Faqt
+open AssertionHelpers
+open Formatting
+
+[<Extension>]
+type Assertions =
+
+    /// Asserts that the subject has a value.
+    [<Extension>]
+    static member HaveValue(t: Testable<Nullable<'a>>, ?because) : AndDerived<Nullable<'a>, 'a> =
+        use _ = t.Assert()
+
+        if not t.Subject.HasValue then
+            t.Fail("{subject}\n\tshould have a value{because}, but was\n{actual}", because)
+
+        AndDerived(t, t.Subject.Value)
+```
+
+This allows users to continue asserting on the derived state (the inner value, in this case).
+
+Finally, let's look at a more complex assertion - a higher-order assertion that calls user assertions and which also
+asserts for every item in a sequence:
+
+```f#
+open Faqt
+open AssertionHelpers
+open Formatting
+
+[<Extension>]
+type Assertions =
+
+    /// Asserts that all elements in the collection satisfy the supplied assertion.
+    [<Extension>]
+    static member AllSatisfy(t: Testable<#seq<'a>>, assertion: 'a -> 'ignored, ?because) : And<_> =
+        use _ = t.Assert(true, true)
+
+        let subjectLength = Seq.length t.Subject
+
+        let exceptions =
+            t.Subject
+            |> Seq.indexed
+            |> Seq.choose (fun (i, x) ->
+                try
+                    use _ = t.AssertItem()
+                    assertion x |> ignore
+                    None
+                with :? AssertionFailedException as ex ->
+                    Some(i, ex)
+            )
+            |> Seq.toArray
+
+        if exceptions.Length > 0 then
+            let assertionFailuresString =
+                exceptions
+                |> Seq.map (fun (i, ex) -> $"\n\n[Item %i{i + 1}/%i{subjectLength}]\n%s{ex.Message}")
+                |> String.concat ""
+
+            t.Fail(
+                "{subject}\n\tshould only contain items satisfying the supplied assertion{because}, but {0} of {1} items failed.{2}",
+                because,
+                string exceptions.Length,
+                string subjectLength,
+                assertionFailuresString
+            )
+
+        And(t)
+```
+
+Note that in this case we use `t.Assert(true, true)` at the top (use `t.Assert(true)` for higher-order assertions that
+do not assert on items in a sequence), and we call `use _ = t.AssertItem()` before the assertion of each item.
+
+The most significant thing not demonstrated in the examples above is that if your assertion calls `Should`, make sure to
+use the `Should(t)` overload instead of `Should()`.
 
 If you want all the details, here they are:
 
 * Implement the assertion as
   an [extension method](https://learn.microsoft.com/en-us/dotnet/fsharp/language-reference/type-extensions#extension-methods)
   for `Testable` (the first argument), with whatever constraints you need. The constraints could be implicitly imposed
-  by F#, as above where it requires `equality` on `'a` due to the use of `<>`, or they could be explicitly specified,
-  for example by specifying more concrete types (such as `Testable<'a option>` in order to have your extension only work
-  for `option`-wrapped types).
+  by F#, as with `Be` where it requires `equality` on `'a` due to the use of `<>`, or they could be explicitly
+  specified, for example by specifying more concrete types (such as `Testable<'a option>` in order to have your
+  extension only work for `option`-wrapped types).
 
 * Accept whichever arguments you need for your assertion, and end with `?because`.
 
 * First in your method, call `use _ = t.Assert()`. This is needed to track important state necessary for subject
   names to work. If your assertion is a higher-order assertion (like `Satisfy`) that calls user code that is expected to
-  call other assertions, call `t.Assert(true)` instead.
+  call other assertions, call `t.Assert(true)` instead. If your assertion does this for each item in a sequence, call
+  `t.Assert(true, true)` instead, and additionally call `use _ = t.AssertItem()` before the assertion of each item.
 
 * If your condition is not met, call
 
