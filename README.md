@@ -245,6 +245,14 @@ If you want to use another operator, you can define your own just as easily.
 See [this StackOverflow answer](https://stackoverflow.com/a/34188952/2978652) for valid prefix operators. However, your
 custom operator will then be shown in the subject name (whereas `%` is automatically removed).
 
+## Security considerations
+
+**Treat assertion exception messages (and therefore test failure messages) as securely as you treat your source code.**
+
+Faqt derives subject names from your source code. Known existing limitations (see below) as well as bugs can cause Faqt
+to use a lot more of your code in the subject name than intended (up to entire source files). Therefore, do not give
+anyone access to Faqt assertion failure messages that should not have access to your source code.
+
 ## FAQ
 
 ### Which testing frameworks does Faqt work with?
