@@ -337,20 +337,20 @@ throws a custom exception when an assertion fails.
 The automatic subject name (the first part of the assertion message) is correct in most situations, but there are edge
 cases where it may produce unexpected results:
 
-* The subject name is incorrect if the assertion chain does not start on a new line or at the start of a
-  lambda (`fun ... ->`).
 * Multi-line strings literals will be concatenated.
 * Lines starting with `//` in multi-line string literals will be removed.
-* Nested `Satisfy`, `AllSatisfy` or other higher-order assertions may give incorrect subject names.
-* Chaining assertions after `AllSatisfy` may give incorrect subject names if the sequence is empty.
-* `SatisfyAny` or similar with multiple assertion chains all on one line containing the same assertion may give
-  incorrect subject names.
-* Assertion chains do not fully complete on a single thread.
 * Subject names will be truncated if they are too long (currently 1000 characters, though that may change without
-  notice), since it is then likely that an aforementioned limitation or a bug is causing Faqt to use too large parts of
-  the source code as the subject name.
+  notice), since it is then likely that a limitation or a bug is causing Faqt to use too large parts of the source code
+  as the subject name.
+* The subject name may be incorrect under the following conditions:
+  * Assertion chains not starting on a new line or at the start of a lambda (`fun ... ->`)
+  * Nested `Satisfy`, `AllSatisfy` or other higher-order assertions
+  * `SatisfyAny` or similar with multiple assertion chains all on the same line containing the same assertion
+  * Assertion chains not fully completing on a single thread
+  * Situations where assertions are not invoked in source order, such as for assertions chained after `AllSatisfy` if
+    the sequence is empty
 
-If you have encountered a case not listed above, please raise an issue. If I can't or won't fix it, I can at the very
+If you have encountered a case not covered above, please raise an issue. If I can't or won't fix it, I can at the very
 least document it as a known limitation.
 
 These limitations are due to the implementation of automatic subject names. It is based on clever use of caller info
@@ -364,15 +364,15 @@ the relevant code in [SubjectName.fs](https://github.com/cmeeren/Faqt/blob/main/
 
 This is due to how subject names are implemented, and the solution was chosen as the lesser of several evils. The
 details are probably boring, but in short, when an assertion fails, Faqt needs to know the chain of assertions
-encountered in the source code. This is stored in thread-local state. This state has to be reset when a new assertion
-chain starts. This is done in `Should()`. However, that would ruin the subject name for assertions after
-subsequent `Should()` calls in the chain.
+encountered in the source code in order to derive the correct subject name. This chain is stored in thread-local state,
+and has to be reset when a new assertion chain starts. This is done in `Should()`. However, that would ruin the subject
+name for assertions after subsequent `Should()` calls in the chain.
 
 Alternative solutions would either require making the assertion syntax more verbose (e.g. by enclosing entire assertion
 chains in some method call, or wrapping them in a `use` statement in order to reset the thread-local state or avoid it
-entirely), or make the subject name inference incorrect in many more cases (e.g. by removing the tracking of the
-encountered assertion history altogether, thereby only giving correct subject names up to the first assertion of any
-given name in a chain).
+entirely), or make the subject name incorrect in many more cases (e.g. by removing the tracking of the encountered
+assertion history altogether, thereby only giving correct subject names up to the first assertion of any given name in a
+chain).
 
 ### Why not FluentAssertions?
 
@@ -405,6 +405,6 @@ assertion failure messages, and have used those as inspiration for Faqt's assert
 
 ### Can I use Faqt from C#?
 
-Feel free, but know that Faqt is designed only for F#. The subject names only work correctly for F#, and the API design
-and assertion choices are based on F# idioms and expected usage. Any support for C# is incidental, and improving or even
-preserving C# support is out of scope for Faqt.
+Faqt is designed only for F#. The subject names only work correctly for F#, and the API design and assertion choices are
+based on F# idioms and expected usage. Any support for C# is incidental, and improving or even preserving C# support is
+out of scope for Faqt. You are likely better off with FluentAssertions for C#.
