@@ -323,5 +323,10 @@ module internal SubjectName =
             |> String.regexReplace ".*fun .+? -> " ""
 
             |> String.trim
+
+            // Remove 'ignore' operator
+            |> String.removePrefix "%"
+
+            |> String.trim
         with ex ->
             "subject"

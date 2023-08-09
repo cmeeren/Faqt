@@ -1,6 +1,7 @@
 ﻿module ``Subject name``
 
 open Faqt
+open Faqt.Operators
 open Xunit
 
 
@@ -477,6 +478,12 @@ let ``Quoted identifiers with // are untouched`` () =
         let ``// some identifier`` = 1
         ``// some identifier``.Should().Fail()
     |> assertExnMsg "``// some identifier``"
+
+
+[<Fact>]
+let ``Ignore operator is stripped`` () =
+    fun () -> %(1).Should().Fail()
+    |> assertExnMsg "(1)"
 
 
 [<Fact>]
