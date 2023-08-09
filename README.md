@@ -347,6 +347,7 @@ cases where it may produce unexpected results:
   * Nested `Satisfy`, `AllSatisfy` or other higher-order assertions
   * `SatisfyAny` or similar with multiple assertion chains all on the same line containing the same assertion
   * Assertion chains not fully completing on a single thread
+  * Assertion chains containing non-assertion methods with the same name as an assertion
   * Situations where assertions are not invoked in source order, such as for assertions chained after `AllSatisfy` if
     the sequence is empty
 

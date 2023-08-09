@@ -1,5 +1,6 @@
 ﻿module ``Subject name``
 
+open System
 open Faqt
 open Faqt.Operators
 open Xunit
@@ -568,6 +569,20 @@ let ``Known limitation: Single-line SatisfyAny, same assertion does not work cor
 "asd"
 s1
 s1
+"""
+
+
+type private String with
+
+    member this.Fail() = this
+
+
+[<Fact>]
+let ``Known limitation: Non-assertion method with same name as an assertion gives incorrect results`` () =
+    fun () -> "asd".Fail().Length.Should().Fail()
+    |> assertExnMsg
+        """
+"asd"
 """
 
 
