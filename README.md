@@ -242,7 +242,8 @@ let inline (~%) x = ignore x
 ```
 
 If you want to use another operator, you can define your own just as easily.
-See [this StackOverflow answer](https://stackoverflow.com/a/34188952/2978652) for valid prefix operators.
+See [this StackOverflow answer](https://stackoverflow.com/a/34188952/2978652) for valid prefix operators. However, your
+custom operator will then be shown in the subject name (whereas `%` is automatically removed).
 
 ## FAQ
 
