@@ -274,6 +274,9 @@ cases where it may produce unexpected results:
 * `SatisfyAny` or similar with multiple assertion chains all on one line containing the same assertion may give
   incorrect subject names.
 * Assertion chains do not fully complete on a single thread.
+* Subject names will be truncated if they are too long (currently 1000 characters, though that may change without
+  notice), since it is then likely that an aforementioned limitation or a bug is causing Faqt to use too large parts of
+  the source code as the subject name.
 
 If you have encountered a case not listed above, please raise an issue. If I can't or won't fix it, I can at the very
 least document it as a known limitation.

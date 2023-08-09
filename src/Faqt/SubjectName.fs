@@ -328,5 +328,9 @@ module internal SubjectName =
             |> String.removePrefix "%"
 
             |> String.trim
+
+            // Truncate the subject name if too long. This limits the damage from known limitations and bugs that could
+            // potentially use large parts of the code as the subject name.
+            |> String.truncate "…" 1000
         with ex ->
             "subject"

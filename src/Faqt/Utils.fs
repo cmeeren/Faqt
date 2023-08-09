@@ -135,6 +135,13 @@ module String =
         ||> Seq.fold (fun str (i, arg) -> str |> replace $"{{%i{i}}}" arg)
 
 
+    let truncate (indicator: string) length (str: string) =
+        if str.Length > length then
+            str.Substring(0, length - indicator.Length) + indicator
+        else
+            str
+
+
 module IDisposable =
 
     let noOp =
