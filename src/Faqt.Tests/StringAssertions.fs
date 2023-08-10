@@ -1416,21 +1416,6 @@ module ``EndWith without StringComparison`` =
 
 
     [<Fact>]
-    let ``Fails with expected message if string does not end with substring`` () =
-        fun () ->
-            let x = "asd"
-            x.Should().EndWith("D")
-        |> assertExnMsg
-            """
-x
-    should end with
-"D"
-    using StringComparison.Ordinal, but was
-"asd"
-"""
-
-
-    [<Fact>]
     let ``Fails with expected message if null`` () =
         fun () ->
             let x: string = null
@@ -1446,21 +1431,6 @@ x
 
 
     [<Fact>]
-    let ``Fails with expected message with because`` () =
-        fun () ->
-            let x = "asd"
-            x.Should().EndWith("D", "some reason")
-        |> assertExnMsg
-            """
-x
-    should end with
-"D"
-    using StringComparison.Ordinal because some reason, but was
-"asd"
-"""
-
-
-    [<Fact>]
     let ``Fails with expected message if null with because`` () =
         fun () ->
             let x: string = null
@@ -1472,6 +1442,36 @@ x
 "D"
     using StringComparison.Ordinal because some reason, but was
 <null>
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if string does not end with substring`` () =
+        fun () ->
+            let x = "asd"
+            x.Should().EndWith("D")
+        |> assertExnMsg
+            """
+x
+    should end with
+"D"
+    using StringComparison.Ordinal, but was
+"asd"
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because`` () =
+        fun () ->
+            let x = "asd"
+            x.Should().EndWith("D", "some reason")
+        |> assertExnMsg
+            """
+x
+    should end with
+"D"
+    using StringComparison.Ordinal because some reason, but was
+"asd"
 """
 
 
