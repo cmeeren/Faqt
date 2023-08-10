@@ -43,3 +43,49 @@ type SeqAssertions =
             )
 
         And(t)
+
+
+    /// Asserts that the subject contains the same number of elements as the assertion collection, and that each
+    /// subject element satisfies the corresponding assertion in the assertion collection.
+    [<Extension>]
+    static member SatisfyRespectively(t: Testable<#seq<'a>>, assertions: seq<'a -> 'ignored>, ?because) : And<_> =
+        use _ = t.Assert(true)
+
+        let subjectLength = Seq.length t.Subject
+        let assertionsLength = Seq.length assertions
+
+        if subjectLength <> assertionsLength then
+            t.Fail(
+                "{subject}\n\tshould contain items respectively satisfying the\n{0}\n\tspecified assertions{because}, but actual length was\n{1}\n\n{actual}",
+                because,
+                string assertionsLength,
+                string subjectLength
+            )
+
+        let exceptions =
+            Seq.zip t.Subject assertions
+            |> Seq.indexed
+            |> Seq.choose (fun (i, (x, assertion)) ->
+                try
+                    assertion x |> ignore
+                    None
+                with :? AssertionFailedException as ex ->
+                    Some(i, ex)
+            )
+            |> Seq.toArray
+
+        if exceptions.Length > 0 then
+            let assertionFailuresString =
+                exceptions
+                |> Seq.map (fun (i, ex) -> $"\n\n[Item %i{i + 1}/%i{subjectLength}]\n%s{ex.Message}")
+                |> String.concat ""
+
+            t.Fail(
+                "{subject}\n\tshould contain items respectively satisfying the specified assertions{because}, but {0} of {1} items failed.{2}",
+                because,
+                string exceptions.Length,
+                string subjectLength,
+                assertionFailuresString
+            )
+
+        And(t)
