@@ -11,7 +11,11 @@ open Xunit
 
 let assertExnMsg (msg: string) (f: unit -> 'a) =
     let ex = Assert.Throws<AssertionFailedException>(f >> ignore)
-    Assert.Equal(msg.ReplaceLineEndings("\n").Trim(), ex.Message.ReplaceLineEndings("\n").Trim().Replace("\t", "    "))
+
+    Assert.Equal(
+        "\n" + msg.ReplaceLineEndings("\n").Trim() + "\n" :> obj, // Cast to obj to force full output
+        "\n" + ex.Message.ReplaceLineEndings("\n").Trim().Replace("\t", "    ") + "\n"
+    )
 
 
 module CultureInfo =
