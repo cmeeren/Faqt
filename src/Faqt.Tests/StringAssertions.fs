@@ -354,19 +354,6 @@ module ``BeUpperCase without culture`` =
 
 
     [<Fact>]
-    let ``Fails with expected message if subject contains lower-case characters`` () =
-        fun () ->
-            let x = "Aa"
-            x.Should().BeUpperCase()
-        |> assertExnMsg
-            """
-x
-    should be upper-case according to the invariant culture, but was
-"Aa"
-"""
-
-
-    [<Fact>]
     let ``Fails with expected message if null`` () =
         fun () ->
             let x: string = null
@@ -380,19 +367,6 @@ x
 
 
     [<Fact>]
-    let ``Fails with expected message with because`` () =
-        fun () ->
-            let x = "Aa"
-            x.Should().BeUpperCase("some reason")
-        |> assertExnMsg
-            """
-x
-    should be upper-case according to the invariant culture because some reason, but was
-"Aa"
-"""
-
-
-    [<Fact>]
     let ``Fails with expected message if null with because`` () =
         fun () ->
             let x: string = null
@@ -402,6 +376,32 @@ x
 x
     should be upper-case according to the invariant culture because some reason, but was
 <null>
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if subject contains lower-case characters`` () =
+        fun () ->
+            let x = "Aa"
+            x.Should().BeUpperCase()
+        |> assertExnMsg
+            """
+x
+    should be upper-case according to the invariant culture, but was
+"Aa"
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because`` () =
+        fun () ->
+            let x = "Aa"
+            x.Should().BeUpperCase("some reason")
+        |> assertExnMsg
+            """
+x
+    should be upper-case according to the invariant culture because some reason, but was
+"Aa"
 """
 
 
