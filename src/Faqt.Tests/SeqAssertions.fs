@@ -11,7 +11,7 @@ module SatisfyAll =
     let ``Passes if all of the inner assertions passes and can be chained with And`` () =
         [ "asd"; "123" ]
             .Should()
-            .AllSatisfy(fun x -> x.Length.Should().Pass())
+            .AllSatisfy(fun x -> x.Should().Pass())
             .Id<And<string list>>()
             .And.Be([ "asd"; "123" ])
 
