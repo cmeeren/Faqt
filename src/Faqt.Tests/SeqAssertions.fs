@@ -22,6 +22,37 @@ module SatisfyAll =
 
 
     [<Fact>]
+    let ``Fails with expected message if subject is null`` () =
+        fun () ->
+            let x: seq<string> = null
+            x.Should().AllSatisfy(fun y -> y.Length.Should().Test(y.Length = 3))
+
+        |> assertExnMsg
+            """
+x
+    should only contain items satisfying the supplied assertion, but was
+<null>
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if subject is null with because`` () =
+        fun () ->
+            let x: seq<string> = null
+
+            x
+                .Should()
+                .AllSatisfy((fun y -> y.Length.Should().Test(y.Length = 3)), "some reason")
+
+        |> assertExnMsg
+            """
+x
+    should only contain items satisfying the supplied assertion because some reason, but was
+<null>
+"""
+
+
+    [<Fact>]
     let ``Fails with expected message if at least one of the elements fail to satisfy the assertion`` () =
         fun () ->
             let x = [ "asd"; "test"; "1234" ]
@@ -81,6 +112,36 @@ module SatisfyRespectively =
     [<Fact>]
     let ``Passes if subject and assertions are empty`` () =
         List<int>.Empty.Should().SatisfyRespectively([])
+
+
+    [<Fact>]
+    let ``Fails with expected message if subject is null`` () =
+        fun () ->
+            let x: seq<string> = null
+
+            x.Should().SatisfyRespectively([ (fun x -> x.Should().Pass()) ])
+
+        |> assertExnMsg
+            """
+x
+    should contain items respectively satisfying the specified assertions, but was
+<null>
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if subject is null with because`` () =
+        fun () ->
+            let x: seq<string> = null
+
+            x.Should().SatisfyRespectively([ (fun x -> x.Should().Pass()) ], "some reason")
+
+        |> assertExnMsg
+            """
+x
+    should contain items respectively satisfying the specified assertions because some reason, but was
+<null>
+"""
 
 
     [<Fact>]

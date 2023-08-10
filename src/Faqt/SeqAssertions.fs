@@ -13,6 +13,12 @@ type SeqAssertions =
     static member AllSatisfy(t: Testable<#seq<'a>>, assertion: 'a -> 'ignored, ?because) : And<_> =
         use _ = t.Assert(true, true)
 
+        if isNull (box t.Subject) then
+            t.Fail(
+                "{subject}\n\tshould only contain items satisfying the supplied assertion{because}, but was\n{actual}",
+                because
+            )
+
         let subjectLength = Seq.length t.Subject
 
         let exceptions =
@@ -50,6 +56,12 @@ type SeqAssertions =
     [<Extension>]
     static member SatisfyRespectively(t: Testable<#seq<'a>>, assertions: seq<'a -> 'ignored>, ?because) : And<_> =
         use _ = t.Assert(true)
+
+        if isNull (box t.Subject) then
+            t.Fail(
+                "{subject}\n\tshould contain items respectively satisfying the specified assertions{because}, but was\n{actual}",
+                because
+            )
 
         let subjectLength = Seq.length t.Subject
         let assertionsLength = Seq.length assertions
