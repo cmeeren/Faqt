@@ -245,3 +245,258 @@ x1
 
 x3
 """
+
+
+module HaveLength =
+
+
+    [<Fact>]
+    let ``Can be chained with And`` () =
+        [].Should().HaveLength(0).Id<And<int list>>().And.Be([])
+
+
+    [<Fact>]
+    let ``Passes if length = expected`` () = [ 1 ].Should().HaveLength(1)
+
+
+    [<Fact>]
+    let ``Fails if length < expected`` () =
+        Assert.Throws<AssertionFailedException>(fun () -> List<int>.Empty.Should().HaveLength(1) |> ignore)
+
+
+    [<Fact>]
+    let ``Fails if length > expected`` () =
+        Assert.Throws<AssertionFailedException>(fun () -> [ 1; 2 ].Should().HaveLength(1) |> ignore)
+
+
+    [<Fact>]
+    let ``Fails with expected message if null`` () =
+        fun () ->
+            let x: seq<int> = null
+            x.Should().HaveLength(1)
+        |> assertExnMsg
+            """
+x
+    should have length
+1
+    but was
+<null>
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if null with because`` () =
+        fun () ->
+            let x: seq<int> = null
+            x.Should().HaveLength(1, "some reason")
+        |> assertExnMsg
+            """
+x
+    should have length
+1
+    because some reason, but was
+<null>
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if length does not match`` () =
+        fun () ->
+            let x = List<int>.Empty
+            x.Should().HaveLength(1)
+        |> assertExnMsg
+            """
+x
+    should have length
+1
+    but length was
+0
+
+[]
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message  if length does not match with because`` () =
+        fun () ->
+            let x = List<int>.Empty
+            x.Should().HaveLength(1, "some reason")
+        |> assertExnMsg
+            """
+x
+    should have length
+1
+    because some reason, but length was
+0
+
+[]
+"""
+
+
+module BeEmpty =
+
+
+    [<Fact>]
+    let ``Can be chained with And`` () =
+        List<int>.Empty.Should().BeEmpty().Id<And<int list>>().And.Be([])
+
+
+    [<Fact>]
+    let ``Passes if subject is empty`` () = List<int>.Empty.Should().BeEmpty()
+
+
+    [<Fact>]
+    let ``Fails with expected message if null`` () =
+        fun () ->
+            let x: seq<int> = null
+            x.Should().BeEmpty()
+        |> assertExnMsg
+            """
+x
+    should be empty, but was
+<null>
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if null with because`` () =
+        fun () ->
+            let x: seq<int> = null
+            x.Should().BeEmpty("some reason")
+        |> assertExnMsg
+            """
+x
+    should be empty because some reason, but was
+<null>
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if not empty`` () =
+        fun () ->
+            let x = [ 1 ]
+            x.Should().BeEmpty()
+        |> assertExnMsg
+            """
+x
+    should be empty, but was
+[1]
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if not empty with because`` () =
+        fun () ->
+            let x = [ 1 ]
+            x.Should().BeEmpty("some reason")
+        |> assertExnMsg
+            """
+x
+    should be empty because some reason, but was
+[1]
+"""
+
+
+module NotBeEmpty =
+
+
+    [<Fact>]
+    let ``Can be chained with And`` () =
+        [ 1 ].Should().NotBeEmpty().Id<And<int list>>().And.Be([ 1 ])
+
+
+    [<Fact>]
+    let ``Passes if subject is not empty`` () = [ 1 ].Should().NotBeEmpty()
+
+
+    [<Fact>]
+    let ``Fails with expected message if null`` () =
+        fun () ->
+            let x: seq<int> = null
+            x.Should().NotBeEmpty()
+        |> assertExnMsg
+            """
+x
+    should not be empty, but was
+<null>
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if null with because`` () =
+        fun () ->
+            let x: seq<int> = null
+            x.Should().NotBeEmpty("some reason")
+        |> assertExnMsg
+            """
+x
+    should not be empty because some reason, but was
+<null>
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if empty`` () =
+        fun () ->
+            let x = List<int>.Empty
+            x.Should().NotBeEmpty()
+        |> assertExnMsg
+            """
+x
+    should not be empty, but was empty.
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if empty with because`` () =
+        fun () ->
+            let x = List<int>.Empty
+            x.Should().NotBeEmpty("some reason")
+        |> assertExnMsg
+            """
+x
+    should not be empty because some reason, but was empty.
+"""
+
+
+module BeNullOrEmpty =
+
+
+    [<Fact>]
+    let ``Can be chained with And`` () =
+        Seq.empty<int>.Should().BeNullOrEmpty().Id<And<seq<int>>>().And.Be(Seq.empty)
+
+
+    [<Fact>]
+    let ``Passes if subject is empty`` () = Seq.empty<int>.Should().BeNullOrEmpty()
+
+
+    [<Fact>]
+    let ``Passes if subject is null`` () =
+        (null: seq<int>).Should().BeNullOrEmpty()
+
+
+    [<Fact>]
+    let ``Fails with expected message if not empty`` () =
+        fun () ->
+            let x = seq { 1 }
+            x.Should().BeNullOrEmpty()
+        |> assertExnMsg
+            """
+x
+    should be null or empty, but was
+seq [1]
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if not empty with because`` () =
+        fun () ->
+            let x = seq { 1 }
+            x.Should().BeNullOrEmpty("some reason")
+        |> assertExnMsg
+            """
+x
+    should be null or empty because some reason, but was
+seq [1]
+"""

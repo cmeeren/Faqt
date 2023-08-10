@@ -2,6 +2,7 @@
 
 open System.Runtime.CompilerServices
 open AssertionHelpers
+open Formatting
 
 
 [<Extension>]
@@ -99,5 +100,62 @@ type SeqAssertions =
                 string subjectLength,
                 assertionFailuresString
             )
+
+        And(t)
+
+
+    /// Asserts that the subject has the specified length.
+    [<Extension>]
+    static member HaveLength(t: Testable<#seq<'a>>, expected: int, ?because) : And<_> =
+        use _ = t.Assert()
+
+        if isNull (box t.Subject) then
+            t.Fail("{subject}\n\tshould have length\n{0}\n\t{because}but was\n{actual}", because, format expected)
+        else
+            let subjectLength = Seq.length t.Subject
+
+            if subjectLength <> expected then
+                t.Fail(
+                    "{subject}\n\tshould have length\n{0}\n\t{because}but length was\n{1}\n\n{actual}",
+                    because,
+                    format expected,
+                    format subjectLength
+                )
+
+            And(t)
+
+
+    /// Asserts that the subject is empty. Equivalent to HaveLength(0) (but with a different error message and without
+    /// full enumeration).
+    [<Extension>]
+    static member BeEmpty(t: Testable<#seq<'a>>, ?because) : And<_> =
+        use _ = t.Assert()
+
+        if isNull (box t.Subject) || not (Seq.isEmpty t.Subject) then
+            t.Fail("{subject}\n\tshould be empty{because}, but was\n{actual}", because)
+
+        And(t)
+
+
+    /// Asserts that the subject is not empty.
+    [<Extension>]
+    static member NotBeEmpty(t: Testable<#seq<'a>>, ?because) : And<_> =
+        use _ = t.Assert()
+
+        if isNull (box t.Subject) then
+            t.Fail("{subject}\n\tshould not be empty{because}, but was\n{actual}", because)
+        elif Seq.isEmpty t.Subject then
+            t.Fail("{subject}\n\tshould not be empty{because}, but was empty.", because)
+
+        And(t)
+
+
+    /// Asserts that the subject is null or empty.
+    [<Extension>]
+    static member BeNullOrEmpty(t: Testable<#seq<'a>>, ?because) : And<_> =
+        use _ = t.Assert()
+
+        if not (isNull t.Subject || Seq.isEmpty t.Subject) then
+            t.Fail("{subject}\n\tshould be null or empty{because}, but was\n{actual}", because)
 
         And(t)
