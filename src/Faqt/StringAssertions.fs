@@ -45,7 +45,7 @@ type StringAssertions =
             t.Fail("{subject}\n\tshould have length\n{0}\n\t{because}but was\n{actual}", because, format expected)
         elif t.Subject.Length <> expected then
             t.Fail(
-                "{subject}\n\tshould have length\n{0}\n\t{because}but was\n{actual}\n\twith length\n{1}",
+                "{subject}\n\tshould have length\n{0}\n\t{because}but length was\n{1}\n\n{actual}",
                 because,
                 format expected,
                 format t.Subject.Length

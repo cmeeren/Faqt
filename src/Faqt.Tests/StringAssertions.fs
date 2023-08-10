@@ -39,10 +39,10 @@ module HaveLength =
 x
     should have length
 1
-    but was
-""
-    with length
+    but length was
 0
+
+""
 """
 
 
@@ -71,10 +71,10 @@ x
 x
     should have length
 1
-    because some reason, but was
-""
-    with length
+    because some reason, but length was
 0
+
+""
 """
 
 
