@@ -1827,21 +1827,6 @@ module ``MatchRegex with string`` =
 
 
     [<Fact>]
-    let ``Fails with expected message if string does not match regex`` () =
-        fun () ->
-            let x = "asd"
-            x.Should().MatchRegex("b.*")
-        |> assertExnMsg
-            """
-x
-    should match the regex
-b.*
-    but was
-"asd"
-"""
-
-
-    [<Fact>]
     let ``Fails with expected message if null`` () =
         fun () ->
             let x: string = null
@@ -1857,21 +1842,6 @@ b.*
 
 
     [<Fact>]
-    let ``Fails with expected message with because`` () =
-        fun () ->
-            let x = "asd"
-            x.Should().MatchRegex("b.*", "some reason")
-        |> assertExnMsg
-            """
-x
-    should match the regex
-b.*
-    because some reason, but was
-"asd"
-"""
-
-
-    [<Fact>]
     let ``Fails with expected message if null with because`` () =
         fun () ->
             let x: string = null
@@ -1883,6 +1853,36 @@ x
 b.*
     because some reason, but was
 <null>
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if string does not match regex`` () =
+        fun () ->
+            let x = "asd"
+            x.Should().MatchRegex("b.*")
+        |> assertExnMsg
+            """
+x
+    should match the regex
+b.*
+    but was
+"asd"
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because`` () =
+        fun () ->
+            let x = "asd"
+            x.Should().MatchRegex("b.*", "some reason")
+        |> assertExnMsg
+            """
+x
+    should match the regex
+b.*
+    because some reason, but was
+"asd"
 """
 
 
