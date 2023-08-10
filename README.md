@@ -246,7 +246,8 @@ type Assertions =
 ```
 
 Note that in this case we use `t.Assert(true, true)` at the top (use `t.Assert(true)` for higher-order assertions that
-do not assert on items in a sequence), and we call `use _ = t.AssertItem()` before the assertion of each item.
+do not run the same assertions on items in a sequence), and we call `use _ = t.AssertItem()` before the assertion of
+each item.
 
 The most significant thing not demonstrated in the examples above is that if your assertion calls `Should`, make sure to
 use the `Should(t)` overload instead of `Should()`.
@@ -264,8 +265,9 @@ If you want all the details, here they are:
 
 * First in your method, call `use _ = t.Assert()`. This is needed to track important state necessary for subject
   names to work. If your assertion is a higher-order assertion (like `Satisfy`) that calls user code that is expected to
-  call other assertions, call `t.Assert(true)` instead. If your assertion does this for each item in a sequence, call
-  `t.Assert(true, true)` instead, and additionally call `use _ = t.AssertItem()` before the assertion of each item.
+  call other assertions, call `t.Assert(true)` instead. If your assertion calls the same assertions for each item in a
+  sequence, call `t.Assert(true, true)` instead, and additionally call `use _ = t.AssertItem()` before the assertion of
+  each item.
 
 * If your condition is not met, call
 
