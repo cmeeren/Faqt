@@ -91,19 +91,6 @@ module BeEmpty =
 
 
     [<Fact>]
-    let ``Fails with expected message if not empty`` () =
-        fun () ->
-            let x = "a"
-            x.Should().BeEmpty()
-        |> assertExnMsg
-            """
-x
-    should be empty, but was
-"a"
-"""
-
-
-    [<Fact>]
     let ``Fails with expected message if null`` () =
         fun () ->
             let x: string = null
@@ -117,19 +104,6 @@ x
 
 
     [<Fact>]
-    let ``Fails with expected message if not empty with because`` () =
-        fun () ->
-            let x = "a"
-            x.Should().BeEmpty("some reason")
-        |> assertExnMsg
-            """
-x
-    should be empty because some reason, but was
-"a"
-"""
-
-
-    [<Fact>]
     let ``Fails with expected message if null with because`` () =
         fun () ->
             let x: string = null
@@ -139,6 +113,32 @@ x
 x
     should be empty because some reason, but was
 <null>
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if not empty`` () =
+        fun () ->
+            let x = "a"
+            x.Should().BeEmpty()
+        |> assertExnMsg
+            """
+x
+    should be empty, but was
+"a"
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if not empty with because`` () =
+        fun () ->
+            let x = "a"
+            x.Should().BeEmpty("some reason")
+        |> assertExnMsg
+            """
+x
+    should be empty because some reason, but was
+"a"
 """
 
 
