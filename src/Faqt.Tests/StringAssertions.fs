@@ -945,6 +945,36 @@ module ``StartWith with StringComparison`` =
 
 
     [<Fact>]
+    let ``Fails with expected message if null`` () =
+        fun () ->
+            let x: string = null
+            x.Should().StartWith("A", StringComparison.Ordinal)
+        |> assertExnMsg
+            """
+x
+    should start with
+"A"
+    using StringComparison.Ordinal, but was
+<null>
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if null with because`` () =
+        fun () ->
+            let x: string = null
+            x.Should().StartWith("A", StringComparison.Ordinal, "some reason")
+        |> assertExnMsg
+            """
+x
+    should start with
+"A"
+    using StringComparison.Ordinal because some reason, but was
+<null>
+"""
+
+
+    [<Fact>]
     let ``Fails with expected message if string does not start with substring`` () =
         fun () ->
             let x = "asd"
@@ -998,21 +1028,6 @@ x
 
 
     [<Fact>]
-    let ``Fails with expected message if null`` () =
-        fun () ->
-            let x: string = null
-            x.Should().StartWith("A", StringComparison.Ordinal)
-        |> assertExnMsg
-            """
-x
-    should start with
-"A"
-    using StringComparison.Ordinal, but was
-<null>
-"""
-
-
-    [<Fact>]
     let ``Fails with expected message with because`` () =
         fun () ->
             let x = "asd"
@@ -1024,21 +1039,6 @@ x
 "A"
     using StringComparison.Ordinal because some reason, but was
 "asd"
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message if null with because`` () =
-        fun () ->
-            let x: string = null
-            x.Should().StartWith("A", StringComparison.Ordinal, "some reason")
-        |> assertExnMsg
-            """
-x
-    should start with
-"A"
-    using StringComparison.Ordinal because some reason, but was
-<null>
 """
 
 
