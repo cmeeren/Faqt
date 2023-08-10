@@ -117,7 +117,7 @@ x
 
 
     [<Fact>]
-    let ``Fails with expected message if empty with because`` () =
+    let ``Fails with expected message if not empty with because`` () =
         fun () ->
             let x = "a"
             x.Should().BeEmpty("some reason")
@@ -234,7 +234,7 @@ x
 
 
     [<Fact>]
-    let ``Fails with expected message if empty with because`` () =
+    let ``Fails with expected message if not empty with because`` () =
         fun () ->
             let x = "a"
             x.Should().BeNullOrEmpty("some reason")
