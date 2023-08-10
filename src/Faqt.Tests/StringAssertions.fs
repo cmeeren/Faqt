@@ -30,7 +30,7 @@ module HaveLength =
 
 
     [<Fact>]
-    let ``Fails with expected message`` () =
+    let ``Fails with expected message if length does not match`` () =
         fun () ->
             let x = ""
             x.Should().HaveLength(1)
@@ -62,7 +62,7 @@ x
 
 
     [<Fact>]
-    let ``Fails with expected message with because`` () =
+    let ``Fails with expected message if length does not match with because`` () =
         fun () ->
             let x = ""
             x.Should().HaveLength(1, "some reason")
