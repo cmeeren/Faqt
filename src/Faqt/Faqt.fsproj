@@ -1,39 +1,39 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <TargetFrameworks>net5.0;net7.0</TargetFrameworks>
-        <Version>0.2.0</Version>
-        <Authors>Christer van der Meeren</Authors>
-        <Description>A fluent assertion library for F#.</Description>
-        <PackageLicenseExpression>MIT</PackageLicenseExpression>
-        <PackageTags>F# fluent assertion assertions mstest xunit nunit unit test testing preconditions postconditions invariants fluentassertions shouldly</PackageTags>
-        <PackageIcon>faqt-logo-128x128.png</PackageIcon>
-        <PackageReleaseNotes>https://github.com/cmeeren/Faqt/blob/main/RELEASE_NOTES.md</PackageReleaseNotes>
-    </PropertyGroup>
+  <PropertyGroup>
+    <TargetFrameworks>net5.0;net7.0</TargetFrameworks>
+    <Version>0.2.0</Version>
+    <Authors>Christer van der Meeren</Authors>
+    <Description>A fluent assertion library for F#.</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageTags>F# fluent assertion assertions mstest xunit nunit unit test testing preconditions postconditions invariants fluentassertions shouldly</PackageTags>
+    <PackageIcon>faqt-logo-128x128.png</PackageIcon>
+    <PackageReleaseNotes>https://github.com/cmeeren/Faqt/blob/main/RELEASE_NOTES.md</PackageReleaseNotes>
+  </PropertyGroup>
 
-    <PropertyGroup>
-        <NoWarn>NETSDK1138;$(NoWarn)</NoWarn>
-    </PropertyGroup>
+  <PropertyGroup>
+    <NoWarn>NETSDK1138;$(NoWarn)</NoWarn>
+  </PropertyGroup>
 
-    <ItemGroup>
-        <None Include="faqt-logo-128x128.png" Pack="True" PackagePath="" Visible="false" />
-        <Compile Include="Utils.fs" />
-        <Compile Include="SubjectName.fs" />
-        <Compile Include="Formatting.fs" />
-        <Compile Include="Types.fs" />
-        <Compile Include="Operators.fs" />
-        <Compile Include="HigherOrderAssertions.fs" />
-        <Compile Include="BasicAssertions.fs" />
-        <Compile Include="ComparisonAssertions.fs" />
-        <Compile Include="UnionAssertions.fs" />
-        <Compile Include="BoolAssertions.fs" />
-        <Compile Include="NullableAssertions.fs" />
-        <Compile Include="StringAssertions.fs" />
-        <Compile Include="SeqAssertions.fs" />
-    </ItemGroup>
+  <ItemGroup>
+    <None Include="faqt-logo-128x128.png" Pack="True" PackagePath="" Visible="false" />
+    <Compile Include="Utils.fs" />
+    <Compile Include="SubjectName.fs" />
+    <Compile Include="Formatting.fs" />
+    <Compile Include="Types.fs" />
+    <Compile Include="Operators.fs" />
+    <Compile Include="HigherOrderAssertions.fs" />
+    <Compile Include="BasicAssertions.fs" />
+    <Compile Include="ComparisonAssertions.fs" />
+    <Compile Include="UnionAssertions.fs" />
+    <Compile Include="BoolAssertions.fs" />
+    <Compile Include="NullableAssertions.fs" />
+    <Compile Include="StringAssertions.fs" />
+    <Compile Include="SeqAssertions.fs" />
+  </ItemGroup>
 
-    <ItemGroup>
-        <PackageReference Update="FSharp.Core" Version="7.0.400" />
-    </ItemGroup>
+  <ItemGroup>
+    <PackageReference Update="FSharp.Core" Version="7.0.400" />
+  </ItemGroup>
 
 </Project>

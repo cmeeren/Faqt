@@ -1,41 +1,41 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <TargetFramework>net7.0</TargetFramework>
-    </PropertyGroup>
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+  </PropertyGroup>
 
-    <ItemGroup>
-        <Compile Include="TestUtils.fs" />
-        <Compile Include="SubjectName.fs" />
-        <Compile Include="Testable.fs" />
-        <Compile Include="And.fs" />
-        <Compile Include="AndDerived.fs" />
-        <Compile Include="CustomAssertions.fs" />
-        <Compile Include="Operators.fs" />
-        <Compile Include="HigherOrderAssertions.fs" />
-        <Compile Include="BasicAssertions.fs" />
-        <Compile Include="ComparisonAssertions.fs" />
-        <Compile Include="UnionAssertions.fs" />
-        <Compile Include="BoolAssertions.fs" />
-        <Compile Include="NullableAssertions.fs" />
-        <Compile Include="StringAssertions.fs" />
-        <Compile Include="SeqAssertions.fs" />
-    </ItemGroup>
+  <ItemGroup>
+    <Compile Include="TestUtils.fs" />
+    <Compile Include="SubjectName.fs" />
+    <Compile Include="Testable.fs" />
+    <Compile Include="And.fs" />
+    <Compile Include="AndDerived.fs" />
+    <Compile Include="CustomAssertions.fs" />
+    <Compile Include="Operators.fs" />
+    <Compile Include="HigherOrderAssertions.fs" />
+    <Compile Include="BasicAssertions.fs" />
+    <Compile Include="ComparisonAssertions.fs" />
+    <Compile Include="UnionAssertions.fs" />
+    <Compile Include="BoolAssertions.fs" />
+    <Compile Include="NullableAssertions.fs" />
+    <Compile Include="StringAssertions.fs" />
+    <Compile Include="SeqAssertions.fs" />
+  </ItemGroup>
 
-    <ItemGroup>
-        <ProjectReference Include="..\Faqt\Faqt.fsproj" />
-    </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Faqt\Faqt.fsproj" />
+  </ItemGroup>
 
-    <ItemGroup>
-        <PackageReference Include="Meziantou.Xunit.ParallelTestFramework" Version="2.1.0" />
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.7.0" />
-        <PackageReference Include="xunit.assert" Version="2.5.0" />
-        <PackageReference Include="xunit.core" Version="2.5.0" />
-        <PackageReference Include="xunit.runner.visualstudio" Version="2.5.0">
-            <PrivateAssets>all</PrivateAssets>
-            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-        </PackageReference>
-        <PackageReference Update="FSharp.Core" Version="7.0.400" />
-    </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Meziantou.Xunit.ParallelTestFramework" Version="2.1.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.7.0" />
+    <PackageReference Include="xunit.assert" Version="2.5.0" />
+    <PackageReference Include="xunit.core" Version="2.5.0" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.5.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Update="FSharp.Core" Version="7.0.400" />
+  </ItemGroup>
 
 </Project>
