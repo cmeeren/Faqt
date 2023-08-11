@@ -159,3 +159,14 @@ type SeqAssertions =
             t.Fail("{subject}\n\tshould be null or empty{because}, but was\n{actual}", because)
 
         And(t)
+
+
+    /// Asserts that the subject contains the specified item, as determined using the default equality comparison (=).
+    [<Extension>]
+    static member Contain(t: Testable<#seq<'a>>, expected: 'a, ?because) : AndDerived<_, 'a> =
+        use _ = t.Assert()
+
+        if isNull (box t.Subject) || not (Seq.contains expected t.Subject) then
+            t.Fail("{subject}\n\tshould contain\n{0}\n\t{because}but was\n{actual}", because, format expected)
+
+        AndDerived(t, expected)

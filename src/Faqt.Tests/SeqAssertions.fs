@@ -500,3 +500,75 @@ x
     should be null or empty because some reason, but was
 seq [1]
 """
+
+
+module Contain =
+
+
+    [<Fact>]
+    let ``can be chained with AndDerived with found value`` () =
+        [ 1 ].Should().Contain(1).Id<AndDerived<int list, int>>().That.Should().Be(1)
+
+
+    [<Fact>]
+    let ``Passes if sequence contains value`` () = [ 1 ].Should().Contain(1)
+
+
+    [<Fact>]
+    let ``Fails with expected message if null`` () =
+        fun () ->
+            let x: seq<int> = null
+            x.Should().Contain(1)
+        |> assertExnMsg
+            """
+x
+    should contain
+1
+    but was
+<null>
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if null with because`` () =
+        fun () ->
+            let x: seq<int> = null
+            x.Should().Contain(1, "some reason")
+        |> assertExnMsg
+            """
+x
+    should contain
+1
+    because some reason, but was
+<null>
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if not containing value`` () =
+        fun () ->
+            let x = List<int>.Empty
+            x.Should().Contain(1)
+        |> assertExnMsg
+            """
+x
+    should contain
+1
+    but was
+[]
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if not containing value with because`` () =
+        fun () ->
+            let x = List<int>.Empty
+            x.Should().Contain(1, "some reason")
+        |> assertExnMsg
+            """
+x
+    should contain
+1
+    because some reason, but was
+[]
+"""
