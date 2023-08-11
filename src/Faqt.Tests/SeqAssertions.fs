@@ -317,7 +317,7 @@ x
 
 
     [<Fact>]
-    let ``Fails with expected message  if length does not match with because`` () =
+    let ``Fails with expected message if length does not match with because`` () =
         fun () ->
             let x = List<int>.Empty
             x.Should().HaveLength(1, "some reason")
