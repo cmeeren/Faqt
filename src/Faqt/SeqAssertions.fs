@@ -20,7 +20,7 @@ type SeqAssertions =
                 because
             )
 
-        let subjectLength = Seq.length t.Subject
+        let subjectLength = Seq.stringOptimizedLength t.Subject
 
         let exceptions =
             t.Subject
@@ -64,7 +64,7 @@ type SeqAssertions =
                 because
             )
 
-        let subjectLength = Seq.length t.Subject
+        let subjectLength = Seq.stringOptimizedLength t.Subject
         let assertionsLength = Seq.length assertions
 
         if subjectLength <> assertionsLength then
@@ -112,7 +112,7 @@ type SeqAssertions =
         if isNull (box t.Subject) then
             t.Fail("{subject}\n\tshould have length\n{0}\n\t{because}but was\n{actual}", because, format expected)
         else
-            let subjectLength = Seq.length t.Subject
+            let subjectLength = Seq.stringOptimizedLength t.Subject
 
             if subjectLength <> expected then
                 t.Fail(
@@ -131,7 +131,7 @@ type SeqAssertions =
     static member BeEmpty(t: Testable<#seq<'a>>, ?because) : And<_> =
         use _ = t.Assert()
 
-        if isNull (box t.Subject) || not (Seq.isEmpty t.Subject) then
+        if isNull (box t.Subject) || not (Seq.stringOptimizedIsEmpty t.Subject) then
             t.Fail("{subject}\n\tshould be empty{because}, but was\n{actual}", because)
 
         And(t)
@@ -144,7 +144,7 @@ type SeqAssertions =
 
         if isNull (box t.Subject) then
             t.Fail("{subject}\n\tshould not be empty{because}, but was\n{actual}", because)
-        elif Seq.isEmpty t.Subject then
+        elif Seq.stringOptimizedIsEmpty t.Subject then
             t.Fail("{subject}\n\tshould not be empty{because}, but was empty.", because)
 
         And(t)
@@ -155,7 +155,7 @@ type SeqAssertions =
     static member BeNullOrEmpty(t: Testable<#seq<'a>>, ?because) : And<_> =
         use _ = t.Assert()
 
-        if not (isNull t.Subject || Seq.isEmpty t.Subject) then
+        if not (isNull t.Subject || Seq.stringOptimizedIsEmpty t.Subject) then
             t.Fail("{subject}\n\tshould be null or empty{because}, but was\n{actual}", because)
 
         And(t)
