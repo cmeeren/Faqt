@@ -572,3 +572,49 @@ x
     because some reason, but was
 []
 """
+
+
+module NotContain =
+
+
+    [<Fact>]
+    let ``can be chained with And`` () =
+        [ 1 ].Should().NotContain(2).Id<And<int list>>().And.Be([ 1 ])
+
+
+    [<Fact>]
+    let ``Passes if sequence does not contain the value`` () = [ 1 ].Should().NotContain(2)
+
+
+    [<Fact>]
+    let ``Passes if subject is null`` () = (null: seq<int>).Should().NotContain(2)
+
+
+    [<Fact>]
+    let ``Fails with expected message if not containing the value`` () =
+        fun () ->
+            let x = [ 1; 2 ]
+            x.Should().NotContain(2)
+        |> assertExnMsg
+            """
+x
+    should not contain
+2
+    but was
+[1; 2]
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if not containing the value with because`` () =
+        fun () ->
+            let x = [ 1; 2 ]
+            x.Should().NotContain(2, "some reason")
+        |> assertExnMsg
+            """
+x
+    should not contain
+2
+    because some reason, but was
+[1; 2]
+"""
