@@ -22,6 +22,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{
 		.github\workflows\ci.yml = .github\workflows\ci.yml
 	EndProjectSection
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Faqt.Benchmarks", "src\Faqt.Benchmarks\Faqt.Benchmarks.fsproj", "{95454C24-C6C7-4100-9413-F17B06182D61}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -40,6 +42,10 @@ Global
 		{58827F94-880A-4A1D-B3C2-CF7D1BB3D160}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{58827F94-880A-4A1D-B3C2-CF7D1BB3D160}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{58827F94-880A-4A1D-B3C2-CF7D1BB3D160}.Release|Any CPU.Build.0 = Release|Any CPU
+		{95454C24-C6C7-4100-9413-F17B06182D61}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{95454C24-C6C7-4100-9413-F17B06182D61}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{95454C24-C6C7-4100-9413-F17B06182D61}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{95454C24-C6C7-4100-9413-F17B06182D61}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{C10B7978-6F4B-4D60-93EA-D059201E460E} = {5834EE0F-8FAB-4F14-9FBC-F963E33043B3}
