@@ -148,3 +148,18 @@ module IDisposable =
         { new IDisposable with
             member _.Dispose() = ()
         }
+
+
+module Seq =
+
+
+    let stringOptimizedLength (xs: seq<'a>) =
+        match box xs with
+        | :? string as x -> x.Length
+        | _ -> Seq.length xs
+
+
+    let stringOptimizedIsEmpty (xs: seq<'a>) =
+        match box xs with
+        | :? string as x -> x.Length = 0
+        | _ -> Seq.isEmpty xs
