@@ -986,7 +986,7 @@ module ContainAtLeastOneItemMatching =
     let ``Can be chained with AndDerived with matched value`` () =
         [ 1; 2; 3 ]
             .Should()
-            .ContainAtLeastOneItemMatching((=) 2)
+            .ContainAtLeastOneItemMatching(fun x -> x > 1)
             .Id<AndDerived<int list, int>>()
             .That.Should(())
             .Be(2)
