@@ -242,3 +242,33 @@ type SeqAssertions =
                 )
 
         AndDerived(t, Seq.head t.Subject)
+
+
+    /// Asserts that the subject contains exactly one item matching the predicate.
+    [<Extension>]
+    static member ContainExactlyOneItemMatching
+        (
+            t: Testable<#seq<'a>>,
+            predicate: 'a -> bool,
+            ?because
+        ) : AndDerived<_, 'a> =
+        use _ = t.Assert()
+
+        if isNull (box t.Subject) then
+            t.Fail(
+                "{subject}\n\tshould contain exactly one item matching the specified predicate{because}, but was\n{actual}",
+                because
+            )
+        else
+            let matchingItems = t.Subject |> Seq.filter predicate
+            let matchingLength = Seq.length matchingItems
+
+            if matchingLength <> 1 then
+                t.Fail(
+                    "{subject}\n\tshould contain exactly one item matching the specified predicate{because}, but found\n{0}\n\titems matching the predicate:\n{1}\n\tFull sequence:\n{actual}",
+                    because,
+                    matchingLength.ToString(),
+                    format matchingItems
+                )
+
+            AndDerived(t, Seq.head matchingItems)

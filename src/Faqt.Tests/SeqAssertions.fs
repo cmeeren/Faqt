@@ -827,3 +827,81 @@ x
 
 [1; 2]
 """
+
+
+module ContainExactlyOneItemMatching =
+
+
+    [<Fact>]
+    let ``Can be chained with AndDerived with matched value`` () =
+        [ 1; 2 ]
+            .Should()
+            .ContainExactlyOneItemMatching((=) 2)
+            .Id<AndDerived<int list, int>>()
+            .That.Should(())
+            .Be(2)
+
+
+    [<Fact>]
+    let ``Passes if sequence contains a single element matching the predicate`` () =
+        [ 1; 2 ].Should().ContainExactlyOneItemMatching((=) 1)
+
+
+    [<Fact>]
+    let ``Fails with expected message if subject is null`` () =
+        fun () ->
+            let x: seq<int> = null
+            x.Should().ContainExactlyOneItemMatching(fun _ -> true)
+        |> assertExnMsg
+            """
+x
+    should contain exactly one item matching the specified predicate, but was
+<null>
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if subject is null with because`` () =
+        fun () ->
+            let x: seq<int> = null
+            x.Should().ContainExactlyOneItemMatching((fun _ -> true), "some reason")
+        |> assertExnMsg
+            """
+x
+    should contain exactly one item matching the specified predicate because some reason, but was
+<null>
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if more than one item matches the predicate`` () =
+        fun () ->
+            let x = [ 1; 2; 3 ]
+            x.Should().ContainExactlyOneItemMatching(fun x -> x < 3)
+        |> assertExnMsg
+            """
+x
+    should contain exactly one item matching the specified predicate, but found
+2
+    items matching the predicate:
+seq [1; 2]
+    Full sequence:
+[1; 2; 3]
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if more than one item matches the predicate with because`` () =
+        fun () ->
+            let x = [ 1; 2; 3 ]
+            x.Should().ContainExactlyOneItemMatching((fun x -> x < 3), "some reason")
+        |> assertExnMsg
+            """
+x
+    should contain exactly one item matching the specified predicate because some reason, but found
+2
+    items matching the predicate:
+seq [1; 2]
+    Full sequence:
+[1; 2; 3]
+"""
