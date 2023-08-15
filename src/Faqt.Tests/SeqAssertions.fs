@@ -744,3 +744,86 @@ x
     Full sequence:
 [1; 3; 2]
 """
+
+
+module ContainExactlyOneItem =
+
+
+    [<Fact>]
+    let ``Can be chained with AndDerived with inner value`` () =
+        [ 1 ]
+            .Should()
+            .ContainExactlyOneItem()
+            .Id<AndDerived<int list, int>>()
+            .That.Should(())
+            .Be(1)
+
+
+    [<Fact>]
+    let ``Passes if sequence contains a single element`` () = [ 1 ].Should().ContainExactlyOneItem()
+
+
+    [<Fact>]
+    let ``Fails if empty`` () =
+        Assert.Throws<AssertionFailedException>(fun () -> List<int>.Empty.Should().ContainExactlyOneItem() |> ignore)
+
+
+    [<Fact>]
+    let ``Fails if more than one item`` () =
+        Assert.Throws<AssertionFailedException>(fun () -> [ 1; 2 ].Should().ContainExactlyOneItem() |> ignore)
+
+
+    [<Fact>]
+    let ``Fails with expected message if subject is null`` () =
+        fun () ->
+            let x: seq<int> = null
+            x.Should().ContainExactlyOneItem()
+        |> assertExnMsg
+            """
+x
+    should contain exactly one item, but was
+<null>
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if subject is null with because`` () =
+        fun () ->
+            let x: seq<int> = null
+            x.Should().ContainExactlyOneItem("some reason")
+        |> assertExnMsg
+            """
+x
+    should contain exactly one item because some reason, but was
+<null>
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if subject contains more than one item`` () =
+        fun () ->
+            let x = [ 1; 2 ]
+            x.Should().ContainExactlyOneItem()
+        |> assertExnMsg
+            """
+x
+    should contain exactly one item, but actual length was
+2
+
+[1; 2]
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if subject contains more than one item with because`` () =
+        fun () ->
+            let x = [ 1; 2 ]
+            x.Should().ContainExactlyOneItem("some reason")
+        |> assertExnMsg
+            """
+x
+    should contain exactly one item because some reason, but actual length was
+2
+
+[1; 2]
+"""

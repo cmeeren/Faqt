@@ -221,3 +221,24 @@ type SeqAssertions =
                         )
 
         And(t)
+
+
+    /// Asserts that the subject contains exactly one item. Equivalent to NotBeEmpty, but with a different error message
+    /// and allows continuing to assert on the item.
+    [<Extension>]
+    static member ContainExactlyOneItem(t: Testable<#seq<'a>>, ?because) : AndDerived<_, 'a> =
+        use _ = t.Assert()
+
+        if isNull (box t.Subject) then
+            t.Fail("{subject}\n\tshould contain exactly one item{because}, but was\n{actual}", because)
+        else
+            let subjectLength = Seq.length t.Subject
+
+            if subjectLength <> 1 then
+                t.Fail(
+                    "{subject}\n\tshould contain exactly one item{because}, but actual length was\n{0}\n\n{actual}",
+                    because,
+                    subjectLength.ToString()
+                )
+
+        AndDerived(t, Seq.head t.Subject)
