@@ -1052,3 +1052,78 @@ x
     should contain at least one item matching the specified predicate because some reason, but found none. Full sequence:
 [1; 2; 3]
 """
+
+
+module ContainItemsMatching =
+
+
+    [<Fact>]
+    let ``Can be chained with AndDerived with matched values`` () =
+        [ 1; 2; 3 ]
+            .Should()
+            .ContainItemsMatching(fun x -> x > 1)
+            .Id<AndDerived<int list, seq<int>>>()
+            .That.Should(())
+            .SequenceEqual([ 2; 3 ])
+
+
+    [<Fact>]
+    let ``Passes if sequence contains a single item matching the predicate`` () =
+        [ 1; 2 ].Should().ContainItemsMatching((=) 1)
+
+
+    [<Fact>]
+    let ``Passes if sequence contains multiple items matching the predicate`` () =
+        [ 1; 2 ].Should().ContainItemsMatching(fun x -> x < 3)
+
+
+    [<Fact>]
+    let ``Fails with expected message if subject is null`` () =
+        fun () ->
+            let x: seq<int> = null
+            x.Should().ContainItemsMatching(fun _ -> true)
+        |> assertExnMsg
+            """
+x
+    should contain items matching the specified predicate, but was
+<null>
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if subject is null with because`` () =
+        fun () ->
+            let x: seq<int> = null
+            x.Should().ContainItemsMatching((fun _ -> true), "some reason")
+        |> assertExnMsg
+            """
+x
+    should contain items matching the specified predicate because some reason, but was
+<null>
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if no items match the predicate`` () =
+        fun () ->
+            let x = [ 1; 2; 3 ]
+            x.Should().ContainItemsMatching(fun x -> x > 3)
+        |> assertExnMsg
+            """
+x
+    should contain items matching the specified predicate, but found none. Full sequence:
+[1; 2; 3]
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if no items match the predicate with because`` () =
+        fun () ->
+            let x = [ 1; 2; 3 ]
+            x.Should().ContainItemsMatching((fun x -> x > 3), "some reason")
+        |> assertExnMsg
+            """
+x
+    should contain items matching the specified predicate because some reason, but found none. Full sequence:
+[1; 2; 3]
+"""
