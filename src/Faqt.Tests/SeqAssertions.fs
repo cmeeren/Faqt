@@ -1127,3 +1127,49 @@ x
     should contain items matching the specified predicate because some reason, but found none. Full sequence:
 [1; 2; 3]
 """
+
+
+module BeDistinct =
+
+
+    [<Fact>]
+    let ``Can be chained with And`` () =
+        [].Should().BeDistinct().Id<And<int list>>().And.Be([])
+
+
+    [<Fact>]
+    let ``Passes if distinct`` () = [ 1; 2; 3 ].Should().BeDistinct()
+
+
+    [<Fact>]
+    let ``Passes if null`` () = (null: seq<int>).Should().BeDistinct()
+
+
+    [<Fact>]
+    let ``Fails with expected message if not distinct`` () =
+        fun () ->
+            let x = [ 1; 2; 2; 2; 5; 5; 0 ]
+            x.Should().BeDistinct()
+        |> assertExnMsg
+            """
+x
+    should be distinct, but found the following duplicate items (tuple is (item, count)):
+[(2, 3); (5, 2)]
+    Full sequence:
+[1; 2; 2; 2; 5; 5; 0]
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if not distinct with because`` () =
+        fun () ->
+            let x = [ 1; 2; 2; 2; 5; 5; 0 ]
+            x.Should().BeDistinct("some reason")
+        |> assertExnMsg
+            """
+x
+    should be distinct because some reason, but found the following duplicate items (tuple is (item, count)):
+[(2, 3); (5, 2)]
+    Full sequence:
+[1; 2; 2; 2; 5; 5; 0]
+"""

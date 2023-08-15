@@ -344,3 +344,23 @@ type SeqAssertions =
                 )
 
             AndDerived(t, matchingItems)
+
+
+    /// Asserts that the subject is distinct, as determined using default equality comparison (=). Passes if the subject
+    /// is null.
+    [<Extension>]
+    static member BeDistinct(t: Testable<#seq<'a>>, ?because) : And<_> =
+        use _ = t.Assert()
+
+        if not (isNull (box t.Subject)) then
+            let nonDistinctItemsWithCounts =
+                t.Subject |> Seq.countBy id |> Seq.filter (fun (_, c) -> c > 1)
+
+            if not (Seq.isEmpty nonDistinctItemsWithCounts) then
+                t.Fail(
+                    "{subject}\n\tshould be distinct{because}, but found the following duplicate items (tuple is (item, count)):\n{0}\n\tFull sequence:\n{actual}",
+                    because,
+                    format (Seq.toList nonDistinctItemsWithCounts)
+                )
+
+        And(t)
