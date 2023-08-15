@@ -223,8 +223,7 @@ type SeqAssertions =
         And(t)
 
 
-    /// Asserts that the subject contains exactly one item. Equivalent to NotBeEmpty, but with a different error message
-    /// and allows continuing to assert on the item.
+    /// Asserts that the subject contains exactly one item.
     [<Extension>]
     static member ContainExactlyOneItem(t: Testable<#seq<'a>>, ?because) : AndDerived<_, 'a> =
         use _ = t.Assert()
