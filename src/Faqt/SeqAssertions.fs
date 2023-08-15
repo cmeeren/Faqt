@@ -274,7 +274,7 @@ type SeqAssertions =
 
 
     /// Asserts that the subject contains at least one item. Equivalent to NotBeEmpty, but with a different error
-    /// message and allows continuing to assert on the item.
+    /// message and allows continuing to assert on the first matching item.
     [<Extension>]
     static member ContainAtLeastOneItem(t: Testable<#seq<'a>>, ?because) : AndDerived<_, 'a> =
         use _ = t.Assert()
