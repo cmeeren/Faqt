@@ -9,7 +9,7 @@ open Formatting
 type SeqAssertions =
 
 
-    /// Asserts that all elements in the collection satisfy the supplied assertion.
+    /// Asserts that all items in the collection satisfy the supplied assertion.
     [<Extension>]
     static member AllSatisfy(t: Testable<#seq<'a>>, assertion: 'a -> 'ignored, ?because) : And<_> =
         use _ = t.Assert(true, true)
@@ -52,8 +52,8 @@ type SeqAssertions =
         And(t)
 
 
-    /// Asserts that the subject contains the same number of elements as the assertion collection, and that each
-    /// subject element satisfies the corresponding assertion in the assertion collection.
+    /// Asserts that the subject contains the same number of items as the assertion collection, and that each subject
+    /// item satisfies the corresponding assertion in the assertion collection.
     [<Extension>]
     static member SatisfyRespectively(t: Testable<#seq<'a>>, assertions: seq<'a -> 'ignored>, ?because) : And<_> =
         use _ = t.Assert(true)
@@ -184,7 +184,7 @@ type SeqAssertions =
         And(t)
 
 
-    /// Asserts that the subject contains the same elements in the same order as the specified sequence, as determined
+    /// Asserts that the subject contains the same items in the same order as the specified sequence, as determined
     /// using the default equality comparison (=). Passes if both sequences are null.
     [<Extension>]
     static member SequenceEqual(t: Testable<#seq<'a>>, expected: seq<'a>, ?because) : And<_> =

@@ -53,7 +53,7 @@ x
 
 
     [<Fact>]
-    let ``Fails with expected message if at least one of the elements fail to satisfy the assertion`` () =
+    let ``Fails with expected message if at least one of the items fail to satisfy the assertion`` () =
         fun () ->
             let x = [ "asd"; "test"; "1234" ]
             x.Should().AllSatisfy(fun y -> y.Length.Should().Test(y.Length = 3))
@@ -145,7 +145,7 @@ x
 
 
     [<Fact>]
-    let ``Fails with expected message if subject does not contain one element per assertion`` () =
+    let ``Fails with expected message if subject does not contain one item per assertion`` () =
         fun () ->
             let x = [ "asd"; "test"; "1234" ]
 
@@ -166,7 +166,7 @@ x
 
 
     [<Fact>]
-    let ``Fails with expected message if subject does not contain one element per assertion with because`` () =
+    let ``Fails with expected message if subject does not contain one item per assertion with because`` () =
         fun () ->
             let x = [ "asd"; "test"; "1234" ]
 
@@ -187,7 +187,7 @@ x
 
 
     [<Fact>]
-    let ``Fails with expected message if at least one of the elements fail to satisfy the assertion`` () =
+    let ``Fails with expected message if at least one of the items fail to satisfy the assertion`` () =
         fun () ->
             let x = [ "asd"; "test"; "1234" ]
 
@@ -217,7 +217,7 @@ x3
 
 
     [<Fact>]
-    let ``Fails with expected message if at least one of the elements fail to satisfy the assertion with because`` () =
+    let ``Fails with expected message if at least one of the items fail to satisfy the assertion with because`` () =
         fun () ->
             let x = [ "asd"; "test"; "1234" ]
 
@@ -709,7 +709,7 @@ x
 
 
     [<Fact>]
-    let ``Fails with expected message if elements are not equal`` () =
+    let ``Fails with expected message if items are not equal`` () =
         fun () ->
             let x = [ 1; 3; 2 ]
             x.Should().SequenceEqual([ 1; 2; 3 ])
@@ -728,7 +728,7 @@ x
 
 
     [<Fact>]
-    let ``Fails with expected message if elements are not equal with because`` () =
+    let ``Fails with expected message if items are not equal with because`` () =
         fun () ->
             let x = [ 1; 3; 2 ]
             x.Should().SequenceEqual([ 1; 2; 3 ], "some reason")
@@ -760,7 +760,7 @@ module ContainExactlyOneItem =
 
 
     [<Fact>]
-    let ``Passes if sequence contains a single element`` () = [ 1 ].Should().ContainExactlyOneItem()
+    let ``Passes if sequence contains a single item`` () = [ 1 ].Should().ContainExactlyOneItem()
 
 
     [<Fact>]
@@ -843,7 +843,7 @@ module ContainExactlyOneItemMatching =
 
 
     [<Fact>]
-    let ``Passes if sequence contains a single element matching the predicate`` () =
+    let ``Passes if sequence contains a single item matching the predicate`` () =
         [ 1; 2 ].Should().ContainExactlyOneItemMatching((=) 1)
 
 
