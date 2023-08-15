@@ -285,3 +285,32 @@ type SeqAssertions =
             t.Fail("{subject}\n\tshould contain at least one item{because}, but was empty.", because)
 
         AndDerived(t, Seq.head t.Subject)
+
+
+    /// Asserts that the subject contains at least one item matching the predicate. Allows continuing to assert on the
+    /// first matching item.
+    [<Extension>]
+    static member ContainAtLeastOneItemMatching
+        (
+            t: Testable<#seq<'a>>,
+            predicate: 'a -> bool,
+            ?because
+        ) : AndDerived<_, 'a> =
+        use _ = t.Assert()
+
+        if isNull (box t.Subject) then
+            t.Fail(
+                "{subject}\n\tshould contain at least one item matching the specified predicate{because}, but was\n{actual}",
+                because
+            )
+        else
+            let matchingItems = t.Subject |> Seq.filter predicate
+
+            if Seq.isEmpty matchingItems then
+                t.Fail(
+                    "{subject}\n\tshould contain at least one item matching the specified predicate{because}, but found none. Full sequence:\n{actual}",
+                    because,
+                    format matchingItems
+                )
+
+            AndDerived(t, Seq.head matchingItems)
