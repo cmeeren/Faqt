@@ -182,3 +182,42 @@ type SeqAssertions =
             t.Fail("{subject}\n\tshould not contain\n{0}\n\t{because}but was\n{actual}", because, format expected)
 
         And(t)
+
+
+    /// Asserts that the subject contains the same elements in the same order as the specified sequence, as determined
+    /// using the default equality comparison (=). Passes if both sequences are null.
+    [<Extension>]
+    static member SequenceEqual(t: Testable<#seq<'a>>, expected: seq<'a>, ?because) : And<_> =
+        use _ = t.Assert()
+
+        if isNull (box t.Subject) && not (isNull expected) then
+            t.Fail(
+                "{subject}\n\tshould be sequence equal to\n{0}\n\t{because}but was\n{actual}",
+                because,
+                format expected
+            )
+        elif not (isNull (box t.Subject)) then
+            let subjectLength = Seq.length t.Subject
+            let expectedLength = Seq.length expected
+
+            if subjectLength <> expectedLength then
+                t.Fail(
+                    "{subject}\n\tshould be sequence equal to\n{0}\n\t{because}but expected length\n{1}\n\tis different from actual length\n{2}\n\n{actual}",
+                    because,
+                    format expected,
+                    expectedLength.ToString(),
+                    subjectLength.ToString()
+                )
+            else
+                for i, (actualItem, expectedItem) in Seq.zip t.Subject expected |> Seq.indexed do
+                    if actualItem <> expectedItem then
+                        t.Fail(
+                            "{subject}\n\tshould be sequence equal to\n{0}\n\t{because}but actual item at index {1}\n{2}\n\tis not equal to expected item\n{3}\n\tFull sequence:\n{actual}",
+                            because,
+                            format expected,
+                            i.ToString(),
+                            format actualItem,
+                            format expectedItem
+                        )
+
+        And(t)

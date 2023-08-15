@@ -618,3 +618,129 @@ x
     because some reason, but was
 [1; 2]
 """
+
+
+module SequenceEqual =
+
+
+    [<Fact>]
+    let ``Can be chained with And`` () =
+        [ 1 ].Should().SequenceEqual([ 1 ]).Id<And<int list>>().And.Be([ 1 ])
+
+
+    [<Fact>]
+    let ``Passes if sequence contains all values in order`` () =
+        let x = ResizeArray()
+        x.AddRange([ 1; 2; 1; 3; 2 ])
+        x.Should().SequenceEqual([ 1; 2; 1; 3; 2 ])
+
+
+    [<Fact>]
+    let ``Passes if both subject and expected is null`` () =
+        (null: seq<int>).Should().SequenceEqual(null)
+
+
+    [<Fact>]
+    let ``Fails with expected message if only subject is null`` () =
+        fun () ->
+            let x: seq<int> = null
+            x.Should().SequenceEqual([])
+        |> assertExnMsg
+            """
+x
+    should be sequence equal to
+[]
+    but was
+<null>
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if only subject is null with because`` () =
+        fun () ->
+            let x: seq<int> = null
+            x.Should().SequenceEqual([], "some reason")
+        |> assertExnMsg
+            """
+x
+    should be sequence equal to
+[]
+    because some reason, but was
+<null>
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if different length`` () =
+        fun () ->
+            let x = [ 1; 2; 3 ]
+            x.Should().SequenceEqual([ 1; 2 ])
+        |> assertExnMsg
+            """
+x
+    should be sequence equal to
+[1; 2]
+    but expected length
+2
+    is different from actual length
+3
+
+[1; 2; 3]
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if different length with because`` () =
+        fun () ->
+            let x = [ 1; 2; 3 ]
+            x.Should().SequenceEqual([ 1; 2 ], "some reason")
+        |> assertExnMsg
+            """
+x
+    should be sequence equal to
+[1; 2]
+    because some reason, but expected length
+2
+    is different from actual length
+3
+
+[1; 2; 3]
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if elements are not equal`` () =
+        fun () ->
+            let x = [ 1; 3; 2 ]
+            x.Should().SequenceEqual([ 1; 2; 3 ])
+        |> assertExnMsg
+            """
+x
+    should be sequence equal to
+[1; 2; 3]
+    but actual item at index 1
+3
+    is not equal to expected item
+2
+    Full sequence:
+[1; 3; 2]
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if elements are not equal with because`` () =
+        fun () ->
+            let x = [ 1; 3; 2 ]
+            x.Should().SequenceEqual([ 1; 2; 3 ], "some reason")
+        |> assertExnMsg
+            """
+x
+    should be sequence equal to
+[1; 2; 3]
+    because some reason, but actual item at index 1
+3
+    is not equal to expected item
+2
+    Full sequence:
+[1; 3; 2]
+"""
