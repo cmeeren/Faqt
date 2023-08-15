@@ -267,7 +267,7 @@ type SeqAssertions =
                     "{subject}\n\tshould contain exactly one item matching the specified predicate{because}, but found\n{0}\n\titems matching the predicate:\n{1}\n\tFull sequence:\n{actual}",
                     because,
                     matchingLength.ToString(),
-                    format matchingItems
+                    format (Seq.toList matchingItems)
                 )
 
             AndDerived(t, Seq.head matchingItems)

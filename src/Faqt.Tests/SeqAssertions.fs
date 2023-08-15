@@ -884,7 +884,7 @@ x
     should contain exactly one item matching the specified predicate, but found
 2
     items matching the predicate:
-seq [1; 2]
+[1; 2]
     Full sequence:
 [1; 2; 3]
 """
@@ -901,7 +901,7 @@ x
     should contain exactly one item matching the specified predicate because some reason, but found
 2
     items matching the predicate:
-seq [1; 2]
+[1; 2]
     Full sequence:
 [1; 2; 3]
 """
