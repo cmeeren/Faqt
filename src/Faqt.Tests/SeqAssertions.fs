@@ -506,7 +506,7 @@ module Contain =
 
 
     [<Fact>]
-    let ``can be chained with AndDerived with found value`` () =
+    let ``Can be chained with AndDerived with found value`` () =
         [ 1 ].Should().Contain(1).Id<AndDerived<int list, int>>().That.Should().Be(1)
 
 
@@ -578,7 +578,7 @@ module NotContain =
 
 
     [<Fact>]
-    let ``can be chained with And`` () =
+    let ``Can be chained with And`` () =
         [ 1 ].Should().NotContain(2).Id<And<int list>>().And.Be([ 1 ])
 
 
