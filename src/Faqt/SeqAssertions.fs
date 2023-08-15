@@ -271,3 +271,17 @@ type SeqAssertions =
                 )
 
             AndDerived(t, Seq.head matchingItems)
+
+
+    /// Asserts that the subject contains at least one item. Equivalent to NotBeEmpty, but with a different error
+    /// message and allows continuing to assert on the item.
+    [<Extension>]
+    static member ContainAtLeastOneItem(t: Testable<#seq<'a>>, ?because) : AndDerived<_, 'a> =
+        use _ = t.Assert()
+
+        if isNull (box t.Subject) then
+            t.Fail("{subject}\n\tshould contain at least one item{because}, but was\n{actual}", because)
+        else if Seq.isEmpty t.Subject then
+            t.Fail("{subject}\n\tshould contain at least one item{because}, but was empty.", because)
+
+        AndDerived(t, Seq.head t.Subject)

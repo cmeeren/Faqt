@@ -905,3 +905,75 @@ seq [1; 2]
     Full sequence:
 [1; 2; 3]
 """
+
+
+module ContainAtLeastOneItem =
+
+
+    [<Fact>]
+    let ``Can be chained with AndDerived with inner value`` () =
+        [ 1; 2 ]
+            .Should()
+            .ContainAtLeastOneItem()
+            .Id<AndDerived<int list, int>>()
+            .That.Should(())
+            .Be(1)
+
+
+    [<Fact>]
+    let ``Passes if sequence contains a single item`` () = [ 1 ].Should().ContainAtLeastOneItem()
+
+
+    [<Fact>]
+    let ``Passes if sequence contains multiple items`` () =
+        [ 1; 2 ].Should().ContainAtLeastOneItem()
+
+
+    [<Fact>]
+    let ``Fails with expected message if subject is null`` () =
+        fun () ->
+            let x: seq<int> = null
+            x.Should().ContainAtLeastOneItem()
+        |> assertExnMsg
+            """
+x
+    should contain at least one item, but was
+<null>
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if subject is null with because`` () =
+        fun () ->
+            let x: seq<int> = null
+            x.Should().ContainAtLeastOneItem("some reason")
+        |> assertExnMsg
+            """
+x
+    should contain at least one item because some reason, but was
+<null>
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if subject is empty`` () =
+        fun () ->
+            let x = List<int>.Empty
+            x.Should().ContainAtLeastOneItem()
+        |> assertExnMsg
+            """
+x
+    should contain at least one item, but was empty.
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if subject is empty with because`` () =
+        fun () ->
+            let x = List<int>.Empty
+            x.Should().ContainAtLeastOneItem("some reason")
+        |> assertExnMsg
+            """
+x
+    should contain at least one item because some reason, but was empty.
+"""
