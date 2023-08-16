@@ -1153,8 +1153,10 @@ module BeDistinct =
         |> assertExnMsg
             """
 x
-    should be distinct, but found the following duplicate items (tuple is (item, count)):
-[(2, 3); (5, 2)]
+    should be distinct, but found the following duplicate items:
+[{ Count = 3
+  Item = 2 }; { Count = 2
+  Item = 5 }]
     Full sequence:
 [1; 2; 2; 2; 5; 5; 0]
 """
@@ -1168,8 +1170,10 @@ x
         |> assertExnMsg
             """
 x
-    should be distinct because some reason, but found the following duplicate items (tuple is (item, count)):
-[(2, 3); (5, 2)]
+    should be distinct because some reason, but found the following duplicate items:
+[{ Count = 3
+  Item = 2 }; { Count = 2
+  Item = 5 }]
     Full sequence:
 [1; 2; 2; 2; 5; 5; 0]
 """

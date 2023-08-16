@@ -5,6 +5,9 @@ open AssertionHelpers
 open Formatting
 
 
+type private BeDistinctReportItem<'a> = { Count: int; Item: 'a }
+
+
 [<Extension>]
 type SeqAssertions =
 
@@ -357,10 +360,15 @@ type SeqAssertions =
                 t.Subject |> Seq.countBy id |> Seq.filter (fun (_, c) -> c > 1)
 
             if not (Seq.isEmpty nonDistinctItemsWithCounts) then
+                let items =
+                    nonDistinctItemsWithCounts
+                    |> Seq.map (fun (x, c) -> { Count = c; Item = x })
+                    |> Seq.toList
+
                 t.Fail(
-                    "{subject}\n\tshould be distinct{because}, but found the following duplicate items (tuple is (item, count)):\n{0}\n\tFull sequence:\n{actual}",
+                    "{subject}\n\tshould be distinct{because}, but found the following duplicate items:\n{0}\n\tFull sequence:\n{actual}",
                     because,
-                    format (Seq.toList nonDistinctItemsWithCounts)
+                    format items
                 )
 
         And(t)
