@@ -1177,3 +1177,61 @@ x
     Full sequence:
 [1; 2; 2; 2; 5; 5; 0]
 """
+
+
+module BeDistinctBy =
+
+
+    [<Fact>]
+    let ``Can be chained with And`` () =
+        [].Should().BeDistinctBy(id).Id<And<string list>>().And.Be([])
+
+
+    [<Fact>]
+    let ``Passes if distinct by the specified projection`` () =
+        [ "a"; "as"; "asd" ].Should().BeDistinctBy(fun s -> s.Length)
+
+
+    [<Fact>]
+    let ``Passes if null`` () =
+        (null: seq<string>).Should().BeDistinctBy(id)
+
+
+    [<Fact>]
+    let ``Fails with expected message if not distinct by the specified projection`` () =
+        fun () ->
+            let x = [ "a"; "as"; "asd"; "abc"; "b"; "foobar" ]
+            x.Should().BeDistinctBy(fun s -> s.Length)
+        |> assertExnMsg
+            """
+x
+    should be distinct by the specified projection, but found the following duplicate items:
+[{ Count = 2
+  Projected = 1
+  Items = ["a"; "b"] };
+ { Count = 2
+  Projected = 3
+  Items = ["asd"; "abc"] }]
+    Full sequence:
+["a"; "as"; "asd"; "abc"; "b"; "foobar"]
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if not distinct by the specified projection with because`` () =
+        fun () ->
+            let x = [ "a"; "as"; "asd"; "abc"; "b"; "foobar" ]
+            x.Should().BeDistinctBy((fun s -> s.Length), "some reason")
+        |> assertExnMsg
+            """
+x
+    should be distinct by the specified projection because some reason, but found the following duplicate items:
+[{ Count = 2
+  Projected = 1
+  Items = ["a"; "b"] };
+ { Count = 2
+  Projected = 3
+  Items = ["asd"; "abc"] }]
+    Full sequence:
+["a"; "as"; "asd"; "abc"; "b"; "foobar"]
+"""

@@ -8,6 +8,13 @@ open Formatting
 type private BeDistinctReportItem<'a> = { Count: int; Item: 'a }
 
 
+type private BeDistinctByReportItem<'a, 'b> = {
+    Count: int
+    Projected: 'b
+    Items: 'a list
+}
+
+
 [<Extension>]
 type SeqAssertions =
 
@@ -369,6 +376,40 @@ type SeqAssertions =
                     "{subject}\n\tshould be distinct{because}, but found the following duplicate items:\n{0}\n\tFull sequence:\n{actual}",
                     because,
                     format items
+                )
+
+        And(t)
+
+
+    /// Asserts that the subject is distinct by the specified projection, as determined using default equality
+    /// comparison (=). Passes if the subject is null.
+    [<Extension>]
+    static member BeDistinctBy(t: Testable<#seq<'a>>, projection: 'a -> 'b, ?because) : And<_> =
+        use _ = t.Assert()
+
+        if not (isNull (box t.Subject)) then
+            let nonDistinctItemsWithCounts =
+                t.Subject
+                |> Seq.groupBy projection
+                |> Seq.choose (fun (p, xs) ->
+                    let xs = Seq.toList xs
+
+                    if xs.Length > 1 then
+                        Some {
+                            Count = xs.Length
+                            Projected = p
+                            Items = xs
+                        }
+                    else
+                        None
+                )
+                |> Seq.toList
+
+            if not (Seq.isEmpty nonDistinctItemsWithCounts) then
+                t.Fail(
+                    "{subject}\n\tshould be distinct by the specified projection{because}, but found the following duplicate items:\n{0}\n\tFull sequence:\n{actual}",
+                    because,
+                    format (Seq.toList nonDistinctItemsWithCounts)
                 )
 
         And(t)
