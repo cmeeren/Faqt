@@ -319,52 +319,55 @@ type SeqAssertions =
             AndDerived(t, matchingItems)
 
 
-    /// Asserts that the subject is distinct, as determined using default equality comparison (=). Passes if the subject
-    /// is null.
+    /// Asserts that the subject is distinct, as determined using default equality comparison (=).
     [<Extension>]
     static member BeDistinct(t: Testable<#seq<'a>>, ?because) : And<_> =
         use _ = t.Assert()
 
-        if not (isNull (box t.Subject)) then
-            let nonDistinctItemsWithCounts =
-                t.Subject |> Seq.countBy id |> Seq.filter (fun (_, c) -> c > 1)
+        if isNull (box t.Subject) then
+            t.With("But was", t.Subject).Fail(because)
 
-            if not (Seq.stringOptimizedIsEmpty nonDistinctItemsWithCounts) then
-                let items =
-                    nonDistinctItemsWithCounts
-                    |> Seq.map (fun (x, c) -> {| Count = c; Item = TryFormat x |})
-                    |> Seq.toList
+        let nonDistinctItemsWithCounts =
+            t.Subject |> Seq.countBy id |> Seq.filter (fun (_, c) -> c > 1)
 
-                t.With("Duplicates", items).With("Value", t.Subject).Fail(because)
+        if not (Seq.stringOptimizedIsEmpty nonDistinctItemsWithCounts) then
+            let items =
+                nonDistinctItemsWithCounts
+                |> Seq.map (fun (x, c) -> {| Count = c; Item = TryFormat x |})
+                |> Seq.toList
+
+            t.With("Duplicates", items).With("Value", t.Subject).Fail(because)
 
         And(t)
 
 
     /// Asserts that the subject is distinct by the specified projection, as determined using default equality
-    /// comparison (=). Passes if the subject is null.
+    /// comparison (=).
     [<Extension>]
     static member BeDistinctBy(t: Testable<#seq<'a>>, projection: 'a -> 'b, ?because) : And<_> =
         use _ = t.Assert()
 
-        if not (isNull (box t.Subject)) then
-            let duplicates =
-                t.Subject
-                |> Seq.groupBy projection
-                |> Seq.choose (fun (p, xs) ->
-                    let xs = Seq.toList xs
+        if isNull (box t.Subject) then
+            t.With("But was", t.Subject).Fail(because)
 
-                    if xs.Length > 1 then
-                        Some {
-                            Count = xs.Length
-                            Projected = p
-                            Items = xs |> List.map (box >> TryFormat)
-                        }
-                    else
-                        None
-                )
-                |> Seq.toList
+        let duplicates =
+            t.Subject
+            |> Seq.groupBy projection
+            |> Seq.choose (fun (p, xs) ->
+                let xs = Seq.toList xs
 
-            if not (Seq.stringOptimizedIsEmpty duplicates) then
-                t.With("Duplicates", duplicates).With("Value", t.Subject).Fail(because)
+                if xs.Length > 1 then
+                    Some {
+                        Count = xs.Length
+                        Projected = p
+                        Items = xs |> List.map (box >> TryFormat)
+                    }
+                else
+                    None
+            )
+            |> Seq.toList
+
+        if not (Seq.stringOptimizedIsEmpty duplicates) then
+            t.With("Duplicates", duplicates).With("Value", t.Subject).Fail(because)
 
         And(t)

@@ -1168,7 +1168,30 @@ module BeDistinct =
 
 
     [<Fact>]
-    let ``Passes if null`` () = (null: seq<int>).Should().BeDistinct()
+    let ``Fails with expected message if null`` () =
+        fun () ->
+            let x: seq<int> = null
+            x.Should().BeDistinct()
+        |> assertExnMsg
+            """
+Subject: x
+Should: BeDistinct
+But was: null
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if null with because`` () =
+        fun () ->
+            let x: seq<int> = null
+            x.Should().BeDistinct("Some reason")
+        |> assertExnMsg
+            """
+Subject: x
+Because: Some reason
+Should: BeDistinct
+But was: null
+"""
 
 
     [<Fact>]
@@ -1222,8 +1245,30 @@ module BeDistinctBy =
 
 
     [<Fact>]
-    let ``Passes if null`` () =
-        (null: seq<string>).Should().BeDistinctBy(id)
+    let ``Fails with expected message if null`` () =
+        fun () ->
+            let x: seq<int> = null
+            x.Should().BeDistinctBy(id)
+        |> assertExnMsg
+            """
+Subject: x
+Should: BeDistinctBy
+But was: null
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if null with because`` () =
+        fun () ->
+            let x: seq<int> = null
+            x.Should().BeDistinctBy(id, "Some reason")
+        |> assertExnMsg
+            """
+Subject: x
+Because: Some reason
+Should: BeDistinctBy
+But was: null
+"""
 
 
     [<Fact>]
