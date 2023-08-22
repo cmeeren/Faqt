@@ -978,14 +978,13 @@ module Transform =
     [<Fact>]
     let ``Fails with expected message when function throws`` () =
         fun () -> "a".Should().Transform(fun _ -> failwith "foo")
-        |> assertExnMsg
+        |> assertExnMsgWildcard
             """
 Subject: '"a"'
 Should: Transform
 But threw: |-
   System.Exception: foo
-     at BasicAssertions.Transform.Pipe #1 input at line 980@980-1.Invoke(String _arg1) in C:\Users\cmeer\Source\Repos\Faqt\src\Faqt.Tests\BasicAssertions.fs:line 980
-     at Faqt.BasicAssertions.Transform[a,b](Testable`1 t, FSharpFunc`2 f, FSharpOption`1 because) in C:\Users\cmeer\Source\Repos\Faqt\src\Faqt\BasicAssertions.fs:line 128
+     at *
 For value: a
 """
 
@@ -993,18 +992,14 @@ For value: a
     [<Fact>]
     let ``Fails with expected message with because`` () =
         fun () -> "a".Should().Transform(int, "Some reason")
-        |> assertExnMsg
+        |> assertExnMsgWildcard
             """
 Subject: '"a"'
 Because: Some reason
 Should: Transform
 But threw: |-
   System.FormatException: The input string 'a' was not in a correct format.
-     at System.Number.ThrowOverflowOrFormatException(ParsingStatus status, ReadOnlySpan`1 value, TypeCode type)
-     at System.Int32.Parse(String s, NumberStyles style, IFormatProvider provider)
-     at Microsoft.FSharp.Core.LanguagePrimitives.ParseInt32(String s) in D:\a\_work\1\s\src\FSharp.Core\prim-types.fs:line 2458
-     at BasicAssertions.Transform.Pipe #1 input at line 995@995-1.Invoke(String value)
-     at Faqt.BasicAssertions.Transform[a,b](Testable`1 t, FSharpFunc`2 f, FSharpOption`1 because) in C:\Users\cmeer\Source\Repos\Faqt\src\Faqt\BasicAssertions.fs:line 128
+     at *
 For value: a
 """
 
@@ -1037,14 +1032,13 @@ For value: a
     [<Fact>]
     let ``Fails with expected message when function throws`` () =
         fun () -> "a".Should().TryTransform(fun _ -> failwith<string option> "foo")
-        |> assertExnMsg
+        |> assertExnMsgWildcard
             """
 Subject: '"a"'
 Should: TryTransform
 But threw: |-
   System.Exception: foo
-     at BasicAssertions.TryTransform option.Pipe #1 input at line 1039@1039-1.Invoke(String _arg1) in C:\Users\cmeer\Source\Repos\Faqt\src\Faqt.Tests\BasicAssertions.fs:line 1039
-     at Faqt.BasicAssertions.TryTransform[a,b](Testable`1 t, FSharpFunc`2 f, FSharpOption`1 because) in C:\Users\cmeer\Source\Repos\Faqt\src\Faqt\BasicAssertions.fs:line 141
+     at *
 For value: a
 """
 
@@ -1068,15 +1062,14 @@ For value: a
             "a"
                 .Should()
                 .TryTransform((fun _ -> failwith<string option> "foo"), "Some reason")
-        |> assertExnMsg
+        |> assertExnMsgWildcard
             """
 Subject: '"a"'
 Because: Some reason
 Should: TryTransform
 But threw: |-
   System.Exception: foo
-     at BasicAssertions.TryTransform option.Pipe #1 input at line 1067@1070-1.Invoke(String _arg1) in C:\Users\cmeer\Source\Repos\Faqt\src\Faqt.Tests\BasicAssertions.fs:line 1070
-     at Faqt.BasicAssertions.TryTransform[a,b](Testable`1 t, FSharpFunc`2 f, FSharpOption`1 because) in C:\Users\cmeer\Source\Repos\Faqt\src\Faqt\BasicAssertions.fs:line 141
+     at *
 For value: a
 """
 
@@ -1109,14 +1102,13 @@ For value: a
     [<Fact>]
     let ``Fails with expected message when function throws`` () =
         fun () -> "a".Should().TryTransform(fun _ -> failwith<string voption> "foo")
-        |> assertExnMsg
+        |> assertExnMsgWildcard
             """
 Subject: '"a"'
 Should: TryTransform
 But threw: |-
   System.Exception: foo
-     at BasicAssertions.TryTransform voption.Pipe #1 input at line 1111@1111-1.Invoke(String _arg1) in C:\Users\cmeer\Source\Repos\Faqt\src\Faqt.Tests\BasicAssertions.fs:line 1111
-     at Faqt.BasicAssertions.TryTransform[a,b](Testable`1 t, FSharpFunc`2 f, FSharpOption`1 because) in C:\Users\cmeer\Source\Repos\Faqt\src\Faqt\BasicAssertions.fs:line 158
+     at *
 For value: a
 """
 
@@ -1143,15 +1135,14 @@ For value: a
             "a"
                 .Should()
                 .TryTransform((fun _ -> failwith<string voption> "foo"), "ValueSome reason")
-        |> assertExnMsg
+        |> assertExnMsgWildcard
             """
 Subject: '"a"'
 Because: ValueSome reason
 Should: TryTransform
 But threw: |-
   System.Exception: foo
-     at BasicAssertions.TryTransform voption.Pipe #1 input at line 1142@1145-1.Invoke(String _arg1) in C:\Users\cmeer\Source\Repos\Faqt\src\Faqt.Tests\BasicAssertions.fs:line 1145
-     at Faqt.BasicAssertions.TryTransform[a,b](Testable`1 t, FSharpFunc`2 f, FSharpOption`1 because) in C:\Users\cmeer\Source\Repos\Faqt\src\Faqt\BasicAssertions.fs:line 158
+     at *
 For value: a
 """
 
@@ -1185,14 +1176,13 @@ For value: a
     [<Fact>]
     let ``Fails with expected message when function throws`` () =
         fun () -> "a".Should().TryTransform(fun _ -> failwith<Result<string, string>> "foo")
-        |> assertExnMsg
+        |> assertExnMsgWildcard
             """
 Subject: '"a"'
 Should: TryTransform
 But threw: |-
   System.Exception: foo
-     at BasicAssertions.TryTransform Result.Pipe #1 input at line 1187@1187-1.Invoke(String _arg1) in C:\Users\cmeer\Source\Repos\Faqt\src\Faqt.Tests\BasicAssertions.fs:line 1187
-     at Faqt.BasicAssertions.TryTransform[a,b,c](Testable`1 t, FSharpFunc`2 f, FSharpOption`1 because) in C:\Users\cmeer\Source\Repos\Faqt\src\Faqt\BasicAssertions.fs:line 175
+     at *
 For value: a
 """
 
@@ -1220,15 +1210,14 @@ For value: a
             "a"
                 .Should()
                 .TryTransform((fun _ -> failwith<Result<string, string>> "foo"), "Some reason")
-        |> assertExnMsg
+        |> assertExnMsgWildcard
             """
 Subject: '"a"'
 Because: Some reason
 Should: TryTransform
 But threw: |-
   System.Exception: foo
-     at BasicAssertions.TryTransform Result.Pipe #1 input at line 1219@1222-1.Invoke(String _arg1) in C:\Users\cmeer\Source\Repos\Faqt\src\Faqt.Tests\BasicAssertions.fs:line 1222
-     at Faqt.BasicAssertions.TryTransform[a,b,c](Testable`1 t, FSharpFunc`2 f, FSharpOption`1 because) in C:\Users\cmeer\Source\Repos\Faqt\src\Faqt\BasicAssertions.fs:line 175
+     at *
 For value: a
 """
 
@@ -1261,14 +1250,13 @@ For value: a
     [<Fact>]
     let ``Fails with expected message when function throws`` () =
         fun () -> "a".Should().TryTransform(fun _ -> failwith<bool * int> "foo")
-        |> assertExnMsg
+        |> assertExnMsgWildcard
             """
 Subject: '"a"'
 Should: TryTransform
 But threw: |-
   System.Exception: foo
-     at BasicAssertions.TryTransform parse.Pipe #1 input at line 1263@1263-1.Invoke(String _arg1) in C:\Users\cmeer\Source\Repos\Faqt\src\Faqt.Tests\BasicAssertions.fs:line 1263
-     at Faqt.BasicAssertions.TryTransform[a,b](Testable`1 t, FSharpFunc`2 f, FSharpOption`1 because) in C:\Users\cmeer\Source\Repos\Faqt\src\Faqt\BasicAssertions.fs:line 192
+     at *
 For value: a
 """
 
@@ -1289,14 +1277,13 @@ For value: a
     [<Fact>]
     let ``Fails with expected message with because when function throws`` () =
         fun () -> "a".Should().TryTransform((fun _ -> failwith<bool * int> "foo"), "Some reason")
-        |> assertExnMsg
+        |> assertExnMsgWildcard
             """
 Subject: '"a"'
 Because: Some reason
 Should: TryTransform
 But threw: |-
   System.Exception: foo
-     at BasicAssertions.TryTransform parse.Pipe #1 input at line 1291@1291-1.Invoke(String _arg1) in C:\Users\cmeer\Source\Repos\Faqt\src\Faqt.Tests\BasicAssertions.fs:line 1291
-     at Faqt.BasicAssertions.TryTransform[a,b](Testable`1 t, FSharpFunc`2 f, FSharpOption`1 because) in C:\Users\cmeer\Source\Repos\Faqt\src\Faqt\BasicAssertions.fs:line 192
+     at *
 For value: a
 """

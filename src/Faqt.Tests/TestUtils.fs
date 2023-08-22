@@ -18,6 +18,19 @@ let assertExnMsg (msg: string) (f: unit -> 'a) =
     )
 
 
+let assertExnMsgWildcard (msg: string) (f: unit -> 'a) =
+    let ex = Assert.Throws<AssertionFailedException>(f >> ignore)
+
+    match msg.Split('*') with
+    | [| a; b |] ->
+        let exnMsg = "\n\n" + ex.Message.ReplaceLineEndings("\n").Trim() + "\n"
+        let a = "\n\n" + a.ReplaceLineEndings("\n").Trim()
+        let b = b.ReplaceLineEndings("\n").Trim() + "\n"
+        Assert.StartsWith(a, exnMsg)
+        Assert.EndsWith(b, exnMsg)
+    | _ -> failwith "Expected msg to contain a single *"
+
+
 module CultureInfo =
 
     let withCurrentCulture (cultureName: string) =
