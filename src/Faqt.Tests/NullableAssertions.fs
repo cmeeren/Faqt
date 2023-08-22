@@ -25,9 +25,9 @@ module HaveValue =
             x.Should().HaveValue()
         |> assertExnMsg
             """
-x
-    should have a value, but was
-<null>
+Subject: x
+Should: HaveValue
+But was: null
 """
 
 
@@ -35,12 +35,13 @@ x
     let ``Fails with expected message with because`` () =
         fun () ->
             let x = Nullable<int>()
-            x.Should().HaveValue("some reason")
+            x.Should().HaveValue("Some reason")
         |> assertExnMsg
             """
-x
-    should have a value because some reason, but was
-<null>
+Subject: x
+Because: Some reason
+Should: HaveValue
+But was: null
 """
 
 
@@ -63,9 +64,9 @@ module NotHaveValue =
             x.Should().NotHaveValue()
         |> assertExnMsg
             """
-x
-    should not have a value, but was
-1
+Subject: x
+Should: NotHaveValue
+But was: 1
 """
 
 
@@ -73,12 +74,13 @@ x
     let ``Fails with expected message with because`` () =
         fun () ->
             let x = Nullable(1)
-            x.Should().NotHaveValue("some reason")
+            x.Should().NotHaveValue("Some reason")
         |> assertExnMsg
             """
-x
-    should not have a value because some reason, but was
-1
+Subject: x
+Because: Some reason
+Should: NotHaveValue
+But was: 1
 """
 
 
@@ -97,9 +99,9 @@ module BeNull =
             x.Should().BeNull()
         |> assertExnMsg
             """
-x
-    should be null, but was
-1
+Subject: x
+Should: BeNull
+But was: 1
 """
 
 
@@ -107,12 +109,13 @@ x
     let ``Fails with expected message with because`` () =
         fun () ->
             let x = Nullable(1)
-            x.Should().BeNull("some reason")
+            x.Should().BeNull("Some reason")
         |> assertExnMsg
             """
-x
-    should be null because some reason, but was
-1
+Subject: x
+Because: Some reason
+Should: BeNull
+But was: 1
 """
 
 
@@ -136,9 +139,9 @@ module NotBeNull =
             x.Should().NotBeNull()
         |> assertExnMsg
             """
-x
-    should not be null, but was
-<null>
+Subject: x
+Should: NotBeNull
+But was: null
 """
 
 
@@ -146,10 +149,11 @@ x
     let ``Fails with expected message with because`` () =
         fun () ->
             let x = Nullable<int>()
-            x.Should().NotBeNull("some reason")
+            x.Should().NotBeNull("Some reason")
         |> assertExnMsg
             """
-x
-    should not be null because some reason, but was
-<null>
+Subject: x
+Because: Some reason
+Should: NotBeNull
+But was: null
 """

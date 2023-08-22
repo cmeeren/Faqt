@@ -102,6 +102,9 @@ module String =
     let trim (str: string) = str.Trim()
 
 
+    let split (separator: string) (str: string) = str.Split(separator)
+
+
     let replace (oldValue: string) (newValue: string) (str: string) = str.Replace(oldValue, newValue)
 
 

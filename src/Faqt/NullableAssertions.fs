@@ -15,7 +15,7 @@ type NullableAssertions =
         use _ = t.Assert()
 
         if not t.Subject.HasValue then
-            t.Fail("{subject}\n\tshould have a value{because}, but was\n{actual}", because)
+            t.With("But was", t.Subject).Fail(because)
 
         AndDerived(t, t.Subject.Value)
 
@@ -26,7 +26,7 @@ type NullableAssertions =
         use _ = t.Assert()
 
         if t.Subject.HasValue then
-            t.Fail("{subject}\n\tshould not have a value{because}, but was\n{actual}", because)
+            t.With("But was", t.Subject).Fail(because)
 
         And(t)
 
@@ -38,7 +38,7 @@ type NullableAssertions =
         use _ = t.Assert()
 
         if t.Subject.HasValue then
-            t.Fail("{subject}\n\tshould be null{because}, but was\n{actual}", because)
+            t.With("But was", t.Subject).Fail(because)
 
         And(t)
 
@@ -50,6 +50,6 @@ type NullableAssertions =
         use _ = t.Assert()
 
         if not t.Subject.HasValue then
-            t.Fail("{subject}\n\tshould not be null{because}, but was\n{actual}", because)
+            t.With("But was", t.Subject).Fail(because)
 
         AndDerived(t, t.Subject.Value)

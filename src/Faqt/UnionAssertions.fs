@@ -29,7 +29,7 @@ type UnionAssertions =
             | NewUnionCase(caseInfo, _) when
                 caseInfo.Tag <> FSharpValue.PreComputeUnionTagReaderCached typeof<'a> t.Subject
                 ->
-                t.Fail("{subject}\n\tshould be of case\n{0}\n\t{because}but was\n{actual}", because, caseInfo.Name)
+                t.With("Expected", caseInfo.Name).With("But was", t.Subject).Fail(because)
 
             | NewUnionCase(caseInfo, _) ->
                 let fieldValues = FSharpValue.PreComputeUnionReaderCached caseInfo t.Subject
@@ -61,35 +61,50 @@ type UnionAssertions =
 
         match caseConstructor with
         | NewUnionCase(caseInfo, _) when caseInfo.Tag <> FSharpValue.PreComputeUnionTagReaderCached typeof<'a> t.Subject ->
-            t.Fail("{subject}\n\tshould be of case\n{0}\n\t{because}but was\n{actual}", because, caseInfo.Name)
+            t.With("Expected", caseInfo.Name).With("But was", t.Subject).Fail(because)
         | NewUnionCase _ -> And(t)
         | _ -> invalidOp $"The specified expression is not a case constructor for %s{typeof<'a>.FullName}"
 
 
-    /// Asserts that the subject is Some, and allows continuing to assert on the inner value. Alias of BeOfCase(Some).
+    /// Asserts that the subject is Some, and allows continuing to assert on the inner value. Equivalent to
+    /// BeOfCase(Some) (but with a different error message).
     [<Extension>]
     static member BeSome(t: Testable<'a option>, ?because) : AndDerived<'a option, 'a> =
         use _ = t.Assert()
-        t.BeOfCase(Some, ?because = because)
+
+        match t.Subject with
+        | Some x -> AndDerived(t, x)
+        | None -> t.With("But was", t.Subject).Fail(because)
 
 
-    /// Asserts that the subject is None. Alias of BeOfCase(None), and equivalent to Be(None) (but with a different
-    /// error message).
+    /// Asserts that the subject is None. Equivalent to BeOfCase(None) and Be(None) (but with a different error
+    /// message).
     [<Extension>]
     static member BeNone(t: Testable<'a option>, ?because) : And<'a option> =
         use _ = t.Assert()
-        t.BeOfCase(None, ?because = because)
+
+        match t.Subject with
+        | None -> And(t)
+        | Some _ -> t.With("But was", t.Subject).Fail(because)
 
 
-    /// Asserts that the subject is Ok, and allows continuing to assert on the inner value. Alias of BeOfCase(Ok).
+    /// Asserts that the subject is Ok, and allows continuing to assert on the inner value. Alias of Equivalent to
+    /// BeOfCase(Ok) (but with a different error message).
     [<Extension>]
     static member BeOk(t: Testable<Result<'a, 'b>>, ?because) : AndDerived<Result<'a, 'b>, 'a> =
         use _ = t.Assert()
-        t.BeOfCase(Ok, ?because = because)
+
+        match t.Subject with
+        | Ok x -> AndDerived(t, x)
+        | Error _ -> t.With("But was", t.Subject).Fail(because)
 
 
-    /// Asserts that the subject is Error, and allows continuing to assert on the inner value. Alias of BeOfCase(Error).
+    /// Asserts that the subject is Error, and allows continuing to assert on the inner value. Equivalent to
+    /// BeOfCase(Error) (but with a different error message).
     [<Extension>]
     static member BeError(t: Testable<Result<'a, 'b>>, ?because) : AndDerived<Result<'a, 'b>, 'b> =
         use _ = t.Assert()
-        t.BeOfCase(Error, ?because = because)
+
+        match t.Subject with
+        | Error x -> AndDerived(t, x)
+        | Ok _ -> t.With("But was", t.Subject).Fail(because)

@@ -82,11 +82,10 @@ module BeOfCase =
             x.Should().BeOfCase(SingleFieldInt)
         |> assertExnMsg
             """
-x
-    should be of case
-SingleFieldInt
-    but was
-NoFields
+Subject: x
+Should: BeOfCase
+Expected: SingleFieldInt
+But was: NoFields
 """
 
 
@@ -97,11 +96,11 @@ NoFields
             x.Should().BeOfCase(NoFields)
         |> assertExnMsg
             """
-x
-    should be of case
-NoFields
-    but was
-SingleFieldInt 1
+Subject: x
+Should: BeOfCase
+Expected: NoFields
+But was:
+  SingleFieldInt: 1
 """
 
 
@@ -147,11 +146,9 @@ module BeSome =
             x.Should().BeSome()
         |> assertExnMsg
             """
-x
-    should be of case
-Some
-    but was
-None
+Subject: x
+Should: BeSome
+But was: null
 """
 
 
@@ -159,14 +156,13 @@ None
     let ``Fails with expected message with because`` () =
         fun () ->
             let x = Option<int>.None
-            x.Should().BeSome("some reason")
+            x.Should().BeSome("Some reason")
         |> assertExnMsg
             """
-x
-    should be of case
-Some
-    because some reason, but was
-None
+Subject: x
+Because: Some reason
+Should: BeSome
+But was: null
 """
 
 
@@ -185,11 +181,10 @@ module BeNone =
             x.Should().BeNone()
         |> assertExnMsg
             """
-x
-    should be of case
-None
-    but was
-Some 1
+Subject: x
+Should: BeNone
+But was:
+  Some: 1
 """
 
 
@@ -197,14 +192,14 @@ Some 1
     let ``Fails with expected message with because`` () =
         fun () ->
             let x = Some 1
-            x.Should().BeNone("some reason")
+            x.Should().BeNone("Some reason")
         |> assertExnMsg
             """
-x
-    should be of case
-None
-    because some reason, but was
-Some 1
+Subject: x
+Because: Some reason
+Should: BeNone
+But was:
+  Some: 1
 """
 
 
@@ -228,11 +223,10 @@ module BeOk =
             x.Should().BeOk()
         |> assertExnMsg
             """
-x
-    should be of case
-Ok
-    but was
-Error "asd"
+Subject: x
+Should: BeOk
+But was:
+  Error: asd
 """
 
 
@@ -240,14 +234,14 @@ Error "asd"
     let ``Fails with expected message with because`` () =
         fun () ->
             let x = Error "asd"
-            x.Should().BeOk("some reason")
+            x.Should().BeOk("Some reason")
         |> assertExnMsg
             """
-x
-    should be of case
-Ok
-    because some reason, but was
-Error "asd"
+Subject: x
+Because: Some reason
+Should: BeOk
+But was:
+  Error: asd
 """
 
 
@@ -271,11 +265,10 @@ module BeError =
             x.Should().BeError()
         |> assertExnMsg
             """
-x
-    should be of case
-Error
-    but was
-Ok "asd"
+Subject: x
+Should: BeError
+But was:
+  Ok: asd
 """
 
 
@@ -283,12 +276,12 @@ Ok "asd"
     let ``Fails with expected message with because`` () =
         fun () ->
             let x = Ok "asd"
-            x.Should().BeError("some reason")
+            x.Should().BeError("Some reason")
         |> assertExnMsg
             """
-x
-    should be of case
-Error
-    because some reason, but was
-Ok "asd"
+Subject: x
+Because: Some reason
+Should: BeError
+But was:
+  Ok: asd
 """

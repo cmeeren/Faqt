@@ -21,22 +21,25 @@ module Satisfy =
         fun () -> "asd".Length.Should().Satisfy(fun x -> x.ToString().Length.Should().Fail())
         |> assertExnMsg
             """
-"asd".Length
-    should satisfy the supplied assertion, but the assertion failed with the following message:
-
-x.ToString().Length
+Subject: '"asd".Length'
+Should: Satisfy
+Failure:
+  Subject: x.ToString().Length
+  Should: Fail
 """
 
 
     [<Fact>]
     let ``Fails with expected message with because`` () =
-        fun () -> "asd".Should().Satisfy((fun x -> x.Length.Should().Fail()), "some reason")
+        fun () -> "asd".Should().Satisfy((fun x -> x.Length.Should().Fail()), "Some reason")
         |> assertExnMsg
             """
-"asd"
-    should satisfy the supplied assertion because some reason, but the assertion failed with the following message:
-
-x.Length
+Subject: '"asd"'
+Because: Some reason
+Should: Satisfy
+Failure:
+  Subject: x.Length
+  Should: Fail
 """
 
 
@@ -57,18 +60,19 @@ module NotSatisfy =
         fun () -> "asd".Should().NotSatisfy(fun x -> x.Should().Pass())
         |> assertExnMsg
             """
-"asd"
-    should not satisfy the supplied assertion, but the assertion succeeded.
+Subject: '"asd"'
+Should: NotSatisfy
 """
 
 
     [<Fact>]
     let ``Fails with expected message with because`` () =
-        fun () -> "asd".Should().NotSatisfy((fun x -> x.Length.Should().Pass()), "some reason")
+        fun () -> "asd".Should().NotSatisfy((fun x -> x.Length.Should().Pass()), "Some reason")
         |> assertExnMsg
             """
-"asd"
-    should not satisfy the supplied assertion because some reason, but the assertion succeeded.
+Subject: '"asd"'
+Because: Some reason
+Should: NotSatisfy
 """
 
 
@@ -108,16 +112,17 @@ module SatisfyAll =
                 )
         |> assertExnMsg
             """
-"asd"
-    should satisfy all of the 3 supplied assertions, but 2 failed.
-
-[Assertion 1/3]
-
-s1.Length
-
-[Assertion 3/3]
-
-s3.Length
+Subject: '"asd"'
+Should: SatisfyAll
+Failures:
+- Index: 0
+  Failure:
+    Subject: s1.Length
+    Should: Fail
+- Index: 2
+  Failure:
+    Subject: s3.Length
+    Should: Fail
 """
 
 
@@ -132,20 +137,22 @@ s3.Length
                         (fun s2 -> s2.Length.Should().Pass())
                         (fun s3 -> s3.Length.Should().Fail())
                     ],
-                    "some reason"
+                    "Some reason"
                 )
         |> assertExnMsg
             """
-"asd"
-    should satisfy all of the 3 supplied assertions because some reason, but 2 failed.
-
-[Assertion 1/3]
-
-s1.Length
-
-[Assertion 3/3]
-
-s3.Length
+Subject: '"asd"'
+Because: Some reason
+Should: SatisfyAll
+Failures:
+- Index: 0
+  Failure:
+    Subject: s1.Length
+    Should: Fail
+- Index: 2
+  Failure:
+    Subject: s3.Length
+    Should: Fail
 """
 
 
@@ -193,14 +200,11 @@ module SatisfyAny =
                 )
         |> assertExnMsg
             """
-"asd"
-    should satisfy at least one of the 2 supplied assertions, but none were satisfied.
-
-[Assertion 1/2]
-
-s1.Length
-
-[Assertion 2/2]
-
-s2.Length
+Subject: '"asd"'
+Should: SatisfyAny
+Failures:
+- Subject: s1.Length
+  Should: Fail
+- Subject: s2.Length
+  Should: Fail
 """

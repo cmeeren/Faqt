@@ -15,19 +15,26 @@ If you don't agree, I consider that a bug - please raise an issue. 😉
 
 ### Work in progress, 1.0 to be released late August 2023
 
-Faqt is currently a work in progress. All "infrastructure" and supporting features are in place; most of the actual
-assertions remain to be implemented. A feature complete 1.0 version will hopefully be released during August 2023.
+Faqt is currently a work in progress. All "infrastructure" and supporting features are in place; some actual assertions
+remain to be implemented. A feature complete 1.0 version will hopefully be released by the end of August 2023.
+
+### Versioning and breaking changes
+
+Faqt follows [SemVer v2.0.0](https://semver.org/) and aims to preserve **source and binary** compatibility between
+releases, except when the major version is incremented. Note that any change to the assertion message format is
+considered a non-breaking change.
 
 ## Table of contents
 
 <!-- TOC -->
 
-* [Table of contents](#table-of-contents)
 * [A motivating example](#a-motivating-example)
 * [Installation and requirements](#installation-and-requirements)
 * [Faqt in a nutshell](#faqt-in-a-nutshell)
 * [Writing your own assertions](#writing-your-own-assertions)
 * [Multiple assertion chains without `|> ignore`](#multiple-assertion-chains-without--ignore)
+* [Customizing the format](#customizing-the-format)
+* [Security considerations](#security-considerations)
 * [FAQ](#faq)
   * [Which testing frameworks does Faqt work with?](#which-testing-frameworks-does-faqt-work-with)
   * [Why is the subject name not correct in my specific example?](#why-is-the-subject-name-not-correct-in-my-specific-example)
@@ -53,11 +60,11 @@ type Customer =
 let calculateFreeShipping customer =
     customer
         .Should()
-        .BeOfCase(Internal, "this function should only be called with internal customers")
+        .BeOfCase(Internal, "This function should only be called with internal customers")
         .Whose.ContactInfo.Should(())
         .BeSome()
         .Whose.Name.LastName.Should(())
-        .Be("Armstrong", "only customers named Armstrong get free shipping")
+        .Be("Armstrong", "Only customers named Armstrong get free shipping")
 ```
 
 (The example is formatted using [Fantomas](https://fsprojects.github.io/fantomas/), which line-breaks fluent chains at
@@ -69,35 +76,41 @@ Depending on the input, a `Faqt.AssertionFailedException` may be raised with one
 If customer is `External`:
 
 ```
-customer
-    should be of case
-Internal
-    because this function should only be called with internal customers, but was
-External { Id = 1 }
+Subject: customer
+Because: This function should only be called with internal customers
+Should: BeOfCase
+Expected: Internal
+But was:
+  External:
+    Id: 1
 ```
 
 If `ContactInfo` is `None`:
 
 ```
-customer...ContactInfo
-    should be of case
-Some
-    but was
-None
+Subject:
+- customer
+- ContactInfo
+Should: BeSome
+But was: null
 ```
 
 If `LastName` is not `Armstrong`:
 
 ```
-customer...ContactInfo...Name.LastName
-    should be
-"Armstrong"
-    because only customers named Armstrong get free shipping, but was
-"Aldrin"
+Subject:
+- customer
+- ContactInfo
+- Name.LastName
+Because: Only customers named Armstrong get free shipping
+Should: Be
+Expected: Armstrong
+But was: Aldrin
 ```
 
-As you can see, the first line tells you which part of the code fails (and `...` is inserted when using derived state
-from an assertion).
+As you can see, the output is YAML-based (because this is both human readable and works well for arbitrary structured
+values). The top-level `Subject` key tells you which part of the code fails, and an array of values is used when using
+derived state from an assertion, so you can track the transformations on the original subject.
 
 **Yes, this works even in Release mode or when source files are not available!** See the very simple requirements below.
 
@@ -136,28 +149,28 @@ As expected by the discerning F# developer, Faqt is:
   and easy-to-read format.
 - **Discoverable:** The fluent syntax means you can just type a dot to discover all possible assertions and actions on
   the current value.
-- **Composable:** As far as possible, assertions are orthogonal (they check one thing only). For example, an assertion
-  for verifying that a collection only contains items that match a predicate does not fail if the collection is empty.
-  You can chain assertions with `And`, `Whose`, `WhoseValue`, `That`, and `Subject`, assert on derived values like
-  with `BeSome()`, and compose assertions with higher-order assertions like `Satisfy`, `SatisfyAll`, and `SatisfyAny`.
-- **Configurable:** You can configure how values are formatted in the assertion message on a type-by-type basis, and
-  specify a default formatter (e.g. for displaying all values as serialized JSON by default).
+- **Composable:** As far as possible, assertions are orthogonal (they check one thing only). For example, an empty
+  collection will pass an assertion verifying that the collection only contains items that match a predicate. You can
+  chain assertions with `And`, `Whose`, `WhoseValue`, `That`, and `Subject`, assert on derived values like with
+  `BeSome()`, and compose assertions with higher-order assertions like `Satisfy` and `SatisfyAll`.
+- **Configurable:** You can configure, either globally or for a specific scope, how assertion failure messages are
+  rendered. You can easily tweak the defaults or completely replace the formatter.
 - **Production-ready:** Faqt is very well tested and is highly unlikely to break your code, whether test or production.
 
 ## Writing your own assertions
 
-Writing your own assertions is easy! They are implemented exactly like Faqt’s built-in assertions, so you can always
-look at those for inspiration (see all files ending with `Assertions`
-in [this folder](https://github.com/cmeeren/Faqt/tree/main/src/Faqt)).
+Writing your own assertions is easy! Custom assertions are implemented exactly like Faqt’s built-in assertions, so you
+can always look at those for inspiration (see all files ending with `Assertions` in [this
+folder](https://github.com/cmeeren/Faqt/tree/main/src/Faqt)).
 
 All the details are further below, but first, we'll get a long way just by looking at some examples.
 
 Here is Faqt’s simplest assertion, `Be`:
 
 ```f#
+open System.Runtime.CompilerServices
 open Faqt
 open AssertionHelpers
-open Formatting
 
 [<Extension>]
 type Assertions =
@@ -168,7 +181,7 @@ type Assertions =
         use _ = t.Assert()
 
         if t.Subject <> expected then
-            t.Fail("{subject}\n\tshould be\n{0}\n\t{because}but was\n{actual}", because, format expected)
+            t.With("Expected", expected).With("But was", t.Subject).Fail(because)
 
         And(t)
 ```
@@ -177,9 +190,10 @@ Simple, right? Now let's look at an assertion that's just as simple, but uses de
 `AndDerived` instead of `And`:
 
 ```f#
+open System
+open System.Runtime.CompilerServices
 open Faqt
 open AssertionHelpers
-open Formatting
 
 [<Extension>]
 type Assertions =
@@ -190,7 +204,7 @@ type Assertions =
         use _ = t.Assert()
 
         if not t.Subject.HasValue then
-            t.Fail("{subject}\n\tshould have a value{because}, but was\n{actual}", because)
+            t.With("But was", t.Subject).Fail(because)
 
         AndDerived(t, t.Subject.Value)
 ```
@@ -201,19 +215,24 @@ Finally, let's look at a more complex assertion - a higher-order assertion that 
 asserts for every item in a sequence:
 
 ```f#
+open System
+open System.Runtime.CompilerServices
 open Faqt
 open AssertionHelpers
 open Formatting
 
+type private SatisfyReportItem = { Index: int; Failure: FailureData }
+
 [<Extension>]
 type Assertions =
 
-    /// Asserts that all elements in the collection satisfy the supplied assertion.
+    /// Asserts that all items in the collection satisfy the supplied assertion.
     [<Extension>]
     static member AllSatisfy(t: Testable<#seq<'a>>, assertion: 'a -> 'ignored, ?because) : And<_> =
         use _ = t.Assert(true, true)
 
-        let subjectLength = Seq.length t.Subject
+        if isNull (box t.Subject) then
+            t.With("But was", t.Subject).Fail(because)
 
         let exceptions =
             t.Subject
@@ -229,18 +248,10 @@ type Assertions =
             |> Seq.toArray
 
         if exceptions.Length > 0 then
-            let assertionFailuresString =
-                exceptions
-                |> Seq.map (fun (i, ex) -> $"\n\n[Item %i{i + 1}/%i{subjectLength}]\n%s{ex.Message}")
-                |> String.concat ""
-
-            t.Fail(
-                "{subject}\n\tshould only contain items satisfying the supplied assertion{because}, but {0} of {1} items failed.{2}",
-                because,
-                string exceptions.Length,
-                string subjectLength,
-                assertionFailuresString
-            )
+            t
+                .With("Failures", exceptions |> Array.map (fun (i, ex) -> { Index = i; Failure = ex.FailureData }))
+                .With("Value", t.Subject)
+                .Fail(because)
 
         And(t)
 ```
@@ -249,19 +260,20 @@ Note that in this case we use `t.Assert(true, true)` at the top (use `t.Assert(t
 do not run the same assertions on items in a sequence), and we call `use _ = t.AssertItem()` before the assertion of
 each item.
 
-The most significant thing not demonstrated in the examples above is that if your assertion calls `Should`, make sure to
+The most significant thing _not_ demonstrated in the examples above is that if your assertion calls `Should`, make sure
+to
 use the `Should(t)` overload instead of `Should()`.
 
 If you want all the details, here they are:
 
-* Implement the assertion as
-  an [extension method](https://learn.microsoft.com/en-us/dotnet/fsharp/language-reference/type-extensions#extension-methods)
-  for `Testable` (the first argument), with whatever constraints you need. The constraints could be implicitly imposed
-  by F#, as with `Be` where it requires `equality` on `'a` due to the use of `<>`, or they could be explicitly
-  specified, for example by specifying more concrete types (such as `Testable<'a option>` in order to have your
-  extension only work for `option`-wrapped types).
+* Implement the assertion as an [extension
+  method](https://learn.microsoft.com/en-us/dotnet/fsharp/language-reference/type-extensions#extension-methods) for
+  `Testable` (the first argument), with whatever constraints you need. The constraints could be implicitly imposed by
+  F#, as with `Be` where it requires `equality` on `'a` due to the use of the inequality operator (`<>`), or they could
+  be explicitly specified, for example by specifying more concrete types (such as `Testable<'a option>` in order to have
+  your extension only work for `option`-wrapped types).
 
-* Accept whichever arguments you need for your assertion, and end with `?because`.
+* Accept whichever arguments you need for your assertion, and end with an optional `?because` parameter.
 
 * First in your method, call `use _ = t.Assert()`. This is needed to track important state necessary for subject
   names to work. If your assertion is a higher-order assertion (like `Satisfy`) that calls user code that is expected to
@@ -269,30 +281,31 @@ If you want all the details, here they are:
   sequence, call `t.Assert(true, true)` instead, and additionally call `use _ = t.AssertItem()` before the assertion of
   each item.
 
-* If your condition is not met, call
+* If your condition is not met and the assertion should fail, call `t.Fail(because)`, optionally with any number
+  of `With(key, value)` or `With(condition, key, value)` before `Fail`:
 
    ```f#
-   t.Fail("<message template>", because, param1, param2, ...)
+   t.With("Key 1", value1).With("Key 2", value2).Fail(because)
    ```
 
-* The message template is up you, but for consistency it should ideally adhere to the following conventions:
+  Note that the keys `"Subject"`, `"Because"`, and `"Should"` are reserved by Faqt.
 
-  * The general structure should be something like “{subject} should … {because}, but …”.
-  * Use `{subject}`, `{because}`, and `{actual}` as placeholders for the subject name, the user-supplied reason, and the
-    current value being tested (`t.Subject`), respectively. (Not all assertions need `{actual}`.)
-  * Use `{0}`, `{1}`, etc. as needed for any values passed as parameters after the template. These parameters must
-    be of type `string`; use the `format` function (in the opened `Formatting` module) to format values for display.
-  * Don’t use string interpolation to insert values you don’t have control over (for example, values that could contain
-    the placeholders mentioned above).
-  * Place `{subject}`, `{actual}`, and other important values on separate lines. All other text should be indented
-    using `\t`.
-  * Ensure that your message is rendered correctly if `{because}` is replaced with an empty string. If needed, Faqt will
-    automatically insert a space before `{because}` and/or a comma + space after `{because}`.
+  Which key-value pairs, if any, to add to the message is up to you. Most assertion failure messages are more helpful if
+  they display value being tested (`t.Subject`). Faqt mostly places this as the last value, so that if its rendering is
+  very large, it does not push other important details far down.
+
+  If you add values where you wrap user-supplied data (e.g., in a record, list or similar), then you should wrap the
+  user values in the single-case DU `TryFormat`. This will ensure that if the value fails serialization, a fallback
+  formatter will be used for that value. If `TryFormat` is not used, only the top-level items added using `With` will
+  have this behavior, which may cause a (less useful) fallback formatter to be used for your top-level values instead of
+  its (user-supplied) constituent parts.
+
+  If you use anonymous type values in your assertion, note that anonymous type members seems to appear in alphabetical
+  order, not declaration order. If this is not desired, use a normal record.
 
 * If your assertion extracts derived state that can be used for further assertions,
-  return `AndDerived(t, derivedState)`. Otherwise return `And(t)`. Prefer `AndDerived` over `And` if at all relevant.
-  For example, if you implement an assertion called `ContainsElementsMatching(predicate)`, return the matched elements
-  as the derived state, so that the user has the option to continue asserting on them.
+  return `AndDerived(t, derivedState)`. Otherwise return `And(t)`. Prefer `AndDerived` over `And` if at all relevant,
+  since it strictly expands what the user can do.
 
 * If your assertion calls `Should` at any point, make sure you use the overload that takes the original `Testable` as an
   argument (`.Should(t)`), since it contains important state relating to the end user’s original assertion call.
@@ -319,6 +332,45 @@ If you want to use another operator, you can define your own just as easily.
 See [this StackOverflow answer](https://stackoverflow.com/a/34188952/2978652) for valid prefix operators. However, your
 custom operator will then be shown in the subject name (whereas `%` is automatically removed).
 
+## Customizing the format
+
+Faqt's formatter is implemented as a simple function with signature `FailureData -> string`.
+
+```f#
+open Faqt
+open Formatting
+
+let myFormatter : FailureData -> string =
+    // You can implement your own formatter from scratch, or modify the default one as shown here
+    YamlFormatterBuilder.Default
+        // Override System.Text.Json options
+        .ConfigureJsonSerializerOptions(fun opts -> opts.MaxDepth <- 5)
+        // Override FSharp.SystemTextJson options
+        .ConfigureJsonFSharpOptions(fun opts -> opts.WithUnionAdjacentTag())
+        // Add custom System.Text.Json converters
+        .AddConverter(MyJsonConverter())
+        // Easily transform values before serializing without needing a custom converter
+        .SerializeAs(fun (t: System.Type) -> t.FullName)
+        // Same as above, but does not apply to subtypes
+        .SerializeExactAs(...)
+        // Set how values wrapped in TryFormat are formatted when serialization fails
+        .TryFormatFallback(fun ex obj -> {|
+            Exception = ex
+            ValueToString = obj.ToString()
+        |})
+        // Set the YamlDotNet visitor (inheriting from YamlVisitorBase) that is used after loading
+        // the serialized JSON into a YAML document
+        .SetYamlVisitor(MyYamlVisitor)
+        // Build the formatter
+        .Build()
+
+// Set the default formatter
+Formatter.Set(myFormatter)
+
+// Set the formatter for a certain scope (until the returned value is disposed)
+use _ = Formatter.With(myFormatter)
+```
+
 ## Security considerations
 
 **Treat assertion exception messages (and therefore test failure messages) as securely as you treat your source code.**
@@ -331,8 +383,9 @@ anyone access to Faqt assertion failure messages that should not have access to 
 
 ### Which testing frameworks does Faqt work with?
 
-All of them. XUnit, NUnit, MSTest, NSpec, MSpec, Expecto, you name it. Faqt is agnostic to the test framework; it simply
-throws a custom exception when an assertion fails.
+All of them. XUnit, NUnit, MSTest, NSpec, MSpec, Expecto, you name it. Faqt is agnostic to the test framework (and can
+also be used in non-test production code, as previously described); it simply throws a custom exception when an
+assertion fails.
 
 ### Why is the subject name not correct in my specific example?
 
@@ -356,9 +409,9 @@ cases where it may produce unexpected results:
 If you have encountered a case not covered above, please raise an issue. If I can't or won't fix it, I can at the very
 least document it as a known limitation.
 
-These limitations are due to the implementation of automatic subject names. It is based on clever use of caller info
-attributes, parsing source code from either local files or embedded resources, thread-local state, and simple
-regex-based processing/replacement of the call chain based on which assertions have been encountered so far.
+These limitations are due to the implementation of automatic subject names. The implementation is based on clever use of
+caller info attributes, parsing source code from either local files or embedded resources, thread-local state, and
+simple regex-based processing/replacement of the call chain based on which assertions have been encountered so far.
 
 If you would like to help make the automatic subject name functionality more robust, please raise an issue. You can find
 the relevant code in [SubjectName.fs](https://github.com/cmeeren/Faqt/blob/main/src/Faqt/SubjectName.fs).

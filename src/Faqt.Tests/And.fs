@@ -14,13 +14,21 @@ module And =
     [<Fact>]
     let ``Allows chaining assertions - fail first`` () =
         fun () -> "asd".Should().Fail().And.Pass()
-        |> assertExnMsg "\"asd\""
+        |> assertExnMsg
+            """
+Subject: '"asd"'
+Should: Fail
+"""
 
 
     [<Fact>]
     let ``Allows chaining assertions - fail second`` () =
         fun () -> "asd".Should().Pass().And.Fail()
-        |> assertExnMsg "\"asd\""
+        |> assertExnMsg
+            """
+Subject: '"asd"'
+Should: Fail
+"""
 
 
     [<Fact>]

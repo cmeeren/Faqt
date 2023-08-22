@@ -4,11 +4,15 @@ open System
 open System.Reflection
 open System.Runtime.CompilerServices
 open System.Runtime.InteropServices
+open Formatting
 
 
 /// The exception raised for all Faqt assertion failures.
-type AssertionFailedException(message: string) =
+type AssertionFailedException internal (message: string, failureData: FailureData) =
     inherit Exception(message)
+
+    /// The data for this assertion failure.
+    member _.FailureData = failureData
 
 
 [<Struct>]
@@ -41,6 +45,48 @@ type Testable<'a> internal (subject: 'a, origin: CallChainOrigin) =
     member internal _.CallChainOrigin = origin
 
     member internal _.CallChainAssertionHistory = CallChain.AssertionHistory origin
+
+
+/// A type to help build assertion failures.
+type FailureBuilder<'a> = private {
+    Testable: Testable<'a>
+    Data: (string * obj) list
+} with
+
+
+    /// Adds the specified key/value to the failure message if condition is true.
+    member this.With(condition: bool, key: string, value: 'b) =
+        if key = "Subject" || key = "Because" || key = "Should" then
+            invalidArg (nameof key) $"The key name %s{key} is reserved by Faqt"
+
+        if not condition then
+            this
+        else
+            {
+                this with
+                    Data = this.Data @ [ key, box value ]
+            }
+
+
+    /// Adds the specified key/value to the failure message.
+    member this.With(key: string, value: 'b) = this.With(true, key, value)
+
+
+    /// Raises an AssertionFailedException with the specified and previously added data.
+    member this.Fail(because: string option) =
+        let data = {
+            Subject = SubjectName.get this.Testable.CallChainOrigin this.Testable.CallChainAssertionHistory
+            Because = because
+            Should =
+                if List.isEmpty this.Testable.CallChainAssertionHistory then
+                    invalidOp
+                        "Call chain assertion history is empty. Testable.Assert must be called in all assertions before calling Fail."
+                else
+                    this.Testable.CallChainAssertionHistory |> List.last
+            Extra = this.Data
+        }
+
+        AssertionFailedException(Formatter.Format data, data) |> raise
 
 
 /// A type which allows chaining assertions.
@@ -88,64 +134,22 @@ module AssertionHelpers =
             Testable(this, continueFrom.CallChainOrigin)
 
 
-        /// Fail the assertion with the given template and args. The template may contain the tokens "{subject}",
-        /// "{actual}", and "{because}". {subject} will be replaced with the subject name. {value} will be replaced with the
-        /// (formatted) value being tested. {actual} will be replaced with an empty string if an empty "because" was passed
-        /// to the Fail constructor. Otherwise, it will be replaced with the because message, prefixed with "because " if
-        /// not already part of the message. It will be further prefixed with a single space if the template does not
-        /// contain a whitespace character immediately preceding the token. Finally, it will be suffixed with ", " if the
-        /// template does not contain ", " immediately following the token.
+        /// Raises an AssertionFailedException with the specified message.
         [<Extension>]
-        static member Fail
-            (
-                this: Testable<'a>,
-                template: string,
-                because: string option,
-                [<ParamArray>] formattedValues: string[]
-            ) =
-
-            let bc (because: string option) prefixSpace suffixComma : string =
-                because
-                |> Option.map (
-                    String.removePrefix "because "
-                    >> String.trim
-                    >> (fun reason ->
-                        (if prefixSpace then " " else "")
-                        + "because "
-                        + reason
-                        + (if suffixComma then ", " else "")
-                    )
-                )
-                |> Option.defaultValue ""
+        static member Fail(this: Testable<'a>, because: string option) =
+            { Testable = this; Data = [] }.Fail(because)
 
 
-            let subjectName =
-                SubjectName.get this.CallChainOrigin this.CallChainAssertionHistory
+        /// Adds the specified key/value to the failure message if condition is true.
+        [<Extension>]
+        static member With(this: Testable<'a>, condition: bool, key: string, value: 'b) =
+            { Testable = this; Data = [] }.With(condition, key, value)
 
-            // We want to replace {subject}, {actual}, and {because} with values we have no control over, and which may
-            // contain formatting tokens such as {0}, {1}, etc. We do not want those replaced in String.formatSimple; only
-            // those originally in the template should be replaced. Similarly, the call to String.formatSimple can produce
-            // the tokens {subject}, {actual}, and {because} which should not be replaced. To work around this, temporarily
-            // replace these tokens with placeholder strings that will never occur in any formatted value, then call
-            // String.formatSimple, and finally replace the placeholders with the target values.
 
-            let subjectPlaceholder = Guid.NewGuid().ToString("N")
-            let actualPlaceholder = Guid.NewGuid().ToString("N")
-            let becausePlaceholder = Guid.NewGuid().ToString("N")
-
-            "\n" + template
-            |> String.replace "{subject}" subjectPlaceholder
-            |> String.replace "{actual}" actualPlaceholder
-            |> String.replace "{because}" becausePlaceholder
-            |> String.formatSimple formattedValues
-            |> String.replace subjectPlaceholder subjectName
-            |> String.replace actualPlaceholder (Formatting.format this.Subject)
-            |> String.regexReplace $"(?<!\s){becausePlaceholder}(?!, )" (bc because true true)
-            |> String.regexReplace $"(?<!\s){becausePlaceholder}(?=, )" (bc because true false)
-            |> String.regexReplace $"(?<=\s){becausePlaceholder}(?!, )" (bc because false true)
-            |> String.regexReplace $"(?<=\s){becausePlaceholder}(?=, )" (bc because false false)
-            |> AssertionFailedException
-            |> raise
+        /// Adds the specified key/value to the failure message.
+        [<Extension>]
+        static member With(this: Testable<'a>, key: string, value: 'b) =
+            { Testable = this; Data = [] }.With(key, value)
 
 
 [<Extension>]
@@ -206,24 +210,23 @@ type Testable<'a> with
         use _ = this.Assert()
 
         if isNull (box this.Subject) then
-            this.Fail(
-                "{subject}\n\tshould be of type\n{0}\n\t{because}but was\nnull",
-                because,
-                expectedType.AssertionName
-            )
+            this.With("Expected", expectedType).With("But was", this.Subject).Fail(because)
         else
             let actualType = this.Subject.GetType()
 
             if actualType = expectedType then
                 And(this)
             else
-                this.Fail(
-                    "{subject}\n\tshould be of type\n{0}\n\t{because}but was\n{1}\n\twith data\n{2}",
-                    because,
-                    expectedType.AssertionName,
-                    actualType.AssertionName,
-                    Formatting.format this.Subject
-                )
+                this
+                    .With("Expected", expectedType)
+                    .With(
+                        "But was",
+                        {|
+                            Type = actualType
+                            Value = TryFormat this.Subject
+                        |}
+                    )
+                    .Fail(because)
 
 
     /// Asserts that the runtime type of the subject is the exact specified type. See 'BeAssignableTo' for allowing
@@ -242,24 +245,23 @@ type Testable<'a> with
         use _ = this.Assert()
 
         if isNull (box this.Subject) then
-            this.Fail(
-                "{subject}\n\tshould be assignable to\n{0}\n\t{because}but was\nnull",
-                because,
-                expectedType.AssertionName
-            )
+            this.With("Expected", expectedType).With("But was", this.Subject).Fail(because)
         else
             let actualType = this.Subject.GetType()
 
             if actualType.IsAssignableTo(expectedType) then
                 And(this)
             else
-                this.Fail(
-                    "{subject}\n\tshould be assignable to\n{0}\n\t{because}but was\n{1}\n\twith data\n{2}",
-                    because,
-                    expectedType.AssertionName,
-                    actualType.AssertionName,
-                    Formatting.format this.Subject
-                )
+                this
+                    .With("Expected", expectedType)
+                    .With(
+                        "But was",
+                        {|
+                            Type = actualType
+                            Value = TryFormat this.Subject
+                        |}
+                    )
+                    .Fail(because)
 
 
     /// Asserts that the runtime type of the subject is assignable to the specified type (i.e., it must either be the

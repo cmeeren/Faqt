@@ -15,11 +15,11 @@ type BasicAssertions =
         use _ = t.Assert()
 
         if not (isEqual t.Subject expected) then
-            t.Fail(
-                "{subject}\n\tshould be\n{0}\n\t{because}but the specified equality comparer returned false when comparing it to\n{actual}",
-                because,
-                format expected
-            )
+            t
+                .With("Expected", expected)
+                .With("But was", t.Subject)
+                .With("WithCustomEquality", true)
+                .Fail(because)
 
         AndDerived(t, expected)
 
@@ -30,33 +30,33 @@ type BasicAssertions =
         use _ = t.Assert()
 
         if t.Subject <> expected then
-            t.Fail("{subject}\n\tshould be\n{0}\n\t{because}but was\n{actual}", because, format expected)
+            t.With("Expected", expected).With("But was", t.Subject).Fail(because)
 
         And(t)
 
 
     /// Asserts that the subject is not the specified value, using default equality comparison (=).
     [<Extension>]
-    static member NotBe(t: Testable<'a>, expected: 'b, isEqual: 'a -> 'b -> bool, ?because) : And<'a> =
+    static member NotBe(t: Testable<'a>, other: 'b, isEqual: 'a -> 'b -> bool, ?because) : And<'a> =
         use _ = t.Assert()
 
-        if isEqual t.Subject expected then
-            t.Fail(
-                "{subject}\n\tshould not be\n{0}\n\t{because}but the specified equality comparer returned true when comparing it to\n{actual}",
-                because,
-                format expected
-            )
+        if isEqual t.Subject other then
+            t
+                .With("Other", other)
+                .With("But was", t.Subject)
+                .With("WithCustomEquality", true)
+                .Fail(because)
 
         And(t)
 
 
     /// Asserts that the subject is not the specified value, using default equality comparison (=).
     [<Extension>]
-    static member NotBe(t: Testable<'a>, expected: 'a, ?because) : And<'a> =
+    static member NotBe(t: Testable<'a>, other: 'a, ?because) : And<'a> =
         use _ = t.Assert()
 
-        if t.Subject = expected then
-            t.Fail("{subject}\n\tshould not be\n{0}\n\t{because}but the values were equal.", because, format expected)
+        if t.Subject = other then
+            t.With("Other", other).With("But was", t.Subject).Fail(because)
 
         And(t)
 
@@ -66,46 +66,32 @@ type BasicAssertions =
     static member BeSameAs(t: Testable<'a>, expected: 'a, ?because) : And<'a> =
         use _ = t.Assert()
 
+        let getData x =
+            if isNull (box x) then
+                null
+            else
+                box {|
+                    PhysicalHash = LanguagePrimitives.PhysicalHash x
+                    Type = x.GetType()
+                    Value = TryFormat x
+                |}
+
         if not (LanguagePrimitives.PhysicalEquality t.Subject expected) then
-            let expectedStr =
-                if isNull (box expected) then
-                    "null"
-                else
-                    $"%i{LanguagePrimitives.PhysicalHash expected} %s{expected.GetType().AssertionName}\n%s{format expected}"
-
-            let actualStr =
-                if isNull (box t.Subject) then
-                    "null"
-                else
-                    $"%i{LanguagePrimitives.PhysicalHash t.Subject} %s{t.Subject.GetType().AssertionName}\n%s{format t.Subject}"
-
-            t.Fail(
-                "{subject}\n\tshould be reference equal to\n{0}\n\t{because}but was\n{1}",
-                because,
-                expectedStr,
-                actualStr
-            )
+            t
+                .With("Expected", getData expected)
+                .With("But was", getData t.Subject)
+                .Fail(because)
 
         And(t)
 
 
     /// Asserts that the subject is not reference equal to the specified value (which must not be null).
     [<Extension>]
-    static member NotBeSameAs(t: Testable<'a>, expected: 'a, ?because) : And<'a> =
+    static member NotBeSameAs(t: Testable<'a>, other: 'a, ?because) : And<'a> =
         use _ = t.Assert()
 
-        if LanguagePrimitives.PhysicalEquality t.Subject expected then
-            let expectedStr =
-                if isNull (box expected) then
-                    "null"
-                else
-                    $"%i{LanguagePrimitives.PhysicalHash expected} %s{expected.GetType().AssertionName}\n%s{format expected}"
-
-            t.Fail(
-                "{subject}\n\tshould not be reference equal to\n{0}\n\t{because}but was the same reference.",
-                because,
-                expectedStr
-            )
+        if LanguagePrimitives.PhysicalEquality t.Subject other then
+            t.With("Other", other).Fail(because)
 
         And(t)
 
@@ -116,7 +102,7 @@ type BasicAssertions =
         use _ = t.Assert()
 
         if not (isNull t.Subject) then
-            t.Fail("{subject}\n\tshould be null{because}, but was\n{actual}", because)
+            t.With("But was", t.Subject).Fail(because)
 
         And(t)
 
@@ -127,7 +113,7 @@ type BasicAssertions =
         use _ = t.Assert()
 
         if isNull t.Subject then
-            t.Fail("{subject}\n\tshould not be null{because}, but was null.", because)
+            t.With("But was", t.Subject).Fail(because)
 
         And(t)
 
@@ -141,12 +127,7 @@ type BasicAssertions =
         try
             AndDerived(t, f t.Subject)
         with ex ->
-            t.Fail(
-                "{subject}\n\tshould be successfully transformed by the specified function{because}, but failed with the following exception:\n{0}: {1}",
-                because,
-                ex.GetType().FullName,
-                ex.Message
-            )
+            t.With("But threw", ex).With("For value", t.Subject).Fail(because)
 
 
     /// Asserts that the subject can be transformed using the specified function (fails if the function returns None or
@@ -159,21 +140,11 @@ type BasicAssertions =
             try
                 f t.Subject
             with ex ->
-                t.Fail(
-                    "{subject}\n\tshould be successfully transformed by the specified function{because}, but failed with the following exception:\n{0}: {1}",
-                    because,
-                    ex.GetType().FullName,
-                    ex.Message
-                )
+                t.With("But threw", ex).With("For value", t.Subject).Fail(because)
 
         match result with
         | Some x -> AndDerived(t, x)
-        | None ->
-            t.Fail(
-                "{subject}\n\tshould be successfully transformed by the specified function{because}, but the function returned\n{0}",
-                because,
-                format None
-            )
+        | None -> t.With("But got", None).With("For value", t.Subject).Fail(because)
 
 
     /// Asserts that the subject can be transformed using the specified function (fails if the function returns
@@ -186,21 +157,11 @@ type BasicAssertions =
             try
                 f t.Subject
             with ex ->
-                t.Fail(
-                    "{subject}\n\tshould be successfully transformed by the specified function{because}, but failed with the following exception:\n{0}: {1}",
-                    because,
-                    ex.GetType().FullName,
-                    ex.Message
-                )
+                t.With("But threw", ex).With("For value", t.Subject).Fail(because)
 
         match result with
         | ValueSome x -> AndDerived(t, x)
-        | ValueNone ->
-            t.Fail(
-                "{subject}\n\tshould be successfully transformed by the specified function{because}, but the function returned\n{0}",
-                because,
-                format ValueNone
-            )
+        | ValueNone -> t.With("But got", ValueNone).With("For value", t.Subject).Fail(because)
 
 
     /// Asserts that the subject can be transformed using the specified function (fails if the function returns Error or
@@ -213,21 +174,11 @@ type BasicAssertions =
             try
                 f t.Subject
             with ex ->
-                t.Fail(
-                    "{subject}\n\tshould be successfully transformed by the specified function{because}, but failed with the following exception:\n{0}: {1}",
-                    because,
-                    ex.GetType().FullName,
-                    ex.Message
-                )
+                t.With("But threw", ex).With("For value", t.Subject).Fail(because)
 
         match result with
         | Ok x -> AndDerived(t, x)
-        | Error err ->
-            t.Fail(
-                "{subject}\n\tshould be successfully transformed by the specified function{because}, but the function returned\n{0}",
-                because,
-                format (Error err)
-            )
+        | Error err -> t.With("But got", Error err).With("For value", t.Subject).Fail(because)
 
 
     /// Asserts that the subject can be transformed using the specified function (fails if the function returns false or
@@ -240,18 +191,8 @@ type BasicAssertions =
             try
                 f t.Subject
             with ex ->
-                t.Fail(
-                    "{subject}\n\tshould be successfully transformed by the specified function{because}, but failed with the following exception:\n{0}: {1}",
-                    because,
-                    ex.GetType().FullName,
-                    ex.Message
-                )
+                t.With("But threw", ex).With("For value", t.Subject).Fail(because)
 
         match result with
         | true, x -> AndDerived(t, x)
-        | false, _ ->
-            t.Fail(
-                "{subject}\n\tshould be successfully transformed by the specified function{because}, but the function returned\n{0}",
-                because,
-                format false
-            )
+        | false, _ -> t.With("But got", false).With("For value", t.Subject).Fail(because)

@@ -19,11 +19,9 @@ module BeTrue =
             x.Should().BeTrue()
         |> assertExnMsg
             """
-x
-    should be
-true
-    but was
-false
+Subject: x
+Should: BeTrue
+But was: false
 """
 
 
@@ -31,14 +29,13 @@ false
     let ``Fails with expected message with because`` () =
         fun () ->
             let x = false
-            x.Should().BeTrue("some reason")
+            x.Should().BeTrue("Some reason")
         |> assertExnMsg
             """
-x
-    should be
-true
-    because some reason, but was
-false
+Subject: x
+Because: Some reason
+Should: BeTrue
+But was: false
 """
 
 
@@ -57,11 +54,9 @@ module BeFalse =
             x.Should().BeFalse()
         |> assertExnMsg
             """
-x
-    should be
-false
-    but was
-true
+Subject: x
+Should: BeFalse
+But was: true
 """
 
 
@@ -69,14 +64,13 @@ true
     let ``Fails with expected message with because`` () =
         fun () ->
             let x = true
-            x.Should().BeFalse("some reason")
+            x.Should().BeFalse("Some reason")
         |> assertExnMsg
             """
-x
-    should be
-false
-    because some reason, but was
-true
+Subject: x
+Because: Some reason
+Should: BeFalse
+But was: true
 """
 
 
@@ -103,11 +97,10 @@ module Imply =
             x.Should().Imply(false)
         |> assertExnMsg
             """
-x
-    should imply the specified value, but subject was
-true
-    and the specified value was
-false
+Subject: x
+Should: Imply
+But was: true
+With other: false
 """
 
 
@@ -115,14 +108,14 @@ false
     let ``Fails with expected message with because`` () =
         fun () ->
             let x = true
-            x.Should().Imply(false, "some reason")
+            x.Should().Imply(false, "Some reason")
         |> assertExnMsg
             """
-x
-    should imply the specified value because some reason, but subject was
-true
-    and the specified value was
-false
+Subject: x
+Because: Some reason
+Should: Imply
+But was: true
+With other: false
 """
 
 
@@ -149,11 +142,10 @@ module BeImpliedBy =
             x.Should().BeImpliedBy(true)
         |> assertExnMsg
             """
-x
-    should be implied by the specified value, but the value was
-true
-    and the subject was
-false
+Subject: x
+Should: BeImpliedBy
+Other: true
+But was: false
 """
 
 
@@ -161,12 +153,12 @@ false
     let ``Fails with expected message with because`` () =
         fun () ->
             let x = false
-            x.Should().BeImpliedBy(true, "some reason")
+            x.Should().BeImpliedBy(true, "Some reason")
         |> assertExnMsg
             """
-x
-    should be implied by the specified value because some reason, but the value was
-true
-    and the subject was
-false
+Subject: x
+Because: Some reason
+Should: BeImpliedBy
+Other: true
+But was: false
 """

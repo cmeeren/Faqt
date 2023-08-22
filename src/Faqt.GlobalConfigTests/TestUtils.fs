@@ -7,4 +7,8 @@ open Xunit
 
 let assertExnMsg (msg: string) (f: unit -> 'a) =
     let ex = Assert.Throws<AssertionFailedException>(f >> ignore)
-    Assert.Equal(msg.ReplaceLineEndings("\n").Trim(), ex.Message.ReplaceLineEndings("\n").Trim().Replace("\t", "    "))
+
+    Assert.Equal(
+        ("\n\n" + msg.ReplaceLineEndings("\n").Trim() + "\n") :> obj, // Cast to obj to force full output
+        ("\n\n" + ex.Message.ReplaceLineEndings("\n").Trim() + "\n")
+    )

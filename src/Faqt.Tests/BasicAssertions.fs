@@ -37,11 +37,10 @@ module Be =
             x.Should().Be(2)
         |> assertExnMsg
             """
-x
-    should be
-2
-    but was
-1
+Subject: x
+Should: Be
+Expected: 2
+But was: 1
 """
 
 
@@ -52,13 +51,14 @@ x
             x.Should().Be({| A = 2; B = "bar" |})
         |> assertExnMsg
             """
-x
-    should be
-{ A = 2
-  B = "bar" }
-    but was
-{ A = 1
-  B = "foo" }
+Subject: x
+Should: Be
+Expected:
+  A: 2
+  B: bar
+But was:
+  A: 1
+  B: foo
 """
 
 
@@ -69,11 +69,10 @@ x
             x.Should().Be("")
         |> assertExnMsg
             """
-x
-    should be
-""
-    but was
-<null>
+Subject: x
+Should: Be
+Expected: ''
+But was: null
 """
 
 
@@ -84,11 +83,10 @@ x
             x.Should().Be(null)
         |> assertExnMsg
             """
-x
-    should be
-<null>
-    but was
-""
+Subject: x
+Should: Be
+Expected: null
+But was: ''
 """
 
 
@@ -96,14 +94,14 @@ x
     let ``Fails with expected message with because`` () =
         fun () ->
             let x = 1
-            x.Should().Be(2, "some reason")
+            x.Should().Be(2, "Some reason")
         |> assertExnMsg
             """
-x
-    should be
-2
-    because some reason, but was
-1
+Subject: x
+Because: Some reason
+Should: Be
+Expected: 2
+But was: 1
 """
 
 
@@ -143,11 +141,11 @@ module ``Be with custom comparer`` =
             x.Should().Be(2, isEqual)
         |> assertExnMsg
             """
-x
-    should be
-2
-    but the specified equality comparer returned false when comparing it to
-1
+Subject: x
+Should: Be
+Expected: 2
+But was: 1
+WithCustomEquality: true
 """
 
 
@@ -160,11 +158,11 @@ x
             x.Should().Be(1, isEqual)
         |> assertExnMsg
             """
-x
-    should be
-1
-    but the specified equality comparer returned false when comparing it to
-1
+Subject: x
+Should: Be
+Expected: 1
+But was: 1
+WithCustomEquality: true
 """
 
 
@@ -174,14 +172,15 @@ x
 
         fun () ->
             let x = 1
-            x.Should().Be(1, isEqual, "some reason")
+            x.Should().Be(1, isEqual, "Some reason")
         |> assertExnMsg
             """
-x
-    should be
-1
-    because some reason, but the specified equality comparer returned false when comparing it to
-1
+Subject: x
+Because: Some reason
+Should: Be
+Expected: 1
+But was: 1
+WithCustomEquality: true
 """
 
 
@@ -219,10 +218,10 @@ module NotBe =
             x.Should().NotBe(x)
         |> assertExnMsg
             """
-x
-    should not be
-1
-    but the values were equal.
+Subject: x
+Should: NotBe
+Other: 1
+But was: 1
 """
 
 
@@ -233,11 +232,14 @@ x
             x.Should().NotBe(x)
         |> assertExnMsg
             """
-x
-    should not be
-{ A = 1
-  B = "foo" }
-    but the values were equal.
+Subject: x
+Should: NotBe
+Other:
+  A: 1
+  B: foo
+But was:
+  A: 1
+  B: foo
 """
 
 
@@ -248,10 +250,10 @@ x
             x.Should().NotBe(null)
         |> assertExnMsg
             """
-x
-    should not be
-<null>
-    but the values were equal.
+Subject: x
+Should: NotBe
+Other: null
+But was: null
 """
 
 
@@ -259,13 +261,14 @@ x
     let ``Fails with expected message with because`` () =
         fun () ->
             let x = 1
-            x.Should().NotBe(x, "some reason")
+            x.Should().NotBe(x, "Some reason")
         |> assertExnMsg
             """
-x
-    should not be
-1
-    because some reason, but the values were equal.
+Subject: x
+Because: Some reason
+Should: NotBe
+Other: 1
+But was: 1
 """
 
 
@@ -299,11 +302,11 @@ module ``NotBe with custom comparer`` =
             x.Should().NotBe(2, isEqual)
         |> assertExnMsg
             """
-x
-    should not be
-2
-    but the specified equality comparer returned true when comparing it to
-1
+Subject: x
+Should: NotBe
+Other: 2
+But was: 1
+WithCustomEquality: true
 """
 
 
@@ -313,14 +316,15 @@ x
 
         fun () ->
             let x = 1
-            x.Should().NotBe(1, isEqual, "some reason")
+            x.Should().NotBe(1, isEqual, "Some reason")
         |> assertExnMsg
             """
-x
-    should not be
-1
-    because some reason, but the specified equality comparer returned true when comparing it to
-1
+Subject: x
+Because: Some reason
+Should: NotBe
+Other: 1
+But was: 1
+WithCustomEquality: true
 """
 
 
@@ -347,12 +351,13 @@ module BeSameAs =
         fun () -> x.Should().BeSameAs(y)
         |> assertExnMsg
             $"""
-x
-    should be reference equal to
-%i{LanguagePrimitives.PhysicalHash y} System.String
-"asd"
-    but was
-null
+Subject: x
+Should: BeSameAs
+Expected:
+  PhysicalHash: %i{LanguagePrimitives.PhysicalHash y}
+  Type: System.String
+  Value: asd
+But was: null
 """
 
 
@@ -364,12 +369,13 @@ null
         fun () -> x.Should().BeSameAs(y)
         |> assertExnMsg
             $"""
-x
-    should be reference equal to
-null
-    but was
-%i{LanguagePrimitives.PhysicalHash x} System.String
-"asd"
+Subject: x
+Should: BeSameAs
+Expected: null
+But was:
+  PhysicalHash: %i{LanguagePrimitives.PhysicalHash x}
+  Type: System.String
+  Value: asd
 """
 
 
@@ -382,13 +388,18 @@ null
         fun () -> x.Should().BeSameAs(y)
         |> assertExnMsg
             $"""
-x
-    should be reference equal to
-%i{LanguagePrimitives.PhysicalHash y} Microsoft.FSharp.Collections.FSharpMap<System.String, System.Int32>
-map [("a", 1)]
-    but was
-%i{LanguagePrimitives.PhysicalHash x} Microsoft.FSharp.Collections.FSharpMap<System.String, System.Int32>
-map [("a", 1)]
+Subject: x
+Should: BeSameAs
+Expected:
+  PhysicalHash: %i{LanguagePrimitives.PhysicalHash y}
+  Type: Microsoft.FSharp.Collections.FSharpMap<System.String, System.Int32>
+  Value:
+    a: 1
+But was:
+  PhysicalHash: %i{LanguagePrimitives.PhysicalHash x}
+  Type: Microsoft.FSharp.Collections.FSharpMap<System.String, System.Int32>
+  Value:
+    a: 1
 """
 
 
@@ -397,16 +408,20 @@ map [("a", 1)]
         let x = "a"
         let y = "b"
 
-        fun () -> x.Should().BeSameAs(y, "some reason")
+        fun () -> x.Should().BeSameAs(y, "Some reason")
         |> assertExnMsg
             $"""
-x
-    should be reference equal to
-%i{LanguagePrimitives.PhysicalHash y} System.String
-"b"
-    because some reason, but was
-%i{LanguagePrimitives.PhysicalHash x} System.String
-"a"
+Subject: x
+Because: Some reason
+Should: BeSameAs
+Expected:
+  PhysicalHash: %i{LanguagePrimitives.PhysicalHash y}
+  Type: System.String
+  Value: b
+But was:
+  PhysicalHash: %i{LanguagePrimitives.PhysicalHash x}
+  Type: System.String
+  Value: a
 """
 
 
@@ -433,10 +448,9 @@ module NotBeSameAs =
             x.Should().NotBeSameAs(null)
         |> assertExnMsg
             """
-x
-    should not be reference equal to
-null
-    but was the same reference.
+Subject: x
+Should: NotBeSameAs
+Other: null
 """
 
 
@@ -447,12 +461,11 @@ null
 
         fun () -> x.Should().NotBeSameAs(y)
         |> assertExnMsg
-            $"""
-x
-    should not be reference equal to
-%i{LanguagePrimitives.PhysicalHash y} Microsoft.FSharp.Collections.FSharpMap<System.String, System.Int32>
-map [("a", 1)]
-    but was the same reference.
+            """
+Subject: x
+Should: NotBeSameAs
+Other:
+  a: 1
 """
 
 
@@ -461,14 +474,13 @@ map [("a", 1)]
         let x = "a"
         let y = x
 
-        fun () -> x.Should().NotBeSameAs(y, "some reason")
+        fun () -> x.Should().NotBeSameAs(y, "Some reason")
         |> assertExnMsg
             $"""
-x
-    should not be reference equal to
-%i{LanguagePrimitives.PhysicalHash y} System.String
-"a"
-    because some reason, but was the same reference.
+Subject: x
+Because: Some reason
+Should: NotBeSameAs
+Other: a
 """
 
 
@@ -487,9 +499,9 @@ module BeNull =
             x.Should().BeNull()
         |> assertExnMsg
             """
-x
-    should be null, but was
-"asd"
+Subject: x
+Should: BeNull
+But was: asd
 """
 
 
@@ -497,12 +509,13 @@ x
     let ``Fails with expected message with because`` () =
         fun () ->
             let x = "asd"
-            x.Should().BeNull("some reason")
+            x.Should().BeNull("Some reason")
         |> assertExnMsg
             """
-x
-    should be null because some reason, but was
-"asd"
+Subject: x
+Because: Some reason
+Should: BeNull
+But was: asd
 """
 
 
@@ -521,8 +534,9 @@ module NotBeNull =
             x.Should().NotBeNull()
         |> assertExnMsg
             """
-x
-    should not be null, but was null.
+Subject: x
+Should: NotBeNull
+But was: null
 """
 
 
@@ -530,11 +544,13 @@ x
     let ``Fails with expected message with because`` () =
         fun () ->
             let (x: string) = null
-            x.Should().NotBeNull("some reason")
+            x.Should().NotBeNull("Some reason")
         |> assertExnMsg
             """
-x
-    should not be null because some reason, but was null.
+Subject: x
+Because: Some reason
+Should: NotBeNull
+But was: null
 """
 
 
@@ -558,11 +574,10 @@ module ``BeOfType non-generic`` =
             x.Should().BeOfType(typeof<string>)
         |> assertExnMsg
             """
-x
-    should be of type
-System.String
-    but was
-null
+Subject: x
+Should: BeOfType
+Expected: System.String
+But was: null
 """
 
 
@@ -573,13 +588,12 @@ null
             x.Should().BeOfType(typeof<int>)
         |> assertExnMsg
             """
-x
-    should be of type
-System.Int32
-    but was
-System.String
-    with data
-"asd"
+Subject: x
+Should: BeOfType
+Expected: System.Int32
+But was:
+  Type: System.String
+  Value: asd
 """
 
 
@@ -591,13 +605,12 @@ System.String
             x.Should().BeOfType(typeof<IDisposable>)
         |> assertExnMsg
             """
-x
-    should be of type
-System.IDisposable
-    but was
-System.IO.MemoryStream
-    with data
-System.IO.MemoryStream
+Subject: x
+Should: BeOfType
+Expected: System.IDisposable
+But was:
+  Type: System.IO.MemoryStream
+  Value: System.IO.MemoryStream
 """
 
 
@@ -609,13 +622,12 @@ System.IO.MemoryStream
             x.Should().BeOfType(typeof<IDictionary<string, int>>)
         |> assertExnMsg
             """
-x
-    should be of type
-System.Collections.Generic.IDictionary<System.String, System.Int32>
-    but was
-Microsoft.FSharp.Collections.FSharpMap<System.String, System.Int32>
-    with data
-map []
+Subject: x
+Should: BeOfType
+Expected: System.Collections.Generic.IDictionary<System.String, System.Int32>
+But was:
+  Type: Microsoft.FSharp.Collections.FSharpMap<System.String, System.Int32>
+  Value: {}
 """
 
 
@@ -627,13 +639,12 @@ map []
             x.Should().BeOfType(typeof<Stream>)
         |> assertExnMsg
             """
-x
-    should be of type
-System.IO.Stream
-    but was
-System.IO.MemoryStream
-    with data
-System.IO.MemoryStream
+Subject: x
+Should: BeOfType
+Expected: System.IO.Stream
+But was:
+  Type: System.IO.MemoryStream
+  Value: System.IO.MemoryStream
 """
 
 
@@ -641,16 +652,16 @@ System.IO.MemoryStream
     let ``Fails with expected message with because`` () =
         fun () ->
             let x = "asd"
-            x.Should().BeOfType(typeof<int>, "some reason")
+            x.Should().BeOfType(typeof<int>, "Some reason")
         |> assertExnMsg
             """
-x
-    should be of type
-System.Int32
-    because some reason, but was
-System.String
-    with data
-"asd"
+Subject: x
+Because: Some reason
+Should: BeOfType
+Expected: System.Int32
+But was:
+  Type: System.String
+  Value: asd
 """
 
 
@@ -684,11 +695,10 @@ module ``BeOfType generic`` =
             x.Should().BeOfType<string>()
         |> assertExnMsg
             """
-x
-    should be of type
-System.String
-    but was
-null
+Subject: x
+Should: BeOfType
+Expected: System.String
+But was: null
 """
 
 
@@ -699,13 +709,12 @@ null
             x.Should().BeOfType<int>()
         |> assertExnMsg
             """
-x
-    should be of type
-System.Int32
-    but was
-System.String
-    with data
-"asd"
+Subject: x
+Should: BeOfType
+Expected: System.Int32
+But was:
+  Type: System.String
+  Value: asd
 """
 
 
@@ -717,13 +726,12 @@ System.String
             x.Should().BeOfType<IDisposable>()
         |> assertExnMsg
             """
-x
-    should be of type
-System.IDisposable
-    but was
-System.IO.MemoryStream
-    with data
-System.IO.MemoryStream
+Subject: x
+Should: BeOfType
+Expected: System.IDisposable
+But was:
+  Type: System.IO.MemoryStream
+  Value: System.IO.MemoryStream
 """
 
 
@@ -735,13 +743,12 @@ System.IO.MemoryStream
             x.Should().BeOfType<IDictionary<string, int>>()
         |> assertExnMsg
             """
-x
-    should be of type
-System.Collections.Generic.IDictionary<System.String, System.Int32>
-    but was
-Microsoft.FSharp.Collections.FSharpMap<System.String, System.Int32>
-    with data
-map []
+Subject: x
+Should: BeOfType
+Expected: System.Collections.Generic.IDictionary<System.String, System.Int32>
+But was:
+  Type: Microsoft.FSharp.Collections.FSharpMap<System.String, System.Int32>
+  Value: {}
 """
 
 
@@ -753,13 +760,12 @@ map []
             x.Should().BeOfType<Stream>()
         |> assertExnMsg
             """
-x
-    should be of type
-System.IO.Stream
-    but was
-System.IO.MemoryStream
-    with data
-System.IO.MemoryStream
+Subject: x
+Should: BeOfType
+Expected: System.IO.Stream
+But was:
+  Type: System.IO.MemoryStream
+  Value: System.IO.MemoryStream
 """
 
 
@@ -767,16 +773,16 @@ System.IO.MemoryStream
     let ``Fails with expected message with because`` () =
         fun () ->
             let x = "asd"
-            x.Should().BeOfType<int>("some reason")
+            x.Should().BeOfType<int>("Some reason")
         |> assertExnMsg
             """
-x
-    should be of type
-System.Int32
-    because some reason, but was
-System.String
-    with data
-"asd"
+Subject: x
+Because: Some reason
+Should: BeOfType
+Expected: System.Int32
+But was:
+  Type: System.String
+  Value: asd
 """
 
 
@@ -824,11 +830,10 @@ module ``BeAssignableTo non-generic`` =
             x.Should().BeAssignableTo(typeof<string>)
         |> assertExnMsg
             """
-x
-    should be assignable to
-System.String
-    but was
-null
+Subject: x
+Should: BeAssignableTo
+Expected: System.String
+But was: null
 """
 
 
@@ -839,13 +844,12 @@ null
             x.Should().BeAssignableTo(typeof<int>)
         |> assertExnMsg
             """
-x
-    should be assignable to
-System.Int32
-    but was
-System.String
-    with data
-"asd"
+Subject: x
+Should: BeAssignableTo
+Expected: System.Int32
+But was:
+  Type: System.String
+  Value: asd
 """
 
 
@@ -853,16 +857,16 @@ System.String
     let ``Fails with expected message with because`` () =
         fun () ->
             let x = "asd"
-            x.Should().BeAssignableTo(typeof<int>, "some reason")
+            x.Should().BeAssignableTo(typeof<int>, "Some reason")
         |> assertExnMsg
             """
-x
-    should be assignable to
-System.Int32
-    because some reason, but was
-System.String
-    with data
-"asd"
+Subject: x
+Because: Some reason
+Should: BeAssignableTo
+Expected: System.Int32
+But was:
+  Type: System.String
+  Value: asd
 """
 
 
@@ -918,11 +922,10 @@ module ``BeAssignableTo generic`` =
             x.Should().BeAssignableTo<string>()
         |> assertExnMsg
             """
-x
-    should be assignable to
-System.String
-    but was
-null
+Subject: x
+Should: BeAssignableTo
+Expected: System.String
+But was: null
 """
 
 
@@ -933,13 +936,12 @@ null
             x.Should().BeAssignableTo<int>()
         |> assertExnMsg
             """
-x
-    should be assignable to
-System.Int32
-    but was
-System.String
-    with data
-"asd"
+Subject: x
+Should: BeAssignableTo
+Expected: System.Int32
+But was:
+  Type: System.String
+  Value: asd
 """
 
 
@@ -947,16 +949,16 @@ System.String
     let ``Fails with expected message with because`` () =
         fun () ->
             let x = "asd"
-            x.Should().BeAssignableTo<int>("some reason")
+            x.Should().BeAssignableTo<int>("Some reason")
         |> assertExnMsg
             """
-x
-    should be assignable to
-System.Int32
-    because some reason, but was
-System.String
-    with data
-"asd"
+Subject: x
+Because: Some reason
+Should: BeAssignableTo
+Expected: System.Int32
+But was:
+  Type: System.String
+  Value: asd
 """
 
 
@@ -978,20 +980,32 @@ module Transform =
         fun () -> "a".Should().Transform(fun _ -> failwith "foo")
         |> assertExnMsg
             """
-"a"
-    should be successfully transformed by the specified function, but failed with the following exception:
-System.Exception: foo
+Subject: '"a"'
+Should: Transform
+But threw: |-
+  System.Exception: foo
+     at BasicAssertions.Transform.Pipe #1 input at line 980@980-1.Invoke(String _arg1) in C:\Users\cmeer\Source\Repos\Faqt\src\Faqt.Tests\BasicAssertions.fs:line 980
+     at Faqt.BasicAssertions.Transform[a,b](Testable`1 t, FSharpFunc`2 f, FSharpOption`1 because) in C:\Users\cmeer\Source\Repos\Faqt\src\Faqt\BasicAssertions.fs:line 128
+For value: a
 """
 
 
     [<Fact>]
     let ``Fails with expected message with because`` () =
-        fun () -> "a".Should().Transform(int, "some reason")
+        fun () -> "a".Should().Transform(int, "Some reason")
         |> assertExnMsg
             """
-"a"
-    should be successfully transformed by the specified function because some reason, but failed with the following exception:
-System.FormatException: The input string 'a' was not in a correct format.
+Subject: '"a"'
+Because: Some reason
+Should: Transform
+But threw: |-
+  System.FormatException: The input string 'a' was not in a correct format.
+     at System.Number.ThrowOverflowOrFormatException(ParsingStatus status, ReadOnlySpan`1 value, TypeCode type)
+     at System.Int32.Parse(String s, NumberStyles style, IFormatProvider provider)
+     at Microsoft.FSharp.Core.LanguagePrimitives.ParseInt32(String s) in D:\a\_work\1\s\src\FSharp.Core\prim-types.fs:line 2458
+     at BasicAssertions.Transform.Pipe #1 input at line 995@995-1.Invoke(String value)
+     at Faqt.BasicAssertions.Transform[a,b](Testable`1 t, FSharpFunc`2 f, FSharpOption`1 because) in C:\Users\cmeer\Source\Repos\Faqt\src\Faqt\BasicAssertions.fs:line 128
+For value: a
 """
 
 
@@ -1013,9 +1027,10 @@ module ``TryTransform option`` =
         fun () -> "a".Should().TryTransform(fun _ -> Option<string>.None)
         |> assertExnMsg
             """
-"a"
-    should be successfully transformed by the specified function, but the function returned
-None
+Subject: '"a"'
+Should: TryTransform
+But got: null
+For value: a
 """
 
 
@@ -1024,20 +1039,26 @@ None
         fun () -> "a".Should().TryTransform(fun _ -> failwith<string option> "foo")
         |> assertExnMsg
             """
-"a"
-    should be successfully transformed by the specified function, but failed with the following exception:
-System.Exception: foo
+Subject: '"a"'
+Should: TryTransform
+But threw: |-
+  System.Exception: foo
+     at BasicAssertions.TryTransform option.Pipe #1 input at line 1039@1039-1.Invoke(String _arg1) in C:\Users\cmeer\Source\Repos\Faqt\src\Faqt.Tests\BasicAssertions.fs:line 1039
+     at Faqt.BasicAssertions.TryTransform[a,b](Testable`1 t, FSharpFunc`2 f, FSharpOption`1 because) in C:\Users\cmeer\Source\Repos\Faqt\src\Faqt\BasicAssertions.fs:line 141
+For value: a
 """
 
 
     [<Fact>]
     let ``Fails with expected message with because when returning None`` () =
-        fun () -> "a".Should().TryTransform((fun _ -> Option<string>.None), "some reason")
+        fun () -> "a".Should().TryTransform((fun _ -> Option<string>.None), "Some reason")
         |> assertExnMsg
             """
-"a"
-    should be successfully transformed by the specified function because some reason, but the function returned
-None
+Subject: '"a"'
+Because: Some reason
+Should: TryTransform
+But got: null
+For value: a
 """
 
 
@@ -1046,12 +1067,17 @@ None
         fun () ->
             "a"
                 .Should()
-                .TryTransform((fun _ -> failwith<string option> "foo"), "some reason")
+                .TryTransform((fun _ -> failwith<string option> "foo"), "Some reason")
         |> assertExnMsg
             """
-"a"
-    should be successfully transformed by the specified function because some reason, but failed with the following exception:
-System.Exception: foo
+Subject: '"a"'
+Because: Some reason
+Should: TryTransform
+But threw: |-
+  System.Exception: foo
+     at BasicAssertions.TryTransform option.Pipe #1 input at line 1067@1070-1.Invoke(String _arg1) in C:\Users\cmeer\Source\Repos\Faqt\src\Faqt.Tests\BasicAssertions.fs:line 1070
+     at Faqt.BasicAssertions.TryTransform[a,b](Testable`1 t, FSharpFunc`2 f, FSharpOption`1 because) in C:\Users\cmeer\Source\Repos\Faqt\src\Faqt\BasicAssertions.fs:line 141
+For value: a
 """
 
 
@@ -1073,9 +1099,10 @@ module ``TryTransform voption`` =
         fun () -> "a".Should().TryTransform(fun _ -> ValueOption<string>.ValueNone)
         |> assertExnMsg
             """
-"a"
-    should be successfully transformed by the specified function, but the function returned
-ValueNone
+Subject: '"a"'
+Should: TryTransform
+But got: ValueNone
+For value: a
 """
 
 
@@ -1084,9 +1111,13 @@ ValueNone
         fun () -> "a".Should().TryTransform(fun _ -> failwith<string voption> "foo")
         |> assertExnMsg
             """
-"a"
-    should be successfully transformed by the specified function, but failed with the following exception:
-System.Exception: foo
+Subject: '"a"'
+Should: TryTransform
+But threw: |-
+  System.Exception: foo
+     at BasicAssertions.TryTransform voption.Pipe #1 input at line 1111@1111-1.Invoke(String _arg1) in C:\Users\cmeer\Source\Repos\Faqt\src\Faqt.Tests\BasicAssertions.fs:line 1111
+     at Faqt.BasicAssertions.TryTransform[a,b](Testable`1 t, FSharpFunc`2 f, FSharpOption`1 because) in C:\Users\cmeer\Source\Repos\Faqt\src\Faqt\BasicAssertions.fs:line 158
+For value: a
 """
 
 
@@ -1098,9 +1129,11 @@ System.Exception: foo
                 .TryTransform((fun _ -> ValueOption<string>.ValueNone), "ValueSome reason")
         |> assertExnMsg
             """
-"a"
-    should be successfully transformed by the specified function because ValueSome reason, but the function returned
-ValueNone
+Subject: '"a"'
+Because: ValueSome reason
+Should: TryTransform
+But got: ValueNone
+For value: a
 """
 
 
@@ -1112,9 +1145,14 @@ ValueNone
                 .TryTransform((fun _ -> failwith<string voption> "foo"), "ValueSome reason")
         |> assertExnMsg
             """
-"a"
-    should be successfully transformed by the specified function because ValueSome reason, but failed with the following exception:
-System.Exception: foo
+Subject: '"a"'
+Because: ValueSome reason
+Should: TryTransform
+But threw: |-
+  System.Exception: foo
+     at BasicAssertions.TryTransform voption.Pipe #1 input at line 1142@1145-1.Invoke(String _arg1) in C:\Users\cmeer\Source\Repos\Faqt\src\Faqt.Tests\BasicAssertions.fs:line 1145
+     at Faqt.BasicAssertions.TryTransform[a,b](Testable`1 t, FSharpFunc`2 f, FSharpOption`1 because) in C:\Users\cmeer\Source\Repos\Faqt\src\Faqt\BasicAssertions.fs:line 158
+For value: a
 """
 
 
@@ -1136,9 +1174,11 @@ module ``TryTransform Result`` =
         fun () -> "a".Should().TryTransform(fun _ -> Result<string, _>.Error "foo")
         |> assertExnMsg
             """
-"a"
-    should be successfully transformed by the specified function, but the function returned
-Error "foo"
+Subject: '"a"'
+Should: TryTransform
+But got:
+  Error: foo
+For value: a
 """
 
 
@@ -1147,9 +1187,13 @@ Error "foo"
         fun () -> "a".Should().TryTransform(fun _ -> failwith<Result<string, string>> "foo")
         |> assertExnMsg
             """
-"a"
-    should be successfully transformed by the specified function, but failed with the following exception:
-System.Exception: foo
+Subject: '"a"'
+Should: TryTransform
+But threw: |-
+  System.Exception: foo
+     at BasicAssertions.TryTransform Result.Pipe #1 input at line 1187@1187-1.Invoke(String _arg1) in C:\Users\cmeer\Source\Repos\Faqt\src\Faqt.Tests\BasicAssertions.fs:line 1187
+     at Faqt.BasicAssertions.TryTransform[a,b,c](Testable`1 t, FSharpFunc`2 f, FSharpOption`1 because) in C:\Users\cmeer\Source\Repos\Faqt\src\Faqt\BasicAssertions.fs:line 175
+For value: a
 """
 
 
@@ -1158,12 +1202,15 @@ System.Exception: foo
         fun () ->
             "a"
                 .Should()
-                .TryTransform((fun _ -> Result<string, _>.Error "foo"), "some reason")
+                .TryTransform((fun _ -> Result<string, _>.Error "foo"), "Some reason")
         |> assertExnMsg
             """
-"a"
-    should be successfully transformed by the specified function because some reason, but the function returned
-Error "foo"
+Subject: '"a"'
+Because: Some reason
+Should: TryTransform
+But got:
+  Error: foo
+For value: a
 """
 
 
@@ -1172,12 +1219,17 @@ Error "foo"
         fun () ->
             "a"
                 .Should()
-                .TryTransform((fun _ -> failwith<Result<string, string>> "foo"), "some reason")
+                .TryTransform((fun _ -> failwith<Result<string, string>> "foo"), "Some reason")
         |> assertExnMsg
             """
-"a"
-    should be successfully transformed by the specified function because some reason, but failed with the following exception:
-System.Exception: foo
+Subject: '"a"'
+Because: Some reason
+Should: TryTransform
+But threw: |-
+  System.Exception: foo
+     at BasicAssertions.TryTransform Result.Pipe #1 input at line 1219@1222-1.Invoke(String _arg1) in C:\Users\cmeer\Source\Repos\Faqt\src\Faqt.Tests\BasicAssertions.fs:line 1222
+     at Faqt.BasicAssertions.TryTransform[a,b,c](Testable`1 t, FSharpFunc`2 f, FSharpOption`1 because) in C:\Users\cmeer\Source\Repos\Faqt\src\Faqt\BasicAssertions.fs:line 175
+For value: a
 """
 
 
@@ -1199,9 +1251,10 @@ module ``TryTransform parse`` =
         fun () -> "a".Should().TryTransform(fun s -> Int32.TryParse s)
         |> assertExnMsg
             """
-"a"
-    should be successfully transformed by the specified function, but the function returned
-false
+Subject: '"a"'
+Should: TryTransform
+But got: false
+For value: a
 """
 
 
@@ -1210,29 +1263,40 @@ false
         fun () -> "a".Should().TryTransform(fun _ -> failwith<bool * int> "foo")
         |> assertExnMsg
             """
-"a"
-    should be successfully transformed by the specified function, but failed with the following exception:
-System.Exception: foo
+Subject: '"a"'
+Should: TryTransform
+But threw: |-
+  System.Exception: foo
+     at BasicAssertions.TryTransform parse.Pipe #1 input at line 1263@1263-1.Invoke(String _arg1) in C:\Users\cmeer\Source\Repos\Faqt\src\Faqt.Tests\BasicAssertions.fs:line 1263
+     at Faqt.BasicAssertions.TryTransform[a,b](Testable`1 t, FSharpFunc`2 f, FSharpOption`1 because) in C:\Users\cmeer\Source\Repos\Faqt\src\Faqt\BasicAssertions.fs:line 192
+For value: a
 """
 
 
     [<Fact>]
     let ``Fails with expected message with because when returning false`` () =
-        fun () -> "a".Should().TryTransform((fun s -> Int32.TryParse s), "some reason")
+        fun () -> "a".Should().TryTransform((fun s -> Int32.TryParse s), "Some reason")
         |> assertExnMsg
             """
-"a"
-    should be successfully transformed by the specified function because some reason, but the function returned
-false
+Subject: '"a"'
+Because: Some reason
+Should: TryTransform
+But got: false
+For value: a
 """
 
 
     [<Fact>]
     let ``Fails with expected message with because when function throws`` () =
-        fun () -> "a".Should().TryTransform((fun _ -> failwith<bool * int> "foo"), "some reason")
+        fun () -> "a".Should().TryTransform((fun _ -> failwith<bool * int> "foo"), "Some reason")
         |> assertExnMsg
             """
-"a"
-    should be successfully transformed by the specified function because some reason, but failed with the following exception:
-System.Exception: foo
+Subject: '"a"'
+Because: Some reason
+Should: TryTransform
+But threw: |-
+  System.Exception: foo
+     at BasicAssertions.TryTransform parse.Pipe #1 input at line 1291@1291-1.Invoke(String _arg1) in C:\Users\cmeer\Source\Repos\Faqt\src\Faqt.Tests\BasicAssertions.fs:line 1291
+     at Faqt.BasicAssertions.TryTransform[a,b](Testable`1 t, FSharpFunc`2 f, FSharpOption`1 because) in C:\Users\cmeer\Source\Repos\Faqt\src\Faqt\BasicAssertions.fs:line 192
+For value: a
 """

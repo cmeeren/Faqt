@@ -1,9 +1,9 @@
 ﻿module ``Custom assertions``
 
+open System
 open System.Runtime.CompilerServices
 open Faqt
 open AssertionHelpers
-open Formatting
 open Xunit
 
 
@@ -20,7 +20,13 @@ type private Assertions =
     [<Extension>]
     static member DelegatingFailSatisfy(t: Testable<int>) : And<int> =
         use _ = t.Assert()
-        t.TestSatisfy(fun x -> x.Should().Fail())
+        t.Satisfy(fun x -> x.Should().Fail())
+
+
+    [<Extension>]
+    static member FailWithoutAssert<'a>(t: Testable<'a>) : And<'a> =
+        t.Fail(None)
+        And(t)
 
 
     [<Extension>]
@@ -28,11 +34,7 @@ type private Assertions =
         use _ = t.Assert()
 
         if t.Subject = "Russia" && target = "Ukraine" then
-            t.Fail(
-                "\tExpected\n{subject}\n\tto not invade\n{0}\n\t{because}but an invasion was found to be taking place by\n{actual}",
-                because,
-                format target
-            )
+            t.With("Target", target).With("But was invaded by", t.Subject).Fail(because)
 
         And(t)
 
@@ -40,7 +42,11 @@ type private Assertions =
 [<Fact>]
 let ``DelegatingFail gives expected subject name`` () =
     fun () -> "asd".Should().DelegatingFail()
-    |> assertExnMsg "\"asd\""
+    |> assertExnMsg
+        """
+Subject: '"asd"'
+Should: DelegatingFail
+"""
 
 
 [<Fact>]
@@ -48,9 +54,23 @@ let ``DelegatingFailSatisfy gives expected subject name`` () =
     fun () -> (1).Should().DelegatingFailSatisfy()
     |> assertExnMsg
         """
-(1)
-x
+Subject: (1)
+Should: DelegatingFailSatisfy
+Failure:
+  Subject: x
+  Should: Fail
 """
+
+
+[<Fact>]
+let ``FailWithoutAssert throws expected exception`` () =
+    let ex =
+        Assert.Throws<InvalidOperationException>(fun () -> (1).Should().FailWithoutAssert() |> ignore)
+
+    Assert.Equal(
+        "Call chain assertion history is empty. Testable.Assert must be called in all assertions before calling Fail.",
+        ex.Message
+    )
 
 
 [<Fact>]
@@ -60,10 +80,8 @@ let ``Custom assertion gives expected message`` () =
         country.Should().NotInvade("Ukraine")
     |> assertExnMsg
         """
-    Expected
-country
-    to not invade
-"Ukraine"
-    but an invasion was found to be taking place by
-"Russia"
+Subject: country
+Should: NotInvade
+Target: Ukraine
+But was invaded by: Russia
 """

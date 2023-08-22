@@ -2,25 +2,32 @@
 
 open System.Runtime.CompilerServices
 open AssertionHelpers
-open Formatting
 
 
 [<Extension>]
 type BoolAssertions =
 
 
-    /// Asserts that the subject is true. Alias of Be(true).
+    /// Asserts that the subject is true. Equivalent to Be(true) (but with a different error message).
     [<Extension>]
     static member BeTrue(t: Testable<bool>, ?because) : And<bool> =
         use _ = t.Assert()
-        t.Be(true, ?because = because)
+
+        if t.Subject = false then
+            t.With("But was", t.Subject).Fail(because)
+
+        And(t)
 
 
-    /// Asserts that the subject is true. Alias of Be(false).
+    /// Asserts that the subject is false. Equivalent to Be(false) (but with a different error message).
     [<Extension>]
     static member BeFalse(t: Testable<bool>, ?because) : And<bool> =
         use _ = t.Assert()
-        t.Be(false, ?because = because)
+
+        if t.Subject = true then
+            t.With("But was", t.Subject).Fail(because)
+
+        And(t)
 
 
     /// Asserts that if the subject is true, other is also true.
@@ -29,11 +36,7 @@ type BoolAssertions =
         use _ = t.Assert()
 
         if t.Subject && not other then
-            t.Fail(
-                "{subject}\n\tshould imply the specified value{because}, but subject was\n{actual}\n\tand the specified value was\n{0}",
-                because,
-                format other
-            )
+            t.With("But was", t.Subject).With("With other", other).Fail(because)
 
         And(t)
 
@@ -44,10 +47,6 @@ type BoolAssertions =
         use _ = t.Assert()
 
         if other && not t.Subject then
-            t.Fail(
-                "{subject}\n\tshould be implied by the specified value{because}, but the value was\n{0}\n\tand the subject was\n{actual}",
-                because,
-                format other
-            )
+            t.With("Other", other).With("But was", t.Subject).Fail(because)
 
         And(t)

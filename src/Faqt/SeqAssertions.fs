@@ -5,7 +5,10 @@ open AssertionHelpers
 open Formatting
 
 
-type private BeDistinctReportItem<'a> = { Count: int; Item: 'a }
+type private SatisfyReportItem = { Index: int; Failure: FailureData }
+
+
+type private ExpectedActualReportItem<'a> = { Index: int; Expected: 'a; Actual: 'a }
 
 
 type private BeDistinctByReportItem<'a, 'b> = {
@@ -25,12 +28,7 @@ type SeqAssertions =
         use _ = t.Assert(true, true)
 
         if isNull (box t.Subject) then
-            t.Fail(
-                "{subject}\n\tshould only contain items satisfying the supplied assertion{because}, but was\n{actual}",
-                because
-            )
-
-        let subjectLength = Seq.stringOptimizedLength t.Subject
+            t.With("But was", t.Subject).Fail(because)
 
         let exceptions =
             t.Subject
@@ -46,18 +44,10 @@ type SeqAssertions =
             |> Seq.toArray
 
         if exceptions.Length > 0 then
-            let assertionFailuresString =
-                exceptions
-                |> Seq.map (fun (i, ex) -> $"\n\n[Item %i{i + 1}/%i{subjectLength}]\n%s{ex.Message}")
-                |> String.concat ""
-
-            t.Fail(
-                "{subject}\n\tshould only contain items satisfying the supplied assertion{because}, but {0} of {1} items failed.{2}",
-                because,
-                string exceptions.Length,
-                string subjectLength,
-                assertionFailuresString
-            )
+            t
+                .With("Failures", exceptions |> Array.map (fun (i, ex) -> { Index = i; Failure = ex.FailureData }))
+                .With("Value", t.Subject)
+                .Fail(because)
 
         And(t)
 
@@ -69,21 +59,17 @@ type SeqAssertions =
         use _ = t.Assert(true)
 
         if isNull (box t.Subject) then
-            t.Fail(
-                "{subject}\n\tshould contain items respectively satisfying the specified assertions{because}, but was\n{actual}",
-                because
-            )
+            t.With("But was", t.Subject).Fail(because)
 
         let subjectLength = Seq.stringOptimizedLength t.Subject
-        let assertionsLength = Seq.length assertions
+        let assertionsLength = Seq.stringOptimizedLength assertions
 
         if subjectLength <> assertionsLength then
-            t.Fail(
-                "{subject}\n\tshould contain items respectively satisfying the\n{0}\n\tspecified assertions{because}, but actual length was\n{1}\n\n{actual}",
-                because,
-                string assertionsLength,
-                string subjectLength
-            )
+            t
+                .With("Expected length", assertionsLength)
+                .With("Actual length", subjectLength)
+                .With("Value", t.Subject)
+                .Fail(because)
 
         let exceptions =
             Seq.zip t.Subject assertions
@@ -98,18 +84,10 @@ type SeqAssertions =
             |> Seq.toArray
 
         if exceptions.Length > 0 then
-            let assertionFailuresString =
-                exceptions
-                |> Seq.map (fun (i, ex) -> $"\n\n[Item %i{i + 1}/%i{subjectLength}]\n%s{ex.Message}")
-                |> String.concat ""
-
-            t.Fail(
-                "{subject}\n\tshould contain items respectively satisfying the specified assertions{because}, but {0} of {1} items failed.{2}",
-                because,
-                string exceptions.Length,
-                string subjectLength,
-                assertionFailuresString
-            )
+            t
+                .With("Failures", exceptions |> Array.map (fun (i, ex) -> { Index = i; Failure = ex.FailureData }))
+                .With("Value", t.Subject)
+                .Fail(because)
 
         And(t)
 
@@ -120,17 +98,16 @@ type SeqAssertions =
         use _ = t.Assert()
 
         if isNull (box t.Subject) then
-            t.Fail("{subject}\n\tshould have length\n{0}\n\t{because}but was\n{actual}", because, format expected)
+            t.With("Expected", expected).With("But was", t.Subject).Fail(because)
         else
             let subjectLength = Seq.stringOptimizedLength t.Subject
 
             if subjectLength <> expected then
-                t.Fail(
-                    "{subject}\n\tshould have length\n{0}\n\t{because}but length was\n{1}\n\n{actual}",
-                    because,
-                    format expected,
-                    format subjectLength
-                )
+                t
+                    .With("Expected", expected)
+                    .With("But was", subjectLength)
+                    .With("Value", t.Subject)
+                    .Fail(because)
 
             And(t)
 
@@ -142,7 +119,7 @@ type SeqAssertions =
         use _ = t.Assert()
 
         if isNull (box t.Subject) || not (Seq.stringOptimizedIsEmpty t.Subject) then
-            t.Fail("{subject}\n\tshould be empty{because}, but was\n{actual}", because)
+            t.With("But was", t.Subject).Fail(because)
 
         And(t)
 
@@ -152,10 +129,8 @@ type SeqAssertions =
     static member NotBeEmpty(t: Testable<#seq<'a>>, ?because) : And<_> =
         use _ = t.Assert()
 
-        if isNull (box t.Subject) then
-            t.Fail("{subject}\n\tshould not be empty{because}, but was\n{actual}", because)
-        elif Seq.stringOptimizedIsEmpty t.Subject then
-            t.Fail("{subject}\n\tshould not be empty{because}, but was empty.", because)
+        if isNull (box t.Subject) || Seq.stringOptimizedIsEmpty t.Subject then
+            t.With("But was", t.Subject).Fail(because)
 
         And(t)
 
@@ -166,30 +141,30 @@ type SeqAssertions =
         use _ = t.Assert()
 
         if not (isNull t.Subject || Seq.stringOptimizedIsEmpty t.Subject) then
-            t.Fail("{subject}\n\tshould be null or empty{because}, but was\n{actual}", because)
+            t.With("But was", t.Subject).Fail(because)
 
         And(t)
 
 
     /// Asserts that the subject contains the specified item, as determined using the default equality comparison (=).
     [<Extension>]
-    static member Contain(t: Testable<#seq<'a>>, expected: 'a, ?because) : AndDerived<_, 'a> =
+    static member Contain(t: Testable<#seq<'a>>, item: 'a, ?because) : AndDerived<_, 'a> =
         use _ = t.Assert()
 
-        if isNull (box t.Subject) || not (Seq.contains expected t.Subject) then
-            t.Fail("{subject}\n\tshould contain\n{0}\n\t{because}but was\n{actual}", because, format expected)
+        if isNull (box t.Subject) || not (Seq.contains item t.Subject) then
+            t.With("Item", item).With("But was", t.Subject).Fail(because)
 
-        AndDerived(t, expected)
+        AndDerived(t, item)
 
 
     /// Asserts that the subject does not contain the specified item, as determined using the default equality
     /// comparison (=). Passes if the subject is null.
     [<Extension>]
-    static member NotContain(t: Testable<#seq<'a>>, expected: 'a, ?because) : And<_> =
+    static member NotContain(t: Testable<#seq<'a>>, item: 'a, ?because) : And<_> =
         use _ = t.Assert()
 
-        if not (isNull (box t.Subject)) && Seq.contains expected t.Subject then
-            t.Fail("{subject}\n\tshould not contain\n{0}\n\t{because}but was\n{actual}", because, format expected)
+        if not (isNull (box t.Subject)) && Seq.contains item t.Subject then
+            t.With("Item", item).With("But was", t.Subject).Fail(because)
 
         And(t)
 
@@ -201,34 +176,39 @@ type SeqAssertions =
         use _ = t.Assert()
 
         if isNull (box t.Subject) && not (isNull expected) then
-            t.Fail(
-                "{subject}\n\tshould be sequence equal to\n{0}\n\t{because}but was\n{actual}",
-                because,
-                format expected
-            )
+            t.With("Expected", expected).With("But was", t.Subject).Fail(because)
         elif not (isNull (box t.Subject)) then
-            let subjectLength = Seq.length t.Subject
-            let expectedLength = Seq.length expected
+            let subjectLength = Seq.stringOptimizedLength t.Subject
+            let expectedLength = Seq.stringOptimizedLength expected
 
             if subjectLength <> expectedLength then
-                t.Fail(
-                    "{subject}\n\tshould be sequence equal to\n{0}\n\t{because}but expected length\n{1}\n\tis different from actual length\n{2}\n\n{actual}",
-                    because,
-                    format expected,
-                    expectedLength.ToString(),
-                    subjectLength.ToString()
-                )
+                t
+                    .With("Expected length", expectedLength)
+                    .With("Actual length", subjectLength)
+                    .With("Expected", expected)
+                    .With("Actual", t.Subject)
+                    .Fail(because)
             else
-                for i, (actualItem, expectedItem) in Seq.zip t.Subject expected |> Seq.indexed do
-                    if actualItem <> expectedItem then
-                        t.Fail(
-                            "{subject}\n\tshould be sequence equal to\n{0}\n\t{because}but actual item at index {1}\n{2}\n\tis not equal to expected item\n{3}\n\tFull sequence:\n{actual}",
-                            because,
-                            format expected,
-                            i.ToString(),
-                            format actualItem,
-                            format expectedItem
-                        )
+                let differentItems =
+                    Seq.zip t.Subject expected
+                    |> Seq.indexed
+                    |> Seq.choose (fun (i, (actualItem, expectedItem)) ->
+                        if actualItem <> expectedItem then
+                            Some {
+                                Index = i
+                                Expected = expectedItem
+                                Actual = actualItem
+                            }
+                        else
+                            None
+                    )
+
+                if not (Seq.stringOptimizedIsEmpty differentItems) then
+                    t
+                        .With("Failures", differentItems)
+                        .With("Expected", expected)
+                        .With("Actual", t.Subject)
+                        .Fail(because)
 
         And(t)
 
@@ -239,16 +219,12 @@ type SeqAssertions =
         use _ = t.Assert()
 
         if isNull (box t.Subject) then
-            t.Fail("{subject}\n\tshould contain exactly one item{because}, but was\n{actual}", because)
+            t.With("But was", t.Subject).Fail(because)
         else
-            let subjectLength = Seq.length t.Subject
+            let subjectLength = Seq.stringOptimizedLength t.Subject
 
             if subjectLength <> 1 then
-                t.Fail(
-                    "{subject}\n\tshould contain exactly one item{because}, but actual length was\n{0}\n\n{actual}",
-                    because,
-                    subjectLength.ToString()
-                )
+                t.With("But length was", subjectLength).With("Value", t.Subject).Fail(because)
 
         AndDerived(t, Seq.head t.Subject)
 
@@ -264,21 +240,17 @@ type SeqAssertions =
         use _ = t.Assert()
 
         if isNull (box t.Subject) then
-            t.Fail(
-                "{subject}\n\tshould contain exactly one item matching the specified predicate{because}, but was\n{actual}",
-                because
-            )
+            t.With("But was", t.Subject).Fail(because)
         else
             let matchingItems = t.Subject |> Seq.filter predicate
-            let matchingLength = Seq.length matchingItems
+            let matchingLength = Seq.stringOptimizedLength matchingItems
 
             if matchingLength <> 1 then
-                t.Fail(
-                    "{subject}\n\tshould contain exactly one item matching the specified predicate{because}, but found\n{0}\n\titems matching the predicate:\n{1}\n\tFull sequence:\n{actual}",
-                    because,
-                    matchingLength.ToString(),
-                    format (Seq.toList matchingItems)
-                )
+                t
+                    .With("But found", matchingLength)
+                    .With("Matching items", matchingItems)
+                    .With("Value", t.Subject)
+                    .Fail(because)
 
             AndDerived(t, Seq.head matchingItems)
 
@@ -289,10 +261,8 @@ type SeqAssertions =
     static member ContainAtLeastOneItem(t: Testable<#seq<'a>>, ?because) : AndDerived<_, 'a> =
         use _ = t.Assert()
 
-        if isNull (box t.Subject) then
-            t.Fail("{subject}\n\tshould contain at least one item{because}, but was\n{actual}", because)
-        else if Seq.isEmpty t.Subject then
-            t.Fail("{subject}\n\tshould contain at least one item{because}, but was empty.", because)
+        if isNull (box t.Subject) || Seq.stringOptimizedIsEmpty t.Subject then
+            t.With("But was", t.Subject).Fail(because)
 
         AndDerived(t, Seq.head t.Subject)
 
@@ -309,19 +279,16 @@ type SeqAssertions =
         use _ = t.Assert()
 
         if isNull (box t.Subject) then
-            t.Fail(
-                "{subject}\n\tshould contain at least one item matching the specified predicate{because}, but was\n{actual}",
-                because
-            )
+            t.With("But was", t.Subject).Fail(because)
         else
             let matchingItems = t.Subject |> Seq.filter predicate
 
-            if Seq.isEmpty matchingItems then
-                t.Fail(
-                    "{subject}\n\tshould contain at least one item matching the specified predicate{because}, but found none. Full sequence:\n{actual}",
-                    because,
-                    format matchingItems
-                )
+            if Seq.stringOptimizedIsEmpty matchingItems then
+                t
+                    .With("But found", 0)
+                    .With("Matching items", matchingItems)
+                    .With("Value", t.Subject)
+                    .Fail(because)
 
             AndDerived(t, Seq.head matchingItems)
 
@@ -339,19 +306,12 @@ type SeqAssertions =
         use _ = t.Assert()
 
         if isNull (box t.Subject) then
-            t.Fail(
-                "{subject}\n\tshould contain items matching the specified predicate{because}, but was\n{actual}",
-                because
-            )
+            t.With("But was", t.Subject).Fail(because)
         else
             let matchingItems = t.Subject |> Seq.filter predicate
 
-            if Seq.isEmpty matchingItems then
-                t.Fail(
-                    "{subject}\n\tshould contain items matching the specified predicate{because}, but found none. Full sequence:\n{actual}",
-                    because,
-                    format matchingItems
-                )
+            if Seq.stringOptimizedIsEmpty matchingItems then
+                t.With("But found", 0).With("Value", t.Subject).Fail(because)
 
             AndDerived(t, matchingItems)
 
@@ -366,17 +326,13 @@ type SeqAssertions =
             let nonDistinctItemsWithCounts =
                 t.Subject |> Seq.countBy id |> Seq.filter (fun (_, c) -> c > 1)
 
-            if not (Seq.isEmpty nonDistinctItemsWithCounts) then
+            if not (Seq.stringOptimizedIsEmpty nonDistinctItemsWithCounts) then
                 let items =
                     nonDistinctItemsWithCounts
-                    |> Seq.map (fun (x, c) -> { Count = c; Item = x })
+                    |> Seq.map (fun (x, c) -> {| Count = c; Item = TryFormat x |})
                     |> Seq.toList
 
-                t.Fail(
-                    "{subject}\n\tshould be distinct{because}, but found the following duplicate items:\n{0}\n\tFull sequence:\n{actual}",
-                    because,
-                    format items
-                )
+                t.With("Duplicates", items).With("Value", t.Subject).Fail(because)
 
         And(t)
 
@@ -388,7 +344,7 @@ type SeqAssertions =
         use _ = t.Assert()
 
         if not (isNull (box t.Subject)) then
-            let nonDistinctItemsWithCounts =
+            let duplicates =
                 t.Subject
                 |> Seq.groupBy projection
                 |> Seq.choose (fun (p, xs) ->
@@ -398,18 +354,14 @@ type SeqAssertions =
                         Some {
                             Count = xs.Length
                             Projected = p
-                            Items = xs
+                            Items = xs |> List.map (box >> TryFormat)
                         }
                     else
                         None
                 )
                 |> Seq.toList
 
-            if not (Seq.isEmpty nonDistinctItemsWithCounts) then
-                t.Fail(
-                    "{subject}\n\tshould be distinct by the specified projection{because}, but found the following duplicate items:\n{0}\n\tFull sequence:\n{actual}",
-                    because,
-                    format (Seq.toList nonDistinctItemsWithCounts)
-                )
+            if not (Seq.stringOptimizedIsEmpty duplicates) then
+                t.With("Duplicates", duplicates).With("Value", t.Subject).Fail(because)
 
         And(t)

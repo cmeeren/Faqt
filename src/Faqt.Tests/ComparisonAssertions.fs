@@ -46,11 +46,11 @@ module BeCloseTo =
             x.Should().BeCloseTo(1.0, 0.05)
         |> assertExnMsg
             """
-x
-    should be
-1.0 ± 0.05
-    but was
-1.09
+Subject: x
+Should: BeCloseTo
+Target: 1
+With tolerance: 0.05
+But was: 1.09
 """
 
 
@@ -61,11 +61,11 @@ x
             x.Should().BeCloseTo(TimeSpan(0, 5, 0), TimeSpan(0, 0, 1))
         |> assertExnMsg
             """
-x
-    should be
-00:05:00 ± 00:00:01
-    but was
-00:05:02
+Subject: x
+Should: BeCloseTo
+Target: 00:05:00
+With tolerance: 00:00:01
+But was: 00:05:02
 """
 
 
@@ -81,14 +81,15 @@ x
     let ``Fails with expected message with because`` () =
         fun () ->
             let x = 1.09
-            x.Should().BeCloseTo(1.0, 0.05, "some reason")
+            x.Should().BeCloseTo(1.0, 0.05, "Some reason")
         |> assertExnMsg
             """
-x
-    should be
-1.0 ± 0.05
-    because some reason, but was
-1.09
+Subject: x
+Because: Some reason
+Should: BeCloseTo
+Target: 1
+With tolerance: 0.05
+But was: 1.09
 """
 
 
@@ -135,11 +136,11 @@ module NotBeCloseTo =
             x.Should().NotBeCloseTo(1.0, 0.05)
         |> assertExnMsg
             """
-x
-    should not be
-1.0 ± 0.05
-    but was
-1.02
+Subject: x
+Should: NotBeCloseTo
+Target: 1
+With tolerance: 0.05
+But was: 1.02
 """
 
 
@@ -150,11 +151,11 @@ x
             x.Should().NotBeCloseTo(TimeSpan(0, 5, 0), TimeSpan(0, 0, 2))
         |> assertExnMsg
             """
-x
-    should not be
-00:05:00 ± 00:00:02
-    but was
-00:05:01
+Subject: x
+Should: NotBeCloseTo
+Target: 00:05:00
+With tolerance: 00:00:02
+But was: 00:05:01
 """
 
 
@@ -170,14 +171,15 @@ x
     let ``Fails with expected message with because`` () =
         fun () ->
             let x = 1.02
-            x.Should().NotBeCloseTo(1.0, 0.05, "some reason")
+            x.Should().NotBeCloseTo(1.0, 0.05, "Some reason")
         |> assertExnMsg
             """
-x
-    should not be
-1.0 ± 0.05
-    because some reason, but was
-1.02
+Subject: x
+Because: Some reason
+Should: NotBeCloseTo
+Target: 1
+With tolerance: 0.05
+But was: 1.02
 """
 
 
@@ -210,11 +212,10 @@ module BeGreaterThan =
             x.Should().BeGreaterThan(0)
         |> assertExnMsg
             """
-x
-    should be greater than
-0
-    but was
--1
+Subject: x
+Should: BeGreaterThan
+Other: 0
+But was: -1
 """
 
 
@@ -225,11 +226,10 @@ x
             x.Should().BeGreaterThan(TimeSpan(0, 5, 0))
         |> assertExnMsg
             """
-x
-    should be greater than
-00:05:00
-    but was
-00:04:00
+Subject: x
+Should: BeGreaterThan
+Other: 00:05:00
+But was: 00:04:00
 """
 
 
@@ -237,14 +237,14 @@ x
     let ``Fails with expected message with because`` () =
         fun () ->
             let x = -1
-            x.Should().BeGreaterThan(0, "some reason")
+            x.Should().BeGreaterThan(0, "Some reason")
         |> assertExnMsg
             """
-x
-    should be greater than
-0
-    because some reason, but was
--1
+Subject: x
+Because: Some reason
+Should: BeGreaterThan
+Other: 0
+But was: -1
 """
 
 
@@ -276,11 +276,10 @@ module BeGreaterThanOrEqualTo =
             x.Should().BeGreaterThanOrEqualTo(0)
         |> assertExnMsg
             """
-x
-    should be greater than or equal to
-0
-    but was
--1
+Subject: x
+Should: BeGreaterThanOrEqualTo
+Other: 0
+But was: -1
 """
 
 
@@ -291,11 +290,10 @@ x
             x.Should().BeGreaterThanOrEqualTo(TimeSpan(0, 5, 0))
         |> assertExnMsg
             """
-x
-    should be greater than or equal to
-00:05:00
-    but was
-00:04:00
+Subject: x
+Should: BeGreaterThanOrEqualTo
+Other: 00:05:00
+But was: 00:04:00
 """
 
 
@@ -303,14 +301,14 @@ x
     let ``Fails with expected message with because`` () =
         fun () ->
             let x = -1
-            x.Should().BeGreaterThanOrEqualTo(0, "some reason")
+            x.Should().BeGreaterThanOrEqualTo(0, "Some reason")
         |> assertExnMsg
             """
-x
-    should be greater than or equal to
-0
-    because some reason, but was
--1
+Subject: x
+Because: Some reason
+Should: BeGreaterThanOrEqualTo
+Other: 0
+But was: -1
 """
 
 
@@ -343,11 +341,10 @@ module BeLessThan =
             x.Should().BeLessThan(0)
         |> assertExnMsg
             """
-x
-    should be less than
-0
-    but was
-1
+Subject: x
+Should: BeLessThan
+Other: 0
+But was: 1
 """
 
 
@@ -358,11 +355,10 @@ x
             x.Should().BeLessThan(TimeSpan(0, 4, 0))
         |> assertExnMsg
             """
-x
-    should be less than
-00:04:00
-    but was
-00:05:00
+Subject: x
+Should: BeLessThan
+Other: 00:04:00
+But was: 00:05:00
 """
 
 
@@ -370,14 +366,14 @@ x
     let ``Fails with expected message with because`` () =
         fun () ->
             let x = 1
-            x.Should().BeLessThan(0, "some reason")
+            x.Should().BeLessThan(0, "Some reason")
         |> assertExnMsg
             """
-x
-    should be less than
-0
-    because some reason, but was
-1
+Subject: x
+Because: Some reason
+Should: BeLessThan
+Other: 0
+But was: 1
 """
 
 
@@ -409,11 +405,10 @@ module BeLessThanOrEqualTo =
             x.Should().BeLessThanOrEqualTo(0)
         |> assertExnMsg
             """
-x
-    should be less than or equal to
-0
-    but was
-1
+Subject: x
+Should: BeLessThanOrEqualTo
+Other: 0
+But was: 1
 """
 
 
@@ -424,11 +419,10 @@ x
             x.Should().BeLessThanOrEqualTo(TimeSpan(0, 4, 0))
         |> assertExnMsg
             """
-x
-    should be less than or equal to
-00:04:00
-    but was
-00:05:00
+Subject: x
+Should: BeLessThanOrEqualTo
+Other: 00:04:00
+But was: 00:05:00
 """
 
 
@@ -436,14 +430,14 @@ x
     let ``Fails with expected message with because`` () =
         fun () ->
             let x = 1
-            x.Should().BeLessThanOrEqualTo(0, "some reason")
+            x.Should().BeLessThanOrEqualTo(0, "Some reason")
         |> assertExnMsg
             """
-x
-    should be less than or equal to
-0
-    because some reason, but was
-1
+Subject: x
+Because: Some reason
+Should: BeLessThanOrEqualTo
+Other: 0
+But was: 1
 """
 
 
@@ -476,9 +470,9 @@ module BePositive =
             x.Should().BePositive()
         |> assertExnMsg
             """
-x
-    should be positive, but was
--1
+Subject: x
+Should: BePositive
+But was: -1
 """
 
 
@@ -486,12 +480,13 @@ x
     let ``Fails with expected message with because`` () =
         fun () ->
             let x = -1
-            x.Should().BePositive("some reason")
+            x.Should().BePositive("Some reason")
         |> assertExnMsg
             """
-x
-    should be positive because some reason, but was
--1
+Subject: x
+Because: Some reason
+Should: BePositive
+But was: -1
 """
 
 
@@ -524,9 +519,9 @@ module BeNegative =
             x.Should().BeNegative()
         |> assertExnMsg
             """
-x
-    should be negative, but was
-1
+Subject: x
+Should: BeNegative
+But was: 1
 """
 
 
@@ -534,12 +529,13 @@ x
     let ``Fails with expected message with because`` () =
         fun () ->
             let x = 1
-            x.Should().BeNegative("some reason")
+            x.Should().BeNegative("Some reason")
         |> assertExnMsg
             """
-x
-    should be negative because some reason, but was
-1
+Subject: x
+Because: Some reason
+Should: BeNegative
+But was: 1
 """
 
 
@@ -571,9 +567,9 @@ module BeNonNegative =
             x.Should().BeNonNegative()
         |> assertExnMsg
             """
-x
-    should be non-negative, but was
--1
+Subject: x
+Should: BeNonNegative
+But was: -1
 """
 
 
@@ -581,12 +577,13 @@ x
     let ``Fails with expected message with because`` () =
         fun () ->
             let x = -1
-            x.Should().BeNonNegative("some reason")
+            x.Should().BeNonNegative("Some reason")
         |> assertExnMsg
             """
-x
-    should be non-negative because some reason, but was
--1
+Subject: x
+Because: Some reason
+Should: BeNonNegative
+But was: -1
 """
 
 
@@ -618,9 +615,9 @@ module BeNonPositive =
             x.Should().BeNonPositive()
         |> assertExnMsg
             """
-x
-    should be non-positive, but was
-1
+Subject: x
+Should: BeNonPositive
+But was: 1
 """
 
 
@@ -628,12 +625,13 @@ x
     let ``Fails with expected message with because`` () =
         fun () ->
             let x = 1
-            x.Should().BeNonPositive("some reason")
+            x.Should().BeNonPositive("Some reason")
         |> assertExnMsg
             """
-x
-    should be non-positive because some reason, but was
-1
+Subject: x
+Because: Some reason
+Should: BeNonPositive
+But was: 1
 """
 
 
@@ -674,11 +672,11 @@ module BeInRange =
             x.Should().BeInRange(2, 4)
         |> assertExnMsg
             """
-x
-    should be in the range
-[2, 4]
-    but was
-1
+Subject: x
+Should: BeInRange
+Lower: 2
+Upper: 4
+But was: 1
 """
 
 
@@ -686,12 +684,13 @@ x
     let ``Fails with expected message with because`` () =
         fun () ->
             let x = 1
-            x.Should().BeInRange(2, 4, "some reason")
+            x.Should().BeInRange(2, 4, "Some reason")
         |> assertExnMsg
             """
-x
-    should be in the range
-[2, 4]
-    because some reason, but was
-1
+Subject: x
+Because: Some reason
+Should: BeInRange
+Lower: 2
+Upper: 4
+But was: 1
 """

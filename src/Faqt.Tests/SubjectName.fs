@@ -9,13 +9,21 @@ open Xunit
 [<Fact>]
 let ``Literal boolean`` () =
     fun () -> true.Should().Fail()
-    |> assertExnMsg "true"
+    |> assertExnMsg
+        """
+Subject: 'true'
+Should: Fail
+"""
 
 
 [<Fact>]
 let ``Literal string`` () =
     fun () -> "asd".Should().Fail()
-    |> assertExnMsg "\"asd\""
+    |> assertExnMsg
+        """
+Subject: '"asd"'
+Should: Fail
+"""
 
 
 [<Fact>]
@@ -23,7 +31,11 @@ let ``Single variable name`` () =
     fun () ->
         let thisIsAVariableName = 1
         thisIsAVariableName.Should().Fail()
-    |> assertExnMsg "thisIsAVariableName"
+    |> assertExnMsg
+        """
+Subject: thisIsAVariableName
+Should: Fail
+"""
 
 
 [<Fact>]
@@ -31,7 +43,11 @@ let ``Dot chain`` () =
     fun () ->
         let thisIsAVariableName = "1"
         thisIsAVariableName.Length.GetType().Should().Fail()
-    |> assertExnMsg "thisIsAVariableName.Length.GetType()"
+    |> assertExnMsg
+        """
+Subject: thisIsAVariableName.Length.GetType()
+Should: Fail
+"""
 
 
 [<Fact>]
@@ -45,13 +61,20 @@ let ``Dot chain with line breaks`` () =
             .Should()
             .Fail()
     |> assertExnMsg
-        "thisIsAVariableNameThatIsVeryLongAndShouldForceNextMethodCallOnNextLineWithoutUsingComments_______________.Length"
+        """
+Subject: thisIsAVariableNameThatIsVeryLongAndShouldForceNextMethodCallOnNextLineWithoutUsingComments_______________.Length
+Should: Fail
+"""
 
 
 [<Fact>]
 let ``Simple parenthesized expression`` () =
     fun () -> (1 + 2).Should().Fail()
-    |> assertExnMsg "(1 + 2)"
+    |> assertExnMsg
+        """
+Subject: (1 + 2)
+Should: Fail
+"""
 
 
 [<Fact>]
@@ -59,7 +82,11 @@ let ``Assertions with explicit type parameters`` () =
     fun () ->
         let thisIsAVariableName = 1
         thisIsAVariableName.Should().Test<int>(false)
-    |> assertExnMsg "thisIsAVariableName"
+    |> assertExnMsg
+        """
+Subject: thisIsAVariableName
+Should: Test
+"""
 
 
 [<Fact>]
@@ -72,7 +99,11 @@ let ``Comments`` () =
             .Length // Another comment here
             .Should()
             .Fail()
-    |> assertExnMsg "thisIsAVariableName.Length"
+    |> assertExnMsg
+        """
+Subject: thisIsAVariableName.Length
+Should: Fail
+"""
 
 
 [<Fact>]
@@ -80,7 +111,11 @@ let ``And-chained assertions, same name, single line, first fails`` () =
     fun () ->
         let thisIsAVariableName = 1
         thisIsAVariableName.Should().Fail().And.Fail()
-    |> assertExnMsg "thisIsAVariableName"
+    |> assertExnMsg
+        """
+Subject: thisIsAVariableName
+Should: Fail
+"""
 
 
 [<Fact>]
@@ -88,7 +123,11 @@ let ``And-chained assertions, same name, single line, second fails`` () =
     fun () ->
         let thisIsAVariableName = 1
         thisIsAVariableName.Should().Test(true).And.Test(false)
-    |> assertExnMsg "thisIsAVariableName"
+    |> assertExnMsg
+        """
+Subject: thisIsAVariableName
+Should: Test
+"""
 
 
 [<Fact>]
@@ -96,7 +135,11 @@ let ``And-chained assertions, different names, single line, first fails`` () =
     fun () ->
         let thisIsAVariableName = 1
         thisIsAVariableName.Should().FailDerived().And.Fail()
-    |> assertExnMsg "thisIsAVariableName"
+    |> assertExnMsg
+        """
+Subject: thisIsAVariableName
+Should: FailDerived
+"""
 
 
 [<Fact>]
@@ -104,7 +147,11 @@ let ``And-chained assertions, different names, single line, second fails`` () =
     fun () ->
         let thisIsAVariableName = 1
         thisIsAVariableName.Should().Pass().And.Fail()
-    |> assertExnMsg "thisIsAVariableName"
+    |> assertExnMsg
+        """
+Subject: thisIsAVariableName
+Should: Fail
+"""
 
 
 [<Fact>]
@@ -112,7 +159,11 @@ let ``Whose, single line, first fails`` () =
     fun () ->
         let thisIsAVariableName = "asd"
         thisIsAVariableName.Should().FailDerived().Whose.Length.Should(()).Pass()
-    |> assertExnMsg "thisIsAVariableName"
+    |> assertExnMsg
+        """
+Subject: thisIsAVariableName
+Should: FailDerived
+"""
 
 
 [<Fact>]
@@ -120,7 +171,13 @@ let ``Whose, single line, second fails`` () =
     fun () ->
         let thisIsAVariableName = "1"
         thisIsAVariableName.Should().PassDerived().Whose.Length.Should(()).Fail()
-    |> assertExnMsg "thisIsAVariableName...Length"
+    |> assertExnMsg
+        """
+Subject:
+- thisIsAVariableName
+- Length
+Should: Fail
+"""
 
 
 [<Fact>]
@@ -137,7 +194,14 @@ let ``Multiple Whose`` () =
             .GetType()
             .Should(())
             .Fail()
-    |> assertExnMsg "thisIsAVariableName...Length...ToString().GetType()"
+    |> assertExnMsg
+        """
+Subject:
+- thisIsAVariableName
+- Length
+- ToString().GetType()
+Should: Fail
+"""
 
 
 [<Fact>]
@@ -145,7 +209,11 @@ let ``That, single line, first fails`` () =
     fun () ->
         let thisIsAVariableName = "asd"
         thisIsAVariableName.Should().FailDerived().That.Length.Should(()).Pass()
-    |> assertExnMsg "thisIsAVariableName"
+    |> assertExnMsg
+        """
+Subject: thisIsAVariableName
+Should: FailDerived
+"""
 
 
 [<Fact>]
@@ -153,7 +221,13 @@ let ``That, single line, second fails`` () =
     fun () ->
         let thisIsAVariableName = "1"
         thisIsAVariableName.Should().PassDerived().That.Length.Should(()).Fail()
-    |> assertExnMsg "thisIsAVariableName...Length"
+    |> assertExnMsg
+        """
+Subject:
+- thisIsAVariableName
+- Length
+Should: Fail
+"""
 
 
 [<Fact>]
@@ -170,7 +244,14 @@ let ``Multiple That`` () =
             .GetType()
             .Should(())
             .Fail()
-    |> assertExnMsg "thisIsAVariableName...Length...ToString().GetType()"
+    |> assertExnMsg
+        """
+Subject:
+- thisIsAVariableName
+- Length
+- ToString().GetType()
+Should: Fail
+"""
 
 
 [<Fact>]
@@ -178,7 +259,11 @@ let ``WhoseValue, single line, first fails`` () =
     fun () ->
         let thisIsAVariableName = "asd"
         thisIsAVariableName.Should().FailDerived().WhoseValue.Length.Should(()).Pass()
-    |> assertExnMsg "thisIsAVariableName"
+    |> assertExnMsg
+        """
+Subject: thisIsAVariableName
+Should: FailDerived
+"""
 
 
 [<Fact>]
@@ -192,7 +277,13 @@ let ``WhoseValue, single line, second fails`` () =
             .WhoseValue.Length.GetType()
             .Should(())
             .Fail()
-    |> assertExnMsg "thisIsAVariableName...Length.GetType()"
+    |> assertExnMsg
+        """
+Subject:
+- thisIsAVariableName
+- Length.GetType()
+Should: Fail
+"""
 
 
 [<Fact>]
@@ -209,7 +300,14 @@ let ``Multiple WhoseValue`` () =
             .GetType()
             .Should(())
             .Fail()
-    |> assertExnMsg "thisIsAVariableName...Length...ToString().GetType()"
+    |> assertExnMsg
+        """
+Subject:
+- thisIsAVariableName
+- Length
+- ToString().GetType()
+Should: Fail
+"""
 
 
 [<Fact>]
@@ -217,7 +315,11 @@ let ``Whose, same child assertion, first fails`` () =
     fun () ->
         let thisIsAVariableName = ""
         thisIsAVariableName.Should().FailDerived().Whose.Length.Should(()).FailDerived()
-    |> assertExnMsg "thisIsAVariableName"
+    |> assertExnMsg
+        """
+Subject: thisIsAVariableName
+Should: FailDerived
+"""
 
 
 [<Fact>]
@@ -225,7 +327,13 @@ let ``Whose, same child assertion, second fails`` () =
     fun () ->
         let x = ""
         x.Should().TestDerived(true).Whose.Length.Should(()).TestDerived(false)
-    |> assertExnMsg "x...Length"
+    |> assertExnMsg
+        """
+Subject:
+- x
+- Length
+Should: TestDerived
+"""
 
 
 [<Fact>]
@@ -233,7 +341,11 @@ let ``Testable.Subject`` () =
     fun () ->
         let thisIsAVariableName = "1"
         thisIsAVariableName.Should().Pass().And.Subject.Length.Should(()).Fail()
-    |> assertExnMsg "thisIsAVariableName.Length"
+    |> assertExnMsg
+        """
+Subject: thisIsAVariableName.Length
+Should: Fail
+"""
 
 
 [<Fact>]
@@ -241,7 +353,11 @@ let ``Testable.Whose`` () =
     fun () ->
         let thisIsAVariableName = "1"
         thisIsAVariableName.Should().Pass().And.Whose.Length.Should(()).Fail()
-    |> assertExnMsg "thisIsAVariableName.Length"
+    |> assertExnMsg
+        """
+Subject: thisIsAVariableName.Length
+Should: Fail
+"""
 
 
 [<Fact>]
@@ -257,7 +373,13 @@ let ``And.Whose: Picks correct assertion among multiple with matching name`` () 
             .And.Whose.ToString()
             .Should(())
             .TestDerived(true)
-    |> assertExnMsg "thisIsAVariableName...Length"
+    |> assertExnMsg
+        """
+Subject:
+- thisIsAVariableName
+- Length
+Should: TestDerived
+"""
 
 
 [<Fact>]
@@ -267,7 +389,7 @@ let ``And.Whose: Picks correct assertion among multiple with matching name in Sa
 
         thisIsAVariableName
             .Should()
-            .TestSatisfy(fun x ->
+            .Satisfy(fun x ->
                 x
                     .Should(())
                     .TestDerived(true)
@@ -279,18 +401,24 @@ let ``And.Whose: Picks correct assertion among multiple with matching name in Sa
             )
     |> assertExnMsg
         """
-thisIsAVariableName
-x...Length
+Subject: thisIsAVariableName
+Should: Satisfy
+Failure:
+  Subject: [x, Length]
+  Should: TestDerived
 """
 
 
 [<Fact>]
 let ``Single-line Satisfy`` () =
-    fun () -> "asd".Should().TestSatisfy(fun x -> x.Length.Should().Fail())
+    fun () -> "asd".Should().Satisfy(fun x -> x.Length.Should().Fail())
     |> assertExnMsg
         """
-"asd"
-x.Length
+Subject: '"asd"'
+Should: Satisfy
+Failure:
+  Subject: x.Length
+  Should: Fail
 """
 
 
@@ -299,14 +427,17 @@ let ``Multi-line Satisfy`` () =
     fun () ->
         "asd"
             .Should()
-            .TestSatisfy(fun x ->
+            .Satisfy(fun x ->
                 // Comment to force break
                 x.Length.Should().Fail()
             )
     |> assertExnMsg
         """
-"asd"
-x.Length
+Subject: '"asd"'
+Should: Satisfy
+Failure:
+  Subject: x.Length
+  Should: Fail
 """
 
 
@@ -315,18 +446,21 @@ let ``Multiple multi-line Satisfy, last fails`` () =
     fun () ->
         "asd"
             .Should()
-            .TestSatisfy(fun x1 ->
+            .Satisfy(fun x1 ->
                 // Comment to force break
                 x1.Length.Should().Pass()
             )
-            .And.TestSatisfy(fun x2 ->
+            .And.Satisfy(fun x2 ->
                 // Comment to force break
                 x2.Length.Should().Fail()
             )
     |> assertExnMsg
         """
-"asd"
-x2.Length
+Subject: '"asd"'
+Should: Satisfy
+Failure:
+  Subject: x2.Length
+  Should: Fail
 """
 
 
@@ -335,7 +469,7 @@ let ``Multi-line SatisfyAny, same assertion`` () =
     fun () ->
         "asd"
             .Should()
-            .TestSatisfyAny(
+            .SatisfyAny(
                 [
                     // Comment to force break
                     (fun s1 -> s1.Should().Fail())
@@ -345,21 +479,37 @@ let ``Multi-line SatisfyAny, same assertion`` () =
             )
     |> assertExnMsg
         """
-"asd"
-s1
-s2
+Subject: '"asd"'
+Should: SatisfyAny
+Failures:
+- Subject: s1
+  Should: Fail
+- Subject: s2
+  Should: Fail
 """
 
 
 [<Fact>]
 let ``AllSatisfy, multiple failures, single-line`` () =
-    fun () -> [ 1; 2; 3 ].Should().TestAllSatisfy(fun s -> s.Should().Fail())
+    fun () -> [ 1; 2; 3 ].Should().AllSatisfy(fun s -> s.Should().Fail())
     |> assertExnMsg
         """
-[ 1; 2; 3 ]
-s
-s
-s
+Subject: '[ 1; 2; 3 ]'
+Should: AllSatisfy
+Failures:
+- Index: 0
+  Failure:
+    Subject: s
+    Should: Fail
+- Index: 1
+  Failure:
+    Subject: s
+    Should: Fail
+- Index: 2
+  Failure:
+    Subject: s
+    Should: Fail
+Value: [1, 2, 3]
 """
 
 
@@ -369,12 +519,21 @@ let ``AllSatisfy, multiple failures, multi-line`` () =
         [ 1; 2 ]
             .Should()
             // Comment to force break
-            .TestAllSatisfy(fun s -> s.Should().Fail())
+            .AllSatisfy(fun s -> s.Should().Fail())
     |> assertExnMsg
         """
-[ 1; 2 ]
-s
-s
+Subject: '[ 1; 2 ]'
+Should: AllSatisfy
+Failures:
+- Index: 0
+  Failure:
+    Subject: s
+    Should: Fail
+- Index: 1
+  Failure:
+    Subject: s
+    Should: Fail
+Value: [1, 2]
 """
 
 
@@ -383,12 +542,13 @@ let ``AllSatisfy single and then chain with same assertion`` () =
     fun () ->
         [ 1 ]
             .Should()
-            .TestAllSatisfy(fun s -> s.ToString().Should().Test(true))
+            .AllSatisfy(fun s -> s.ToString().Should().Test(true))
             .And.Subject.Length.Should(())
             .Test(false)
     |> assertExnMsg
         """
-[ 1 ].Length
+Subject: '[ 1 ].Length'
+Should: Test
 """
 
 
@@ -397,12 +557,13 @@ let ``AllSatisfy multiple and then chain with same assertion`` () =
     fun () ->
         [ 1; 2; 3 ]
             .Should()
-            .TestAllSatisfy(fun s -> s.ToString().Should().Test(true))
+            .AllSatisfy(fun s -> s.ToString().Should().Test(true))
             .And.Subject.Length.Should(())
             .Test(false)
     |> assertExnMsg
         """
-[ 1; 2; 3 ].Length
+Subject: '[ 1; 2; 3 ].Length'
+Should: Test
 """
 
 
@@ -411,12 +572,13 @@ let ``Assertions chained after higher-order assertions using the same assertion`
     fun () ->
         "asd"
             .Should()
-            .TestSatisfy(fun s1 -> s1.Should().Test(true))
+            .Satisfy(fun s1 -> s1.Should().Test(true))
             .And.Subject.Length.Should(())
             .Test(false)
     |> assertExnMsg
         """
-"asd".Length
+Subject: '"asd".Length'
+Should: Test
 """
 
 
@@ -428,7 +590,11 @@ let ``Multiple consecutive assertions on same thread, different callsites`` () =
 
         let var2 = 1
         var2.Should().Pass().And.Subject.ToString().Length.Should(()).Fail()
-    |> assertExnMsg "var2.ToString().Length"
+    |> assertExnMsg
+        """
+Subject: var2.ToString().Length
+Should: Fail
+"""
 
 
 [<Fact>]
@@ -439,7 +605,11 @@ let ``Multiple consecutive assertions on same thread, same callsite`` () =
         for i in [ 1..99 ] do
             x.Should().Pass().And.Subject.ToString().Length.Should(()).Test(i < 99)
             |> ignore
-    |> assertExnMsg "x.ToString().Length"
+    |> assertExnMsg
+        """
+Subject: x.ToString().Length
+Should: Test
+"""
 
 
 [<Fact>]
@@ -452,25 +622,41 @@ let ``Multiline bracketed expressions`` () =
             )
             .Should()
             .Fail()
-    |> assertExnMsg "\"string\".Split('a')"
+    |> assertExnMsg
+        """
+Subject: "\"string\".Split('a')"
+Should: Fail
+"""
 
 
 [<Fact>]
 let ``Literal URLs are supported`` () =
-    fun () -> "http://test.example.com".Should().Fail()
-    |> assertExnMsg "\"http://test.example.com\""
+    fun () -> "https://test.example.com".Should().Fail()
+    |> assertExnMsg
+        """
+Subject: '"https://test.example.com"'
+Should: Fail
+"""
 
 
 [<Fact>]
 let ``Single-line strings with // are untouched`` () =
     fun () -> "this is// a test".Should().Fail()
-    |> assertExnMsg "\"this is// a test\""
+    |> assertExnMsg
+        """
+Subject: '"this is// a test"'
+Should: Fail
+"""
 
 
 [<Fact>]
 let ``Single-line triple-quoted strings with // are untouched`` () =
     fun () -> """this is// a test""".Should().Fail()
-    |> assertExnMsg "\"\"\"this is// a test\"\"\""
+    |> assertExnMsg
+        @"
+Subject: '""""""this is// a test""""""'
+Should: Fail
+"
 
 
 [<Fact>]
@@ -478,13 +664,21 @@ let ``Quoted identifiers with // are untouched`` () =
     fun () ->
         let ``// some identifier`` = 1
         ``// some identifier``.Should().Fail()
-    |> assertExnMsg "``// some identifier``"
+    |> assertExnMsg
+        """
+Subject: '``// some identifier``'
+Should: Fail
+"""
 
 
 [<Fact>]
 let ``Ignore operator is stripped`` () =
     fun () -> %(1).Should().Fail()
-    |> assertExnMsg "(1)"
+    |> assertExnMsg
+        """
+Subject: (1)
+Should: Fail
+"""
 
 
 [<Fact>]
@@ -494,7 +688,11 @@ let ``Known limitation: Lines of multi-line strings that start with // are remov
     //is a test"
             .Should()
             .Fail()
-    |> assertExnMsg "\"this"
+    |> assertExnMsg
+        """
+Subject: '"this'
+Should: Fail
+"""
 
 
 [<Fact>]
@@ -504,7 +702,11 @@ let ``Known limitation: Literal multiline strings are concatenated to a single l
 is a test"
             .Should()
             .Fail()
-    |> assertExnMsg "\"thisis a test\""
+    |> assertExnMsg
+        """
+Subject: '"thisis a test"'
+Should: Fail
+"""
 
 
 [<Fact>]
@@ -514,7 +716,11 @@ let ``Known limitation: Literal multiline strings are concatenated to a single l
     .is a test"
             .Should()
             .Fail()
-    |> assertExnMsg "\"this.is a test\""
+    |> assertExnMsg
+        """
+Subject: '"this.is a test"'
+Should: Fail
+"""
 
 
 [<Fact>]
@@ -522,19 +728,24 @@ let ``Known limitation: Nested multi-line Satisfy does not work correctly`` () =
     fun () ->
         "asd"
             .Should()
-            .TestSatisfy(fun s1 ->
+            .Satisfy(fun s1 ->
                 // Comment to force break
-                s1.Should().TestSatisfy(fun ss1 -> ss1.Should().Pass())
+                s1.Should().Satisfy(fun ss1 -> ss1.Should().Pass())
             )
-            .And.TestSatisfy(fun s2 ->
+            .And.Satisfy(fun s2 ->
                 // Comment to force break
-                s2.Should().TestSatisfy(fun ss2 -> ss2.Should().Fail())
+                s2.Should().Satisfy(fun ss2 -> ss2.Should().Fail())
             )
     |> assertExnMsg
         """
-"asd".TestSatisfy(fun s2 ->s2
-s2
-ss2
+Subject: '"asd".Satisfy(fun s2 ->s2'
+Should: Satisfy
+Failure:
+  Subject: s2
+  Should: Satisfy
+  Failure:
+    Subject: ss2
+    Should: Fail
 """
 
 
@@ -543,19 +754,24 @@ let ``Known limitation: AllSatisfy with empty sequence does not work correctly``
     fun () ->
         List<int>.Empty
             .Should()
-            .TestAllSatisfy(fun s -> s.ToString().Should().Test(true))
+            .AllSatisfy(fun s -> s.ToString().Should().Test(true))
             .And.Subject.Length.Should(())
             .Test(false)
     |> assertExnMsg
         """
-s.ToString()
+Subject: s.ToString()
+Should: Test
 """
 
 
 [<Fact>]
 let ``Known limitation: Assertion chains must start on a new line or after lambda`` () =
     fun () -> ignore ("asd".Should().Fail())
-    |> assertExnMsg "ignore (\"asd\""
+    |> assertExnMsg
+        """
+Subject: ignore ("asd"
+Should: Fail
+"""
 
 
 [<Fact>]
@@ -563,12 +779,16 @@ let ``Known limitation: Single-line SatisfyAny, same assertion does not work cor
     fun () ->
         "asd"
             .Should()
-            .TestSatisfyAny([ (fun s1 -> s1.Should().Fail()); (fun s2 -> s2.Should().Fail()) ])
+            .SatisfyAny([ (fun s1 -> s1.Should().Fail()); (fun s2 -> s2.Should().Fail()) ])
     |> assertExnMsg
         """
-"asd"
-s1
-s1
+Subject: '"asd"'
+Should: SatisfyAny
+Failures:
+- Subject: s1
+  Should: Fail
+- Subject: s1
+  Should: Fail
 """
 
 
@@ -582,7 +802,8 @@ let ``Known limitation: Non-assertion method with same name as an assertion give
     fun () -> "asd".Fail().Length.Should().Fail()
     |> assertExnMsg
         """
-"asd"
+Subject: '"asd"'
+Should: Fail
 """
 
 
@@ -593,20 +814,68 @@ let ``Known limitation: Nested AllSatisfy does not work correctly`` () =
 
         x
             .Should()
-            .TestAllSatisfy(fun x1 -> x1.Should().TestAllSatisfy(fun x2 -> x2.Should().Fail()))
+            .AllSatisfy(fun x1 -> x1.Should().AllSatisfy(fun x2 -> x2.Should().Fail()))
     |> assertExnMsg
         """
-subject
-
-x2
-x2
-x2
-
-x2
-x2
-x2
-
-x2
-x2
-x2
+Subject: subject
+Should: AllSatisfy
+Failures:
+- Index: 0
+  Failure:
+    Subject: ''
+    Should: AllSatisfy
+    Failures:
+    - Index: 0
+      Failure:
+        Subject: x2
+        Should: Fail
+    - Index: 1
+      Failure:
+        Subject: x2
+        Should: Fail
+    - Index: 2
+      Failure:
+        Subject: x2
+        Should: Fail
+    Value: [11, 12, 13]
+- Index: 1
+  Failure:
+    Subject: ''
+    Should: AllSatisfy
+    Failures:
+    - Index: 0
+      Failure:
+        Subject: x2
+        Should: Fail
+    - Index: 1
+      Failure:
+        Subject: x2
+        Should: Fail
+    - Index: 2
+      Failure:
+        Subject: x2
+        Should: Fail
+    Value: [21, 22, 23]
+- Index: 2
+  Failure:
+    Subject: ''
+    Should: AllSatisfy
+    Failures:
+    - Index: 0
+      Failure:
+        Subject: x2
+        Should: Fail
+    - Index: 1
+      Failure:
+        Subject: x2
+        Should: Fail
+    - Index: 2
+      Failure:
+        Subject: x2
+        Should: Fail
+    Value: [31, 32, 33]
+Value:
+- [11, 12, 13]
+- [21, 22, 23]
+- [31, 32, 33]
 """

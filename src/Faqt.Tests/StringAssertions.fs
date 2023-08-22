@@ -36,11 +36,10 @@ module HaveLength =
             x.Should().HaveLength(1)
         |> assertExnMsg
             """
-x
-    should have length
-1
-    but was
-<null>
+Subject: x
+Should: HaveLength
+Expected: 1
+But was: null
 """
 
 
@@ -51,13 +50,11 @@ x
             x.Should().HaveLength(1)
         |> assertExnMsg
             """
-x
-    should have length
-1
-    but length was
-0
-
-""
+Subject: x
+Should: HaveLength
+Expected: 1
+But was: 0
+Value: ''
 """
 
 
@@ -65,16 +62,15 @@ x
     let ``Fails with expected message if length does not match with because`` () =
         fun () ->
             let x = ""
-            x.Should().HaveLength(1, "some reason")
+            x.Should().HaveLength(1, "Some reason")
         |> assertExnMsg
             """
-x
-    should have length
-1
-    because some reason, but length was
-0
-
-""
+Subject: x
+Because: Some reason
+Should: HaveLength
+Expected: 1
+But was: 0
+Value: ''
 """
 
 
@@ -97,9 +93,9 @@ module BeEmpty =
             x.Should().BeEmpty()
         |> assertExnMsg
             """
-x
-    should be empty, but was
-<null>
+Subject: x
+Should: BeEmpty
+But was: null
 """
 
 
@@ -107,12 +103,13 @@ x
     let ``Fails with expected message if null with because`` () =
         fun () ->
             let x: string = null
-            x.Should().BeEmpty("some reason")
+            x.Should().BeEmpty("Some reason")
         |> assertExnMsg
             """
-x
-    should be empty because some reason, but was
-<null>
+Subject: x
+Because: Some reason
+Should: BeEmpty
+But was: null
 """
 
 
@@ -123,9 +120,9 @@ x
             x.Should().BeEmpty()
         |> assertExnMsg
             """
-x
-    should be empty, but was
-"a"
+Subject: x
+Should: BeEmpty
+But was: a
 """
 
 
@@ -133,12 +130,13 @@ x
     let ``Fails with expected message if not empty with because`` () =
         fun () ->
             let x = "a"
-            x.Should().BeEmpty("some reason")
+            x.Should().BeEmpty("Some reason")
         |> assertExnMsg
             """
-x
-    should be empty because some reason, but was
-"a"
+Subject: x
+Because: Some reason
+Should: BeEmpty
+But was: a
 """
 
 
@@ -161,9 +159,9 @@ module NotBeEmpty =
             x.Should().NotBeEmpty()
         |> assertExnMsg
             """
-x
-    should not be empty, but was
-<null>
+Subject: x
+Should: NotBeEmpty
+But was: null
 """
 
 
@@ -171,12 +169,13 @@ x
     let ``Fails with expected message if null with because`` () =
         fun () ->
             let x: string = null
-            x.Should().NotBeEmpty("some reason")
+            x.Should().NotBeEmpty("Some reason")
         |> assertExnMsg
             """
-x
-    should not be empty because some reason, but was
-<null>
+Subject: x
+Because: Some reason
+Should: NotBeEmpty
+But was: null
 """
 
 
@@ -187,8 +186,9 @@ x
             x.Should().NotBeEmpty()
         |> assertExnMsg
             """
-x
-    should not be empty, but was empty.
+Subject: x
+Should: NotBeEmpty
+But was: ''
 """
 
 
@@ -196,11 +196,13 @@ x
     let ``Fails with expected message if empty with because`` () =
         fun () ->
             let x = ""
-            x.Should().NotBeEmpty("some reason")
+            x.Should().NotBeEmpty("Some reason")
         |> assertExnMsg
             """
-x
-    should not be empty because some reason, but was empty.
+Subject: x
+Because: Some reason
+Should: NotBeEmpty
+But was: ''
 """
 
 
@@ -227,9 +229,9 @@ module BeNullOrEmpty =
             x.Should().BeNullOrEmpty()
         |> assertExnMsg
             """
-x
-    should be null or empty, but was
-"a"
+Subject: x
+Should: BeNullOrEmpty
+But was: a
 """
 
 
@@ -237,12 +239,13 @@ x
     let ``Fails with expected message if not empty with because`` () =
         fun () ->
             let x = "a"
-            x.Should().BeNullOrEmpty("some reason")
+            x.Should().BeNullOrEmpty("Some reason")
         |> assertExnMsg
             """
-x
-    should be null or empty because some reason, but was
-"a"
+Subject: x
+Because: Some reason
+Should: BeNullOrEmpty
+But was: a
 """
 
 
@@ -270,9 +273,10 @@ module ``BeUpperCase with culture`` =
             x.Should().BeUpperCase(CultureInfo.InvariantCulture)
         |> assertExnMsg
             """
-x
-    should be upper-case according to the invariant culture, but was
-"Aa"
+Subject: x
+Should: BeUpperCase
+In culture: invariant
+But was: Aa
 """
 
 
@@ -283,9 +287,10 @@ x
             x.Should().BeUpperCase(CultureInfo(""))
         |> assertExnMsg
             """
-x
-    should be upper-case according to the invariant culture, but was
-"Aa"
+Subject: x
+Should: BeUpperCase
+In culture: invariant
+But was: Aa
 """
 
 
@@ -296,9 +301,10 @@ x
             x.Should().BeUpperCase(CultureInfo.InvariantCulture)
         |> assertExnMsg
             """
-x
-    should be upper-case according to the invariant culture, but was
-<null>
+Subject: x
+Should: BeUpperCase
+In culture: invariant
+But was: null
 """
 
 
@@ -306,12 +312,14 @@ x
     let ``Fails with expected message if null with because`` () =
         fun () ->
             let x: string = null
-            x.Should().BeUpperCase(CultureInfo.InvariantCulture, "some reason")
+            x.Should().BeUpperCase(CultureInfo.InvariantCulture, "Some reason")
         |> assertExnMsg
             """
-x
-    should be upper-case according to the invariant culture because some reason, but was
-<null>
+Subject: x
+Because: Some reason
+Should: BeUpperCase
+In culture: invariant
+But was: null
 """
 
 
@@ -322,9 +330,10 @@ x
             x.Should().BeUpperCase(CultureInfo("nb-NO"))
         |> assertExnMsg
             """
-x
-    should be upper-case according to culture nb-NO, but was
-"Aa"
+Subject: x
+Should: BeUpperCase
+In culture: nb-NO
+But was: Aa
 """
 
 
@@ -332,12 +341,14 @@ x
     let ``Fails with expected message with because`` () =
         fun () ->
             let x = "Aa"
-            x.Should().BeUpperCase(CultureInfo.InvariantCulture, "some reason")
+            x.Should().BeUpperCase(CultureInfo.InvariantCulture, "Some reason")
         |> assertExnMsg
             """
-x
-    should be upper-case according to the invariant culture because some reason, but was
-"Aa"
+Subject: x
+Because: Some reason
+Should: BeUpperCase
+In culture: invariant
+But was: Aa
 """
 
 
@@ -360,9 +371,10 @@ module ``BeUpperCase without culture`` =
             x.Should().BeUpperCase()
         |> assertExnMsg
             """
-x
-    should be upper-case according to the invariant culture, but was
-<null>
+Subject: x
+Should: BeUpperCase
+In culture: invariant
+But was: null
 """
 
 
@@ -370,12 +382,14 @@ x
     let ``Fails with expected message if null with because`` () =
         fun () ->
             let x: string = null
-            x.Should().BeUpperCase("some reason")
+            x.Should().BeUpperCase("Some reason")
         |> assertExnMsg
             """
-x
-    should be upper-case according to the invariant culture because some reason, but was
-<null>
+Subject: x
+Because: Some reason
+Should: BeUpperCase
+In culture: invariant
+But was: null
 """
 
 
@@ -386,9 +400,10 @@ x
             x.Should().BeUpperCase()
         |> assertExnMsg
             """
-x
-    should be upper-case according to the invariant culture, but was
-"Aa"
+Subject: x
+Should: BeUpperCase
+In culture: invariant
+But was: Aa
 """
 
 
@@ -396,12 +411,14 @@ x
     let ``Fails with expected message with because`` () =
         fun () ->
             let x = "Aa"
-            x.Should().BeUpperCase("some reason")
+            x.Should().BeUpperCase("Some reason")
         |> assertExnMsg
             """
-x
-    should be upper-case according to the invariant culture because some reason, but was
-"Aa"
+Subject: x
+Because: Some reason
+Should: BeUpperCase
+In culture: invariant
+But was: Aa
 """
 
 
@@ -429,9 +446,10 @@ module ``BeLowerCase with culture`` =
             x.Should().BeLowerCase(CultureInfo.InvariantCulture)
         |> assertExnMsg
             """
-x
-    should be lower-case according to the invariant culture, but was
-<null>
+Subject: x
+Should: BeLowerCase
+In culture: invariant
+But was: null
 """
 
 
@@ -439,12 +457,14 @@ x
     let ``Fails with expected message if null with because`` () =
         fun () ->
             let x: string = null
-            x.Should().BeLowerCase(CultureInfo.InvariantCulture, "some reason")
+            x.Should().BeLowerCase(CultureInfo.InvariantCulture, "Some reason")
         |> assertExnMsg
             """
-x
-    should be lower-case according to the invariant culture because some reason, but was
-<null>
+Subject: x
+Because: Some reason
+Should: BeLowerCase
+In culture: invariant
+But was: null
 """
 
 
@@ -455,9 +475,10 @@ x
             x.Should().BeLowerCase(CultureInfo.InvariantCulture)
         |> assertExnMsg
             """
-x
-    should be lower-case according to the invariant culture, but was
-"Aa"
+Subject: x
+Should: BeLowerCase
+In culture: invariant
+But was: Aa
 """
 
 
@@ -468,9 +489,10 @@ x
             x.Should().BeLowerCase(CultureInfo(""))
         |> assertExnMsg
             """
-x
-    should be lower-case according to the invariant culture, but was
-"Aa"
+Subject: x
+Should: BeLowerCase
+In culture: invariant
+But was: Aa
 """
 
 
@@ -481,9 +503,10 @@ x
             x.Should().BeLowerCase(CultureInfo("nb-NO"))
         |> assertExnMsg
             """
-x
-    should be lower-case according to culture nb-NO, but was
-"Aa"
+Subject: x
+Should: BeLowerCase
+In culture: nb-NO
+But was: Aa
 """
 
 
@@ -491,12 +514,14 @@ x
     let ``Fails with expected message with because`` () =
         fun () ->
             let x = "Aa"
-            x.Should().BeLowerCase(CultureInfo.InvariantCulture, "some reason")
+            x.Should().BeLowerCase(CultureInfo.InvariantCulture, "Some reason")
         |> assertExnMsg
             """
-x
-    should be lower-case according to the invariant culture because some reason, but was
-"Aa"
+Subject: x
+Because: Some reason
+Should: BeLowerCase
+In culture: invariant
+But was: Aa
 """
 
 
@@ -519,9 +544,10 @@ module ``BeLowerCase without culture`` =
             x.Should().BeLowerCase()
         |> assertExnMsg
             """
-x
-    should be lower-case according to the invariant culture, but was
-<null>
+Subject: x
+Should: BeLowerCase
+In culture: invariant
+But was: null
 """
 
 
@@ -529,12 +555,14 @@ x
     let ``Fails with expected message if null with because`` () =
         fun () ->
             let x: string = null
-            x.Should().BeLowerCase("some reason")
+            x.Should().BeLowerCase("Some reason")
         |> assertExnMsg
             """
-x
-    should be lower-case according to the invariant culture because some reason, but was
-<null>
+Subject: x
+Because: Some reason
+Should: BeLowerCase
+In culture: invariant
+But was: null
 """
 
 
@@ -545,9 +573,10 @@ x
             x.Should().BeLowerCase()
         |> assertExnMsg
             """
-x
-    should be lower-case according to the invariant culture, but was
-"Aa"
+Subject: x
+Should: BeLowerCase
+In culture: invariant
+But was: Aa
 """
 
 
@@ -555,12 +584,14 @@ x
     let ``Fails with expected message with because`` () =
         fun () ->
             let x = "Aa"
-            x.Should().BeLowerCase("some reason")
+            x.Should().BeLowerCase("Some reason")
         |> assertExnMsg
             """
-x
-    should be lower-case according to the invariant culture because some reason, but was
-"Aa"
+Subject: x
+Because: Some reason
+Should: BeLowerCase
+In culture: invariant
+But was: Aa
 """
 
 
@@ -598,11 +629,11 @@ module ``Contain with StringComparison`` =
             x.Should().Contain("f", StringComparison.Ordinal)
         |> assertExnMsg
             """
-x
-    should contain
-"f"
-    using StringComparison.Ordinal, but was
-<null>
+Subject: x
+Should: Contain
+Substring: f
+StringComparison: Ordinal
+But was: null
 """
 
 
@@ -610,14 +641,15 @@ x
     let ``Fails with expected message if null with because`` () =
         fun () ->
             let x: string = null
-            x.Should().Contain("f", StringComparison.Ordinal, "some reason")
+            x.Should().Contain("f", StringComparison.Ordinal, "Some reason")
         |> assertExnMsg
             """
-x
-    should contain
-"f"
-    using StringComparison.Ordinal because some reason, but was
-<null>
+Subject: x
+Because: Some reason
+Should: Contain
+Substring: f
+StringComparison: Ordinal
+But was: null
 """
 
 
@@ -628,11 +660,11 @@ x
             x.Should().Contain("S", StringComparison.Ordinal)
         |> assertExnMsg
             """
-x
-    should contain
-"S"
-    using StringComparison.Ordinal, but was
-"asd"
+Subject: x
+Should: Contain
+Substring: S
+StringComparison: Ordinal
+But was: asd
 """
 
 
@@ -647,11 +679,12 @@ x
             x.Should().Contain("f", StringComparison.CurrentCulture)
         |> assertExnMsg
             """
-x
-    should contain
-"f"
-    using StringComparison.CurrentCulture (culture nb-NO), but was
-"asd"
+Subject: x
+Should: Contain
+Substring: f
+StringComparison: CurrentCulture
+CurrentCulture: nb-NO
+But was: asd
 """
 
 
@@ -666,11 +699,12 @@ x
             x.Should().Contain("f", StringComparison.CurrentCulture)
         |> assertExnMsg
             """
-x
-    should contain
-"f"
-    using StringComparison.CurrentCulture (invariant culture), but was
-"asd"
+Subject: x
+Should: Contain
+Substring: f
+StringComparison: CurrentCulture
+CurrentCulture: invariant
+But was: asd
 """
 
 
@@ -678,14 +712,15 @@ x
     let ``Fails with expected message with because`` () =
         fun () ->
             let x = "asd"
-            x.Should().Contain("f", StringComparison.Ordinal, "some reason")
+            x.Should().Contain("f", StringComparison.Ordinal, "Some reason")
         |> assertExnMsg
             """
-x
-    should contain
-"f"
-    using StringComparison.Ordinal because some reason, but was
-"asd"
+Subject: x
+Because: Some reason
+Should: Contain
+Substring: f
+StringComparison: Ordinal
+But was: asd
 """
 
 
@@ -713,11 +748,11 @@ module ``Contain without StringComparison`` =
             x.Should().Contain("f")
         |> assertExnMsg
             """
-x
-    should contain
-"f"
-    using StringComparison.Ordinal, but was
-<null>
+Subject: x
+Should: Contain
+Substring: f
+StringComparison: Ordinal
+But was: null
 """
 
 
@@ -725,14 +760,15 @@ x
     let ``Fails with expected message if null with because`` () =
         fun () ->
             let x: string = null
-            x.Should().Contain("f", "some reason")
+            x.Should().Contain("f", "Some reason")
         |> assertExnMsg
             """
-x
-    should contain
-"f"
-    using StringComparison.Ordinal because some reason, but was
-<null>
+Subject: x
+Because: Some reason
+Should: Contain
+Substring: f
+StringComparison: Ordinal
+But was: null
 """
 
 
@@ -743,11 +779,11 @@ x
             x.Should().Contain("S")
         |> assertExnMsg
             """
-x
-    should contain
-"S"
-    using StringComparison.Ordinal, but was
-"asd"
+Subject: x
+Should: Contain
+Substring: S
+StringComparison: Ordinal
+But was: asd
 """
 
 
@@ -755,14 +791,15 @@ x
     let ``Fails with expected message with because`` () =
         fun () ->
             let x = "asd"
-            x.Should().Contain("f", "some reason")
+            x.Should().Contain("f", "Some reason")
         |> assertExnMsg
             """
-x
-    should contain
-"f"
-    using StringComparison.Ordinal because some reason, but was
-"asd"
+Subject: x
+Because: Some reason
+Should: Contain
+Substring: f
+StringComparison: Ordinal
+But was: asd
 """
 
 
@@ -805,11 +842,11 @@ module ``NotContain with StringComparison`` =
             x.Should().NotContain("s", StringComparison.Ordinal)
         |> assertExnMsg
             """
-x
-    should not contain
-"s"
-    using StringComparison.Ordinal, but was
-"asd"
+Subject: x
+Should: NotContain
+Substring: s
+StringComparison: Ordinal
+But was: asd
 """
 
 
@@ -824,11 +861,12 @@ x
             x.Should().NotContain("s", StringComparison.CurrentCulture)
         |> assertExnMsg
             """
-x
-    should not contain
-"s"
-    using StringComparison.CurrentCulture (culture nb-NO), but was
-"asd"
+Subject: x
+Should: NotContain
+Substring: s
+StringComparison: CurrentCulture
+CurrentCulture: nb-NO
+But was: asd
 """
 
 
@@ -843,11 +881,12 @@ x
             x.Should().NotContain("s", StringComparison.CurrentCulture)
         |> assertExnMsg
             """
-x
-    should not contain
-"s"
-    using StringComparison.CurrentCulture (invariant culture), but was
-"asd"
+Subject: x
+Should: NotContain
+Substring: s
+StringComparison: CurrentCulture
+CurrentCulture: invariant
+But was: asd
 """
 
 
@@ -855,14 +894,15 @@ x
     let ``Fails with expected message with because`` () =
         fun () ->
             let x = "asd"
-            x.Should().NotContain("s", StringComparison.Ordinal, "some reason")
+            x.Should().NotContain("s", StringComparison.Ordinal, "Some reason")
         |> assertExnMsg
             """
-x
-    should not contain
-"s"
-    using StringComparison.Ordinal because some reason, but was
-"asd"
+Subject: x
+Because: Some reason
+Should: NotContain
+Substring: s
+StringComparison: Ordinal
+But was: asd
 """
 
 
@@ -894,11 +934,11 @@ module ``NotContain without StringComparison`` =
             x.Should().NotContain("s")
         |> assertExnMsg
             """
-x
-    should not contain
-"s"
-    using StringComparison.Ordinal, but was
-"asd"
+Subject: x
+Should: NotContain
+Substring: s
+StringComparison: Ordinal
+But was: asd
 """
 
 
@@ -906,14 +946,15 @@ x
     let ``Fails with expected message with because`` () =
         fun () ->
             let x = "asd"
-            x.Should().NotContain("s", "some reason")
+            x.Should().NotContain("s", "Some reason")
         |> assertExnMsg
             """
-x
-    should not contain
-"s"
-    using StringComparison.Ordinal because some reason, but was
-"asd"
+Subject: x
+Because: Some reason
+Should: NotContain
+Substring: s
+StringComparison: Ordinal
+But was: asd
 """
 
 
@@ -951,11 +992,11 @@ module ``StartWith with StringComparison`` =
             x.Should().StartWith("A", StringComparison.Ordinal)
         |> assertExnMsg
             """
-x
-    should start with
-"A"
-    using StringComparison.Ordinal, but was
-<null>
+Subject: x
+Should: StartWith
+Substring: A
+StringComparison: Ordinal
+But was: null
 """
 
 
@@ -963,14 +1004,15 @@ x
     let ``Fails with expected message if null with because`` () =
         fun () ->
             let x: string = null
-            x.Should().StartWith("A", StringComparison.Ordinal, "some reason")
+            x.Should().StartWith("A", StringComparison.Ordinal, "Some reason")
         |> assertExnMsg
             """
-x
-    should start with
-"A"
-    using StringComparison.Ordinal because some reason, but was
-<null>
+Subject: x
+Because: Some reason
+Should: StartWith
+Substring: A
+StringComparison: Ordinal
+But was: null
 """
 
 
@@ -981,11 +1023,11 @@ x
             x.Should().StartWith("A", StringComparison.Ordinal)
         |> assertExnMsg
             """
-x
-    should start with
-"A"
-    using StringComparison.Ordinal, but was
-"asd"
+Subject: x
+Should: StartWith
+Substring: A
+StringComparison: Ordinal
+But was: asd
 """
 
 
@@ -1000,11 +1042,12 @@ x
             x.Should().StartWith("A", StringComparison.CurrentCulture)
         |> assertExnMsg
             """
-x
-    should start with
-"A"
-    using StringComparison.CurrentCulture (culture nb-NO), but was
-"asd"
+Subject: x
+Should: StartWith
+Substring: A
+StringComparison: CurrentCulture
+CurrentCulture: nb-NO
+But was: asd
 """
 
 
@@ -1019,11 +1062,12 @@ x
             x.Should().StartWith("A", StringComparison.CurrentCulture)
         |> assertExnMsg
             """
-x
-    should start with
-"A"
-    using StringComparison.CurrentCulture (invariant culture), but was
-"asd"
+Subject: x
+Should: StartWith
+Substring: A
+StringComparison: CurrentCulture
+CurrentCulture: invariant
+But was: asd
 """
 
 
@@ -1031,14 +1075,15 @@ x
     let ``Fails with expected message with because`` () =
         fun () ->
             let x = "asd"
-            x.Should().StartWith("A", StringComparison.Ordinal, "some reason")
+            x.Should().StartWith("A", StringComparison.Ordinal, "Some reason")
         |> assertExnMsg
             """
-x
-    should start with
-"A"
-    using StringComparison.Ordinal because some reason, but was
-"asd"
+Subject: x
+Because: Some reason
+Should: StartWith
+Substring: A
+StringComparison: Ordinal
+But was: asd
 """
 
 
@@ -1066,11 +1111,11 @@ module ``StartWith without StringComparison`` =
             x.Should().StartWith("A")
         |> assertExnMsg
             """
-x
-    should start with
-"A"
-    using StringComparison.Ordinal, but was
-<null>
+Subject: x
+Should: StartWith
+Substring: A
+StringComparison: Ordinal
+But was: null
 """
 
 
@@ -1078,14 +1123,15 @@ x
     let ``Fails with expected message if null with because`` () =
         fun () ->
             let x: string = null
-            x.Should().StartWith("A", "some reason")
+            x.Should().StartWith("A", "Some reason")
         |> assertExnMsg
             """
-x
-    should start with
-"A"
-    using StringComparison.Ordinal because some reason, but was
-<null>
+Subject: x
+Because: Some reason
+Should: StartWith
+Substring: A
+StringComparison: Ordinal
+But was: null
 """
 
 
@@ -1096,11 +1142,11 @@ x
             x.Should().StartWith("A")
         |> assertExnMsg
             """
-x
-    should start with
-"A"
-    using StringComparison.Ordinal, but was
-"asd"
+Subject: x
+Should: StartWith
+Substring: A
+StringComparison: Ordinal
+But was: asd
 """
 
 
@@ -1108,14 +1154,15 @@ x
     let ``Fails with expected message with because`` () =
         fun () ->
             let x = "asd"
-            x.Should().StartWith("A", "some reason")
+            x.Should().StartWith("A", "Some reason")
         |> assertExnMsg
             """
-x
-    should start with
-"A"
-    using StringComparison.Ordinal because some reason, but was
-"asd"
+Subject: x
+Because: Some reason
+Should: StartWith
+Substring: A
+StringComparison: Ordinal
+But was: asd
 """
 
 
@@ -1160,11 +1207,11 @@ module ``NotStartWith with StringComparison`` =
             x.Should().NotStartWith("a", StringComparison.Ordinal)
         |> assertExnMsg
             """
-x
-    should not start with
-"a"
-    using StringComparison.Ordinal, but was
-"asd"
+Subject: x
+Should: NotStartWith
+Substring: a
+StringComparison: Ordinal
+But was: asd
 """
 
 
@@ -1179,11 +1226,12 @@ x
             x.Should().NotStartWith("a", StringComparison.CurrentCulture)
         |> assertExnMsg
             """
-x
-    should not start with
-"a"
-    using StringComparison.CurrentCulture (culture nb-NO), but was
-"asd"
+Subject: x
+Should: NotStartWith
+Substring: a
+StringComparison: CurrentCulture
+CurrentCulture: nb-NO
+But was: asd
 """
 
 
@@ -1198,11 +1246,12 @@ x
             x.Should().NotStartWith("a", StringComparison.CurrentCulture)
         |> assertExnMsg
             """
-x
-    should not start with
-"a"
-    using StringComparison.CurrentCulture (invariant culture), but was
-"asd"
+Subject: x
+Should: NotStartWith
+Substring: a
+StringComparison: CurrentCulture
+CurrentCulture: invariant
+But was: asd
 """
 
 
@@ -1210,14 +1259,15 @@ x
     let ``Fails with expected message with because`` () =
         fun () ->
             let x = "asd"
-            x.Should().NotStartWith("a", StringComparison.Ordinal, "some reason")
+            x.Should().NotStartWith("a", StringComparison.Ordinal, "Some reason")
         |> assertExnMsg
             """
-x
-    should not start with
-"a"
-    using StringComparison.Ordinal because some reason, but was
-"asd"
+Subject: x
+Because: Some reason
+Should: NotStartWith
+Substring: a
+StringComparison: Ordinal
+But was: asd
 """
 
 
@@ -1250,11 +1300,11 @@ module ``NotStartWith without StringComparison`` =
             x.Should().NotStartWith("a")
         |> assertExnMsg
             """
-x
-    should not start with
-"a"
-    using StringComparison.Ordinal, but was
-"asd"
+Subject: x
+Should: NotStartWith
+Substring: a
+StringComparison: Ordinal
+But was: asd
 """
 
 
@@ -1262,14 +1312,15 @@ x
     let ``Fails with expected message with because`` () =
         fun () ->
             let x = "asd"
-            x.Should().NotStartWith("a", "some reason")
+            x.Should().NotStartWith("a", "Some reason")
         |> assertExnMsg
             """
-x
-    should not start with
-"a"
-    using StringComparison.Ordinal because some reason, but was
-"asd"
+Subject: x
+Because: Some reason
+Should: NotStartWith
+Substring: a
+StringComparison: Ordinal
+But was: asd
 """
 
 
@@ -1307,11 +1358,11 @@ module ``EndWith with StringComparison`` =
             x.Should().EndWith("D", StringComparison.Ordinal)
         |> assertExnMsg
             """
-x
-    should end with
-"D"
-    using StringComparison.Ordinal, but was
-<null>
+Subject: x
+Should: EndWith
+Substring: D
+StringComparison: Ordinal
+But was: null
 """
 
 
@@ -1319,14 +1370,15 @@ x
     let ``Fails with expected message if null with because`` () =
         fun () ->
             let x: string = null
-            x.Should().EndWith("D", StringComparison.Ordinal, "some reason")
+            x.Should().EndWith("D", StringComparison.Ordinal, "Some reason")
         |> assertExnMsg
             """
-x
-    should end with
-"D"
-    using StringComparison.Ordinal because some reason, but was
-<null>
+Subject: x
+Because: Some reason
+Should: EndWith
+Substring: D
+StringComparison: Ordinal
+But was: null
 """
 
 
@@ -1337,11 +1389,11 @@ x
             x.Should().EndWith("D", StringComparison.Ordinal)
         |> assertExnMsg
             """
-x
-    should end with
-"D"
-    using StringComparison.Ordinal, but was
-"asd"
+Subject: x
+Should: EndWith
+Substring: D
+StringComparison: Ordinal
+But was: asd
 """
 
 
@@ -1356,11 +1408,12 @@ x
             x.Should().EndWith("D", StringComparison.CurrentCulture)
         |> assertExnMsg
             """
-x
-    should end with
-"D"
-    using StringComparison.CurrentCulture (culture nb-NO), but was
-"asd"
+Subject: x
+Should: EndWith
+Substring: D
+StringComparison: CurrentCulture
+CurrentCulture: nb-NO
+But was: asd
 """
 
 
@@ -1375,11 +1428,12 @@ x
             x.Should().EndWith("D", StringComparison.CurrentCulture)
         |> assertExnMsg
             """
-x
-    should end with
-"D"
-    using StringComparison.CurrentCulture (invariant culture), but was
-"asd"
+Subject: x
+Should: EndWith
+Substring: D
+StringComparison: CurrentCulture
+CurrentCulture: invariant
+But was: asd
 """
 
 
@@ -1387,14 +1441,15 @@ x
     let ``Fails with expected message with because`` () =
         fun () ->
             let x = "asd"
-            x.Should().EndWith("D", StringComparison.Ordinal, "some reason")
+            x.Should().EndWith("D", StringComparison.Ordinal, "Some reason")
         |> assertExnMsg
             """
-x
-    should end with
-"D"
-    using StringComparison.Ordinal because some reason, but was
-"asd"
+Subject: x
+Because: Some reason
+Should: EndWith
+Substring: D
+StringComparison: Ordinal
+But was: asd
 """
 
 
@@ -1422,11 +1477,11 @@ module ``EndWith without StringComparison`` =
             x.Should().EndWith("D")
         |> assertExnMsg
             """
-x
-    should end with
-"D"
-    using StringComparison.Ordinal, but was
-<null>
+Subject: x
+Should: EndWith
+Substring: D
+StringComparison: Ordinal
+But was: null
 """
 
 
@@ -1434,14 +1489,15 @@ x
     let ``Fails with expected message if null with because`` () =
         fun () ->
             let x: string = null
-            x.Should().EndWith("D", "some reason")
+            x.Should().EndWith("D", "Some reason")
         |> assertExnMsg
             """
-x
-    should end with
-"D"
-    using StringComparison.Ordinal because some reason, but was
-<null>
+Subject: x
+Because: Some reason
+Should: EndWith
+Substring: D
+StringComparison: Ordinal
+But was: null
 """
 
 
@@ -1452,11 +1508,11 @@ x
             x.Should().EndWith("D")
         |> assertExnMsg
             """
-x
-    should end with
-"D"
-    using StringComparison.Ordinal, but was
-"asd"
+Subject: x
+Should: EndWith
+Substring: D
+StringComparison: Ordinal
+But was: asd
 """
 
 
@@ -1464,14 +1520,15 @@ x
     let ``Fails with expected message with because`` () =
         fun () ->
             let x = "asd"
-            x.Should().EndWith("D", "some reason")
+            x.Should().EndWith("D", "Some reason")
         |> assertExnMsg
             """
-x
-    should end with
-"D"
-    using StringComparison.Ordinal because some reason, but was
-"asd"
+Subject: x
+Because: Some reason
+Should: EndWith
+Substring: D
+StringComparison: Ordinal
+But was: asd
 """
 
 
@@ -1514,11 +1571,11 @@ module ``NotEndWith with StringComparison`` =
             x.Should().NotEndWith("d", StringComparison.Ordinal)
         |> assertExnMsg
             """
-x
-    should not end with
-"d"
-    using StringComparison.Ordinal, but was
-"asd"
+Subject: x
+Should: NotEndWith
+Substring: d
+StringComparison: Ordinal
+But was: asd
 """
 
 
@@ -1533,11 +1590,12 @@ x
             x.Should().NotEndWith("d", StringComparison.CurrentCulture)
         |> assertExnMsg
             """
-x
-    should not end with
-"d"
-    using StringComparison.CurrentCulture (culture nb-NO), but was
-"asd"
+Subject: x
+Should: NotEndWith
+Substring: d
+StringComparison: CurrentCulture
+CurrentCulture: nb-NO
+But was: asd
 """
 
 
@@ -1552,11 +1610,12 @@ x
             x.Should().NotEndWith("d", StringComparison.CurrentCulture)
         |> assertExnMsg
             """
-x
-    should not end with
-"d"
-    using StringComparison.CurrentCulture (invariant culture), but was
-"asd"
+Subject: x
+Should: NotEndWith
+Substring: d
+StringComparison: CurrentCulture
+CurrentCulture: invariant
+But was: asd
 """
 
 
@@ -1564,14 +1623,15 @@ x
     let ``Fails with expected message with because`` () =
         fun () ->
             let x = "asd"
-            x.Should().NotEndWith("d", StringComparison.Ordinal, "some reason")
+            x.Should().NotEndWith("d", StringComparison.Ordinal, "Some reason")
         |> assertExnMsg
             """
-x
-    should not end with
-"d"
-    using StringComparison.Ordinal because some reason, but was
-"asd"
+Subject: x
+Because: Some reason
+Should: NotEndWith
+Substring: d
+StringComparison: Ordinal
+But was: asd
 """
 
 
@@ -1603,11 +1663,11 @@ module ``NotEndWith without StringComparison`` =
             x.Should().NotEndWith("d")
         |> assertExnMsg
             """
-x
-    should not end with
-"d"
-    using StringComparison.Ordinal, but was
-"asd"
+Subject: x
+Should: NotEndWith
+Substring: d
+StringComparison: Ordinal
+But was: asd
 """
 
 
@@ -1615,14 +1675,15 @@ x
     let ``Fails with expected message with because`` () =
         fun () ->
             let x = "asd"
-            x.Should().NotEndWith("d", "some reason")
+            x.Should().NotEndWith("d", "Some reason")
         |> assertExnMsg
             """
-x
-    should not end with
-"d"
-    using StringComparison.Ordinal because some reason, but was
-"asd"
+Subject: x
+Because: Some reason
+Should: NotEndWith
+Substring: d
+StringComparison: Ordinal
+But was: asd
 """
 
 
@@ -1646,11 +1707,10 @@ module ``MatchRegex with Regex`` =
             x.Should().MatchRegex(Regex("b.*"))
         |> assertExnMsg
             """
-x
-    should match the regex
-b.*
-    but was
-<null>
+Subject: x
+Should: MatchRegex
+Pattern: b.*
+But was: null
 """
 
 
@@ -1658,14 +1718,14 @@ b.*
     let ``Fails with expected message if null with because`` () =
         fun () ->
             let x: string = null
-            x.Should().MatchRegex(Regex("b.*"), "some reason")
+            x.Should().MatchRegex(Regex("b.*"), "Some reason")
         |> assertExnMsg
             """
-x
-    should match the regex
-b.*
-    because some reason, but was
-<null>
+Subject: x
+Because: Some reason
+Should: MatchRegex
+Pattern: b.*
+But was: null
 """
 
 
@@ -1676,11 +1736,10 @@ b.*
             x.Should().MatchRegex(Regex("b.*"))
         |> assertExnMsg
             """
-x
-    should match the regex
-b.*
-    but was
-"asd"
+Subject: x
+Should: MatchRegex
+Pattern: b.*
+But was: asd
 """
 
 
@@ -1696,11 +1755,11 @@ b.*
                 .MatchRegex(Regex("b.*", RegexOptions.IgnoreCase ||| RegexOptions.Multiline))
         |> assertExnMsg
             """
-x
-    should match the regex
-b.*
-    using RegexOptions.IgnoreCase, Multiline, but was
-"asd"
+Subject: x
+Should: MatchRegex
+Pattern: b.*
+RegexOptions: IgnoreCase, Multiline
+But was: asd
 """
 
 
@@ -1708,14 +1767,14 @@ b.*
     let ``Fails with expected message with because`` () =
         fun () ->
             let x = "asd"
-            x.Should().MatchRegex(Regex("b.*"), "some reason")
+            x.Should().MatchRegex(Regex("b.*"), "Some reason")
         |> assertExnMsg
             """
-x
-    should match the regex
-b.*
-    because some reason, but was
-"asd"
+Subject: x
+Because: Some reason
+Should: MatchRegex
+Pattern: b.*
+But was: asd
 """
 
 
@@ -1743,11 +1802,10 @@ module ``MatchRegex with string and options`` =
             x.Should().MatchRegex("b.*", RegexOptions.None)
         |> assertExnMsg
             """
-x
-    should match the regex
-b.*
-    but was
-<null>
+Subject: x
+Should: MatchRegex
+Pattern: b.*
+But was: null
 """
 
 
@@ -1755,14 +1813,14 @@ b.*
     let ``Fails with expected message if null with because`` () =
         fun () ->
             let x: string = null
-            x.Should().MatchRegex("b.*", RegexOptions.None, "some reason")
+            x.Should().MatchRegex("b.*", RegexOptions.None, "Some reason")
         |> assertExnMsg
             """
-x
-    should match the regex
-b.*
-    because some reason, but was
-<null>
+Subject: x
+Because: Some reason
+Should: MatchRegex
+Pattern: b.*
+But was: null
 """
 
 
@@ -1773,11 +1831,10 @@ b.*
             x.Should().MatchRegex("b.*", RegexOptions.None)
         |> assertExnMsg
             """
-x
-    should match the regex
-b.*
-    but was
-"asd"
+Subject: x
+Should: MatchRegex
+Pattern: b.*
+But was: asd
 """
 
 
@@ -1791,11 +1848,11 @@ b.*
             x.Should().MatchRegex("b.*", RegexOptions.IgnoreCase ||| RegexOptions.Multiline)
         |> assertExnMsg
             """
-x
-    should match the regex
-b.*
-    using RegexOptions.IgnoreCase, Multiline, but was
-"asd"
+Subject: x
+Should: MatchRegex
+Pattern: b.*
+RegexOptions: IgnoreCase, Multiline
+But was: asd
 """
 
 
@@ -1803,14 +1860,14 @@ b.*
     let ``Fails with expected message with because`` () =
         fun () ->
             let x = "asd"
-            x.Should().MatchRegex("b.*", RegexOptions.None, "some reason")
+            x.Should().MatchRegex("b.*", RegexOptions.None, "Some reason")
         |> assertExnMsg
             """
-x
-    should match the regex
-b.*
-    because some reason, but was
-"asd"
+Subject: x
+Because: Some reason
+Should: MatchRegex
+Pattern: b.*
+But was: asd
 """
 
 
@@ -1833,11 +1890,10 @@ module ``MatchRegex with string`` =
             x.Should().MatchRegex("b.*")
         |> assertExnMsg
             """
-x
-    should match the regex
-b.*
-    but was
-<null>
+Subject: x
+Should: MatchRegex
+Pattern: b.*
+But was: null
 """
 
 
@@ -1845,14 +1901,14 @@ b.*
     let ``Fails with expected message if null with because`` () =
         fun () ->
             let x: string = null
-            x.Should().MatchRegex("b.*", "some reason")
+            x.Should().MatchRegex("b.*", "Some reason")
         |> assertExnMsg
             """
-x
-    should match the regex
-b.*
-    because some reason, but was
-<null>
+Subject: x
+Because: Some reason
+Should: MatchRegex
+Pattern: b.*
+But was: null
 """
 
 
@@ -1863,11 +1919,10 @@ b.*
             x.Should().MatchRegex("b.*")
         |> assertExnMsg
             """
-x
-    should match the regex
-b.*
-    but was
-"asd"
+Subject: x
+Should: MatchRegex
+Pattern: b.*
+But was: asd
 """
 
 
@@ -1875,14 +1930,14 @@ b.*
     let ``Fails with expected message with because`` () =
         fun () ->
             let x = "asd"
-            x.Should().MatchRegex("b.*", "some reason")
+            x.Should().MatchRegex("b.*", "Some reason")
         |> assertExnMsg
             """
-x
-    should match the regex
-b.*
-    because some reason, but was
-"asd"
+Subject: x
+Because: Some reason
+Should: MatchRegex
+Pattern: b.*
+But was: asd
 """
 
 
@@ -1911,11 +1966,10 @@ module ``NotMatchRegex with Regex`` =
             x.Should().NotMatchRegex(Regex(".*"))
         |> assertExnMsg
             """
-x
-    should not match the regex
-.*
-    but was
-"asd"
+Subject: x
+Should: NotMatchRegex
+Pattern: .*
+But was: asd
 """
 
 
@@ -1931,11 +1985,11 @@ x
                 .NotMatchRegex(Regex(".*", RegexOptions.IgnoreCase ||| RegexOptions.Multiline))
         |> assertExnMsg
             """
-x
-    should not match the regex
-.*
-    using RegexOptions.IgnoreCase, Multiline, but was
-"asd"
+Subject: x
+Should: NotMatchRegex
+Pattern: .*
+RegexOptions: IgnoreCase, Multiline
+But was: asd
 """
 
 
@@ -1943,14 +1997,14 @@ x
     let ``Fails with expected message with because`` () =
         fun () ->
             let x = "asd"
-            x.Should().NotMatchRegex(Regex(".*"), "some reason")
+            x.Should().NotMatchRegex(Regex(".*"), "Some reason")
         |> assertExnMsg
             """
-x
-    should not match the regex
-.*
-    because some reason, but was
-"asd"
+Subject: x
+Because: Some reason
+Should: NotMatchRegex
+Pattern: .*
+But was: asd
 """
 
 
@@ -1983,11 +2037,10 @@ module ``NotMatchRegex with string and options`` =
             x.Should().NotMatchRegex(".*", RegexOptions.None)
         |> assertExnMsg
             """
-x
-    should not match the regex
-.*
-    but was
-"asd"
+Subject: x
+Should: NotMatchRegex
+Pattern: .*
+But was: asd
 """
 
 
@@ -2003,11 +2056,11 @@ x
                 .NotMatchRegex(".*", RegexOptions.IgnoreCase ||| RegexOptions.Multiline)
         |> assertExnMsg
             """
-x
-    should not match the regex
-.*
-    using RegexOptions.IgnoreCase, Multiline, but was
-"asd"
+Subject: x
+Should: NotMatchRegex
+Pattern: .*
+RegexOptions: IgnoreCase, Multiline
+But was: asd
 """
 
 
@@ -2015,14 +2068,14 @@ x
     let ``Fails with expected message with because`` () =
         fun () ->
             let x = "asd"
-            x.Should().NotMatchRegex(".*", RegexOptions.None, "some reason")
+            x.Should().NotMatchRegex(".*", RegexOptions.None, "Some reason")
         |> assertExnMsg
             """
-x
-    should not match the regex
-.*
-    because some reason, but was
-"asd"
+Subject: x
+Because: Some reason
+Should: NotMatchRegex
+Pattern: .*
+But was: asd
 """
 
 
@@ -2050,11 +2103,10 @@ module ``NotMatchRegex with string`` =
             x.Should().NotMatchRegex(".*")
         |> assertExnMsg
             """
-x
-    should not match the regex
-.*
-    but was
-"asd"
+Subject: x
+Should: NotMatchRegex
+Pattern: .*
+But was: asd
 """
 
 
@@ -2062,12 +2114,12 @@ x
     let ``Fails with expected message with because`` () =
         fun () ->
             let x = "asd"
-            x.Should().NotMatchRegex(".*", "some reason")
+            x.Should().NotMatchRegex(".*", "Some reason")
         |> assertExnMsg
             """
-x
-    should not match the regex
-.*
-    because some reason, but was
-"asd"
+Subject: x
+Because: Some reason
+Should: NotMatchRegex
+Pattern: .*
+But was: asd
 """

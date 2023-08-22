@@ -1,34 +1,36 @@
 ﻿namespace Faqt
 
 open System
-open System.Diagnostics.CodeAnalysis
 open System.Globalization
 open System.Runtime.CompilerServices
 open System.Text.RegularExpressions
 open AssertionHelpers
-open Formatting
 
 
 [<AutoOpen>]
 module private Helpers =
 
 
-    let getStringComparisonStr (comparisonType: StringComparison) =
-        let cultureSuffix =
-            match comparisonType with
-            | StringComparison.CurrentCulture
-            | StringComparison.CurrentCultureIgnoreCase ->
-                if CultureInfo.CurrentCulture.Name = "" then
-                    " (invariant culture)"
-                else
-                    $" (culture {CultureInfo.CurrentCulture.Name})"
-            | _ -> ""
+    let substringFail (t: Testable<string>) substring comparisonType because =
+        t
+            .With("Substring", substring)
+            .With("StringComparison", comparisonType)
+            .With(
+                comparisonType = StringComparison.CurrentCulture
+                || comparisonType = StringComparison.CurrentCultureIgnoreCase,
+                "CurrentCulture",
+                CultureInfo.CurrentCulture
+            )
+            .With("But was", t.Subject)
+            .Fail(because)
 
-        "StringComparison." + comparisonType.ToString() + cultureSuffix
 
-
-    let getRegexOptionsStr (options: RegexOptions) =
-        "using RegexOptions." + options.ToString() + ", "
+    let regexFail (t: Testable<string>) pattern options because =
+        t
+            .With("Pattern", pattern)
+            .With(options <> RegexOptions.None, "RegexOptions", options)
+            .With("But was", t.Subject)
+            .Fail(because)
 
 
 [<Extension>]
@@ -41,18 +43,8 @@ type StringAssertions =
     static member BeUpperCase(t: Testable<string>, culture: CultureInfo, ?because) : And<string> =
         use _ = t.Assert()
 
-        let cultureStr =
-            if culture.Name = "" then
-                "the invariant culture"
-            else
-                "culture " + culture.Name
-
         if isNull t.Subject || t.Subject <> t.Subject.ToUpper(culture) then
-            t.Fail(
-                "{subject}\n\tshould be upper-case according to {0}{because}, but was\n{actual}",
-                because,
-                cultureStr
-            )
+            t.With("In culture", culture).With("But was", t.Subject).Fail(because)
 
         And(t)
 
@@ -71,18 +63,8 @@ type StringAssertions =
     static member BeLowerCase(t: Testable<string>, culture: CultureInfo, ?because) : And<string> =
         use _ = t.Assert()
 
-        let cultureStr =
-            if culture.Name = "" then
-                "the invariant culture"
-            else
-                "culture " + culture.Name
-
         if isNull t.Subject || t.Subject <> t.Subject.ToLower(culture) then
-            t.Fail(
-                "{subject}\n\tshould be lower-case according to {0}{because}, but was\n{actual}",
-                because,
-                cultureStr
-            )
+            t.With("In culture", culture).With("But was", t.Subject).Fail(because)
 
         And(t)
 
@@ -110,12 +92,7 @@ type StringAssertions =
             nullArg (nameof substring)
 
         if isNull t.Subject || not (t.Subject.Contains(substring, comparisonType)) then
-            t.Fail(
-                "{subject}\n\tshould contain\n{0}\n\tusing {1}{because}, but was\n{actual}",
-                because,
-                format substring,
-                getStringComparisonStr comparisonType
-            )
+            substringFail t substring comparisonType because
 
         And(t)
 
@@ -143,12 +120,7 @@ type StringAssertions =
             nullArg (nameof substring)
 
         if not (isNull t.Subject) && t.Subject.Contains(substring, comparisonType) then
-            t.Fail(
-                "{subject}\n\tshould not contain\n{0}\n\tusing {1}{because}, but was\n{actual}",
-                because,
-                format substring,
-                getStringComparisonStr comparisonType
-            )
+            substringFail t substring comparisonType because
 
         And(t)
 
@@ -176,12 +148,7 @@ type StringAssertions =
             nullArg (nameof substring)
 
         if isNull t.Subject || not (t.Subject.StartsWith(substring, comparisonType)) then
-            t.Fail(
-                "{subject}\n\tshould start with\n{0}\n\tusing {1}{because}, but was\n{actual}",
-                because,
-                format substring,
-                getStringComparisonStr comparisonType
-            )
+            substringFail t substring comparisonType because
 
         And(t)
 
@@ -209,12 +176,7 @@ type StringAssertions =
             nullArg (nameof substring)
 
         if not (isNull t.Subject) && t.Subject.StartsWith(substring, comparisonType) then
-            t.Fail(
-                "{subject}\n\tshould not start with\n{0}\n\tusing {1}{because}, but was\n{actual}",
-                because,
-                format substring,
-                getStringComparisonStr comparisonType
-            )
+            substringFail t substring comparisonType because
 
         And(t)
 
@@ -242,12 +204,7 @@ type StringAssertions =
             nullArg (nameof substring)
 
         if isNull t.Subject || not (t.Subject.EndsWith(substring, comparisonType)) then
-            t.Fail(
-                "{subject}\n\tshould end with\n{0}\n\tusing {1}{because}, but was\n{actual}",
-                because,
-                format substring,
-                getStringComparisonStr comparisonType
-            )
+            substringFail t substring comparisonType because
 
         And(t)
 
@@ -275,12 +232,7 @@ type StringAssertions =
             nullArg (nameof substring)
 
         if not (isNull t.Subject) && t.Subject.EndsWith(substring, comparisonType) then
-            t.Fail(
-                "{subject}\n\tshould not end with\n{0}\n\tusing {1}{because}, but was\n{actual}",
-                because,
-                format substring,
-                getStringComparisonStr comparisonType
-            )
+            substringFail t substring comparisonType because
 
         And(t)
 
@@ -299,19 +251,7 @@ type StringAssertions =
         use _ = t.Assert()
 
         if isNull t.Subject || not (regex.IsMatch(t.Subject)) then
-            if regex.Options = RegexOptions.None then
-                t.Fail(
-                    "{subject}\n\tshould match the regex\n{0}\n\t{because}but was\n{actual}",
-                    because,
-                    regex.ToString()
-                )
-            else
-                t.Fail(
-                    "{subject}\n\tshould match the regex\n{0}\n\t{1}{because}but was\n{actual}",
-                    because,
-                    regex.ToString(),
-                    getRegexOptionsStr regex.Options
-                )
+            regexFail t (regex.ToString()) regex.Options because
 
         And(t)
 
@@ -331,15 +271,7 @@ type StringAssertions =
         use _ = t.Assert()
 
         if isNull t.Subject || not (Regex.IsMatch(t.Subject, pattern, options)) then
-            if options = RegexOptions.None then
-                t.Fail("{subject}\n\tshould match the regex\n{0}\n\t{because}but was\n{actual}", because, pattern)
-            else
-                t.Fail(
-                    "{subject}\n\tshould match the regex\n{0}\n\t{1}{because}but was\n{actual}",
-                    because,
-                    pattern,
-                    getRegexOptionsStr options
-                )
+            regexFail t pattern options because
 
         And(t)
 
@@ -365,19 +297,7 @@ type StringAssertions =
         use _ = t.Assert()
 
         if not (isNull t.Subject) && regex.IsMatch(t.Subject) then
-            if regex.Options = RegexOptions.None then
-                t.Fail(
-                    "{subject}\n\tshould not match the regex\n{0}\n\t{because}but was\n{actual}",
-                    because,
-                    regex.ToString()
-                )
-            else
-                t.Fail(
-                    "{subject}\n\tshould not match the regex\n{0}\n\t{1}{because}but was\n{actual}",
-                    because,
-                    regex.ToString(),
-                    getRegexOptionsStr regex.Options
-                )
+            regexFail t (regex.ToString()) regex.Options because
 
         And(t)
 
@@ -398,15 +318,7 @@ type StringAssertions =
         use _ = t.Assert()
 
         if not (isNull t.Subject) && Regex.IsMatch(t.Subject, pattern, options) then
-            if options = RegexOptions.None then
-                t.Fail("{subject}\n\tshould not match the regex\n{0}\n\t{because}but was\n{actual}", because, pattern)
-            else
-                t.Fail(
-                    "{subject}\n\tshould not match the regex\n{0}\n\t{1}{because}but was\n{actual}",
-                    because,
-                    pattern,
-                    getRegexOptionsStr options
-                )
+            regexFail t pattern options because
 
         And(t)
 

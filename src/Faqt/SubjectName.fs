@@ -245,7 +245,7 @@ module internal SubjectName =
     let getFileLines = memoize File.ReadAllLines
 
 
-    let private transformationPlaceholder = "..."
+    let private transformationPlaceholder = Guid.NewGuid().ToString()
 
 
     let get origin (assertions: string list) =
@@ -332,5 +332,7 @@ module internal SubjectName =
             // Truncate the subject name if too long. This limits the damage from known limitations and bugs that could
             // potentially use large parts of the code as the subject name.
             |> String.truncate "…" 1000
-        with ex ->
-            "subject"
+
+            |> String.split transformationPlaceholder
+            |> Array.toList
+        with ex -> [ "subject" ]
