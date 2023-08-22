@@ -39,6 +39,7 @@ considered a non-breaking change.
   * [Which testing frameworks does Faqt work with?](#which-testing-frameworks-does-faqt-work-with)
   * [Why is the subject name not correct in my specific example?](#why-is-the-subject-name-not-correct-in-my-specific-example)
   * [Why do I have to use `Should(())` inside an assertion chain?](#why-do-i-have-to-use-should-inside-an-assertion-chain)
+  * [Why does this assertion pass/fail for null?](#why-does-this-assertion-passfail-for-null)
   * [Why not FluentAssertions?](#why-not-fluentassertions)
   * [Why not Shouldly?](#why-not-shouldly)
   * [Can I use Faqt from C#?](#can-i-use-faqt-from-c)
@@ -429,6 +430,35 @@ chains in some method call, or wrapping them in a `use` statement in order to re
 entirely), or make the subject name incorrect in many more cases (e.g. by removing the tracking of the encountered
 assertion history altogether, thereby only giving correct subject names up to the first assertion of any given name in a
 chain).
+
+### Why does this assertion pass/fail for null?
+
+Note: I recognize that the below is not the only way to look at the issue. If you fundamentally disagree with this
+policy, I am open to discussing it. Please raise an issue.
+
+It really boils down to assumptions about Faqt users would expect and find useful. For example, I assume that
+making `HaveLength(0)` pass for `null` values would be a surprise for many users, and therefore be a bad idea. On the
+other hand, allowing null values in assertions makes the assertions more composable, since it is trivial to
+add `.NotBeNull()` to the start of your assertion chain if you want to require a non-`null` value for an assertion that
+allows it, and somewhat harder to allow a `null` in an assertion that requires it non-`null` value (you'd have to use
+something like `SatisfyAny`).
+
+That being said, in order to find some guiding principles, the general policy on allowing or disallowing `null` subject
+values is based on the following:
+
+* `null` is separate from "empty". Values that are `null` do not have properties like "length" and "contents", whereas
+  empty values do.
+* Negative assertions (like `NotBeEmpty` or `NotContain`) essentially assert the _lack_ of a property, e.g., the lack of
+  a specific length.
+
+With that in mind, `null` subject values are generally allowed in negative assertions and disallowed in positive
+assertions. For example, `HaveLength(0)` will fail for `null`, because a `null` value does not have any length (zero or
+otherwise). Contrariwise, `NotHaveLength(0)` asserts the lack of having the length `0`, and will pass for `null` values
+since they, indeed, do not possess the property of having that specific length.
+
+Another way to look at it is that negative assertions could be thought of conceptually as e.g. `not (HaveLength(0))`,
+i.e., just an inversion of the corresponding positive assertion. In this light, anything that fails the positive
+assertion (including `null`) should pass the negative assertion.
 
 ### Why not FluentAssertions?
 
