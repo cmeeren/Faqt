@@ -786,6 +786,17 @@ Value: FOO
 
 
     [<Fact>]
+    let ``SerializeAs throws expected exception if input and output types are identical`` () =
+        let ex =
+            Assert.Throws<ArgumentException>(fun () -> YamlFormatterBuilder.Default.SerializeAs(id<string>) |> ignore)
+
+        Assert.Equal(
+            "The projected type must be different from the input type, or a stack overflow would occur (Parameter 'projection')",
+            ex.Message
+        )
+
+
+    [<Fact>]
     let ``SerializeExactAs works and allows overriding existing converters`` () =
         let format =
             YamlFormatterBuilder.Default
@@ -836,6 +847,19 @@ Subject: '"a"'
 Should: FailWith
 Value: System.IO.MemoryStream
 """
+
+
+    [<Fact>]
+    let ``SerializeExactAs throws expected exception if input and output types are identical`` () =
+        let ex =
+            Assert.Throws<ArgumentException>(fun () ->
+                YamlFormatterBuilder.Default.SerializeExactAs(id<string>) |> ignore
+            )
+
+        Assert.Equal(
+            "The projected type must be different from the input type, or a stack overflow would occur (Parameter 'projection')",
+            ex.Message
+        )
 
 
     [<Fact>]

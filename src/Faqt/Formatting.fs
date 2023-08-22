@@ -221,12 +221,22 @@ type YamlFormatterBuilder = {
     /// Adds a converter that serializes a transformed value instead of the original value. Only the last added
     /// converter for any given input type will take effect. Subtypes of the input type are included.
     member this.SerializeAs(projection: 'a -> 'b) =
+        if typeof<'a> = typeof<'b> then
+            invalidArg
+                (nameof projection)
+                "The projected type must be different from the input type, or a stack overflow would occur"
+
         this.AddConverter(MappedValueConverter(projection, true))
 
 
     /// Adds a converter that serializes a transformed value instead of the original value. Only the last added
     /// converter for any given input type will take effect. Subtypes of the input type are not included.
     member this.SerializeExactAs(projection: 'a -> 'b) =
+        if typeof<'a> = typeof<'b> then
+            invalidArg
+                (nameof projection)
+                "The projected type must be different from the input type, or a stack overflow would occur"
+
         this.AddConverter(MappedValueConverter(projection, false))
 
 
