@@ -113,7 +113,7 @@ type SeqAssertions =
 
 
     /// Asserts that the subject is empty. Equivalent to HaveLength(0) (but with a different error message and without
-    /// full enumeration).
+    /// full enumeration). If null should be allowed, see BeNullOrEmpty.
     [<Extension>]
     static member BeEmpty(t: Testable<#seq<'a>>, ?because) : And<_> =
         use _ = t.Assert()
