@@ -97,6 +97,9 @@ type SeqAssertions =
     static member HaveLength(t: Testable<#seq<'a>>, expected: int, ?because) : And<_> =
         use _ = t.Assert()
 
+        if expected < 0 then
+            invalidArg (nameof expected) "The expected length must be non-negative"
+
         if isNull (box t.Subject) then
             t.With("Expected", expected).With("But was", t.Subject).Fail(because)
         else

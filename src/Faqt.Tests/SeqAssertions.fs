@@ -1,5 +1,6 @@
 ﻿module SeqAssertions
 
+open System
 open Faqt
 open Xunit
 
@@ -266,6 +267,11 @@ module HaveLength =
 
     [<Fact>]
     let ``Passes if length = expected`` () = [ 1 ].Should().HaveLength(1)
+
+
+    [<Fact>]
+    let ``Throws ArgumentException if length is negative`` () =
+        Assert.Throws<ArgumentException>(fun () -> [ 1 ].Should().HaveLength(-1) |> ignore)
 
 
     [<Fact>]

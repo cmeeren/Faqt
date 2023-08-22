@@ -20,6 +20,11 @@ module HaveLength =
 
 
     [<Fact>]
+    let ``Throws ArgumentException if length is negative`` () =
+        Assert.Throws<ArgumentException>(fun () -> "".Should().HaveLength(-1) |> ignore)
+
+
+    [<Fact>]
     let ``Fails if length < expected`` () =
         Assert.Throws<AssertionFailedException>(fun () -> "".Should().HaveLength(1) |> ignore)
 
