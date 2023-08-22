@@ -109,7 +109,7 @@ type SeqAssertions =
                     .With("Value", t.Subject)
                     .Fail(because)
 
-            And(t)
+        And(t)
 
 
     /// Asserts that the subject is empty. Equivalent to HaveLength(0) (but with a different error message and without
