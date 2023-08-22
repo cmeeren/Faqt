@@ -1,6 +1,9 @@
 ﻿namespace Faqt
 
 open System
+#if NET7_0_OR_GREATER
+open System.Diagnostics.CodeAnalysis
+#endif
 open System.Globalization
 open System.Runtime.CompilerServices
 open System.Text.RegularExpressions
