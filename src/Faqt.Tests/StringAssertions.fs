@@ -618,6 +618,11 @@ module ``Contain with StringComparison`` =
 
 
     [<Fact>]
+    let ``Passes if substring is empty`` () =
+        "asd".Should().Contain("", StringComparison.OrdinalIgnoreCase)
+
+
+    [<Fact>]
     let ``Throws ArgumentNullException if substring is null`` () =
         Assert.Throws<ArgumentNullException>(fun () -> "".Should().Contain(null, StringComparison.Ordinal) |> ignore)
 
@@ -737,6 +742,10 @@ module ``Contain without StringComparison`` =
 
 
     [<Fact>]
+    let ``Passes if substring is empty`` () = "asd".Should().Contain("")
+
+
+    [<Fact>]
     let ``Throws ArgumentNullException if substring is null`` () =
         Assert.Throws<ArgumentNullException>(fun () -> "".Should().Contain(null) |> ignore)
 
@@ -836,6 +845,13 @@ module ``NotContain with StringComparison`` =
 
 
     [<Fact>]
+    let ``Fails if substring is empty`` () =
+        Assert.Throws<AssertionFailedException>(fun () ->
+            "".Should().NotContain("", StringComparison.Ordinal) |> ignore
+        )
+
+
+    [<Fact>]
     let ``Fails with expected message if string contains substring`` () =
         fun () ->
             let x = "asd"
@@ -925,6 +941,11 @@ module ``NotContain without StringComparison`` =
     [<Fact>]
     let ``Throws ArgumentNullException if substring is null`` () =
         Assert.Throws<ArgumentNullException>(fun () -> "".Should().NotContain(null) |> ignore)
+
+
+    [<Fact>]
+    let ``Fails if substring is empty`` () =
+        Assert.Throws<AssertionFailedException>(fun () -> "".Should().NotContain("") |> ignore)
 
 
     [<Fact>]
