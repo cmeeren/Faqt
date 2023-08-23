@@ -42,6 +42,7 @@ considered a non-breaking change.
   * [Why does this assertion pass/fail for null?](#why-does-this-assertion-passfail-for-null)
   * [Why not FluentAssertions?](#why-not-fluentassertions)
   * [Why not Shouldly?](#why-not-shouldly)
+  * [Why not Unquote?](#why-not-unquote)
   * [Can I use Faqt from C#?](#can-i-use-faqt-from-c)
 
 <!-- TOC -->
@@ -488,6 +489,24 @@ instead of "applicative" behavior).
 I will admit I have not used Shouldly myself, but its feature set (ignoring the actual assertions) seem to be a subset
 of that of FluentAssertions. For example, it does not support chaining assertions. However, I like its easy-to-read
 assertion failure messages, and have used those as inspiration for Faqt's assertion messages.
+
+### Why not Unquote?
+
+[Unquote](https://github.com/SwensenSoftware/unquote) is a great library built on a great idea: Use code quotations with
+arbitrary `bool`-returning F# expressions as your assertions, and Unquote will display step-by-step evaluations if the
+assertion fails. This allows you to assert whatever you want without needing custom-made assertions.
+
+Unfortunately, I stopped using it because of several issues:
+
+* Its assertion messages are not very helpful for non-trivial objects or expressions. The rendering is confusing, and it
+  can be very hard to see what the actual error is. Often, I resorted to debugging instead of reading the assertion
+  message, because that turned out to be quicker.
+* It is based around F# quotations, which have several limitations, for example regarding generic functions and mutable
+  values. Simply put, not all F# code can be used in a quotation.
+* It can not be used to extract values for further testing or similar (which is supported by Faqt's `BeSome` and similar
+  assertions).
+* I need assertions that can work in production code, too, and I assume that evaluating quotations has a significant
+  performance impact (I have admittedly not measured this, since I stopped using it for the reasons above anyway).
 
 ### Can I use Faqt from C#?
 
