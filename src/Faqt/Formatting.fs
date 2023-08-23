@@ -282,6 +282,10 @@ type YamlFormatterBuilder = {
                     .WithUnionUnwrapFieldlessTags()
                     .WithUnionUnwrapSingleFieldCases()
                     .WithUnwrapOption(false)
+#if NET8_0_OR_GREATER
+                    // TODO: Test when upgrading test project to .NET 8
+                    .WithMapFormat(MapFormat.Object)
+#endif
             )
             .AddConverter'(fun builder -> builder.getJsonFSharpOptions () |> JsonFSharpConverter)
             .AddConverter'(fun builder -> TryFormatConverter(builder.tryFormatFallback))
