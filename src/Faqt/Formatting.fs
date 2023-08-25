@@ -163,12 +163,12 @@ type private JsonToYamlConverterVisitor(doc: YamlDocument) =
 let private unicodeEscapeCodePlaceholder = Guid.NewGuid().ToString()
 
 
-let private escapeUnicodeEscapeCodes (json: string) =
-    json.Replace(@"\u", unicodeEscapeCodePlaceholder)
+let private escapeUnicodeEscapeCodes (str: string) =
+    str.Replace(@"\u", unicodeEscapeCodePlaceholder)
 
 
-let private unEscapeUnicodeEscapeCodes (json: string) =
-    json.Replace(unicodeEscapeCodePlaceholder, @"\u")
+let private unEscapeUnicodeEscapeCodes (str: string) =
+    str.Replace(unicodeEscapeCodePlaceholder, @"\u")
 
 
 let private formatAsYaml getYamlVisitor (json: string) =
