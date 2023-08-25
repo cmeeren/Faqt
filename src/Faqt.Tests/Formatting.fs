@@ -205,7 +205,7 @@ Value: asd
             """
 Subject: '"a"'
 Should: FailWith
-Value: "as\x11d"
+Value: as\u0011d
 """
 
 
@@ -632,6 +632,17 @@ Value: nb-NO
 Subject: '"a"'
 Should: FailWith
 Value: invariant
+"""
+
+
+    [<Fact>]
+    let ``Rendering of emoji string`` () =
+        fun () -> "a".Should().FailWith("Value", "👍")
+        |> assertExnMsg
+            """
+Subject: '"a"'
+Should: FailWith
+Value: \uD83D\uDC4D
 """
 
 
