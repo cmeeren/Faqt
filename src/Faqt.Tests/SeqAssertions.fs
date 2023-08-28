@@ -1310,3 +1310,715 @@ Duplicates:
   Items: [asd, abc]
 Value: [a, as, asd, abc, b, foobar]
 """
+
+
+module BeAscending =
+
+
+    [<Fact>]
+    let ``Can be chained with And`` () =
+        [].Should().BeAscending().Id<And<string list>>().And.Be([])
+
+
+    [<Fact>]
+    let ``Passes if empty`` () =
+        List<string>.Empty.Should().BeAscending()
+
+
+    [<Fact>]
+    let ``Passes if only one item`` () = [ 1 ].Should().BeAscending()
+
+
+    [<Fact>]
+    let ``Passes if items are in non-strictly ascending order`` () =
+        [ 1; 2; 3; 3; 6 ].Should().BeAscending()
+
+
+    [<Fact>]
+    let ``Fails with expected message if null`` () =
+        fun () ->
+            let x: seq<int> = null
+            x.Should().BeAscending()
+        |> assertExnMsg
+            """
+Subject: x
+Should: BeAscending
+But was: null
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if null with because`` () =
+        fun () ->
+            let x: seq<int> = null
+            x.Should().BeAscending("Some reason")
+        |> assertExnMsg
+            """
+Subject: x
+Because: Some reason
+Should: BeAscending
+But was: null
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if not in ascending order`` () =
+        fun () ->
+            let x = [ 1; 2; 6; 3; 1; 3 ]
+            x.Should().BeAscending()
+        |> assertExnMsg
+            """
+Subject: x
+Should: BeAscending
+But found:
+- Index: 2
+  Item: 6
+- Index: 3
+  Item: 3
+Value: [1, 2, 6, 3, 1, 3]
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if not in ascending order with because`` () =
+        fun () ->
+            let x = [ 1; 2; 6; 3; 1; 3 ]
+            x.Should().BeAscending("Some reason")
+        |> assertExnMsg
+            """
+Subject: x
+Because: Some reason
+Should: BeAscending
+But found:
+- Index: 2
+  Item: 6
+- Index: 3
+  Item: 3
+Value: [1, 2, 6, 3, 1, 3]
+"""
+
+
+module BeAscendingBy =
+
+
+    [<Fact>]
+    let ``Can be chained with And`` () =
+        [].Should().BeAscendingBy(id).Id<And<string list>>().And.Be([])
+
+
+    [<Fact>]
+    let ``Passes if empty`` () =
+        List<string>.Empty.Should().BeAscendingBy(fun s -> s.Length)
+
+
+    [<Fact>]
+    let ``Passes if only one item`` () =
+        [ "asd" ].Should().BeAscendingBy(fun s -> s.Length)
+
+
+    [<Fact>]
+    let ``Passes if items are in non-strictly ascending order by the specified projection`` () =
+        [ "a"; "as"; "foo"; "asd" ].Should().BeAscendingBy(fun s -> s.Length)
+
+
+    [<Fact>]
+    let ``Fails with expected message if null`` () =
+        fun () ->
+            let x: seq<int> = null
+            x.Should().BeAscendingBy(id)
+        |> assertExnMsg
+            """
+Subject: x
+Should: BeAscendingBy
+But was: null
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if null with because`` () =
+        fun () ->
+            let x: seq<int> = null
+            x.Should().BeAscendingBy(id, "Some reason")
+        |> assertExnMsg
+            """
+Subject: x
+Because: Some reason
+Should: BeAscendingBy
+But was: null
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if not in ascending order by the specified projection`` () =
+        fun () ->
+            let x = [ "a"; "as"; "foobar"; "asd"; "a"; "bar" ]
+            x.Should().BeAscendingBy(fun s -> s.Length)
+        |> assertExnMsg
+            """
+Subject: x
+Should: BeAscendingBy
+But found:
+- Index: 2
+  Item: foobar
+  Projected: 6
+- Index: 3
+  Item: asd
+  Projected: 3
+Value: [a, as, foobar, asd, a, bar]
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if not in ascending order by the specified projection with because`` () =
+        fun () ->
+            let x = [ "a"; "as"; "foobar"; "asd"; "a"; "bar" ]
+            x.Should().BeAscendingBy((fun s -> s.Length), "Some reason")
+        |> assertExnMsg
+            """
+Subject: x
+Because: Some reason
+Should: BeAscendingBy
+But found:
+- Index: 2
+  Item: foobar
+  Projected: 6
+- Index: 3
+  Item: asd
+  Projected: 3
+Value: [a, as, foobar, asd, a, bar]
+"""
+
+
+module BeDescending =
+
+
+    [<Fact>]
+    let ``Can be chained with And`` () =
+        [].Should().BeDescending().Id<And<string list>>().And.Be([])
+
+
+    [<Fact>]
+    let ``Passes if empty`` () =
+        List<string>.Empty.Should().BeDescending()
+
+
+    [<Fact>]
+    let ``Passes if only one item`` () = [ 1 ].Should().BeDescending()
+
+
+    [<Fact>]
+    let ``Passes if items are in non-strictly descending order`` () =
+        [ 6; 3; 3; 2; 1 ].Should().BeDescending()
+
+
+    [<Fact>]
+    let ``Fails with expected message if null`` () =
+        fun () ->
+            let x: seq<int> = null
+            x.Should().BeDescending()
+        |> assertExnMsg
+            """
+Subject: x
+Should: BeDescending
+But was: null
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if null with because`` () =
+        fun () ->
+            let x: seq<int> = null
+            x.Should().BeDescending("Some reason")
+        |> assertExnMsg
+            """
+Subject: x
+Because: Some reason
+Should: BeDescending
+But was: null
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if not in descending order`` () =
+        fun () ->
+            let x = [ 3; 1; 3; 6; 2; 1 ]
+            x.Should().BeDescending()
+        |> assertExnMsg
+            """
+Subject: x
+Should: BeDescending
+But found:
+- Index: 1
+  Item: 1
+- Index: 2
+  Item: 3
+Value: [3, 1, 3, 6, 2, 1]
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if not in descending order with because`` () =
+        fun () ->
+            let x = [ 3; 1; 3; 6; 2; 1 ]
+            x.Should().BeDescending("Some reason")
+        |> assertExnMsg
+            """
+Subject: x
+Because: Some reason
+Should: BeDescending
+But found:
+- Index: 1
+  Item: 1
+- Index: 2
+  Item: 3
+Value: [3, 1, 3, 6, 2, 1]
+"""
+
+
+module BeDescendingBy =
+
+
+    [<Fact>]
+    let ``Can be chained with And`` () =
+        [].Should().BeDescendingBy(id).Id<And<string list>>().And.Be([])
+
+
+    [<Fact>]
+    let ``Passes if empty`` () =
+        List<string>.Empty.Should().BeDescendingBy(fun s -> s.Length)
+
+
+    [<Fact>]
+    let ``Passes if only one item`` () =
+        [ "asd" ].Should().BeDescendingBy(fun s -> s.Length)
+
+
+    [<Fact>]
+    let ``Passes if items are in non-strictly descending order by the specified projection`` () =
+        [ "asd"; "foo"; "as"; "a" ].Should().BeDescendingBy(fun s -> s.Length)
+
+
+    [<Fact>]
+    let ``Fails with expected message if null`` () =
+        fun () ->
+            let x: seq<int> = null
+            x.Should().BeDescendingBy(id)
+        |> assertExnMsg
+            """
+Subject: x
+Should: BeDescendingBy
+But was: null
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if null with because`` () =
+        fun () ->
+            let x: seq<int> = null
+            x.Should().BeDescendingBy(id, "Some reason")
+        |> assertExnMsg
+            """
+Subject: x
+Because: Some reason
+Should: BeDescendingBy
+But was: null
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if not in descending order by the specified projection`` () =
+        fun () ->
+            let x = [ "bar"; "as"; "a"; "foobar"; "asd"; "a" ]
+            x.Should().BeDescendingBy(fun s -> s.Length)
+        |> assertExnMsg
+            """
+Subject: x
+Should: BeDescendingBy
+But found:
+- Index: 2
+  Item: a
+  Projected: 1
+- Index: 3
+  Item: foobar
+  Projected: 6
+Value: [bar, as, a, foobar, asd, a]
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if not in descending order by the specified projection with because`` () =
+        fun () ->
+            let x = [ "bar"; "as"; "a"; "foobar"; "asd"; "a" ]
+            x.Should().BeDescendingBy((fun s -> s.Length), "Some reason")
+        |> assertExnMsg
+            """
+Subject: x
+Because: Some reason
+Should: BeDescendingBy
+But found:
+- Index: 2
+  Item: a
+  Projected: 1
+- Index: 3
+  Item: foobar
+  Projected: 6
+Value: [bar, as, a, foobar, asd, a]
+"""
+
+
+module BeStrictlyAscending =
+
+
+    [<Fact>]
+    let ``Can be chained with And`` () =
+        [].Should().BeStrictlyAscending().Id<And<string list>>().And.Be([])
+
+
+    [<Fact>]
+    let ``Passes if empty`` () =
+        List<string>.Empty.Should().BeStrictlyAscending()
+
+
+    [<Fact>]
+    let ``Passes if only one item`` () = [ 1 ].Should().BeStrictlyAscending()
+
+
+    [<Fact>]
+    let ``Passes if items are in strictly ascending order`` () =
+        [ 1; 2; 3; 5; 6 ].Should().BeStrictlyAscending()
+
+
+    [<Fact>]
+    let ``Fails with expected message if null`` () =
+        fun () ->
+            let x: seq<int> = null
+            x.Should().BeStrictlyAscending()
+        |> assertExnMsg
+            """
+Subject: x
+Should: BeStrictlyAscending
+But was: null
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if null with because`` () =
+        fun () ->
+            let x: seq<int> = null
+            x.Should().BeStrictlyAscending("Some reason")
+        |> assertExnMsg
+            """
+Subject: x
+Because: Some reason
+Should: BeStrictlyAscending
+But was: null
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if items are in non-strictly ascending order`` () =
+        fun () ->
+            let x = [ 1; 2; 3; 3; 5 ]
+            x.Should().BeStrictlyAscending()
+        |> assertExnMsg
+            """
+Subject: x
+Should: BeStrictlyAscending
+But found:
+- Index: 2
+  Item: 3
+- Index: 3
+  Item: 3
+Value: [1, 2, 3, 3, 5]
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if items are in non-strictly ascending order with because`` () =
+        fun () ->
+            let x = [ 1; 2; 3; 3; 5 ]
+            x.Should().BeStrictlyAscending("Some reason")
+        |> assertExnMsg
+            """
+Subject: x
+Because: Some reason
+Should: BeStrictlyAscending
+But found:
+- Index: 2
+  Item: 3
+- Index: 3
+  Item: 3
+Value: [1, 2, 3, 3, 5]
+"""
+
+
+module BeStrictlyAscendingBy =
+
+
+    [<Fact>]
+    let ``Can be chained with And`` () =
+        [].Should().BeStrictlyAscendingBy(id).Id<And<string list>>().And.Be([])
+
+
+    [<Fact>]
+    let ``Passes if empty`` () =
+        List<string>.Empty.Should().BeStrictlyAscendingBy(fun s -> s.Length)
+
+
+    [<Fact>]
+    let ``Passes if only one item`` () =
+        [ "asd" ].Should().BeStrictlyAscendingBy(fun s -> s.Length)
+
+
+    [<Fact>]
+    let ``Passes if items are in strictly ascending order by the specified projection`` () =
+        [ "a"; "as"; "foo"; "foobar" ].Should().BeStrictlyAscendingBy(fun s -> s.Length)
+
+
+    [<Fact>]
+    let ``Fails with expected message if null`` () =
+        fun () ->
+            let x: seq<int> = null
+            x.Should().BeStrictlyAscendingBy(id)
+        |> assertExnMsg
+            """
+Subject: x
+Should: BeStrictlyAscendingBy
+But was: null
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if null with because`` () =
+        fun () ->
+            let x: seq<int> = null
+            x.Should().BeStrictlyAscendingBy(id, "Some reason")
+        |> assertExnMsg
+            """
+Subject: x
+Because: Some reason
+Should: BeStrictlyAscendingBy
+But was: null
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if items are in non-strictly ascending order by the specified projection`` () =
+        fun () ->
+            let x = [ "a"; "as"; "asd"; "foo"; "foobar" ]
+            x.Should().BeStrictlyAscendingBy(fun s -> s.Length)
+        |> assertExnMsg
+            """
+Subject: x
+Should: BeStrictlyAscendingBy
+But found:
+- Index: 2
+  Item: asd
+  Projected: 3
+- Index: 3
+  Item: foo
+  Projected: 3
+Value: [a, as, asd, foo, foobar]
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if items are in non-strictly ascending order by the specified projection with because``
+        ()
+        =
+        fun () ->
+            let x = [ "a"; "as"; "asd"; "foo"; "foobar" ]
+            x.Should().BeStrictlyAscendingBy((fun s -> s.Length), "Some reason")
+        |> assertExnMsg
+            """
+Subject: x
+Because: Some reason
+Should: BeStrictlyAscendingBy
+But found:
+- Index: 2
+  Item: asd
+  Projected: 3
+- Index: 3
+  Item: foo
+  Projected: 3
+Value: [a, as, asd, foo, foobar]
+"""
+
+
+module BeStrictlyDescending =
+
+
+    [<Fact>]
+    let ``Can be chained with And`` () =
+        [].Should().BeStrictlyDescending().Id<And<string list>>().And.Be([])
+
+
+    [<Fact>]
+    let ``Passes if empty`` () =
+        List<string>.Empty.Should().BeStrictlyDescending()
+
+
+    [<Fact>]
+    let ``Passes if only one item`` () = [ 1 ].Should().BeStrictlyDescending()
+
+
+    [<Fact>]
+    let ``Passes if items are in strictly descending order`` () =
+        [ 6; 5; 3; 2; 1 ].Should().BeStrictlyDescending()
+
+
+    [<Fact>]
+    let ``Fails with expected message if null`` () =
+        fun () ->
+            let x: seq<int> = null
+            x.Should().BeStrictlyDescending()
+        |> assertExnMsg
+            """
+Subject: x
+Should: BeStrictlyDescending
+But was: null
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if null with because`` () =
+        fun () ->
+            let x: seq<int> = null
+            x.Should().BeStrictlyDescending("Some reason")
+        |> assertExnMsg
+            """
+Subject: x
+Because: Some reason
+Should: BeStrictlyDescending
+But was: null
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if items are in non-strictly descending order`` () =
+        fun () ->
+            let x = [ 6; 5; 3; 3; 2; 1 ]
+            x.Should().BeStrictlyDescending()
+        |> assertExnMsg
+            """
+Subject: x
+Should: BeStrictlyDescending
+But found:
+- Index: 2
+  Item: 3
+- Index: 3
+  Item: 3
+Value: [6, 5, 3, 3, 2, 1]
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if items are in non-strictly descending order with because`` () =
+        fun () ->
+            let x = [ 6; 5; 3; 3; 2; 1 ]
+            x.Should().BeStrictlyDescending("Some reason")
+        |> assertExnMsg
+            """
+Subject: x
+Because: Some reason
+Should: BeStrictlyDescending
+But found:
+- Index: 2
+  Item: 3
+- Index: 3
+  Item: 3
+Value: [6, 5, 3, 3, 2, 1]
+"""
+
+
+module BeStrictlyDescendingBy =
+
+
+    [<Fact>]
+    let ``Can be chained with And`` () =
+        [].Should().BeStrictlyDescendingBy(id).Id<And<string list>>().And.Be([])
+
+
+    [<Fact>]
+    let ``Passes if empty`` () =
+        List<string>.Empty.Should().BeStrictlyDescendingBy(fun s -> s.Length)
+
+
+    [<Fact>]
+    let ``Passes if only one item`` () =
+        [ "asd" ].Should().BeStrictlyDescendingBy(fun s -> s.Length)
+
+
+    [<Fact>]
+    let ``Passes if items are in strictly descending order by the specified projection`` () =
+        [ "asd"; "as"; "a" ].Should().BeStrictlyDescendingBy(fun s -> s.Length)
+
+
+    [<Fact>]
+    let ``Fails with expected message if null`` () =
+        fun () ->
+            let x: seq<int> = null
+            x.Should().BeStrictlyDescendingBy(id)
+        |> assertExnMsg
+            """
+Subject: x
+Should: BeStrictlyDescendingBy
+But was: null
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if null with because`` () =
+        fun () ->
+            let x: seq<int> = null
+            x.Should().BeStrictlyDescendingBy(id, "Some reason")
+        |> assertExnMsg
+            """
+Subject: x
+Because: Some reason
+Should: BeStrictlyDescendingBy
+But was: null
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if items are in non-strictly descending order by the specified projection`` () =
+        fun () ->
+            let x = [ "foobar"; "foo"; "bar"; "as"; "a" ]
+            x.Should().BeStrictlyDescendingBy(fun s -> s.Length)
+        |> assertExnMsg
+            """
+Subject: x
+Should: BeStrictlyDescendingBy
+But found:
+- Index: 1
+  Item: foo
+  Projected: 3
+- Index: 2
+  Item: bar
+  Projected: 3
+Value: [foobar, foo, bar, as, a]
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if items are in non-strictly descending order by the specified projection with because``
+        ()
+        =
+        fun () ->
+            let x = [ "foobar"; "foo"; "bar"; "as"; "a" ]
+            x.Should().BeStrictlyDescendingBy((fun s -> s.Length), "Some reason")
+        |> assertExnMsg
+            """
+Subject: x
+Because: Some reason
+Should: BeStrictlyDescendingBy
+But found:
+- Index: 1
+  Item: foo
+  Projected: 3
+- Index: 2
+  Item: bar
+  Projected: 3
+Value: [foobar, foo, bar, as, a]
+"""

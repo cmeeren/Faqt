@@ -371,3 +371,219 @@ type SeqAssertions =
             t.With("Duplicates", duplicates).With("Value", t.Subject).Fail(because)
 
         And(t)
+
+
+    /// Asserts that the subject is in ascending order.
+    [<Extension>]
+    static member BeAscending(t: Testable<#seq<'a>>, ?because) : And<_> =
+        use _ = t.Assert()
+
+        if isNull (box t.Subject) then
+            t.With("But was", t.Subject).Fail(because)
+
+        for i, (a, b) in t.Subject |> Seq.pairwise |> Seq.indexed do
+
+            if a > b then
+                t
+                    .With("But found", [ {| Index = i; Item = a |}; {| Index = i + 1; Item = b |} ])
+                    .With("Value", t.Subject)
+                    .Fail(because)
+
+        And(t)
+
+
+    /// Asserts that the subject is in ascending order by the specified projection.
+    [<Extension>]
+    static member BeAscendingBy(t: Testable<#seq<'a>>, projection: 'a -> 'b, ?because) : And<_> =
+        use _ = t.Assert()
+
+        if isNull (box t.Subject) then
+            t.With("But was", t.Subject).Fail(because)
+
+        for i, (a, b) in t.Subject |> Seq.pairwise |> Seq.indexed do
+            let a' = projection a
+            let b' = projection b
+
+            if a' > b' then
+                t
+                    .With(
+                        "But found",
+                        [
+                            {|
+                                Index = i
+                                Item = a
+                                Projected = a'
+                            |}
+                            {|
+                                Index = i + 1
+                                Item = b
+                                Projected = b'
+                            |}
+                        ]
+                    )
+                    .With("Value", t.Subject)
+                    .Fail(because)
+
+        And(t)
+
+
+    /// Asserts that the subject is in descending order.
+    [<Extension>]
+    static member BeDescending(t: Testable<#seq<'a>>, ?because) : And<_> =
+        use _ = t.Assert()
+
+        if isNull (box t.Subject) then
+            t.With("But was", t.Subject).Fail(because)
+
+        for i, (a, b) in t.Subject |> Seq.pairwise |> Seq.indexed do
+
+            if a < b then
+                t
+                    .With("But found", [ {| Index = i; Item = a |}; {| Index = i + 1; Item = b |} ])
+                    .With("Value", t.Subject)
+                    .Fail(because)
+
+        And(t)
+
+
+    /// Asserts that the subject is in descending order by the specified projection.
+    [<Extension>]
+    static member BeDescendingBy(t: Testable<#seq<'a>>, projection: 'a -> 'b, ?because) : And<_> =
+        use _ = t.Assert()
+
+        if isNull (box t.Subject) then
+            t.With("But was", t.Subject).Fail(because)
+
+        for i, (a, b) in t.Subject |> Seq.pairwise |> Seq.indexed do
+            let a' = projection a
+            let b' = projection b
+
+            if a' < b' then
+                t
+                    .With(
+                        "But found",
+                        [
+                            {|
+                                Index = i
+                                Item = a
+                                Projected = a'
+                            |}
+                            {|
+                                Index = i + 1
+                                Item = b
+                                Projected = b'
+                            |}
+                        ]
+                    )
+                    .With("Value", t.Subject)
+                    .Fail(because)
+
+        And(t)
+
+
+    /// Asserts that the subject is in ascending order (i.e., is ascending and distinct).
+    [<Extension>]
+    static member BeStrictlyAscending(t: Testable<#seq<'a>>, ?because) : And<_> =
+        use _ = t.Assert()
+
+        if isNull (box t.Subject) then
+            t.With("But was", t.Subject).Fail(because)
+
+        for i, (a, b) in t.Subject |> Seq.pairwise |> Seq.indexed do
+
+            if a >= b then
+                t
+                    .With("But found", [ {| Index = i; Item = a |}; {| Index = i + 1; Item = b |} ])
+                    .With("Value", t.Subject)
+                    .Fail(because)
+
+        And(t)
+
+
+    /// Asserts that the subject is in ascending order (i.e., is ascending and distinct) by the specified projection.
+    [<Extension>]
+    static member BeStrictlyAscendingBy(t: Testable<#seq<'a>>, projection: 'a -> 'b, ?because) : And<_> =
+        use _ = t.Assert()
+
+        if isNull (box t.Subject) then
+            t.With("But was", t.Subject).Fail(because)
+
+        for i, (a, b) in t.Subject |> Seq.pairwise |> Seq.indexed do
+            let a' = projection a
+            let b' = projection b
+
+            if a' >= b' then
+                t
+                    .With(
+                        "But found",
+                        [
+                            {|
+                                Index = i
+                                Item = a
+                                Projected = a'
+                            |}
+                            {|
+                                Index = i + 1
+                                Item = b
+                                Projected = b'
+                            |}
+                        ]
+                    )
+                    .With("Value", t.Subject)
+                    .Fail(because)
+
+        And(t)
+
+
+    /// Asserts that the subject is in strictly descending order (i.e., is descending and distinct).
+    [<Extension>]
+    static member BeStrictlyDescending(t: Testable<#seq<'a>>, ?because) : And<_> =
+        use _ = t.Assert()
+
+        if isNull (box t.Subject) then
+            t.With("But was", t.Subject).Fail(because)
+
+        for i, (a, b) in t.Subject |> Seq.pairwise |> Seq.indexed do
+
+            if a <= b then
+                t
+                    .With("But found", [ {| Index = i; Item = a |}; {| Index = i + 1; Item = b |} ])
+                    .With("Value", t.Subject)
+                    .Fail(because)
+
+        And(t)
+
+
+    /// Asserts that the subject is in descending order (i.e., is descending and distinct) by the specified projection.
+    [<Extension>]
+    static member BeStrictlyDescendingBy(t: Testable<#seq<'a>>, projection: 'a -> 'b, ?because) : And<_> =
+        use _ = t.Assert()
+
+        if isNull (box t.Subject) then
+            t.With("But was", t.Subject).Fail(because)
+
+        for i, (a, b) in t.Subject |> Seq.pairwise |> Seq.indexed do
+            let a' = projection a
+            let b' = projection b
+
+            if a' <= b' then
+                t
+                    .With(
+                        "But found",
+                        [
+                            {|
+                                Index = i
+                                Item = a
+                                Projected = a'
+                            |}
+                            {|
+                                Index = i + 1
+                                Item = b
+                                Projected = b'
+                            |}
+                        ]
+                    )
+                    .With("Value", t.Subject)
+                    .Fail(because)
+
+        And(t)
