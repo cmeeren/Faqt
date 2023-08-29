@@ -64,7 +64,7 @@ type SeqAssertions =
             t.With("But was", t.Subject).Fail(because)
 
         let subjectLength = Seq.stringOptimizedLength t.Subject
-        let assertionsLength = Seq.stringOptimizedLength assertions
+        let assertionsLength = Seq.length assertions
 
         if subjectLength <> assertionsLength then
             t
@@ -205,7 +205,7 @@ type SeqAssertions =
                             None
                     )
 
-                if not (Seq.stringOptimizedIsEmpty differentItems) then
+                if not (Seq.isEmpty differentItems) then
                     t
                         .With("Failures", differentItems)
                         .With("Expected", expected)
@@ -329,7 +329,7 @@ type SeqAssertions =
         let nonDistinctItemsWithCounts =
             t.Subject |> Seq.countBy id |> Seq.filter (fun (_, c) -> c > 1)
 
-        if not (Seq.stringOptimizedIsEmpty nonDistinctItemsWithCounts) then
+        if not (Seq.isEmpty nonDistinctItemsWithCounts) then
             let items =
                 nonDistinctItemsWithCounts
                 |> Seq.map (fun (x, c) -> {| Count = c; Item = TryFormat x |})
@@ -366,7 +366,7 @@ type SeqAssertions =
             )
             |> Seq.toList
 
-        if not (Seq.stringOptimizedIsEmpty duplicates) then
+        if not (Seq.isEmpty duplicates) then
             t.With("Duplicates", duplicates).With("Value", t.Subject).Fail(because)
 
         And(t)
