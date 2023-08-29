@@ -59,6 +59,9 @@ type SeqAssertions =
     static member SatisfyRespectively(t: Testable<#seq<'a>>, assertions: seq<'a -> 'ignored>, ?because) : And<_> =
         use _ = t.Assert(true)
 
+        if isNull assertions then
+            nullArg (nameof assertions)
+
         if isNull (box t.Subject) then
             t.With("But was", t.Subject).Fail(because)
 
@@ -592,6 +595,9 @@ type SeqAssertions =
 
     [<Extension>]
     static member private BeSupersetOf'(t: Testable<#seq<'a>>, subset: seq<'a>, proper: bool, ?because) : And<_> =
+        if isNull subset then
+            nullArg (nameof subset)
+
         if isNull (box t.Subject) then
             t.With("Subset", subset).With("But was", t.Subject).Fail(because)
 
@@ -635,6 +641,9 @@ type SeqAssertions =
 
     [<Extension>]
     static member private BeSubsetOf'(t: Testable<#seq<'a>>, superset: seq<'a>, proper: bool, ?because) : And<_> =
+        if isNull superset then
+            nullArg (nameof superset)
+
         if isNull (box t.Subject) then
             t.With("Superset", superset).With("But was", t.Subject).Fail(because)
 
@@ -682,6 +691,9 @@ type SeqAssertions =
     static member IntersectWith(t: Testable<#seq<'a>>, other: seq<'a>, ?because) : And<_> =
         use _ = t.Assert()
 
+        if isNull other then
+            nullArg (nameof other)
+
         if isNull (box t.Subject) then
             t.With("Other", other).With("But was", t.Subject).Fail(because)
 
@@ -702,6 +714,9 @@ type SeqAssertions =
     [<Extension>]
     static member NotIntersectWith(t: Testable<#seq<'a>>, other: seq<'a>, ?because) : And<_> =
         use _ = t.Assert()
+
+        if isNull other then
+            nullArg (nameof other)
 
         if not (isNull (box t.Subject)) then
             let set = HashSet(t.Subject :> seq<'a>)

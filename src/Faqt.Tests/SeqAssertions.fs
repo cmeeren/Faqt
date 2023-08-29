@@ -122,6 +122,11 @@ module SatisfyRespectively =
 
 
     [<Fact>]
+    let ``Throws ArgumentNullException if assertions is null`` () =
+        Assert.Throws<ArgumentNullException>(fun () -> [ 1 ].Should().SatisfyRespectively(null) |> ignore)
+
+
+    [<Fact>]
     let ``Fails with expected message if subject is null`` () =
         fun () ->
             let x: seq<string> = null
@@ -2065,6 +2070,11 @@ module BeSupersetOf =
 
 
     [<Fact>]
+    let ``Throws ArgumentNullException if subset is null`` () =
+        Assert.Throws<ArgumentNullException>(fun () -> [ 1 ].Should().BeSupersetOf(null) |> ignore)
+
+
+    [<Fact>]
     let ``Fails with expected message if null`` () =
         fun () ->
             let x: seq<int> = null
@@ -2163,6 +2173,11 @@ module BeProperSupersetOf =
     [<MemberData(nameof failData)>]
     let ``Fails if not proper superset`` (subject: int list) (subset: int list) =
         Assert.Throws<AssertionFailedException>(fun () -> subject.Should().BeProperSupersetOf(subset) |> ignore)
+
+
+    [<Fact>]
+    let ``Throws ArgumentNullException if subset is null`` () =
+        Assert.Throws<ArgumentNullException>(fun () -> [ 1 ].Should().BeProperSupersetOf(null) |> ignore)
 
 
     [<Fact>]
@@ -2297,6 +2312,11 @@ module BeSubsetOf =
 
 
     [<Fact>]
+    let ``Throws ArgumentNullException if superset is null`` () =
+        Assert.Throws<ArgumentNullException>(fun () -> [ 1 ].Should().BeSubsetOf(null) |> ignore)
+
+
+    [<Fact>]
     let ``Fails with expected message if null`` () =
         fun () ->
             let x: seq<int> = null
@@ -2395,6 +2415,11 @@ module BeProperSubsetOf =
     [<MemberData(nameof failData)>]
     let ``Fails if not proper subset`` (subject: int list) (superset: int list) =
         Assert.Throws<AssertionFailedException>(fun () -> subject.Should().BeProperSubsetOf(superset) |> ignore)
+
+
+    [<Fact>]
+    let ``Throws ArgumentNullException if superset is null`` () =
+        Assert.Throws<ArgumentNullException>(fun () -> [ 1 ].Should().BeProperSubsetOf(null) |> ignore)
 
 
     [<Fact>]
@@ -2526,6 +2551,11 @@ module IntersectWith =
 
 
     [<Fact>]
+    let ``Throws ArgumentNullException if other is null`` () =
+        Assert.Throws<ArgumentNullException>(fun () -> [ 1 ].Should().IntersectWith(null) |> ignore)
+
+
+    [<Fact>]
     let ``Fails with expected message if null`` () =
         fun () ->
             let x: seq<int> = null
@@ -2625,6 +2655,11 @@ module NotIntersectWith =
     [<MemberData(nameof failData)>]
     let ``Fails if intersects`` (subject: int list) (other: int list) =
         Assert.Throws<AssertionFailedException>(fun () -> subject.Should().NotIntersectWith(other) |> ignore)
+
+
+    [<Fact>]
+    let ``Throws ArgumentNullException if other is null`` () =
+        Assert.Throws<ArgumentNullException>(fun () -> [ 1 ].Should().NotIntersectWith(null) |> ignore)
 
 
     [<Fact>]
