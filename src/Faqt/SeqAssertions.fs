@@ -73,7 +73,7 @@ type SeqAssertions =
                 .With("Value", t.Subject)
                 .Fail(because)
 
-        let exceptions =
+        let failures =
             Seq.zip t.Subject assertions
             |> Seq.indexed
             |> Seq.choose (fun (i, (x, assertion)) ->
@@ -81,15 +81,12 @@ type SeqAssertions =
                     assertion x |> ignore
                     None
                 with :? AssertionFailedException as ex ->
-                    Some(i, ex)
+                    Some { Index = i; Failure = ex.FailureData }
             )
             |> Seq.toArray
 
-        if exceptions.Length > 0 then
-            t
-                .With("Failures", exceptions |> Array.map (fun (i, ex) -> { Index = i; Failure = ex.FailureData }))
-                .With("Value", t.Subject)
-                .Fail(because)
+        if failures.Length > 0 then
+            t.With("Failures", failures).With("Value", t.Subject).Fail(because)
 
         And(t)
 
