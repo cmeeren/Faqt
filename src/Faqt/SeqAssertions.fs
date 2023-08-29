@@ -6,6 +6,7 @@ open AssertionHelpers
 open Formatting
 
 
+[<Struct>]
 type private SatisfyReportItem = { Index: int; Failure: FailureData }
 
 
