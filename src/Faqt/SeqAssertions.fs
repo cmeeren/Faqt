@@ -587,3 +587,89 @@ type SeqAssertions =
                     .Fail(because)
 
         And(t)
+
+
+    [<Extension>]
+    static member private BeSupersetOf'(t: Testable<#seq<'a>>, subset: seq<'a>, proper: bool, ?because) : And<_> =
+        if isNull (box t.Subject) then
+            t.With("Subset", subset).With("But was", t.Subject).Fail(because)
+
+        let remaining = ResizeArray(subset)
+        let mutable containedItemNotInSubset = false
+
+        for item in t.Subject do
+            if not (remaining.Remove item) then
+                containedItemNotInSubset <- true
+
+        if remaining.Count > 0 then
+            t
+                .With("Subset", subset)
+                .With("But lacked", remaining)
+                .With("Value", t.Subject)
+                .Fail(because)
+        elif proper && not containedItemNotInSubset then
+            t
+                .With("Subset", subset)
+                .With("But had no additional items", [])
+                .With("Value", t.Subject)
+                .Fail(because)
+
+        And(t)
+
+
+    /// Asserts that the subject contains all items in the specified sequence (including any duplicates).
+    [<Extension>]
+    static member BeSupersetOf(t: Testable<#seq<'a>>, subset: seq<'a>, ?because) : And<_> =
+        use _ = t.Assert()
+        t.BeSupersetOf'(subset, false, ?because = because)
+
+
+    /// Asserts that the subject contains all items in the specified sequence (including any duplicates) and at least
+    /// one additional item.
+    [<Extension>]
+    static member BeProperSupersetOf(t: Testable<#seq<'a>>, subset: seq<'a>, ?because) : And<_> =
+        use _ = t.Assert()
+        t.BeSupersetOf'(subset, true, ?because = because)
+
+
+    [<Extension>]
+    static member private BeSubsetOf'(t: Testable<#seq<'a>>, superset: seq<'a>, proper: bool, ?because) : And<_> =
+        if isNull (box t.Subject) then
+            t.With("Superset", superset).With("But was", t.Subject).Fail(because)
+
+        let remaining = ResizeArray(t.Subject)
+        let mutable containedItemNotInSubset = false
+
+        for item in superset do
+            if not (remaining.Remove item) then
+                containedItemNotInSubset <- true
+
+        if remaining.Count > 0 then
+            t
+                .With("Superset", superset)
+                .With("But had extra items", remaining)
+                .With("Value", t.Subject)
+                .Fail(because)
+        elif proper && not containedItemNotInSubset then
+            t
+                .With("Superset", superset)
+                .With("But superset had no additional items", [])
+                .With("Value", t.Subject)
+                .Fail(because)
+
+        And(t)
+
+
+    /// Asserts that the specified sequence contains all items in the subject (including any duplicates).
+    [<Extension>]
+    static member BeSubsetOf(t: Testable<#seq<'a>>, superset: seq<'a>, ?because) : And<_> =
+        use _ = t.Assert()
+        t.BeSubsetOf'(superset, false, ?because = because)
+
+
+    /// Asserts that the specified sequence contains all items in the subject (including any duplicates) and at least
+    /// one additional item.
+    [<Extension>]
+    static member BeProperSubsetOf(t: Testable<#seq<'a>>, superset: seq<'a>, ?because) : And<_> =
+        use _ = t.Assert()
+        t.BeSubsetOf'(superset, true, ?because = because)

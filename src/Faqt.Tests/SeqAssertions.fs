@@ -2022,3 +2022,467 @@ But found:
   Projected: 3
 Value: [foobar, foo, bar, as, a]
 """
+
+
+module BeSupersetOf =
+
+
+    [<Fact>]
+    let ``Can be chained with And`` () =
+        [].Should().BeSupersetOf([]).Id<And<int list>>().And.Be([])
+
+
+    let passData = [
+        [| []; [] |] // Both empty
+        [| [ 1 ]; [] |] // Non-empty vs. empty
+        [| [ 1 ]; [ 1 ] |] // Equal with single item
+        [| [ 1; 1 ]; [ 1 ] |] // Additional duplicate item
+        [| [ 1; 1 ]; [ 1; 1 ] |] // Equal with multiple duplicate items
+        [| [ 1; 2 ]; [ 1 ] |] // Additional distinct item
+        [| [ 1; 2 ]; [ 1; 2 ] |] // Equal with multiple distinct items
+        [| [ 1; 1; 1 ]; [ 1; 1 ] |] // Duplicate items and additional duplicate item
+        [| [ 1; 1; 2 ]; [ 1; 1 ] |] // Duplicate items and additional distinct item
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof passData)>]
+    let ``Passes if superset`` (subject: int list) (subset: int list) = subject.Should().BeSupersetOf(subset)
+
+
+    let failData = [
+        [| []; [ 1 ] |] // Empty vs. non-empty
+        [| [ 1 ]; [ 1; 1 ] |] // Missing duplicate item
+        [| [ 1 ]; [ 1; 2 ] |] // Missing distinct item
+        [| [ 1 ]; [ 2 ] |] // Disjoint
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof failData)>]
+    let ``Fails if not superset`` (subject: int list) (subset: int list) =
+        Assert.Throws<AssertionFailedException>(fun () -> subject.Should().BeSupersetOf(subset) |> ignore)
+
+
+    [<Fact>]
+    let ``Fails with expected message if null`` () =
+        fun () ->
+            let x: seq<int> = null
+            x.Should().BeSupersetOf([])
+        |> assertExnMsg
+            """
+Subject: x
+Should: BeSupersetOf
+Subset: []
+But was: null
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if null with because`` () =
+        fun () ->
+            let x: seq<int> = null
+            x.Should().BeSupersetOf([], "Some reason")
+        |> assertExnMsg
+            """
+Subject: x
+Because: Some reason
+Should: BeSupersetOf
+Subset: []
+But was: null
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if subject is missing only a duplicate item in the subset`` () =
+        fun () ->
+            let x = [ 1; 2; 3 ]
+            x.Should().BeSupersetOf([ 1; 2; 2; 3 ])
+        |> assertExnMsg
+            """
+Subject: x
+Should: BeSupersetOf
+Subset: [1, 2, 2, 3]
+But lacked: [2]
+Value: [1, 2, 3]
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if subject is missing a duplicate item in the subset with because`` () =
+        fun () ->
+            let x = [ 1; 2; 3 ]
+            x.Should().BeSupersetOf([ 1; 2; 2; 3 ], "Some reason")
+        |> assertExnMsg
+            """
+Subject: x
+Because: Some reason
+Should: BeSupersetOf
+Subset: [1, 2, 2, 3]
+But lacked: [2]
+Value: [1, 2, 3]
+"""
+
+
+module BeProperSupersetOf =
+
+
+    [<Fact>]
+    let ``Can be chained with And`` () =
+        [ 1 ].Should().BeProperSupersetOf([]).Id<And<int list>>().And.Be([ 1 ])
+
+
+    let passData = [
+        [| [ 1 ]; [] |] // Non-empty vs. empty
+        [| [ 1; 1 ]; [ 1 ] |] // Additional duplicate item
+        [| [ 1; 2 ]; [ 1 ] |] // Additional distinct item
+        [| [ 1; 1; 1 ]; [ 1; 1 ] |] // Duplicate items and additional duplicate item
+        [| [ 1; 1; 2 ]; [ 1; 1 ] |] // Duplicate items and additional distinct item
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof passData)>]
+    let ``Passes if proper superset`` (subject: int list) (subset: int list) =
+        subject.Should().BeProperSupersetOf(subset)
+
+
+    let failData = [
+        [| []; [] |] // Both empty
+        [| []; [ 1 ] |] // Empty vs. non-empty
+        [| [ 1 ]; [ 1 ] |] // Equal with single item
+        [| [ 1; 1 ]; [ 1; 1 ] |] // Equal with multiple duplicate items
+        [| [ 1; 2 ]; [ 1; 2 ] |] // Equal with multiple distinct items
+        [| [ 1 ]; [ 1; 1 ] |] // Missing duplicate item
+        [| [ 1 ]; [ 1; 2 ] |] // Missing distinct item
+        [| [ 1 ]; [ 2 ] |] // Disjoint
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof failData)>]
+    let ``Fails if not proper superset`` (subject: int list) (subset: int list) =
+        Assert.Throws<AssertionFailedException>(fun () -> subject.Should().BeProperSupersetOf(subset) |> ignore)
+
+
+    [<Fact>]
+    let ``Fails with expected message if null`` () =
+        fun () ->
+            let x: seq<int> = null
+            x.Should().BeProperSupersetOf([])
+        |> assertExnMsg
+            """
+Subject: x
+Should: BeProperSupersetOf
+Subset: []
+But was: null
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if null with because`` () =
+        fun () ->
+            let x: seq<int> = null
+            x.Should().BeProperSupersetOf([], "Some reason")
+        |> assertExnMsg
+            """
+Subject: x
+Because: Some reason
+Should: BeProperSupersetOf
+Subset: []
+But was: null
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if subject is missing only a duplicate item in the subset`` () =
+        fun () ->
+            let x = [ 1; 2; 3 ]
+            x.Should().BeProperSupersetOf([ 1; 2; 2; 3 ])
+        |> assertExnMsg
+            """
+Subject: x
+Should: BeProperSupersetOf
+Subset: [1, 2, 2, 3]
+But lacked: [2]
+Value: [1, 2, 3]
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if subject is missing a duplicate item in the subset with because`` () =
+        fun () ->
+            let x = [ 1; 2; 3 ]
+            x.Should().BeProperSupersetOf([ 1; 2; 2; 3 ], "Some reason")
+        |> assertExnMsg
+            """
+Subject: x
+Because: Some reason
+Should: BeProperSupersetOf
+Subset: [1, 2, 2, 3]
+But lacked: [2]
+Value: [1, 2, 3]
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if subject has no extra items`` () =
+        fun () ->
+            let x = [ 1; 2; 3 ]
+            x.Should().BeProperSupersetOf([ 1; 2; 3 ])
+        |> assertExnMsg
+            """
+Subject: x
+Should: BeProperSupersetOf
+Subset: [1, 2, 3]
+But had no additional items: []
+Value: [1, 2, 3]
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if subject has no extra items with because`` () =
+        fun () ->
+            let x = [ 1; 2; 3 ]
+            x.Should().BeProperSupersetOf([ 1; 2; 3 ], "Some reason")
+        |> assertExnMsg
+            """
+Subject: x
+Because: Some reason
+Should: BeProperSupersetOf
+Subset: [1, 2, 3]
+But had no additional items: []
+Value: [1, 2, 3]
+"""
+
+
+module BeSubsetOf =
+
+
+    [<Fact>]
+    let ``Can be chained with And`` () =
+        [].Should().BeSubsetOf([]).Id<And<int list>>().And.Be([])
+
+
+    let passData = [
+        [| []; [] |] // Both empty
+        [| []; [ 1 ] |] // Empty vs. non-empty
+        [| [ 1 ]; [ 1 ] |] // Equal with single item
+        [| [ 1 ]; [ 1; 1 ] |] // Missing duplicate item
+        [| [ 1; 1 ]; [ 1; 1 ] |] // Equal with multiple duplicate items
+        [| [ 1 ]; [ 1; 2 ] |] // Missing distinct item
+        [| [ 1; 2 ]; [ 1; 2 ] |] // Equal with multiple distinct items
+        [| [ 1; 1 ]; [ 1; 1; 1 ] |] // Duplicate items and missing duplicate item
+        [| [ 1; 1 ]; [ 1; 1; 2 ] |] // Duplicate items and missing distinct item
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof passData)>]
+    let ``Passes if subset`` (subject: int list) (superset: int list) = subject.Should().BeSubsetOf(superset)
+
+
+    let failData = [
+        [| [ 1 ]; [] |] // Non-empty vs. empty
+        [| [ 1; 1 ]; [ 1 ] |] // Additional duplicate item
+        [| [ 1; 2 ]; [ 1 ] |] // Additional distinct item
+        [| [ 2 ]; [ 1 ] |] // Disjoint
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof failData)>]
+    let ``Fails if not subset`` (subject: int list) (superset: int list) =
+        Assert.Throws<AssertionFailedException>(fun () -> subject.Should().BeSubsetOf(superset) |> ignore)
+
+
+    [<Fact>]
+    let ``Fails with expected message if null`` () =
+        fun () ->
+            let x: seq<int> = null
+            x.Should().BeSubsetOf([])
+        |> assertExnMsg
+            """
+Subject: x
+Should: BeSubsetOf
+Superset: []
+But was: null
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if null with because`` () =
+        fun () ->
+            let x: seq<int> = null
+            x.Should().BeSubsetOf([], "Some reason")
+        |> assertExnMsg
+            """
+Subject: x
+Because: Some reason
+Should: BeSubsetOf
+Superset: []
+But was: null
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if subject has only an extra duplicate item`` () =
+        fun () ->
+            let x = [ 1; 2; 2; 3 ]
+            x.Should().BeSubsetOf([ 1; 2; 3 ])
+        |> assertExnMsg
+            """
+Subject: x
+Should: BeSubsetOf
+Superset: [1, 2, 3]
+But had extra items: [2]
+Value: [1, 2, 2, 3]
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if subject has only an extra duplicate item with because`` () =
+        fun () ->
+            let x = [ 1; 2; 2; 3 ]
+            x.Should().BeSubsetOf([ 1; 2; 3 ], "Some reason")
+        |> assertExnMsg
+            """
+Subject: x
+Because: Some reason
+Should: BeSubsetOf
+Superset: [1, 2, 3]
+But had extra items: [2]
+Value: [1, 2, 2, 3]
+"""
+
+
+module BeProperSubsetOf =
+
+
+    [<Fact>]
+    let ``Can be chained with And`` () =
+        [].Should().BeProperSubsetOf([ 1 ]).Id<And<int list>>().And.Be([])
+
+
+    let passData = [
+        [| []; [ 1 ] |] // Empty vs. non-empty
+        [| [ 1 ]; [ 1; 1 ] |] // Missing duplicate item
+        [| [ 1 ]; [ 1; 2 ] |] // Missing distinct item
+        [| [ 1; 1 ]; [ 1; 1; 1 ] |] // Duplicate items and missing duplicate item
+        [| [ 1; 1 ]; [ 1; 1; 2 ] |] // Duplicate items and missing distinct item
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof passData)>]
+    let ``Passes if proper subset`` (subject: int list) (superset: int list) =
+        subject.Should().BeProperSubsetOf(superset)
+
+
+    let failData = [
+        [| []; [] |] // Both empty
+        [| [ 1 ]; [] |] // Non-empty vs. empty
+        [| [ 1 ]; [ 1 ] |] // Equal with single item
+        [| [ 1; 1 ]; [ 1 ] |] // Additional duplicate item
+        [| [ 1; 2 ]; [ 1 ] |] // Additional distinct item
+        [| [ 1; 1 ]; [ 1; 1 ] |] // Equal with multiple duplicate items
+        [| [ 1; 2 ]; [ 1; 2 ] |] // Equal with multiple distinct items
+        [| [ 2 ]; [ 1 ] |] // Disjoint
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof failData)>]
+    let ``Fails if not proper subset`` (subject: int list) (superset: int list) =
+        Assert.Throws<AssertionFailedException>(fun () -> subject.Should().BeProperSubsetOf(superset) |> ignore)
+
+
+    [<Fact>]
+    let ``Fails with expected message if null`` () =
+        fun () ->
+            let x: seq<int> = null
+            x.Should().BeProperSubsetOf([])
+        |> assertExnMsg
+            """
+Subject: x
+Should: BeProperSubsetOf
+Superset: []
+But was: null
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if null with because`` () =
+        fun () ->
+            let x: seq<int> = null
+            x.Should().BeProperSubsetOf([], "Some reason")
+        |> assertExnMsg
+            """
+Subject: x
+Because: Some reason
+Should: BeProperSubsetOf
+Superset: []
+But was: null
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if subject has only an extra duplicate item`` () =
+        fun () ->
+            let x = [ 1; 2; 2; 3 ]
+            x.Should().BeProperSubsetOf([ 1; 2; 3 ])
+        |> assertExnMsg
+            """
+Subject: x
+Should: BeProperSubsetOf
+Superset: [1, 2, 3]
+But had extra items: [2]
+Value: [1, 2, 2, 3]
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if subject has only an extra duplicate item with because`` () =
+        fun () ->
+            let x = [ 1; 2; 2; 3 ]
+            x.Should().BeProperSubsetOf([ 1; 2; 3 ], "Some reason")
+        |> assertExnMsg
+            """
+Subject: x
+Because: Some reason
+Should: BeProperSubsetOf
+Superset: [1, 2, 3]
+But had extra items: [2]
+Value: [1, 2, 2, 3]
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if superset has no extra items`` () =
+        fun () ->
+            let x = [ 1; 2; 3 ]
+            x.Should().BeProperSubsetOf([ 1; 2; 3 ])
+        |> assertExnMsg
+            """
+Subject: x
+Should: BeProperSubsetOf
+Superset: [1, 2, 3]
+But superset had no additional items: []
+Value: [1, 2, 3]
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if superset has no extra items with because`` () =
+        fun () ->
+            let x = [ 1; 2; 3 ]
+            x.Should().BeProperSubsetOf([ 1; 2; 3 ], "Some reason")
+        |> assertExnMsg
+            """
+Subject: x
+Because: Some reason
+Should: BeProperSubsetOf
+Superset: [1, 2, 3]
+But superset had no additional items: []
+Value: [1, 2, 3]
+"""
