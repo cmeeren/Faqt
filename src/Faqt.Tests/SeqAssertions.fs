@@ -612,7 +612,7 @@ module NotContain =
 
 
     [<Fact>]
-    let ``Fails with expected message if not containing the value`` () =
+    let ``Fails with expected message if containing the value`` () =
         fun () ->
             let x = [ 1; 2 ]
             x.Should().NotContain(2)
@@ -626,7 +626,7 @@ But was: [1, 2]
 
 
     [<Fact>]
-    let ``Fails with expected message if not containing the value with because`` () =
+    let ``Fails with expected message if containing the value with because`` () =
         fun () ->
             let x = [ 1; 2 ]
             x.Should().NotContain(2, "Some reason")
