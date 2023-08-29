@@ -660,15 +660,13 @@ module SequenceEqual =
 
     [<Fact>]
     let ``Passes if sequence contains all values in order`` () =
-        let x = ResizeArray()
-        x.AddRange([ 1; 2; 1; 3; 2 ])
+        let x = ResizeArray([ 1; 2; 1; 3; 2 ])
         x.Should().SequenceEqual([ 1; 2; 1; 3; 2 ])
 
 
     [<Fact>]
     let ``Passes if sequence contains all values in order including null values`` () =
-        let x = ResizeArray()
-        x.AddRange([ "a"; "b"; null; "c" ])
+        let x = ResizeArray([ "a"; "b"; null; "c" ])
         x.Should().SequenceEqual([ "a"; "b"; null; "c" ])
 
 
