@@ -1,6 +1,7 @@
 ﻿module Formatting
 
 open System
+open System.Collections.Generic
 open System.Globalization
 open System.IO
 open System.Runtime.CompilerServices
@@ -643,6 +644,21 @@ Value: invariant
 Subject: '"a"'
 Should: FailWith
 Value: "\U0001F44D"
+"""
+
+
+    [<Fact>]
+    let ``Rendering of KeyValuePair`` () =
+        fun () ->
+            let x = KeyValuePair(1, "asd")
+            x.Should().FailWith("Value", x)
+        |> assertExnMsg
+            """
+Subject: x
+Should: FailWith
+Value:
+  Key: 1
+  Value: asd
 """
 
 
