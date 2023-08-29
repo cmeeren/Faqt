@@ -2486,3 +2486,173 @@ Superset: [1, 2, 3]
 But superset had no additional items: []
 Value: [1, 2, 3]
 """
+
+
+module IntersectWith =
+
+
+    [<Fact>]
+    let ``Can be chained with And`` () =
+        [ 1 ].Should().IntersectWith([ 1 ]).Id<And<int list>>().And.Be([ 1 ])
+
+
+    let passData = [
+        [| [ 1 ]; [ 1 ] |] // Non-empty and equal
+        [| [ 1 ]; [ 1; 2 ] |] // Other has additional distinct item
+        [| [ 1 ]; [ 1; 2 ] |] // Other has additional duplicate item
+        [| [ 1; 2 ]; [ 1 ] |] // Subject has additional item
+        [| [ 1; 2 ]; [ 1 ] |] // Subject has additional distinct item
+        [| [ 1; 1 ]; [ 1 ] |] // Subject has additional duplicate item
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof passData)>]
+    let ``Passes if intersects`` (subject: int list) (other: int list) = subject.Should().IntersectWith(other)
+
+
+    let failData = [
+        [| []; [] |] // Both empty
+        [| []; [ 1 ] |] // Subject empty
+        [| [ 1 ]; [] |] // Other empty
+        [| [ 1 ]; [ 2 ] |] // Disjoint
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof failData)>]
+    let ``Fails if not intersects`` (subject: int list) (other: int list) =
+        Assert.Throws<AssertionFailedException>(fun () -> subject.Should().IntersectWith(other) |> ignore)
+
+
+    [<Fact>]
+    let ``Fails with expected message if null`` () =
+        fun () ->
+            let x: seq<int> = null
+            x.Should().IntersectWith([])
+        |> assertExnMsg
+            """
+Subject: x
+Should: IntersectWith
+Other: []
+But was: null
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if null with because`` () =
+        fun () ->
+            let x: seq<int> = null
+            x.Should().IntersectWith([], "Some reason")
+        |> assertExnMsg
+            """
+Subject: x
+Because: Some reason
+Should: IntersectWith
+Other: []
+But was: null
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if the sets are disjoint`` () =
+        fun () ->
+            let x = [ 1; 2 ]
+            x.Should().IntersectWith([ 3; 4 ])
+        |> assertExnMsg
+            """
+Subject: x
+Should: IntersectWith
+Other: [3, 4]
+But had no common items: []
+Value: [1, 2]
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if the sets are disjoint with because`` () =
+        fun () ->
+            let x = [ 1; 2 ]
+            x.Should().IntersectWith([ 3; 4 ], "Some reason")
+        |> assertExnMsg
+            """
+Subject: x
+Because: Some reason
+Should: IntersectWith
+Other: [3, 4]
+But had no common items: []
+Value: [1, 2]
+"""
+
+
+module NotIntersectWith =
+
+
+    [<Fact>]
+    let ``Can be chained with And`` () =
+        [].Should().NotIntersectWith([]).Id<And<int list>>().And.Be([])
+
+
+    [<Fact>]
+    let ``Passes if null`` = (null: seq<int>).Should().NotIntersectWith([])
+
+
+    let passData = [
+        [| []; [] |] // Both empty
+        [| []; [ 1 ] |] // Subject empty
+        [| [ 1 ]; [] |] // Other empty
+        [| [ 1 ]; [ 2 ] |] // Disjoint
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof passData)>]
+    let ``Passes if not intersects`` (subject: int list) (other: int list) =
+        subject.Should().NotIntersectWith(other)
+
+
+    let failData = [
+        [| [ 1 ]; [ 1 ] |] // Non-empty and equal
+        [| [ 1 ]; [ 1; 2 ] |] // Other has additional distinct item
+        [| [ 1 ]; [ 1; 2 ] |] // Other has additional duplicate item
+        [| [ 1; 2 ]; [ 1 ] |] // Subject has additional item
+        [| [ 1; 2 ]; [ 1 ] |] // Subject has additional distinct item
+        [| [ 1; 1 ]; [ 1 ] |] // Subject has additional duplicate item
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof failData)>]
+    let ``Fails if intersects`` (subject: int list) (other: int list) =
+        Assert.Throws<AssertionFailedException>(fun () -> subject.Should().NotIntersectWith(other) |> ignore)
+
+
+    [<Fact>]
+    let ``Fails with expected message if the sets intersect`` () =
+        fun () ->
+            let x = [ 1; 2; 3 ]
+            x.Should().NotIntersectWith([ 2; 3; 4 ])
+        |> assertExnMsg
+            """
+Subject: x
+Should: NotIntersectWith
+Other: [2, 3, 4]
+But found common items: [2, 3]
+Value: [1, 2, 3]
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if the sets intersect with because`` () =
+        fun () ->
+            let x = [ 1; 2; 3 ]
+            x.Should().NotIntersectWith([ 2; 3; 4 ], "Some reason")
+        |> assertExnMsg
+            """
+Subject: x
+Because: Some reason
+Should: NotIntersectWith
+Other: [2, 3, 4]
+But found common items: [2, 3]
+Value: [1, 2, 3]
+"""

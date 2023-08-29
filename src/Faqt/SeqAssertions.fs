@@ -1,5 +1,6 @@
 ﻿namespace Faqt
 
+open System.Collections.Generic
 open System.Runtime.CompilerServices
 open AssertionHelpers
 open Formatting
@@ -673,3 +674,44 @@ type SeqAssertions =
     static member BeProperSubsetOf(t: Testable<#seq<'a>>, superset: seq<'a>, ?because) : And<_> =
         use _ = t.Assert()
         t.BeSubsetOf'(superset, true, ?because = because)
+
+
+    /// Asserts that the subject has at least one item in common with the other sequence. Fails if one or both sequences
+    /// are empty.
+    [<Extension>]
+    static member IntersectWith(t: Testable<#seq<'a>>, other: seq<'a>, ?because) : And<_> =
+        use _ = t.Assert()
+
+        if isNull (box t.Subject) then
+            t.With("Other", other).With("But was", t.Subject).Fail(because)
+
+        let set = HashSet(t.Subject :> seq<'a>)
+
+        if not (other |> Seq.exists set.Contains) then
+            t
+                .With("Other", other)
+                .With("But had no common items", [])
+                .With("Value", t.Subject)
+                .Fail(because)
+
+        And(t)
+
+
+    /// Asserts that the subject has no items in common with the other sequence. Passes if the subject is null or if
+    /// either sequence is empty.
+    [<Extension>]
+    static member NotIntersectWith(t: Testable<#seq<'a>>, other: seq<'a>, ?because) : And<_> =
+        use _ = t.Assert()
+
+        if not (isNull (box t.Subject)) then
+            let set = HashSet(t.Subject :> seq<'a>)
+            set.IntersectWith(other)
+
+            if set.Count > 0 then
+                t
+                    .With("Other", other)
+                    .With("But found common items", set)
+                    .With("Value", t.Subject)
+                    .Fail(because)
+
+        And(t)
