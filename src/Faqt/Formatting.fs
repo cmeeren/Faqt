@@ -3,7 +3,6 @@
 open System
 open System.Globalization
 open System.IO
-open System.Text.Encodings.Web
 open System.Text.Json
 open System.Text.Json.Serialization
 open System.Text.RegularExpressions
@@ -160,32 +159,14 @@ type private JsonToYamlConverterVisitor(doc: YamlDocument) =
         base.Visit(mapping)
 
 
-let private unicodeEscapeCodePlaceholder = Guid.NewGuid().ToString()
-
-
-let private escapeUnicodeEscapeCodes (str: string) =
-    str.Replace(@"\u", unicodeEscapeCodePlaceholder)
-
-
-let private unEscapeUnicodeEscapeCodes (str: string) =
-    str.Replace(unicodeEscapeCodePlaceholder, @"\u")
-
-
 let private formatAsYaml getYamlVisitor (json: string) =
-    // YamlDotNet seems to try to decode individual surrogates in surrogate pairs, and throws:
-    // https://github.com/aaubry/YamlDotNet/issues/838
-    //
-    // As a workaround, escape everything that looks like a Unicode escape code so that YamlDotNet doesn't try to decode
-    // them, and un-escape at the end.
-
-    let json = escapeUnicodeEscapeCodes json
     let yaml = YamlStream()
     yaml.Load(new StringReader(json))
     yaml.Accept(getYamlVisitor yaml.Documents[0])
     let outputYaml = new StringWriter()
     yaml.Save(outputYaml, false)
     outputYaml.Flush()
-    outputYaml.ToString().Trim().Trim('.', '-').Trim() |> unEscapeUnicodeEscapeCodes
+    outputYaml.ToString().Trim().Trim('.', '-').Trim()
 
 
 let private getFormatter configureOptions formatAsYaml =
@@ -293,7 +274,6 @@ type YamlFormatterBuilder = {
     /// Returns the default builder. Note that changes to this format is not considered a breaking change.
     static member Default =
         YamlFormatterBuilder.Empty
-            .ConfigureJsonSerializerOptions(fun opts -> opts.Encoder <- JavaScriptEncoder.UnsafeRelaxedJsonEscaping)
             .ConfigureJsonFSharpOptions(fun opts ->
                 opts
                     .WithUnionExternalTag()

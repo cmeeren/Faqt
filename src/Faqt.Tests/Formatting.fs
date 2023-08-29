@@ -205,7 +205,7 @@ Value: asd
             """
 Subject: '"a"'
 Should: FailWith
-Value: as\u0011d
+Value: "as\x11d"
 """
 
 
@@ -642,7 +642,7 @@ Value: invariant
             """
 Subject: '"a"'
 Should: FailWith
-Value: \uD83D\uDC4D
+Value: "\U0001F44D"
 """
 
 
