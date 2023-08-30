@@ -838,60 +838,26 @@ Expected: []
 But was: null
 """
 
-
-    [<Fact>]
-    let ``Fails with expected message if different length`` () =
-        fun () ->
-            let x = [ 1; 2; 3 ]
-            x.Should().HaveSameItemsAs([ 1; 2 ])
-        |> assertExnMsg
-            """
-Subject: x
-Should: HaveSameItemsAs
-Expected length: 2
-Actual length: 3
-Expected: [1, 2]
-Actual: [1, 2, 3]
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message if different length with because`` () =
-        fun () ->
-            let x = [ 1; 2; 3 ]
-            x.Should().HaveSameItemsAs([ 1; 2 ], "Some reason")
-        |> assertExnMsg
-            """
-Subject: x
-Because: Some reason
-Should: HaveSameItemsAs
-Expected length: 2
-Actual length: 3
-Expected: [1, 2]
-Actual: [1, 2, 3]
-"""
-
-
     [<Fact>]
     let ``Fails with expected message if items are not equal with duplicates`` () =
         fun () ->
-            let x = [ 1; 3; 1; 2; 5; 4; 2 ]
+            let x = [ 7; 1; 3; 1; 2; 5; 4; 2 ]
             x.Should().HaveSameItemsAs([ 1; 3; 3; 5; 4; 9; 2 ])
         |> assertExnMsg
             """
 Subject: x
 Should: HaveSameItemsAs
 Missing items: [3, 9]
-Additional items: [1, 2]
+Additional items: [7, 1, 2]
 Expected: [1, 3, 3, 5, 4, 9, 2]
-Actual: [1, 3, 1, 2, 5, 4, 2]
+Actual: [7, 1, 3, 1, 2, 5, 4, 2]
 """
 
 
     [<Fact>]
     let ``Fails with expected message if items are not equal with duplicates with because`` () =
         fun () ->
-            let x = [ 1; 3; 1; 2; 5; 4; 2 ]
+            let x = [ 7; 1; 3; 1; 2; 5; 4; 2 ]
             x.Should().HaveSameItemsAs([ 1; 3; 3; 5; 4; 9; 2 ], "Some reason")
         |> assertExnMsg
             """
@@ -899,9 +865,9 @@ Subject: x
 Because: Some reason
 Should: HaveSameItemsAs
 Missing items: [3, 9]
-Additional items: [1, 2]
+Additional items: [7, 1, 2]
 Expected: [1, 3, 3, 5, 4, 9, 2]
-Actual: [1, 3, 1, 2, 5, 4, 2]
+Actual: [7, 1, 3, 1, 2, 5, 4, 2]
 """
 
 
