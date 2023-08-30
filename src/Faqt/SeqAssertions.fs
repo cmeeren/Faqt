@@ -6,18 +6,22 @@ open AssertionHelpers
 open Formatting
 
 
-[<Struct>]
-type private SatisfyReportItem = { Index: int; Failure: FailureData }
+[<AutoOpen>]
+module private SeqAssertionsHelpers =
 
 
-type private ExpectedActualReportItem<'a> = { Index: int; Expected: 'a; Actual: 'a }
+    [<Struct>]
+    type SatisfyReportItem = { Index: int; Failure: FailureData }
 
 
-type private BeDistinctByReportItem<'a, 'b> = {
-    Count: int
-    Projected: 'b
-    Items: 'a list
-}
+    type ExpectedActualReportItem<'a> = { Index: int; Expected: 'a; Actual: 'a }
+
+
+    type BeDistinctByReportItem<'a, 'b> = {
+        Count: int
+        Projected: 'b
+        Items: 'a list
+    }
 
 
 [<Extension>]

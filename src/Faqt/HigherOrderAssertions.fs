@@ -5,7 +5,11 @@ open AssertionHelpers
 open Formatting
 
 
-type private SatisfyAllReportItem = { Index: int; Failure: FailureData }
+[<AutoOpen>]
+module private HigherOrderAssertionsHelpers =
+
+
+    type SatisfyAllReportItem = { Index: int; Failure: FailureData }
 
 
 [<Extension>]
