@@ -202,8 +202,8 @@ type SeqAssertions =
                         if actualItem <> expectedItem then
                             Some {
                                 Index = i
-                                Expected = expectedItem
-                                Actual = actualItem
+                                Expected = TryFormat expectedItem
+                                Actual = TryFormat actualItem
                             }
                         else
                             None
@@ -413,7 +413,7 @@ type SeqAssertions =
                 if xs.Length > 1 then
                     Some {
                         Count = xs.Length
-                        Projected = p
+                        Projected = TryFormat p
                         Items = xs |> List.map (box >> TryFormat)
                     }
                 else
@@ -439,7 +439,7 @@ type SeqAssertions =
 
             if a > b then
                 t
-                    .With("But found", [ {| Index = i; Item = a |}; {| Index = i + 1; Item = b |} ])
+                    .With("But found", [ {| Index = i; Item = TryFormat a |}; {| Index = i + 1; Item = TryFormat b |} ])
                     .With("Value", t.Subject)
                     .Fail(because)
 
@@ -465,13 +465,13 @@ type SeqAssertions =
                         [
                             {|
                                 Index = i
-                                Item = a
-                                Projected = a'
+                                Item = TryFormat a
+                                Projected = TryFormat a'
                             |}
                             {|
                                 Index = i + 1
-                                Item = b
-                                Projected = b'
+                                Item = TryFormat b
+                                Projected = TryFormat b'
                             |}
                         ]
                     )
@@ -493,7 +493,7 @@ type SeqAssertions =
 
             if a < b then
                 t
-                    .With("But found", [ {| Index = i; Item = a |}; {| Index = i + 1; Item = b |} ])
+                    .With("But found", [ {| Index = i; Item = TryFormat a |}; {| Index = i + 1; Item = TryFormat b |} ])
                     .With("Value", t.Subject)
                     .Fail(because)
 
@@ -519,13 +519,13 @@ type SeqAssertions =
                         [
                             {|
                                 Index = i
-                                Item = a
-                                Projected = a'
+                                Item = TryFormat a
+                                Projected = TryFormat a'
                             |}
                             {|
                                 Index = i + 1
-                                Item = b
-                                Projected = b'
+                                Item = TryFormat b
+                                Projected = TryFormat b'
                             |}
                         ]
                     )
@@ -547,7 +547,7 @@ type SeqAssertions =
 
             if a >= b then
                 t
-                    .With("But found", [ {| Index = i; Item = a |}; {| Index = i + 1; Item = b |} ])
+                    .With("But found", [ {| Index = i; Item = TryFormat a |}; {| Index = i + 1; Item = TryFormat b |} ])
                     .With("Value", t.Subject)
                     .Fail(because)
 
@@ -573,13 +573,13 @@ type SeqAssertions =
                         [
                             {|
                                 Index = i
-                                Item = a
-                                Projected = a'
+                                Item = TryFormat a
+                                Projected = TryFormat a'
                             |}
                             {|
                                 Index = i + 1
-                                Item = b
-                                Projected = b'
+                                Item = TryFormat b
+                                Projected = TryFormat b'
                             |}
                         ]
                     )
@@ -601,7 +601,7 @@ type SeqAssertions =
 
             if a <= b then
                 t
-                    .With("But found", [ {| Index = i; Item = a |}; {| Index = i + 1; Item = b |} ])
+                    .With("But found", [ {| Index = i; Item = TryFormat a |}; {| Index = i + 1; Item = TryFormat b |} ])
                     .With("Value", t.Subject)
                     .Fail(because)
 
@@ -627,13 +627,13 @@ type SeqAssertions =
                         [
                             {|
                                 Index = i
-                                Item = a
-                                Projected = a'
+                                Item = TryFormat a
+                                Projected = TryFormat a'
                             |}
                             {|
                                 Index = i + 1
-                                Item = b
-                                Projected = b'
+                                Item = TryFormat b
+                                Projected = TryFormat b'
                             |}
                         ]
                     )
