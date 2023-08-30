@@ -780,6 +780,131 @@ Actual: [1, 3, 2]
 """
 
 
+module HaveSameItemsAs =
+
+
+    [<Fact>]
+    let ``Can be chained with And`` () =
+        [ 1 ].Should().HaveSameItemsAs([ 1 ]).Id<And<int list>>().And.Be([ 1 ])
+
+
+    [<Fact>]
+    let ``Passes if sequence contains all values ignoring order`` () =
+        let x = ResizeArray([ 1; 2; 1; 3 ])
+        x.Should().HaveSameItemsAs([ 1; 1; 2; 3 ])
+
+
+    [<Fact>]
+    let ``Passes if sequence contains all values ignoring order including null values`` () =
+        let x = ResizeArray([ "a"; "b"; null; "c" ])
+        x.Should().HaveSameItemsAs([ "c"; null; "a"; "b" ])
+
+
+    [<Fact>]
+    let ``Passes if both subject and expected is null`` () =
+        (null: seq<int>).Should().HaveSameItemsAs(null)
+
+
+    [<Fact>]
+    let ``Fails if have same counts and distinct items, but different number of duplicate items`` () =
+        Assert.Throws<AssertionFailedException>(fun () -> [ 1; 1; 2 ].Should().HaveSameItemsAs([ 1; 2; 2 ]) |> ignore)
+
+
+    [<Fact>]
+    let ``Fails with expected message if only subject is null`` () =
+        fun () ->
+            let x: seq<int> = null
+            x.Should().HaveSameItemsAs([])
+        |> assertExnMsg
+            """
+Subject: x
+Should: HaveSameItemsAs
+Expected: []
+But was: null
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if only subject is null with because`` () =
+        fun () ->
+            let x: seq<int> = null
+            x.Should().HaveSameItemsAs([], "Some reason")
+        |> assertExnMsg
+            """
+Subject: x
+Because: Some reason
+Should: HaveSameItemsAs
+Expected: []
+But was: null
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if different length`` () =
+        fun () ->
+            let x = [ 1; 2; 3 ]
+            x.Should().HaveSameItemsAs([ 1; 2 ])
+        |> assertExnMsg
+            """
+Subject: x
+Should: HaveSameItemsAs
+Expected length: 2
+Actual length: 3
+Expected: [1, 2]
+Actual: [1, 2, 3]
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if different length with because`` () =
+        fun () ->
+            let x = [ 1; 2; 3 ]
+            x.Should().HaveSameItemsAs([ 1; 2 ], "Some reason")
+        |> assertExnMsg
+            """
+Subject: x
+Because: Some reason
+Should: HaveSameItemsAs
+Expected length: 2
+Actual length: 3
+Expected: [1, 2]
+Actual: [1, 2, 3]
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if items are not equal with duplicates`` () =
+        fun () ->
+            let x = [ 1; 3; 1; 2; 5; 4; 2 ]
+            x.Should().HaveSameItemsAs([ 1; 3; 3; 5; 4; 9; 2 ])
+        |> assertExnMsg
+            """
+Subject: x
+Should: HaveSameItemsAs
+Missing items: [3, 9]
+Additional items: [1, 2]
+Expected: [1, 3, 3, 5, 4, 9, 2]
+Actual: [1, 3, 1, 2, 5, 4, 2]
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if items are not equal with duplicates with because`` () =
+        fun () ->
+            let x = [ 1; 3; 1; 2; 5; 4; 2 ]
+            x.Should().HaveSameItemsAs([ 1; 3; 3; 5; 4; 9; 2 ], "Some reason")
+        |> assertExnMsg
+            """
+Subject: x
+Because: Some reason
+Should: HaveSameItemsAs
+Missing items: [3, 9]
+Additional items: [1, 2]
+Expected: [1, 3, 3, 5, 4, 9, 2]
+Actual: [1, 3, 1, 2, 5, 4, 2]
+"""
+
+
 module ContainExactlyOneItem =
 
 

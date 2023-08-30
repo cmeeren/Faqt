@@ -11,6 +11,11 @@ open System.Text.RegularExpressions
 open Microsoft.FSharp.Reflection
 
 
+/// A wrapper to use for dictionary keys to avoid problems if the key is null.
+[<Struct>]
+type Key<'a> = Key of 'a
+
+
 /// Memoizes the specified function using reference equality on the input argument.
 ///
 /// Don't call with additional arguments as ad-hoc tuples or records, since these will never be reference equal.

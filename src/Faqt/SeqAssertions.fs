@@ -215,6 +215,68 @@ type SeqAssertions =
         And(t)
 
 
+    /// Asserts that the subject contains the same items (ignoring order) as the specified sequence, as determined using
+    /// the default equality comparison (=). Passes if both sequences are null.
+    [<Extension>]
+    static member HaveSameItemsAs(t: Testable<#seq<'a>>, expected: seq<'a>, ?because) : And<_> =
+        use _ = t.Assert()
+
+        if isNull (box t.Subject) && not (isNull expected) then
+            t.With("Expected", expected).With("But was", t.Subject).Fail(because)
+        elif not (isNull (box t.Subject)) then
+            let subjectLength = Seq.stringOptimizedLength t.Subject
+            let expectedLength = Seq.stringOptimizedLength expected
+
+            if subjectLength <> expectedLength then
+                t
+                    .With("Expected length", expectedLength)
+                    .With("Actual length", subjectLength)
+                    .With("Expected", expected)
+                    .With("Actual", t.Subject)
+                    .Fail(because)
+            else
+                let freqMap = Dictionary()
+                let additionalSubjectItems = ResizeArray<_>()
+                let missingSubjectItems = ResizeArray<_>()
+
+                for x in t.Subject do
+                    let key = Key x
+
+                    match freqMap.TryGetValue(key) with
+                    | true, count -> freqMap[key] <- count + 1
+                    | false, _ -> freqMap[key] <- 1
+
+                for x in expected do
+                    let key = Key x
+
+                    match freqMap.TryGetValue(key) with
+                    | true, 1 -> freqMap.Remove(key) |> ignore
+                    | true, count -> freqMap[key] <- count - 1
+                    | false, _ -> missingSubjectItems.Add(x)
+
+                for x in t.Subject do
+                    let key = Key x
+
+                    match freqMap.TryGetValue(key) with
+                    | true, 1 ->
+                        additionalSubjectItems.Add(x)
+                        freqMap.Remove(key) |> ignore
+                    | true, count ->
+                        additionalSubjectItems.Add(x)
+                        freqMap[key] <- count - 1
+                    | false, _ -> ()
+
+                if missingSubjectItems.Count > 0 || additionalSubjectItems.Count > 0 then
+                    t
+                        .With("Missing items", missingSubjectItems)
+                        .With("Additional items", additionalSubjectItems)
+                        .With("Expected", expected)
+                        .With("Actual", t.Subject)
+                        .Fail(because)
+
+        And(t)
+
+
     /// Asserts that the subject contains exactly one item.
     [<Extension>]
     static member ContainExactlyOneItem(t: Testable<#seq<'a>>, ?because) : AndDerived<_, 'a> =
