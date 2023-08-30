@@ -107,6 +107,17 @@ type private TryFormatConverter(fallback: exn -> obj -> obj) =
         with ex ->
             JsonSerializer.Serialize(writer, fallback ex value, options)
 
+    override this.WriteAsPropertyName(writer, TryFormat value, options) =
+        let str = JsonSerializer.Serialize(value, options)
+
+        let str =
+            if str.StartsWith('"') && str.EndsWith('"') then
+                str.Substring(1, str.Length - 2)
+            else
+                str
+
+        writer.WritePropertyName(str)
+
 
 type private NoOpYamlVisitor() =
     inherit YamlVisitorBase()

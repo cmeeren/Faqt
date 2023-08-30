@@ -662,6 +662,34 @@ Value:
 """
 
 
+    [<Fact>]
+    let ``Supports TryFormat with string as dictionary key`` () =
+        fun () ->
+            let x = dict [ TryFormat "a", 1 ]
+            x.Should().FailWith("Value", x)
+        |> assertExnMsg
+            """
+Subject: x
+Should: FailWith
+Value:
+  a: 1
+"""
+
+
+    [<Fact>]
+    let ``Supports TryFormat with int as dictionary key`` () =
+        fun () ->
+            let x = dict [ TryFormat 1, 1 ]
+            x.Should().FailWith("Value", x)
+        |> assertExnMsg
+            """
+Subject: x
+Should: FailWith
+Value:
+  '1': 1
+"""
+
+
 module YamlFormatterBuilder =
 
 
