@@ -24,8 +24,8 @@ type private Assertions =
         use _ = t.Assert()
 
         t
-            .With("A", Unserializable())
-            .With("B", [ TryFormat(Unserializable()) ])
+            .With("A", TestUnserializableType())
+            .With("B", [ TryFormat(TestUnserializableType()) ])
             .Fail(None)
 
 
@@ -976,10 +976,10 @@ Subject: '"a"'
 Should: FailWithUnserializableAtTopAndNested
 A:
   Error: Foo
-  ToString: Formatting+Unserializable
+  ToString: TestUtils+TestUnserializableType
 B:
 - Error: Foo
-  ToString: Formatting+Unserializable
+  ToString: TestUtils+TestUnserializableType
 """
 
 

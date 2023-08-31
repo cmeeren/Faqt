@@ -61,7 +61,7 @@ type TestSubType<'a, 'b>() =
     interface TestInterface<'a, 'b>
 
 
-type Unserializable() =
+type TestUnserializableType() =
     member _.WillThrow = failwith<int> "Foo"
 
 
