@@ -975,14 +975,14 @@ For value: a
 
     [<Fact>]
     let ``Fails with expected message with because`` () =
-        fun () -> "a".Should().Transform(int, "Some reason")
+        fun () -> "a".Should().Transform((fun _ -> failwith "foo"), "Some reason")
         |> assertExnMsgWildcard
             """
 Subject: '"a"'
 Because: Some reason
 Should: Transform
 But threw: |-
-  System.FormatException: The input string 'a' was not in a correct format.
+  System.Exception: foo
      at *
 For value: a
 """
