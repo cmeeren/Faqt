@@ -177,7 +177,7 @@ open AssertionHelpers
 [<Extension>]
 type Assertions =
 
-    /// Asserts that the subject is the specified value, using the default equality comparison (=).
+    /// Asserts that the subject is equal to the specified value, using the default equality comparison (=).
     [<Extension>]
     static member Be(t: Testable<'a>, expected: 'a, ?because) : And<'a> =
         use _ = t.Assert()

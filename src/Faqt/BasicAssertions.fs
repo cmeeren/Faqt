@@ -9,7 +9,7 @@ open Formatting
 type BasicAssertions =
 
 
-    /// Asserts that the subject is the specified value, using the specified equality comparison.
+    /// Asserts that the subject is equal to the specified value, using the specified equality comparison.
     [<Extension>]
     static member Be(t: Testable<'a>, expected: 'b, isEqual: 'a -> 'b -> bool, ?because) : AndDerived<'a, 'b> =
         use _ = t.Assert()
@@ -24,7 +24,7 @@ type BasicAssertions =
         AndDerived(t, expected)
 
 
-    /// Asserts that the subject is the specified value, using the default equality comparison (=).
+    /// Asserts that the subject is equal to the specified value, using the default equality comparison (=).
     [<Extension>]
     static member Be(t: Testable<'a>, expected: 'a, ?because) : And<'a> =
         use _ = t.Assert()
@@ -35,7 +35,7 @@ type BasicAssertions =
         And(t)
 
 
-    /// Asserts that the subject is not the specified value, using default equality comparison (=).
+    /// Asserts that the subject is not equal to the specified value, using default equality comparison (=).
     [<Extension>]
     static member NotBe(t: Testable<'a>, other: 'b, isEqual: 'a -> 'b -> bool, ?because) : And<'a> =
         use _ = t.Assert()
@@ -50,7 +50,7 @@ type BasicAssertions =
         And(t)
 
 
-    /// Asserts that the subject is not the specified value, using default equality comparison (=).
+    /// Asserts that the subject is not equal to the specified value, using default equality comparison (=).
     [<Extension>]
     static member NotBe(t: Testable<'a>, other: 'a, ?because) : And<'a> =
         use _ = t.Assert()
