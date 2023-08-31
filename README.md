@@ -31,19 +31,7 @@ considered a non-breaking change.
 * [A motivating example](#a-motivating-example)
 * [Installation and requirements](#installation-and-requirements)
 * [Faqt in a nutshell](#faqt-in-a-nutshell)
-* [Writing your own assertions](#writing-your-own-assertions)
-* [Multiple assertion chains without `|> ignore`](#multiple-assertion-chains-without--ignore)
-* [Customizing the format](#customizing-the-format)
-* [Security considerations](#security-considerations)
-* [FAQ](#faq)
-  * [Which testing frameworks does Faqt work with?](#which-testing-frameworks-does-faqt-work-with)
-  * [Why is the subject name not correct in my specific example?](#why-is-the-subject-name-not-correct-in-my-specific-example)
-  * [Why do I have to use `Should(())` inside an assertion chain?](#why-do-i-have-to-use-should-inside-an-assertion-chain)
-  * [Why does this assertion pass/fail for null?](#why-does-this-assertion-passfail-for-null)
-  * [Why not FluentAssertions?](#why-not-fluentassertions)
-  * [Why not Shouldly?](#why-not-shouldly)
-  * [Why not Unquote?](#why-not-unquote)
-  * [Can I use Faqt from C#?](#can-i-use-faqt-from-c)
+* [Documentation](#documentation)
 
 <!-- TOC -->
 
