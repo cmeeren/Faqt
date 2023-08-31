@@ -195,6 +195,17 @@ Value: asd
 
 
     [<Fact>]
+    let ``Rendering of empty string`` () =
+        fun () -> "a".Should().FailWith("Value", "")
+        |> assertExnMsg
+            """
+Subject: '"a"'
+Should: FailWith
+Value: ''
+"""
+
+
+    [<Fact>]
     let ``Rendering of string with non-printable character`` () =
         fun () -> "a".Should().FailWith("Value", "as\u0011d")
         |> assertExnMsg
