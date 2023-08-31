@@ -35,7 +35,7 @@ type BasicAssertions =
         And(t)
 
 
-    /// Asserts that the subject is not equal to the specified value, using default equality comparison (=).
+    /// Asserts that the subject is not equal to the specified value using the specified equality comparison.
     [<Extension>]
     static member NotBe(t: Testable<'a>, other: 'b, isEqual: 'a -> 'b -> bool, ?because) : And<'a> =
         use _ = t.Assert()
