@@ -9,7 +9,7 @@ open Formatting
 type BasicAssertions =
 
 
-    /// Asserts that the subject is equal to the specified value, using the specified equality comparison.
+    /// Asserts that the subject is equal to the specified value using the specified equality comparison.
     [<Extension>]
     static member Be(t: Testable<'a>, expected: 'b, isEqual: 'a -> 'b -> bool, ?because) : AndDerived<'a, 'b> =
         use _ = t.Assert()
