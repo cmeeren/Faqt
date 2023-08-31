@@ -3,7 +3,6 @@
 open System
 open System.Collections.Generic
 open System.Globalization
-open System.IO
 open System.Runtime.CompilerServices
 open System.Text.Json
 open System.Text.Json.Serialization
@@ -660,16 +659,16 @@ Value:
 
     [<Fact>]
     let ``Rendering when serialization throws`` () =
-        fun () -> "".Should().FailWith("Value", new MemoryStream())
+        fun () -> "".Should().FailWith("Value", TestUnserializableType())
         |> assertExnMsgWildcard
             """
 Subject: '""'
 Should: FailWith
 Value:
   SERIALIZATION EXCEPTION: |-
-    System.InvalidOperationException: Timeouts are not supported on this stream.
+    System.Exception: Foo
        at *
-  ToString: System.IO.MemoryStream
+  ToString: TestUtils+TestUnserializableType
 """
 
 
