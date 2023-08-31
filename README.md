@@ -134,17 +134,19 @@ As expected by the discerning F# developer, Faqt is:
 - **Usable:** Faqt comes with batteries included, and contains many useful assertions, including aliases
   (like `BeTrue()` for `Be(true)` on booleans, and `BeSome` for `BeOfCase(Some)` on `option` values).
 - **Safe:** Assertions are as type-safe as F# allows.
-- **Extensible:** No assertion? No problem! Writing your own assertions is very simple (details below).
+- **Extensible:** No assertion? No problem! Writing your own assertions is very simple (details in
+  the [documentation](DOCUMENTATION.md)).
 - **Informative:** The assertion failure messages are designed to give you all the information you need in a consistent
   and easy-to-read format.
 - **Discoverable:** The fluent syntax means you can just type a dot to discover all possible assertions and actions on
   the current value.
 - **Composable:** As far as possible, assertions are orthogonal (they check one thing only). For example, an empty
-  collection will pass an assertion verifying that the collection only contains items that match a predicate. You can
-  chain assertions with `And`, `Whose`, `WhoseValue`, `That`, and `Subject`, assert on derived values like with
-  `BeSome()`, and compose assertions with higher-order assertions like `Satisfy` and `SatisfyAll`.
-- **Configurable:** You can configure, either globally or for a specific scope, how assertion failure messages are
-  rendered. You can easily tweak the defaults or completely replace the formatter.
+  collection will pass an assertion verifying that the collection only contains items that match a predicate, just like
+  F#'s `Seq.forall` and similar. You can chain assertions with `And`, `Whose`, `WhoseValue`, `That`, and `Subject`,
+  assert on derived values like with `BeSome()`, and compose assertions with higher-order assertions like `Satisfy`
+  and `SatisfyAll`.
+- **Configurable:** You can configure, either globally or for a specific scope (such as a test), how assertion failure
+  messages are rendered. You can easily tweak the defaults or completely replace the formatter.
 - **Production-ready:** Faqt is very well tested and is highly unlikely to break your code, whether test or production.
 
 ## Documentation
