@@ -35,6 +35,7 @@
     <Compile Include="BoolAssertions.fs" />
     <Compile Include="NullableAssertions.fs" />
     <Compile Include="StringAssertions.fs" />
+    <Compile Include="DictionaryAssertions.fs" />
     <Compile Include="SeqAssertions.fs" />
   </ItemGroup>
 
