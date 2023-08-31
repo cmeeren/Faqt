@@ -589,9 +589,8 @@ But was: null
 Subject: x
 Should: BeOfType
 Expected: System.Int32
-But was:
-  Type: System.String
-  Value: asd
+But was: System.String
+Subject value: asd
 """
 
 
@@ -606,9 +605,8 @@ But was:
 Subject: x
 Should: BeOfType
 Expected: TestUtils+TestInterface
-But was:
-  Type: TestUtils+TestSubType
-  Value: {}
+But was: TestUtils+TestSubType
+Subject value: {}
 """
 
 
@@ -623,9 +621,8 @@ But was:
 Subject: x
 Should: BeOfType
 Expected: TestUtils+TestInterface<System.String, System.Int32>
-But was:
-  Type: TestUtils+TestSubType<System.String, System.Int32>
-  Value: {}
+But was: TestUtils+TestSubType<System.String, System.Int32>
+Subject value: {}
 """
 
 
@@ -640,9 +637,8 @@ But was:
 Subject: x
 Should: BeOfType
 Expected: TestUtils+TestBaseType
-But was:
-  Type: TestUtils+TestSubType
-  Value: {}
+But was: TestUtils+TestSubType
+Subject value: {}
 """
 
 
@@ -657,9 +653,8 @@ Subject: x
 Because: Some reason
 Should: BeOfType
 Expected: System.Int32
-But was:
-  Type: System.String
-  Value: asd
+But was: System.String
+Subject value: asd
 """
 
 
@@ -710,9 +705,8 @@ But was: null
 Subject: x
 Should: BeOfType
 Expected: System.Int32
-But was:
-  Type: System.String
-  Value: asd
+But was: System.String
+Subject value: asd
 """
 
 
@@ -727,9 +721,8 @@ But was:
 Subject: x
 Should: BeOfType
 Expected: TestUtils+TestInterface
-But was:
-  Type: TestUtils+TestSubType
-  Value: {}
+But was: TestUtils+TestSubType
+Subject value: {}
 """
 
 
@@ -744,9 +737,8 @@ But was:
 Subject: x
 Should: BeOfType
 Expected: TestUtils+TestInterface<System.String, System.Int32>
-But was:
-  Type: TestUtils+TestSubType<System.String, System.Int32>
-  Value: {}
+But was: TestUtils+TestSubType<System.String, System.Int32>
+Subject value: {}
 """
 
 
@@ -761,9 +753,8 @@ But was:
 Subject: x
 Should: BeOfType
 Expected: TestUtils+TestBaseType
-But was:
-  Type: TestUtils+TestSubType
-  Value: {}
+But was: TestUtils+TestSubType
+Subject value: {}
 """
 
 
@@ -778,9 +769,8 @@ Subject: x
 Because: Some reason
 Should: BeOfType
 Expected: System.Int32
-But was:
-  Type: System.String
-  Value: asd
+But was: System.String
+Subject value: asd
 """
 
 
@@ -845,9 +835,8 @@ But was: null
 Subject: x
 Should: BeAssignableTo
 Expected: System.Int32
-But was:
-  Type: System.String
-  Value: asd
+But was: System.String
+Subject value: asd
 """
 
 
@@ -862,9 +851,8 @@ Subject: x
 Because: Some reason
 Should: BeAssignableTo
 Expected: System.Int32
-But was:
-  Type: System.String
-  Value: asd
+But was: System.String
+Subject value: asd
 """
 
 
@@ -937,9 +925,8 @@ But was: null
 Subject: x
 Should: BeAssignableTo
 Expected: System.Int32
-But was:
-  Type: System.String
-  Value: asd
+But was: System.String
+Subject value: asd
 """
 
 
@@ -954,9 +941,8 @@ Subject: x
 Because: Some reason
 Should: BeAssignableTo
 Expected: System.Int32
-But was:
-  Type: System.String
-  Value: asd
+But was: System.String
+Subject value: asd
 """
 
 

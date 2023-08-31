@@ -219,13 +219,8 @@ type Testable<'a> with
             else
                 this
                     .With("Expected", expectedType)
-                    .With(
-                        "But was",
-                        {|
-                            Type = actualType
-                            Value = TryFormat this.Subject
-                        |}
-                    )
+                    .With("But was", actualType)
+                    .With("Subject value", this.Subject)
                     .Fail(because)
 
 
@@ -254,13 +249,8 @@ type Testable<'a> with
             else
                 this
                     .With("Expected", expectedType)
-                    .With(
-                        "But was",
-                        {|
-                            Type = actualType
-                            Value = TryFormat this.Subject
-                        |}
-                    )
+                    .With("But was", actualType)
+                    .With("Subject value", this.Subject)
                     .Fail(because)
 
 
