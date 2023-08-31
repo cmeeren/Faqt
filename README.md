@@ -461,6 +461,10 @@ Another way to look at it is that negative assertions could be thought of concep
 i.e., just an inversion of the corresponding positive assertion. In this light, anything that fails the positive
 assertion (including `null`) should pass the negative assertion.
 
+The only exceptions are for assertions that check equality, such as `Be` or `BeSameAs`. Here, `null` is considered equal
+to `null` (which is consistent with the default F# implementations of structural and reference equality). This also
+extends to `SequenceEqual` and `HaveSameItemsAs`, which will pass if both sequences are `null`.
+
 ### Why not FluentAssertions?
 
 FluentAssertions is a fantastic library, and very much the inspiration for Faqt. Unfortunately, its API design causes
