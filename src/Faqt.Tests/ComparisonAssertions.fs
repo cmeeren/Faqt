@@ -97,7 +97,7 @@ module NotBeCloseTo =
 
 
     [<Fact>]
-    let ``Fails for non-equal integers with zero tolerance and can be chained with And`` () =
+    let ``Passes for non-equal integers with zero tolerance and can be chained with And`` () =
         (2).Should().NotBeCloseTo(1, 0).Id<And<int>>().And.Be(2)
 
 
