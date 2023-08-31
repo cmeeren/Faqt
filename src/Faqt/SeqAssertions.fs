@@ -152,7 +152,7 @@ type SeqAssertions =
         And(t)
 
 
-    /// Asserts that the subject contains the specified item, as determined using the default equality comparison (=).
+    /// Asserts that the subject contains the specified item.
     [<Extension>]
     static member Contain(t: Testable<#seq<'a>>, item: 'a, ?because) : AndDerived<_, 'a> =
         use _ = t.Assert()
@@ -163,8 +163,7 @@ type SeqAssertions =
         AndDerived(t, item)
 
 
-    /// Asserts that the subject does not contain the specified item, as determined using the default equality
-    /// comparison (=). Passes if the subject is null.
+    /// Asserts that the subject does not contain the specified item. Passes if the subject is null.
     [<Extension>]
     static member NotContain(t: Testable<#seq<'a>>, item: 'a, ?because) : And<_> =
         use _ = t.Assert()
@@ -175,8 +174,8 @@ type SeqAssertions =
         And(t)
 
 
-    /// Asserts that the subject contains the same items in the same order as the specified sequence, as determined
-    /// using the default equality comparison (=). Passes if both sequences are null.
+    /// Asserts that the subject contains the same items in the same order as the specified sequence. Passes if both
+    /// sequences are null.
     [<Extension>]
     static member SequenceEqual(t: Testable<#seq<'a>>, expected: seq<'a>, ?because) : And<_> =
         use _ = t.Assert()
@@ -219,8 +218,8 @@ type SeqAssertions =
         And(t)
 
 
-    /// Asserts that the subject contains the same items (ignoring order) as the specified sequence, as determined using
-    /// the default equality comparison (=). Passes if both sequences are null.
+    /// Asserts that the subject contains the same items (ignoring order) as the specified sequence. Passes if both
+    /// sequences are null.
     [<Extension>]
     static member HaveSameItemsAs(t: Testable<#seq<'a>>, expected: seq<'a>, ?because) : And<_> =
         use _ = t.Assert()
@@ -373,7 +372,7 @@ type SeqAssertions =
             AndDerived(t, matchingItems)
 
 
-    /// Asserts that the subject is distinct, as determined using default equality comparison (=).
+    /// Asserts that the subject is distinct.
     [<Extension>]
     static member BeDistinct(t: Testable<#seq<'a>>, ?because) : And<_> =
         use _ = t.Assert()
@@ -395,8 +394,7 @@ type SeqAssertions =
         And(t)
 
 
-    /// Asserts that the subject is distinct by the specified projection, as determined using default equality
-    /// comparison (=).
+    /// Asserts that the subject is distinct by the specified projection.
     [<Extension>]
     static member BeDistinctBy(t: Testable<#seq<'a>>, projection: 'a -> 'b, ?because) : And<_> =
         use _ = t.Assert()

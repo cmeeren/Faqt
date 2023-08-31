@@ -103,8 +103,7 @@ type DictionaryAssertions =
         And(t)
 
 
-    /// Asserts that the subject contains the specified key-value pair, as determined using the default equality
-    /// comparison (=).
+    /// Asserts that the subject contains the specified key-value pair.
     [<Extension>]
     static member Contain
         (
@@ -122,8 +121,7 @@ type DictionaryAssertions =
         AndDerived(t, kvp)
 
 
-    /// Asserts that the subject does not contain the specified key-value pair, as determined using the default equality
-    /// comparison (=). Passes if the subject is null.
+    /// Asserts that the subject does not contain the specified key-value pair. Passes if the subject is null.
     [<Extension>]
     static member NotContain(t: Testable<#IDictionary<'key, 'value>>, key: 'key, value: 'value, ?because) : And<_> =
         use _ = t.Assert()
@@ -135,8 +133,8 @@ type DictionaryAssertions =
         And(t)
 
 
-    /// Asserts that the subject contains the same items as the specified dictionary, as determined using the default
-    /// equality comparison (=). Passes if both dictionaries are null.
+    /// Asserts that the subject contains the same items as the specified dictionary. Passes if both dictionaries are
+    /// null.
     [<Extension>]
     static member HaveSameItemsAs
         (

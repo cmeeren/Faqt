@@ -24,7 +24,7 @@ type BasicAssertions =
         AndDerived(t, expected)
 
 
-    /// Asserts that the subject is equal to the specified value, using the default equality comparison (=).
+    /// Asserts that the subject is equal to the specified value.
     [<Extension>]
     static member Be(t: Testable<'a>, expected: 'a, ?because) : And<'a> =
         use _ = t.Assert()
@@ -50,7 +50,7 @@ type BasicAssertions =
         And(t)
 
 
-    /// Asserts that the subject is not equal to the specified value, using default equality comparison (=).
+    /// Asserts that the subject is not equal to the specified value.
     [<Extension>]
     static member NotBe(t: Testable<'a>, other: 'a, ?because) : And<'a> =
         use _ = t.Assert()
