@@ -4,8 +4,38 @@ open System
 open Faqt
 open Xunit
 
+type Comparison = Comparison of int
+
+type ComparisonZero =
+    | ComparisonZero of int
+
+    static member Zero = ComparisonZero 0
+
+
+[<NoEquality; NoComparison>]
+type NumberWithoutOps = NumberWithoutOps of int
+
+
+[<NoEquality; NoComparison>]
+type NumberWithSubtraction =
+    | NumberWithSubtraction of int
+
+    static member op_Subtraction(NumberWithoutOps a, NumberWithSubtraction b) = Comparison(a - b)
+    static member op_Subtraction(NumberWithSubtraction a, NumberWithoutOps b) = Comparison(a - b)
+
 
 module BeCloseTo =
+
+
+    [<Fact>]
+    let ``Can be called with any set of 3 types where subject or target can be subtracted both ways and tolerance has comparison``
+        ()
+        =
+        (NumberWithoutOps 1).Should().BeCloseTo(NumberWithSubtraction 1, Comparison 0)
+        |> ignore
+
+        (NumberWithSubtraction 1).Should().BeCloseTo(NumberWithoutOps 1, Comparison 0)
+        |> ignore
 
 
     [<Fact>]
@@ -70,8 +100,7 @@ But was: 00:05:02
 
 
     [<Fact>]
-    let ``Can be called with different types`` () =
-        // TODO: Ideally, we should find an example with three different types instead of just two. Currently the subject/expected types would need to support subtraction both ways.
+    let ``Can be called with DateTime and TimeSpan`` () =
         DateTime(2000, 1, 2, 3, 4, 5)
             .Should()
             .BeCloseTo(DateTime(2000, 1, 2, 3, 4, 6), TimeSpan(0, 0, 1))
@@ -94,6 +123,21 @@ But was: 1.09
 
 
 module NotBeCloseTo =
+
+
+    [<Fact>]
+    let ``Can be called with any set of 3 types where subject or target can be subtracted both ways and tolerance has comparison``
+        ()
+        =
+        (NumberWithoutOps 2)
+            .Should()
+            .NotBeCloseTo(NumberWithSubtraction 1, Comparison 0)
+        |> ignore
+
+        (NumberWithSubtraction 2)
+            .Should()
+            .NotBeCloseTo(NumberWithoutOps 1, Comparison 0)
+        |> ignore
 
 
     [<Fact>]
@@ -160,8 +204,7 @@ But was: 00:05:01
 
 
     [<Fact>]
-    let ``Can be called with different types`` () =
-        // TODO: Ideally, we should find an example with three different types instead of just two. Currently the subject/expected types would need to support subtraction both ways.
+    let ``Can be called with DateTime and TimeSpan`` () =
         DateTime(2000, 1, 2, 3, 4, 5)
             .Should()
             .NotBeCloseTo(DateTime(2000, 1, 2, 3, 4, 7), TimeSpan(0, 0, 1))
@@ -184,6 +227,11 @@ But was: 1.02
 
 
 module BeGreaterThan =
+
+
+    [<Fact>]
+    let ``Can be called with any type that has comparison`` () =
+        (Comparison 2).Should().BeGreaterThan(Comparison 1)
 
 
     [<Fact>]
@@ -252,6 +300,11 @@ module BeGreaterThanOrEqualTo =
 
 
     [<Fact>]
+    let ``Can be called with any type that has comparison`` () =
+        (Comparison 2).Should().BeGreaterThanOrEqualTo(Comparison 1)
+
+
+    [<Fact>]
     let ``Can be chained with And`` () =
         (1).Should().BeGreaterThanOrEqualTo(0).Id<And<int>>().And.Be(1)
 
@@ -313,6 +366,11 @@ But was: -1
 
 
 module BeLessThan =
+
+
+    [<Fact>]
+    let ``Can be called with any type that has comparison`` () =
+        (Comparison 1).Should().BeLessThan(Comparison 2)
 
 
     [<Fact>]
@@ -381,6 +439,11 @@ module BeLessThanOrEqualTo =
 
 
     [<Fact>]
+    let ``Can be called with any type that has comparison`` () =
+        (Comparison 1).Should().BeLessThanOrEqualTo(Comparison 2)
+
+
+    [<Fact>]
     let ``Can be chained with And`` () =
         (-1).Should().BeLessThanOrEqualTo(0).Id<And<int>>().And.Be(-1)
 
@@ -445,6 +508,11 @@ module BePositive =
 
 
     [<Fact>]
+    let ``Can be called with any type that has comparison and Zero`` () =
+        (ComparisonZero 1).Should().BePositive()
+
+
+    [<Fact>]
     let ``Can be chained with And`` () =
         (1).Should().BePositive().Id<And<int>>().And.Be(1)
 
@@ -491,6 +559,11 @@ But was: -1
 
 
 module BeNegative =
+
+
+    [<Fact>]
+    let ``Can be called with any type that has comparison and Zero`` () =
+        (ComparisonZero -1).Should().BeNegative()
 
 
     [<Fact>]
@@ -543,6 +616,11 @@ module BeNonNegative =
 
 
     [<Fact>]
+    let ``Can be called with any type that has comparison and Zero`` () =
+        (ComparisonZero 1).Should().BeNonNegative()
+
+
+    [<Fact>]
     let ``Can be chained with And`` () =
         (1).Should().BeNonNegative().Id<And<int>>().And.Be(1)
 
@@ -591,6 +669,11 @@ module BeNonPositive =
 
 
     [<Fact>]
+    let ``Can be called with any type that has comparison and Zero`` () =
+        (ComparisonZero -1).Should().BeNonPositive()
+
+
+    [<Fact>]
     let ``Can be chained with And`` () =
         (-1).Should().BeNonPositive().Id<And<int>>().And.Be(-1)
 
@@ -636,6 +719,11 @@ But was: 1
 
 
 module BeInRange =
+
+
+    [<Fact>]
+    let ``Can be called with any type that has comparison`` () =
+        (Comparison 1).Should().BeInRange(Comparison 0, Comparison 2)
 
 
     [<Fact>]
