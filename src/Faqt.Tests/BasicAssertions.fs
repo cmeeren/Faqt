@@ -9,27 +9,26 @@ module Be =
 
 
     [<Fact>]
-    let ``Passes for equal integers and can be chained with And`` () =
+    let ``Can be chained with And`` () =
         (1).Should().Be(1).Id<And<int>>().And.Be(1)
 
 
+    [<Theory>]
+    [<InlineData("a", "a")>]
+    [<InlineData(null, null)>]
+    let ``Passes if equal`` (a: string, b: string) = a.Should().Be(b)
+
+
+    [<Theory>]
+    [<InlineData("a", "b")>]
+    [<InlineData("a", null)>]
+    [<InlineData(null, "a")>]
+    let ``Fails if not equal`` (a: string, b: string) =
+        Assert.Throws<AssertionFailedException>(fun () -> a.Should().Be(b) |> ignore)
+
+
     [<Fact>]
-    let ``Passes for equal custom type and can be chained with And`` () =
-        let x = {| A = 1; B = "foo" |}
-
-        x
-            .Should()
-            .Be({| A = 1; B = "foo" |})
-            .Id<And<{| A: int; B: string |}>>()
-            .And.Be({| A = 1; B = "foo" |})
-
-
-    [<Fact>]
-    let ``Passes if both subject and expected is null`` () = (null: string).Should().Be(null)
-
-
-    [<Fact>]
-    let ``Fails with expected message for unequal integers`` () =
+    let ``Fails with expected message`` () =
         fun () ->
             let x = 1
             x.Should().Be(2)
@@ -39,52 +38,6 @@ Subject: x
 Should: Be
 Expected: 2
 But was: 1
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message for unequal custom type`` () =
-        fun () ->
-            let x = {| A = 1; B = "foo" |}
-            x.Should().Be({| A = 2; B = "bar" |})
-        |> assertExnMsg
-            """
-Subject: x
-Should: Be
-Expected:
-  A: 2
-  B: bar
-But was:
-  A: 1
-  B: foo
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message if only subject is null`` () =
-        fun () ->
-            let x: string = null
-            x.Should().Be("")
-        |> assertExnMsg
-            """
-Subject: x
-Should: Be
-Expected: ''
-But was: null
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message if only expected is null`` () =
-        fun () ->
-            let x = ""
-            x.Should().Be(null)
-        |> assertExnMsg
-            """
-Subject: x
-Should: Be
-Expected: null
-But was: ''
 """
 
 
@@ -107,53 +60,34 @@ module ``Be with custom comparer`` =
 
 
     [<Fact>]
-    let ``Passes if isEqual returns true and can be chained with AndDerived with expected value`` () =
-        let isEqual _ _ = true
-
+    let ``Can be called with different types and chained with AndDerived with expected value`` () =
         (1)
             .Should()
-            .Be("asd", isEqual)
+            .Be("asd", (fun (_: int) (_: string) -> true))
             .Id<AndDerived<int, string>>()
             .WhoseValue.Should(())
             .Be("asd")
 
 
-    [<Fact>]
-    let ``Handles null subject`` () =
-        let isEqual _ _ = true
-        (null: String).Should().Be("asd", isEqual)
+    [<Theory>]
+    [<InlineData("a", "a")>]
+    [<InlineData(null, null)>]
+    [<InlineData("a", "b")>]
+    [<InlineData("a", null)>]
+    [<InlineData(null, "a")>]
+    let ``Passes if and only if comparer returns true`` (a: string, b: string) =
+        // Pass
+        a.Should().Be(b, (fun _ _ -> true)) |> ignore
+
+        // Fail
+        Assert.Throws<AssertionFailedException>(fun () -> a.Should().Be(b, (fun _ _ -> false)) |> ignore)
 
 
     [<Fact>]
-    let ``Handles null expected`` () =
-        let isEqual _ _ = true
-        (1).Should().Be((null: string), isEqual)
-
-
-    [<Fact>]
-    let ``Fails with expected message if isEqual returns false`` () =
-        let isEqual _ _ = false
-
+    let ``Fails with expected message`` () =
         fun () ->
             let x = 1
-            x.Should().Be(2, isEqual)
-        |> assertExnMsg
-            """
-Subject: x
-Should: Be
-Expected: 2
-But was: 1
-WithCustomEquality: true
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message if isEqual returns false even if values are equal using (=)`` () =
-        let isEqual _ _ = false
-
-        fun () ->
-            let x = 1
-            x.Should().Be(1, isEqual)
+            x.Should().Be(1, (fun _ _ -> false))
         |> assertExnMsg
             """
 Subject: x
@@ -163,14 +97,11 @@ But was: 1
 WithCustomEquality: true
 """
 
-
     [<Fact>]
     let ``Fails with expected message with because`` () =
-        let isEqual _ _ = false
-
         fun () ->
             let x = 1
-            x.Should().Be(1, isEqual, "Some reason")
+            x.Should().Be(1, (fun _ _ -> false), "Some reason")
         |> assertExnMsg
             """
 Subject: x
@@ -186,34 +117,29 @@ module NotBe =
 
 
     [<Fact>]
-    let ``Passes for unequal integers and can be chained with And`` () =
+    let ``Can be chained with And`` () =
         (1).Should().NotBe(2).Id<And<int>>().And.Be(1)
 
 
-    [<Fact>]
-    let ``Passes for unequal custom type and can be chained with And`` () =
-        let x = {| A = 1; B = "foo" |}
-
-        x
-            .Should()
-            .NotBe({| A = 2; B = "bar" |})
-            .Id<And<{| A: int; B: string |}>>()
-            .And.Be({| A = 1; B = "foo" |})
+    [<Theory>]
+    [<InlineData("a", "b")>]
+    [<InlineData("a", null)>]
+    [<InlineData(null, "a")>]
+    let ``Passes if not equal`` (a: string, b: string) = a.Should().NotBe(b)
 
 
-    [<Fact>]
-    let ``Passes if only subject is null`` () = (null: string).Should().NotBe("")
-
-
-    [<Fact>]
-    let ``Passes if only expected is null`` () = "".Should().NotBe(null)
+    [<Theory>]
+    [<InlineData("a", "a")>]
+    [<InlineData(null, null)>]
+    let ``Fails if equal`` (a: string, b: string) =
+        Assert.Throws<AssertionFailedException>(fun () -> a.Should().NotBe(b) |> ignore)
 
 
     [<Fact>]
-    let ``Fails with expected message for equal integers`` () =
+    let ``Fails with expected message`` () =
         fun () ->
             let x = 1
-            x.Should().NotBe(x)
+            x.Should().NotBe(1)
         |> assertExnMsg
             """
 Subject: x
@@ -224,42 +150,10 @@ But was: 1
 
 
     [<Fact>]
-    let ``Fails with expected message for equal custom type`` () =
-        fun () ->
-            let x = {| A = 1; B = "foo" |}
-            x.Should().NotBe(x)
-        |> assertExnMsg
-            """
-Subject: x
-Should: NotBe
-Other:
-  A: 1
-  B: foo
-But was:
-  A: 1
-  B: foo
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message if both subject and expected is null`` () =
-        fun () ->
-            let x: string = null
-            x.Should().NotBe(null)
-        |> assertExnMsg
-            """
-Subject: x
-Should: NotBe
-Other: null
-But was: null
-"""
-
-
-    [<Fact>]
     let ``Fails with expected message with because`` () =
         fun () ->
             let x = 1
-            x.Should().NotBe(x, "Some reason")
+            x.Should().NotBe(1, "Some reason")
         |> assertExnMsg
             """
 Subject: x
@@ -274,25 +168,30 @@ module ``NotBe with custom comparer`` =
 
 
     [<Fact>]
-    let ``Passes if isEqual returns false and can be chained with And`` () =
-        let isEqual _ _ = false
-        (1).Should().NotBe("asd", isEqual).Id<And<int>>().And.Be(1)
+    let ``Can be called with different types and chained with And`` () =
+        (1)
+            .Should()
+            .NotBe("asd", (fun (_: int) (_: string) -> false))
+            .Id<And<int>>()
+            .And.Be(1)
+
+
+    [<Theory>]
+    [<InlineData("a", "a")>]
+    [<InlineData(null, null)>]
+    [<InlineData("a", "b")>]
+    [<InlineData("a", null)>]
+    [<InlineData(null, "a")>]
+    let ``Passes if and only if comparer returns false`` (a: string, b: string) =
+        // Pass
+        a.Should().NotBe(b, (fun _ _ -> false)) |> ignore
+
+        // Fail
+        Assert.Throws<AssertionFailedException>(fun () -> a.Should().NotBe(b, (fun _ _ -> true)) |> ignore)
 
 
     [<Fact>]
-    let ``Handles null subject`` () =
-        let isEqual _ _ = false
-        (null: String).Should().NotBe("asd", isEqual)
-
-
-    [<Fact>]
-    let ``Handles null expected`` () =
-        let isEqual _ _ = false
-        (1).Should().NotBe((null: string), isEqual)
-
-
-    [<Fact>]
-    let ``Fails with expected message if isEqual returns true, even if the values are not equal using (=)`` () =
+    let ``Fails with expected message`` () =
         let isEqual _ _ = true
 
         fun () ->
