@@ -892,6 +892,24 @@ Value: {}
 """
 
 
+    // This test is important because we use obj several places (notably in TryFormat), causing converters' CanConvert
+    // to be called with type = System.Object unless type information is passed to JsonSerializer.Serialize.
+    [<Fact>]
+    let ``SerializeExactAs does not apply to obj as subtype`` () =
+        let format =
+            YamlFormatterBuilder.Default.SerializeExactAs(fun (_: obj) -> "FOO").Build()
+
+        use _ = Formatter.With(format)
+
+        fun () -> "a".Should().FailWith("Value", "asd")
+        |> assertExnMsg
+            """
+Subject: '"a"'
+Should: FailWith
+Value: asd
+"""
+
+
     [<Fact>]
     let ``SerializeExactAs does not apply to interfaces`` () =
         let format =

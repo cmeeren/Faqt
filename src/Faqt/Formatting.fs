@@ -100,15 +100,18 @@ type private TryFormatConverter(fallback: exn -> obj -> obj) =
 
     override this.Write(writer, TryFormat value, options) =
         try
+            let t = if isNull value then typeof<obj> else value.GetType()
             // Serialize once without the writer first to ensure it can be serialized, then use the writer. This
             // is needed because if we use the writer and it fails, we cannot continue writing.
-            JsonSerializer.Serialize(value, options) |> ignore<string>
-            JsonSerializer.Serialize(writer, value, options)
+            JsonSerializer.Serialize(value, t, options) |> ignore<string>
+            JsonSerializer.Serialize(writer, value, t, options)
         with ex ->
-            JsonSerializer.Serialize(writer, fallback ex value, options)
+            let fallback = fallback ex value
+            let t = if isNull fallback then typeof<obj> else fallback.GetType()
+            JsonSerializer.Serialize(writer, fallback, t, options)
 
     override this.WriteAsPropertyName(writer, TryFormat value, options) =
-        let str = JsonSerializer.Serialize(value, options)
+        let str = JsonSerializer.Serialize(value, value.GetType(), options)
 
         let str =
             if str.StartsWith('"') && str.EndsWith('"') then
