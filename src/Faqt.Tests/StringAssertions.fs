@@ -11,71 +11,21 @@ module HaveLength =
 
 
     [<Fact>]
-    let ``Can be chained with And`` () =
-        "a".Should().HaveLength(1).Id<And<string>>().And.Be("a")
+    let ``Can use seq assertion with expected success`` () = "a".Should().HaveLength(1)
 
 
     [<Fact>]
-    let ``Passes if length = expected`` () = "a".Should().HaveLength(1)
-
-
-    [<Fact>]
-    let ``Throws ArgumentException if length is negative`` () =
-        Assert.Throws<ArgumentException>(fun () -> "".Should().HaveLength(-1) |> ignore)
-
-
-    [<Fact>]
-    let ``Fails if length < expected`` () =
-        Assert.Throws<AssertionFailedException>(fun () -> "".Should().HaveLength(1) |> ignore)
-
-
-    [<Fact>]
-    let ``Fails if length > expected`` () =
-        Assert.Throws<AssertionFailedException>(fun () -> "as".Should().HaveLength(1) |> ignore)
-
-
-    [<Fact>]
-    let ``Fails with expected message if null`` () =
+    let ``Can use seq assertion with expected error`` () =
         fun () ->
-            let x: string = null
-            x.Should().HaveLength(1)
+            let x = "a"
+            x.Should().HaveLength(2)
         |> assertExnMsg
             """
 Subject: x
 Should: HaveLength
-Expected: 1
-But was: null
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message if length does not match`` () =
-        fun () ->
-            let x = ""
-            x.Should().HaveLength(1)
-        |> assertExnMsg
-            """
-Subject: x
-Should: HaveLength
-Expected: 1
-But was: 0
-Subject value: ''
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message if length does not match with because`` () =
-        fun () ->
-            let x = ""
-            x.Should().HaveLength(1, "Some reason")
-        |> assertExnMsg
-            """
-Subject: x
-Because: Some reason
-Should: HaveLength
-Expected: 1
-But was: 0
-Subject value: ''
+Expected: 2
+But was: 1
+Subject value: a
 """
 
 
@@ -83,63 +33,17 @@ module BeEmpty =
 
 
     [<Fact>]
-    let ``Can be chained with And`` () =
-        "".Should().BeEmpty().Id<And<string>>().And.Be("")
+    let ``Can use seq assertion with expected success`` () = "".Should().BeEmpty()
 
 
     [<Fact>]
-    let ``Passes if string is empty`` () = "".Should().BeEmpty()
-
-
-    [<Fact>]
-    let ``Fails with expected message if null`` () =
-        fun () ->
-            let x: string = null
-            x.Should().BeEmpty()
-        |> assertExnMsg
-            """
-Subject: x
-Should: BeEmpty
-But was: null
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message if null with because`` () =
-        fun () ->
-            let x: string = null
-            x.Should().BeEmpty("Some reason")
-        |> assertExnMsg
-            """
-Subject: x
-Because: Some reason
-Should: BeEmpty
-But was: null
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message if not empty`` () =
+    let ``Can use seq assertion with expected error`` () =
         fun () ->
             let x = "a"
             x.Should().BeEmpty()
         |> assertExnMsg
             """
 Subject: x
-Should: BeEmpty
-But was: a
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message if not empty with because`` () =
-        fun () ->
-            let x = "a"
-            x.Should().BeEmpty("Some reason")
-        |> assertExnMsg
-            """
-Subject: x
-Because: Some reason
 Should: BeEmpty
 But was: a
 """
@@ -149,63 +53,17 @@ module NotBeEmpty =
 
 
     [<Fact>]
-    let ``Can be chained with And`` () =
-        "a".Should().NotBeEmpty().Id<And<string>>().And.Be("a")
+    let ``Can use seq assertion with expected success`` () = "a".Should().NotBeEmpty()
 
 
     [<Fact>]
-    let ``Passes if string is not empty`` () = "a".Should().NotBeEmpty()
-
-
-    [<Fact>]
-    let ``Fails with expected message if null`` () =
-        fun () ->
-            let x: string = null
-            x.Should().NotBeEmpty()
-        |> assertExnMsg
-            """
-Subject: x
-Should: NotBeEmpty
-But was: null
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message if null with because`` () =
-        fun () ->
-            let x: string = null
-            x.Should().NotBeEmpty("Some reason")
-        |> assertExnMsg
-            """
-Subject: x
-Because: Some reason
-Should: NotBeEmpty
-But was: null
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message if empty`` () =
+    let ``Can use seq assertion with expected error`` () =
         fun () ->
             let x = ""
             x.Should().NotBeEmpty()
         |> assertExnMsg
             """
 Subject: x
-Should: NotBeEmpty
-But was: ''
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message if empty with because`` () =
-        fun () ->
-            let x = ""
-            x.Should().NotBeEmpty("Some reason")
-        |> assertExnMsg
-            """
-Subject: x
-Because: Some reason
 Should: NotBeEmpty
 But was: ''
 """
@@ -215,40 +73,17 @@ module BeNullOrEmpty =
 
 
     [<Fact>]
-    let ``Can be chained with And`` () =
-        "".Should().BeNullOrEmpty().Id<And<string>>().And.Be("")
+    let ``Can use seq assertion with expected success`` () = "".Should().BeNullOrEmpty()
 
 
     [<Fact>]
-    let ``Passes if string is empty`` () = "".Should().BeNullOrEmpty()
-
-
-    [<Fact>]
-    let ``Passes if string is null`` () = (null: string).Should().BeNullOrEmpty()
-
-
-    [<Fact>]
-    let ``Fails with expected message if not empty`` () =
+    let ``Can use seq assertion with expected error`` () =
         fun () ->
             let x = "a"
             x.Should().BeNullOrEmpty()
         |> assertExnMsg
             """
 Subject: x
-Should: BeNullOrEmpty
-But was: a
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message if not empty with because`` () =
-        fun () ->
-            let x = "a"
-            x.Should().BeNullOrEmpty("Some reason")
-        |> assertExnMsg
-            """
-Subject: x
-Because: Some reason
 Should: BeNullOrEmpty
 But was: a
 """
