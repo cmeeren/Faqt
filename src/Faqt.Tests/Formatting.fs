@@ -673,6 +673,17 @@ Value:
 
 
     [<Fact>]
+    let ``Can render null values even if type is not serializable`` () =
+        fun () -> "".Should().FailWith("Value", Unchecked.defaultof<TestUnserializableType>)
+        |> assertExnMsg
+            """
+Subject: '""'
+Should: FailWith
+Value: null
+"""
+
+
+    [<Fact>]
     let ``Supports TryFormat with string as dictionary key`` () =
         fun () ->
             let x = dict [ TryFormat "a", 1 ]
