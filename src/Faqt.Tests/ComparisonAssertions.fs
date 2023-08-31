@@ -70,6 +70,21 @@ module BeCloseTo =
 
 
     [<Fact>]
+    let ``Fails with expected message if null`` () =
+        fun () ->
+            let x = Unchecked.defaultof<NumberWithoutOps>
+            x.Should().BeCloseTo(NumberWithSubtraction 1, Comparison 0)
+        |> assertExnMsg
+            """
+Subject: x
+Should: BeCloseTo
+Target: 1
+With tolerance: 0
+But was: null
+"""
+
+
+    [<Fact>]
     let ``Fails with expected message for floats`` () =
         fun () ->
             let x = 1.09
@@ -174,6 +189,13 @@ module NotBeCloseTo =
 
 
     [<Fact>]
+    let ``Passes if null`` () =
+        Unchecked.defaultof<NumberWithoutOps>
+            .Should()
+            .NotBeCloseTo(NumberWithSubtraction 1, Comparison 0)
+
+
+    [<Fact>]
     let ``Fails with expected message for floats`` () =
         fun () ->
             let x = 1.02
@@ -254,6 +276,20 @@ module BeGreaterThan =
 
 
     [<Fact>]
+    let ``Fails with expected message if null`` () =
+        fun () ->
+            let x = Unchecked.defaultof<Comparison>
+            x.Should().BeGreaterThan(Comparison 1)
+        |> assertExnMsg
+            """
+Subject: x
+Should: BeGreaterThan
+Other: 1
+But was: null
+"""
+
+
+    [<Fact>]
     let ``Fails with expected message for ints`` () =
         fun () ->
             let x = -1
@@ -320,6 +356,20 @@ module BeGreaterThanOrEqualTo =
     [<Fact>]
     let ``Fails if subject < other`` () =
         Assert.Throws<AssertionFailedException>(fun () -> (-1).Should().BeGreaterThanOrEqualTo(0) |> ignore)
+
+
+    [<Fact>]
+    let ``Fails with expected message if null`` () =
+        fun () ->
+            let x = Unchecked.defaultof<Comparison>
+            x.Should().BeGreaterThanOrEqualTo(Comparison 1)
+        |> assertExnMsg
+            """
+Subject: x
+Should: BeGreaterThanOrEqualTo
+Other: 1
+But was: null
+"""
 
 
     [<Fact>]
@@ -393,6 +443,20 @@ module BeLessThan =
 
 
     [<Fact>]
+    let ``Fails with expected message if null`` () =
+        fun () ->
+            let x = Unchecked.defaultof<Comparison>
+            x.Should().BeLessThan(Comparison 1)
+        |> assertExnMsg
+            """
+Subject: x
+Should: BeLessThan
+Other: 1
+But was: null
+"""
+
+
+    [<Fact>]
     let ``Fails with expected message for ints`` () =
         fun () ->
             let x = 1
@@ -459,6 +523,20 @@ module BeLessThanOrEqualTo =
     [<Fact>]
     let ``Fails if subject > other`` () =
         Assert.Throws<AssertionFailedException>(fun () -> (1).Should().BeLessThanOrEqualTo(0) |> ignore)
+
+
+    [<Fact>]
+    let ``Fails with expected message if null`` () =
+        fun () ->
+            let x = Unchecked.defaultof<Comparison>
+            x.Should().BeLessThanOrEqualTo(Comparison 1)
+        |> assertExnMsg
+            """
+Subject: x
+Should: BeLessThanOrEqualTo
+Other: 1
+But was: null
+"""
 
 
     [<Fact>]
@@ -532,6 +610,19 @@ module BePositive =
 
 
     [<Fact>]
+    let ``Fails with expected message if null`` () =
+        fun () ->
+            let x = Unchecked.defaultof<ComparisonZero>
+            x.Should().BePositive()
+        |> assertExnMsg
+            """
+Subject: x
+Should: BePositive
+But was: null
+"""
+
+
+    [<Fact>]
     let ``Fails with expected message`` () =
         fun () ->
             let x = -1
@@ -583,6 +674,19 @@ module BeNegative =
     [<Fact>]
     let ``Fails if subject > 0`` () =
         Assert.Throws<AssertionFailedException>(fun () -> (1).Should().BeNegative() |> ignore)
+
+
+    [<Fact>]
+    let ``Fails with expected message if null`` () =
+        fun () ->
+            let x = Unchecked.defaultof<ComparisonZero>
+            x.Should().BeNegative()
+        |> assertExnMsg
+            """
+Subject: x
+Should: BeNegative
+But was: null
+"""
 
 
     [<Fact>]
@@ -639,6 +743,19 @@ module BeNonNegative =
 
 
     [<Fact>]
+    let ``Fails with expected message if null`` () =
+        fun () ->
+            let x = Unchecked.defaultof<ComparisonZero>
+            x.Should().BeNonNegative()
+        |> assertExnMsg
+            """
+Subject: x
+Should: BeNonNegative
+But was: null
+"""
+
+
+    [<Fact>]
     let ``Fails with expected message`` () =
         fun () ->
             let x = -1
@@ -689,6 +806,19 @@ module BeNonPositive =
     [<Fact>]
     let ``Fails if subject > 0`` () =
         Assert.Throws<AssertionFailedException>(fun () -> (1).Should().BeNonPositive() |> ignore)
+
+
+    [<Fact>]
+    let ``Fails with expected message if null`` () =
+        fun () ->
+            let x = Unchecked.defaultof<ComparisonZero>
+            x.Should().BeNonPositive()
+        |> assertExnMsg
+            """
+Subject: x
+Should: BeNonPositive
+But was: null
+"""
 
 
     [<Fact>]
@@ -751,6 +881,21 @@ module BeInRange =
     [<Fact>]
     let ``Fails if subject is below the lower bound`` () =
         Assert.Throws<AssertionFailedException>(fun () -> (0).Should().BeInRange(1, 3) |> ignore)
+
+
+    [<Fact>]
+    let ``Fails with expected message if null`` () =
+        fun () ->
+            let x = Unchecked.defaultof<Comparison>
+            x.Should().BeInRange(Comparison 0, Comparison 2)
+        |> assertExnMsg
+            """
+Subject: x
+Should: BeInRange
+Lower: 0
+Upper: 2
+But was: null
+"""
 
 
     [<Fact>]
