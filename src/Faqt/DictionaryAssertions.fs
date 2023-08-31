@@ -51,7 +51,7 @@ type DictionaryAssertions =
             |> Seq.toArray
 
         if failures.Length > 0 then
-            t.With("Failures", failures).With("Value", t.Subject).Fail(because)
+            t.With("Failures", failures).With("Subject value", t.Subject).Fail(because)
 
         And(t)
 
@@ -80,7 +80,7 @@ type DictionaryAssertions =
             t
                 .With("Expected count", assertionsCount)
                 .With("Actual count", subjectCount)
-                .With("Value", t.Subject)
+                .With("Subject value", t.Subject)
                 .Fail(because)
 
         let failures =
@@ -98,7 +98,7 @@ type DictionaryAssertions =
             |> Seq.toArray
 
         if failures.Length > 0 then
-            t.With("Failures", failures).With("Value", t.Subject).Fail(because)
+            t.With("Failures", failures).With("Subject value", t.Subject).Fail(because)
 
         And(t)
 
@@ -207,7 +207,7 @@ type DictionaryAssertions =
             t
                 .With("Key", key)
                 .With("But found value", t.Subject[key])
-                .With("Value", t.Subject)
+                .With("Subject value", t.Subject)
                 .Fail(because)
 
         And(t)
@@ -243,7 +243,7 @@ type DictionaryAssertions =
                 t
                     .With("Value", value)
                     .With("But found value for keys", xs |> Seq.map (fun kvp -> kvp.Key))
-                    .With("Dictionary", t.Subject)
+                    .With("Subject value", t.Subject)
                     .Fail(because)
 
         And(t)

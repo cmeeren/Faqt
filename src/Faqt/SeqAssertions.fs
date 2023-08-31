@@ -50,7 +50,7 @@ type SeqAssertions =
             |> Seq.toArray
 
         if failures.Length > 0 then
-            t.With("Failures", failures).With("Value", t.Subject).Fail(because)
+            t.With("Failures", failures).With("Subject value", t.Subject).Fail(because)
 
         And(t)
 
@@ -74,7 +74,7 @@ type SeqAssertions =
             t
                 .With("Expected length", assertionsLength)
                 .With("Actual length", subjectLength)
-                .With("Value", t.Subject)
+                .With("Subject value", t.Subject)
                 .Fail(because)
 
         let failures =
@@ -90,7 +90,7 @@ type SeqAssertions =
             |> Seq.toArray
 
         if failures.Length > 0 then
-            t.With("Failures", failures).With("Value", t.Subject).Fail(because)
+            t.With("Failures", failures).With("Subject value", t.Subject).Fail(because)
 
         And(t)
 
@@ -112,7 +112,7 @@ type SeqAssertions =
                 t
                     .With("Expected", expected)
                     .With("But was", subjectLength)
-                    .With("Value", t.Subject)
+                    .With("Subject value", t.Subject)
                     .Fail(because)
 
         And(t)
@@ -280,7 +280,10 @@ type SeqAssertions =
             let subjectLength = Seq.stringOptimizedLength t.Subject
 
             if subjectLength <> 1 then
-                t.With("But length was", subjectLength).With("Value", t.Subject).Fail(because)
+                t
+                    .With("But length was", subjectLength)
+                    .With("Subject value", t.Subject)
+                    .Fail(because)
 
         AndDerived(t, Seq.head t.Subject)
 
@@ -305,7 +308,7 @@ type SeqAssertions =
                 t
                     .With("But found", matchingLength)
                     .With("Matching items", matchingItems)
-                    .With("Value", t.Subject)
+                    .With("Subject value", t.Subject)
                     .Fail(because)
 
             AndDerived(t, Seq.head matchingItems)
@@ -343,7 +346,7 @@ type SeqAssertions =
                 t
                     .With("But found", 0)
                     .With("Matching items", matchingItems)
-                    .With("Value", t.Subject)
+                    .With("Subject value", t.Subject)
                     .Fail(because)
 
             AndDerived(t, Seq.head matchingItems)
@@ -367,7 +370,7 @@ type SeqAssertions =
             let matchingItems = t.Subject |> Seq.filter predicate
 
             if Seq.stringOptimizedIsEmpty matchingItems then
-                t.With("But found", 0).With("Value", t.Subject).Fail(because)
+                t.With("But found", 0).With("Subject value", t.Subject).Fail(because)
 
             AndDerived(t, matchingItems)
 
@@ -389,7 +392,7 @@ type SeqAssertions =
                 |> Seq.map (fun (x, c) -> {| Count = c; Item = TryFormat x |})
                 |> Seq.toList
 
-            t.With("Duplicates", items).With("Value", t.Subject).Fail(because)
+            t.With("Duplicates", items).With("Subject value", t.Subject).Fail(because)
 
         And(t)
 
@@ -420,7 +423,7 @@ type SeqAssertions =
             |> Seq.toList
 
         if not (Seq.isEmpty duplicates) then
-            t.With("Duplicates", duplicates).With("Value", t.Subject).Fail(because)
+            t.With("Duplicates", duplicates).With("Subject value", t.Subject).Fail(because)
 
         And(t)
 
@@ -438,7 +441,7 @@ type SeqAssertions =
             if a > b then
                 t
                     .With("But found", [ {| Index = i; Item = TryFormat a |}; {| Index = i + 1; Item = TryFormat b |} ])
-                    .With("Value", t.Subject)
+                    .With("Subject value", t.Subject)
                     .Fail(because)
 
         And(t)
@@ -473,7 +476,7 @@ type SeqAssertions =
                             |}
                         ]
                     )
-                    .With("Value", t.Subject)
+                    .With("Subject value", t.Subject)
                     .Fail(because)
 
         And(t)
@@ -492,7 +495,7 @@ type SeqAssertions =
             if a < b then
                 t
                     .With("But found", [ {| Index = i; Item = TryFormat a |}; {| Index = i + 1; Item = TryFormat b |} ])
-                    .With("Value", t.Subject)
+                    .With("Subject value", t.Subject)
                     .Fail(because)
 
         And(t)
@@ -527,7 +530,7 @@ type SeqAssertions =
                             |}
                         ]
                     )
-                    .With("Value", t.Subject)
+                    .With("Subject value", t.Subject)
                     .Fail(because)
 
         And(t)
@@ -546,7 +549,7 @@ type SeqAssertions =
             if a >= b then
                 t
                     .With("But found", [ {| Index = i; Item = TryFormat a |}; {| Index = i + 1; Item = TryFormat b |} ])
-                    .With("Value", t.Subject)
+                    .With("Subject value", t.Subject)
                     .Fail(because)
 
         And(t)
@@ -581,7 +584,7 @@ type SeqAssertions =
                             |}
                         ]
                     )
-                    .With("Value", t.Subject)
+                    .With("Subject value", t.Subject)
                     .Fail(because)
 
         And(t)
@@ -600,7 +603,7 @@ type SeqAssertions =
             if a <= b then
                 t
                     .With("But found", [ {| Index = i; Item = TryFormat a |}; {| Index = i + 1; Item = TryFormat b |} ])
-                    .With("Value", t.Subject)
+                    .With("Subject value", t.Subject)
                     .Fail(because)
 
         And(t)
@@ -635,7 +638,7 @@ type SeqAssertions =
                             |}
                         ]
                     )
-                    .With("Value", t.Subject)
+                    .With("Subject value", t.Subject)
                     .Fail(because)
 
         And(t)
@@ -660,13 +663,13 @@ type SeqAssertions =
             t
                 .With("Subset", subset)
                 .With("But lacked", remaining)
-                .With("Value", t.Subject)
+                .With("Subject value", t.Subject)
                 .Fail(because)
         elif proper && not containedItemNotInSubset then
             t
                 .With("Subset", subset)
                 .With("But had no additional items", [])
-                .With("Value", t.Subject)
+                .With("Subject value", t.Subject)
                 .Fail(because)
 
         And(t)
@@ -706,13 +709,13 @@ type SeqAssertions =
             t
                 .With("Superset", superset)
                 .With("But had extra items", remaining)
-                .With("Value", t.Subject)
+                .With("Subject value", t.Subject)
                 .Fail(because)
         elif proper && not containedItemNotInSubset then
             t
                 .With("Superset", superset)
                 .With("But superset had no additional items", [])
-                .With("Value", t.Subject)
+                .With("Subject value", t.Subject)
                 .Fail(because)
 
         And(t)
@@ -751,7 +754,7 @@ type SeqAssertions =
             t
                 .With("Other", other)
                 .With("But had no common items", [])
-                .With("Value", t.Subject)
+                .With("Subject value", t.Subject)
                 .Fail(because)
 
         And(t)
@@ -774,7 +777,7 @@ type SeqAssertions =
                 t
                     .With("Other", other)
                     .With("But found common items", set)
-                    .With("Value", t.Subject)
+                    .With("Subject value", t.Subject)
                     .Fail(because)
 
         And(t)

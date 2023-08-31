@@ -70,7 +70,7 @@ Failures:
   Failure:
     Subject: y.Value
     Should: Test
-Value:
+Subject value:
   asd: 1
   test: 2
   foobar: 3
@@ -100,7 +100,7 @@ Failures:
   Failure:
     Subject: y.Value
     Should: Test
-Value:
+Subject value:
   asd: 1
   test: 2
   foobar: 3
@@ -175,7 +175,7 @@ Subject: x
 Should: SatisfyRespectively
 Expected count: 2
 Actual count: 3
-Value:
+Subject value:
   asd: 1
   test: 2
   foobar: 3
@@ -198,7 +198,7 @@ Because: Some reason
 Should: SatisfyRespectively
 Expected count: 2
 Actual count: 3
-Value:
+Subject value:
   asd: 1
   test: 2
   foobar: 3
@@ -233,7 +233,7 @@ Failures:
   Failure:
     Subject: x3
     Should: Fail
-Value:
+Subject value:
   asd: 1
   test: 2
   foobar: 3
@@ -270,7 +270,7 @@ Failures:
   Failure:
     Subject: x3
     Should: Fail
-Value:
+Subject value:
   asd: 1
   test: 2
   foobar: 3
@@ -297,7 +297,7 @@ Subject: x
 Should: HaveLength
 Expected: 2
 But was: 1
-Value:
+Subject value:
   a: 1
 """
 
@@ -719,7 +719,7 @@ module ContainExactlyOneItem =
 Subject: x
 Should: ContainExactlyOneItem
 But length was: 2
-Value:
+Subject value:
   a: 1
   b: 2
 """
@@ -749,7 +749,7 @@ Matching items:
   Value: 1
 - Key: b
   Value: 2
-Value:
+Subject value:
   a: 1
   b: 2
 """
@@ -797,7 +797,7 @@ Subject: x
 Should: ContainAtLeastOneItemMatching
 But found: 0
 Matching items: []
-Value:
+Subject value:
   a: 1
 """
 
@@ -821,7 +821,7 @@ module ContainItemsMatching =
 Subject: x
 Should: ContainItemsMatching
 But found: 0
-Value:
+Subject value:
   a: 1
 """
 
@@ -852,7 +852,7 @@ Subset:
 But lacked:
 - Key: b
   Value: 2
-Value:
+Subject value:
   a: 1
 """
 
@@ -883,7 +883,7 @@ Subset:
 But lacked:
 - Key: b
   Value: 2
-Value:
+Subject value:
   a: 1
 """
 
@@ -913,7 +913,7 @@ Superset:
 But had extra items:
 - Key: b
   Value: 2
-Value:
+Subject value:
   a: 1
   b: 2
 """
@@ -944,7 +944,7 @@ Superset:
 But had extra items:
 - Key: b
   Value: 2
-Value:
+Subject value:
   a: 1
   b: 2
 """
@@ -973,7 +973,7 @@ Should: IntersectWith
 Other:
   b: 2
 But had no common items: []
-Value:
+Subject value:
   a: 1
 """
 
@@ -1004,7 +1004,7 @@ Other:
 But found common items:
 - Key: a
   Value: 1
-Value:
+Subject value:
   a: 1
   b: 2
 """
@@ -1125,7 +1125,7 @@ Subject: x
 Should: NotContainKey
 Key: a
 But found value: 1
-Value:
+Subject value:
   a: 1
 """
 
@@ -1142,7 +1142,7 @@ Because: Some reason
 Should: NotContainKey
 Key: a
 But found value: 1
-Value:
+Subject value:
   a: 1
 """
 
@@ -1262,7 +1262,7 @@ Subject: x
 Should: NotContainValue
 Value: 1
 But found value for keys: [a, b]
-Dictionary:
+Subject value:
   a: 1
   b: 1
 """
@@ -1280,7 +1280,7 @@ Because: Some reason
 Should: NotContainValue
 Value: 1
 But found value for keys: [a, b]
-Dictionary:
+Subject value:
   a: 1
   b: 1
 """

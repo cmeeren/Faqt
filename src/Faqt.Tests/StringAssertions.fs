@@ -59,7 +59,7 @@ Subject: x
 Should: HaveLength
 Expected: 1
 But was: 0
-Value: ''
+Subject value: ''
 """
 
 
@@ -75,7 +75,7 @@ Because: Some reason
 Should: HaveLength
 Expected: 1
 But was: 0
-Value: ''
+Subject value: ''
 """
 
 

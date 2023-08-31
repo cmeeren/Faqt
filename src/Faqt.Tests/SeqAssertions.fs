@@ -73,7 +73,7 @@ Failures:
   Failure:
     Subject: y.Length
     Should: Test
-Value: [asd, test, '1234']
+Subject value: [asd, test, '1234']
 """
 
 
@@ -100,7 +100,7 @@ Failures:
   Failure:
     Subject: y.Length
     Should: Test
-Value: [asd, test, '1234']
+Subject value: [asd, test, '1234']
 """
 
 
@@ -172,7 +172,7 @@ Subject: x
 Should: SatisfyRespectively
 Expected length: 2
 Actual length: 3
-Value: [asd, test, '1234']
+Subject value: [asd, test, '1234']
 """
 
 
@@ -192,7 +192,7 @@ Because: Some reason
 Should: SatisfyRespectively
 Expected length: 2
 Actual length: 3
-Value: [asd, test, '1234']
+Subject value: [asd, test, '1234']
 """
 
 
@@ -224,7 +224,7 @@ Failures:
   Failure:
     Subject: x3
     Should: Fail
-Value: [asd, test, '1234']
+Subject value: [asd, test, '1234']
 """
 
 
@@ -258,7 +258,7 @@ Failures:
   Failure:
     Subject: x3
     Should: Fail
-Value: [asd, test, '1234']
+Subject value: [asd, test, '1234']
 """
 
 
@@ -329,7 +329,7 @@ Subject: x
 Should: HaveLength
 Expected: 1
 But was: 0
-Value: []
+Subject value: []
 """
 
 
@@ -345,7 +345,7 @@ Because: Some reason
 Should: HaveLength
 Expected: 1
 But was: 0
-Value: []
+Subject value: []
 """
 
 
@@ -935,7 +935,7 @@ But was: null
 Subject: x
 Should: ContainExactlyOneItem
 But length was: 2
-Value: [1, 2]
+Subject value: [1, 2]
 """
 
 
@@ -950,7 +950,7 @@ Subject: x
 Because: Some reason
 Should: ContainExactlyOneItem
 But length was: 2
-Value: [1, 2]
+Subject value: [1, 2]
 """
 
 
@@ -1010,7 +1010,7 @@ Subject: x
 Should: ContainExactlyOneItemMatching
 But found: 2
 Matching items: [1, 2]
-Value: [1, 2, 3]
+Subject value: [1, 2, 3]
 """
 
 
@@ -1026,7 +1026,7 @@ Because: Some reason
 Should: ContainExactlyOneItemMatching
 But found: 2
 Matching items: [1, 2]
-Value: [1, 2, 3]
+Subject value: [1, 2, 3]
 """
 
 
@@ -1167,7 +1167,7 @@ Subject: x
 Should: ContainAtLeastOneItemMatching
 But found: 0
 Matching items: []
-Value: [1, 2, 3]
+Subject value: [1, 2, 3]
 """
 
 
@@ -1183,7 +1183,7 @@ Because: Some reason
 Should: ContainAtLeastOneItemMatching
 But found: 0
 Matching items: []
-Value: [1, 2, 3]
+Subject value: [1, 2, 3]
 """
 
 
@@ -1247,7 +1247,7 @@ But was: null
 Subject: x
 Should: ContainItemsMatching
 But found: 0
-Value: [1, 2, 3]
+Subject value: [1, 2, 3]
 """
 
 
@@ -1262,7 +1262,7 @@ Subject: x
 Because: Some reason
 Should: ContainItemsMatching
 But found: 0
-Value: [1, 2, 3]
+Subject value: [1, 2, 3]
 """
 
 
@@ -1319,7 +1319,7 @@ Duplicates:
   Item: 2
 - Count: 2
   Item: 5
-Value: [1, 2, 2, 2, 5, 5, 0]
+Subject value: [1, 2, 2, 2, 5, 5, 0]
 """
 
 
@@ -1338,7 +1338,7 @@ Duplicates:
   Item: 2
 - Count: 2
   Item: 5
-Value: [1, 2, 2, 2, 5, 5, 0]
+Subject value: [1, 2, 2, 2, 5, 5, 0]
 """
 
 
@@ -1398,7 +1398,7 @@ Duplicates:
 - Count: 2
   Projected: 3
   Items: [asd, abc]
-Value: [a, as, asd, abc, b, foobar]
+Subject value: [a, as, asd, abc, b, foobar]
 """
 
 
@@ -1419,7 +1419,7 @@ Duplicates:
 - Count: 2
   Projected: 3
   Items: [asd, abc]
-Value: [a, as, asd, abc, b, foobar]
+Subject value: [a, as, asd, abc, b, foobar]
 """
 
 
@@ -1486,7 +1486,7 @@ But found:
   Item: 6
 - Index: 3
   Item: 3
-Value: [1, 2, 6, 3, 1, 3]
+Subject value: [1, 2, 6, 3, 1, 3]
 """
 
 
@@ -1505,7 +1505,7 @@ But found:
   Item: 6
 - Index: 3
   Item: 3
-Value: [1, 2, 6, 3, 1, 3]
+Subject value: [1, 2, 6, 3, 1, 3]
 """
 
 
@@ -1575,7 +1575,7 @@ But found:
 - Index: 3
   Item: asd
   Projected: 3
-Value: [a, as, foobar, asd, a, bar]
+Subject value: [a, as, foobar, asd, a, bar]
 """
 
 
@@ -1596,7 +1596,7 @@ But found:
 - Index: 3
   Item: asd
   Projected: 3
-Value: [a, as, foobar, asd, a, bar]
+Subject value: [a, as, foobar, asd, a, bar]
 """
 
 
@@ -1663,7 +1663,7 @@ But found:
   Item: 1
 - Index: 2
   Item: 3
-Value: [3, 1, 3, 6, 2, 1]
+Subject value: [3, 1, 3, 6, 2, 1]
 """
 
 
@@ -1682,7 +1682,7 @@ But found:
   Item: 1
 - Index: 2
   Item: 3
-Value: [3, 1, 3, 6, 2, 1]
+Subject value: [3, 1, 3, 6, 2, 1]
 """
 
 
@@ -1752,7 +1752,7 @@ But found:
 - Index: 3
   Item: foobar
   Projected: 6
-Value: [bar, as, a, foobar, asd, a]
+Subject value: [bar, as, a, foobar, asd, a]
 """
 
 
@@ -1773,7 +1773,7 @@ But found:
 - Index: 3
   Item: foobar
   Projected: 6
-Value: [bar, as, a, foobar, asd, a]
+Subject value: [bar, as, a, foobar, asd, a]
 """
 
 
@@ -1840,7 +1840,7 @@ But found:
   Item: 3
 - Index: 3
   Item: 3
-Value: [1, 2, 3, 3, 5]
+Subject value: [1, 2, 3, 3, 5]
 """
 
 
@@ -1859,7 +1859,7 @@ But found:
   Item: 3
 - Index: 3
   Item: 3
-Value: [1, 2, 3, 3, 5]
+Subject value: [1, 2, 3, 3, 5]
 """
 
 
@@ -1929,7 +1929,7 @@ But found:
 - Index: 3
   Item: foo
   Projected: 3
-Value: [a, as, asd, foo, foobar]
+Subject value: [a, as, asd, foo, foobar]
 """
 
 
@@ -1952,7 +1952,7 @@ But found:
 - Index: 3
   Item: foo
   Projected: 3
-Value: [a, as, asd, foo, foobar]
+Subject value: [a, as, asd, foo, foobar]
 """
 
 
@@ -2019,7 +2019,7 @@ But found:
   Item: 3
 - Index: 3
   Item: 3
-Value: [6, 5, 3, 3, 2, 1]
+Subject value: [6, 5, 3, 3, 2, 1]
 """
 
 
@@ -2038,7 +2038,7 @@ But found:
   Item: 3
 - Index: 3
   Item: 3
-Value: [6, 5, 3, 3, 2, 1]
+Subject value: [6, 5, 3, 3, 2, 1]
 """
 
 
@@ -2108,7 +2108,7 @@ But found:
 - Index: 2
   Item: bar
   Projected: 3
-Value: [foobar, foo, bar, as, a]
+Subject value: [foobar, foo, bar, as, a]
 """
 
 
@@ -2131,7 +2131,7 @@ But found:
 - Index: 2
   Item: bar
   Projected: 3
-Value: [foobar, foo, bar, as, a]
+Subject value: [foobar, foo, bar, as, a]
 """
 
 
@@ -2220,7 +2220,7 @@ Subject: x
 Should: BeSupersetOf
 Subset: [1, 2, 2, 3]
 But lacked: [2]
-Value: [1, 2, 3]
+Subject value: [1, 2, 3]
 """
 
 
@@ -2236,7 +2236,7 @@ Because: Some reason
 Should: BeSupersetOf
 Subset: [1, 2, 2, 3]
 But lacked: [2]
-Value: [1, 2, 3]
+Subject value: [1, 2, 3]
 """
 
 
@@ -2326,7 +2326,7 @@ Subject: x
 Should: BeProperSupersetOf
 Subset: [1, 2, 2, 3]
 But lacked: [2]
-Value: [1, 2, 3]
+Subject value: [1, 2, 3]
 """
 
 
@@ -2342,7 +2342,7 @@ Because: Some reason
 Should: BeProperSupersetOf
 Subset: [1, 2, 2, 3]
 But lacked: [2]
-Value: [1, 2, 3]
+Subject value: [1, 2, 3]
 """
 
 
@@ -2357,7 +2357,7 @@ Subject: x
 Should: BeProperSupersetOf
 Subset: [1, 2, 3]
 But had no additional items: []
-Value: [1, 2, 3]
+Subject value: [1, 2, 3]
 """
 
 
@@ -2373,7 +2373,7 @@ Because: Some reason
 Should: BeProperSupersetOf
 Subset: [1, 2, 3]
 But had no additional items: []
-Value: [1, 2, 3]
+Subject value: [1, 2, 3]
 """
 
 
@@ -2462,7 +2462,7 @@ Subject: x
 Should: BeSubsetOf
 Superset: [1, 2, 3]
 But had extra items: [2]
-Value: [1, 2, 2, 3]
+Subject value: [1, 2, 2, 3]
 """
 
 
@@ -2478,7 +2478,7 @@ Because: Some reason
 Should: BeSubsetOf
 Superset: [1, 2, 3]
 But had extra items: [2]
-Value: [1, 2, 2, 3]
+Subject value: [1, 2, 2, 3]
 """
 
 
@@ -2568,7 +2568,7 @@ Subject: x
 Should: BeProperSubsetOf
 Superset: [1, 2, 3]
 But had extra items: [2]
-Value: [1, 2, 2, 3]
+Subject value: [1, 2, 2, 3]
 """
 
 
@@ -2584,7 +2584,7 @@ Because: Some reason
 Should: BeProperSubsetOf
 Superset: [1, 2, 3]
 But had extra items: [2]
-Value: [1, 2, 2, 3]
+Subject value: [1, 2, 2, 3]
 """
 
 
@@ -2599,7 +2599,7 @@ Subject: x
 Should: BeProperSubsetOf
 Superset: [1, 2, 3]
 But superset had no additional items: []
-Value: [1, 2, 3]
+Subject value: [1, 2, 3]
 """
 
 
@@ -2615,7 +2615,7 @@ Because: Some reason
 Should: BeProperSubsetOf
 Superset: [1, 2, 3]
 But superset had no additional items: []
-Value: [1, 2, 3]
+Subject value: [1, 2, 3]
 """
 
 
@@ -2701,7 +2701,7 @@ Subject: x
 Should: IntersectWith
 Other: [3, 4]
 But had no common items: []
-Value: [1, 2]
+Subject value: [1, 2]
 """
 
 
@@ -2717,7 +2717,7 @@ Because: Some reason
 Should: IntersectWith
 Other: [3, 4]
 But had no common items: []
-Value: [1, 2]
+Subject value: [1, 2]
 """
 
 
@@ -2779,7 +2779,7 @@ Subject: x
 Should: NotIntersectWith
 Other: [2, 3, 4]
 But found common items: [2, 3]
-Value: [1, 2, 3]
+Subject value: [1, 2, 3]
 """
 
 
@@ -2795,7 +2795,7 @@ Because: Some reason
 Should: NotIntersectWith
 Other: [2, 3, 4]
 But found common items: [2, 3]
-Value: [1, 2, 3]
+Subject value: [1, 2, 3]
 """
 
 /////////////////////////////////////////////////////////////////////////////////////////////////

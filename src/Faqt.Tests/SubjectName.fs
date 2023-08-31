@@ -509,7 +509,7 @@ Failures:
   Failure:
     Subject: s
     Should: Fail
-Value: [1, 2, 3]
+Subject value: [1, 2, 3]
 """
 
 
@@ -533,7 +533,7 @@ Failures:
   Failure:
     Subject: s
     Should: Fail
-Value: [1, 2]
+Subject value: [1, 2]
 """
 
 
@@ -837,7 +837,7 @@ Failures:
       Failure:
         Subject: x2
         Should: Fail
-    Value: [11, 12, 13]
+    Subject value: [11, 12, 13]
 - Index: 1
   Failure:
     Subject: ''
@@ -855,7 +855,7 @@ Failures:
       Failure:
         Subject: x2
         Should: Fail
-    Value: [21, 22, 23]
+    Subject value: [21, 22, 23]
 - Index: 2
   Failure:
     Subject: ''
@@ -873,8 +873,8 @@ Failures:
       Failure:
         Subject: x2
         Should: Fail
-    Value: [31, 32, 33]
-Value:
+    Subject value: [31, 32, 33]
+Subject value:
 - [11, 12, 13]
 - [21, 22, 23]
 - [31, 32, 33]

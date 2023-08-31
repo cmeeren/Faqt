@@ -252,7 +252,7 @@ type Assertions =
         if exceptions.Length > 0 then
             t
                 .With("Failures", exceptions |> Array.map (fun (i, ex) -> { Index = i; Failure = ex.FailureData }))
-                .With("Value", t.Subject)
+                .With("Subject value", t.Subject)
                 .Fail(because)
 
         And(t)
@@ -294,7 +294,8 @@ If you want all the details, here they are:
 
   Which key-value pairs, if any, to add to the message is up to you. Most assertion failure messages are more helpful if
   they display value being tested (`t.Subject`). Faqt mostly places this as the last value, so that if its rendering is
-  very large, it does not push other important details far down.
+  very large, it does not push other important details far down. If you do render `t.Subject` and there is no logical
+  key that fits (such as `"But was"` in the assertion `Be`), the recommended key is `"Subject value"`.
 
   If you add values where you wrap user-supplied data (e.g., in a record, list or similar), then you should wrap the
   user values in the single-case DU `TryFormat`. This will ensure that if the value fails serialization, a fallback
