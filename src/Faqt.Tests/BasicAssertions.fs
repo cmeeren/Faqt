@@ -1,8 +1,6 @@
 ﻿module BasicAssertions
 
 open System
-open System.Collections.Generic
-open System.IO
 open Faqt
 open Xunit
 
@@ -600,33 +598,33 @@ But was:
     [<Fact>]
     let ``Fails with expected message if non-generic interface, even if type implements it`` () =
         fun () ->
-            let x = new MemoryStream()
-            x :> IDisposable |> ignore // Sanity check to avoid false negatives
-            x.Should().BeOfType(typeof<IDisposable>)
+            let x = TestSubType()
+            x :> TestInterface |> ignore // Sanity check to avoid false negatives
+            x.Should().BeOfType(typeof<TestInterface>)
         |> assertExnMsg
             """
 Subject: x
 Should: BeOfType
-Expected: System.IDisposable
+Expected: TestUtils+TestInterface
 But was:
-  Type: System.IO.MemoryStream
-  Value: System.IO.MemoryStream
+  Type: TestUtils+TestSubType
+  Value: {}
 """
 
 
     [<Fact>]
     let ``Fails with expected message if generic interface, even if type implements it`` () =
         fun () ->
-            let x: Map<string, int> = Map.empty
-            x :> IDictionary<string, int> |> ignore // Sanity check to avoid false negatives
-            x.Should().BeOfType(typeof<IDictionary<string, int>>)
+            let x = TestSubType<string, int>()
+            x :> TestInterface<string, int> |> ignore // Sanity check to avoid false negatives
+            x.Should().BeOfType(typeof<TestInterface<string, int>>)
         |> assertExnMsg
             """
 Subject: x
 Should: BeOfType
-Expected: System.Collections.Generic.IDictionary<System.String, System.Int32>
+Expected: TestUtils+TestInterface<System.String, System.Int32>
 But was:
-  Type: Microsoft.FSharp.Collections.FSharpMap<System.String, System.Int32>
+  Type: TestUtils+TestSubType<System.String, System.Int32>
   Value: {}
 """
 
@@ -634,17 +632,17 @@ But was:
     [<Fact>]
     let ``Fails with expected message if sub-type`` () =
         fun () ->
-            let x = new MemoryStream()
-            x :> Stream |> ignore // Sanity check to avoid false negatives
-            x.Should().BeOfType(typeof<Stream>)
+            let x = TestSubType()
+            x :> TestBaseType |> ignore // Sanity check to avoid false negatives
+            x.Should().BeOfType(typeof<TestBaseType>)
         |> assertExnMsg
             """
 Subject: x
 Should: BeOfType
-Expected: System.IO.Stream
+Expected: TestUtils+TestBaseType
 But was:
-  Type: System.IO.MemoryStream
-  Value: System.IO.MemoryStream
+  Type: TestUtils+TestSubType
+  Value: {}
 """
 
 
@@ -721,33 +719,33 @@ But was:
     [<Fact>]
     let ``Fails with expected message if non-generic interface, even if type implements it`` () =
         fun () ->
-            let x = new MemoryStream()
-            x :> IDisposable |> ignore // Sanity check to avoid false negatives
-            x.Should().BeOfType<IDisposable>()
+            let x = TestSubType()
+            x :> TestInterface |> ignore // Sanity check to avoid false negatives
+            x.Should().BeOfType<TestInterface>()
         |> assertExnMsg
             """
 Subject: x
 Should: BeOfType
-Expected: System.IDisposable
+Expected: TestUtils+TestInterface
 But was:
-  Type: System.IO.MemoryStream
-  Value: System.IO.MemoryStream
+  Type: TestUtils+TestSubType
+  Value: {}
 """
 
 
     [<Fact>]
     let ``Fails with expected message if generic interface, even if type implements it`` () =
         fun () ->
-            let x: Map<string, int> = Map.empty
-            x :> IDictionary<string, int> |> ignore // Sanity check to avoid false negatives
-            x.Should().BeOfType<IDictionary<string, int>>()
+            let x = TestSubType<string, int>()
+            x :> TestInterface<string, int> |> ignore // Sanity check to avoid false negatives
+            x.Should().BeOfType<TestInterface<string, int>>()
         |> assertExnMsg
             """
 Subject: x
 Should: BeOfType
-Expected: System.Collections.Generic.IDictionary<System.String, System.Int32>
+Expected: TestUtils+TestInterface<System.String, System.Int32>
 But was:
-  Type: Microsoft.FSharp.Collections.FSharpMap<System.String, System.Int32>
+  Type: TestUtils+TestSubType<System.String, System.Int32>
   Value: {}
 """
 
@@ -755,17 +753,17 @@ But was:
     [<Fact>]
     let ``Fails with expected message if sub-type`` () =
         fun () ->
-            let x = new MemoryStream()
-            x :> Stream |> ignore // Sanity check to avoid false negatives
-            x.Should().BeOfType<Stream>()
+            let x = TestSubType()
+            x :> TestBaseType |> ignore // Sanity check to avoid false negatives
+            x.Should().BeOfType<TestBaseType>()
         |> assertExnMsg
             """
 Subject: x
 Should: BeOfType
-Expected: System.IO.Stream
+Expected: TestUtils+TestBaseType
 But was:
-  Type: System.IO.MemoryStream
-  Value: System.IO.MemoryStream
+  Type: TestUtils+TestSubType
+  Value: {}
 """
 
 
@@ -801,26 +799,26 @@ module ``BeAssignableTo non-generic`` =
 
     [<Fact>]
     let ``Passes for instance of type that implements specified interface`` () =
-        let x = new MemoryStream()
-        x.Should().BeAssignableTo(typeof<IDisposable>)
+        let x = TestSubType()
+        x.Should().BeAssignableTo(typeof<TestInterface>)
 
 
     [<Fact>]
     let ``Passes for boxed instance of type that implements specified interface`` () =
-        let x = new MemoryStream()
-        (box x).Should().BeAssignableTo(typeof<IDisposable>)
+        let x = TestSubType()
+        (box x).Should().BeAssignableTo(typeof<TestInterface>)
 
 
     [<Fact>]
     let ``Passes for instance of subtype of specified type`` () =
-        let x = new MemoryStream()
-        x.Should().BeAssignableTo(typeof<Stream>)
+        let x = TestSubType()
+        x.Should().BeAssignableTo(typeof<TestBaseType>)
 
 
     [<Fact>]
     let ``Passes for boxed instance of subtype of specified type`` () =
-        let x = new MemoryStream()
-        (box x).Should().BeAssignableTo(typeof<Stream>)
+        let x = TestSubType()
+        (box x).Should().BeAssignableTo(typeof<TestBaseType>)
 
 
     [<Fact>]
@@ -893,26 +891,26 @@ module ``BeAssignableTo generic`` =
 
     [<Fact>]
     let ``Passes for instance of type that implements specified interface`` () =
-        let x = new MemoryStream()
-        x.Should().BeAssignableTo<IDisposable>()
+        let x = TestSubType()
+        x.Should().BeAssignableTo<TestInterface>()
 
 
     [<Fact>]
     let ``Passes for boxed instance of type that implements specified interface`` () =
-        let x = new MemoryStream()
-        (box x).Should().BeAssignableTo<IDisposable>()
+        let x = TestSubType()
+        (box x).Should().BeAssignableTo<TestInterface>()
 
 
     [<Fact>]
     let ``Passes for instance of subtype of specified type`` () =
-        let x = new MemoryStream()
-        x.Should().BeAssignableTo<Stream>()
+        let x = TestSubType()
+        x.Should().BeAssignableTo<TestBaseType>()
 
 
     [<Fact>]
     let ``Passes for boxed instance of subtype of specified type`` () =
-        let x = new MemoryStream()
-        (box x).Should().BeAssignableTo<Stream>()
+        let x = TestSubType()
+        (box x).Should().BeAssignableTo<TestBaseType>()
 
 
     [<Fact>]

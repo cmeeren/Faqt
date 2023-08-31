@@ -3,7 +3,6 @@
 open System
 open System.Collections.Generic
 open System.Globalization
-open System.IO
 open System.Runtime.CompilerServices
 open System.Text.Json
 open System.Text.Json.Serialization
@@ -811,11 +810,11 @@ Value: SOME(B)
     [<Fact>]
     let ``SerializeAs also applies to subtypes`` () =
         let format =
-            YamlFormatterBuilder.Default.SerializeAs(fun (_: Stream) -> "FOO").Build()
+            YamlFormatterBuilder.Default.SerializeAs(fun (_: TestBaseType) -> "FOO").Build()
 
         use _ = Formatter.With(format)
 
-        fun () -> "a".Should().FailWith("Value", new MemoryStream())
+        fun () -> "a".Should().FailWith("Value", TestSubType())
         |> assertExnMsg
             """
 Subject: '"a"'
@@ -827,11 +826,13 @@ Value: FOO
     [<Fact>]
     let ``SerializeAs also applies to interfaces`` () =
         let format =
-            YamlFormatterBuilder.Default.SerializeAs(fun (_: IDisposable) -> "FOO").Build()
+            YamlFormatterBuilder.Default
+                .SerializeAs(fun (_: TestInterface) -> "FOO")
+                .Build()
 
         use _ = Formatter.With(format)
 
-        fun () -> "a".Should().FailWith("Value", new MemoryStream())
+        fun () -> "a".Should().FailWith("Value", TestSubType())
         |> assertExnMsg
             """
 Subject: '"a"'
@@ -873,16 +874,21 @@ Value: SOME(B)
     [<Fact>]
     let ``SerializeExactAs does not apply to subtypes`` () =
         let format =
-            YamlFormatterBuilder.Default.SerializeExactAs(fun (_: Stream) -> "FOO").Build()
+            YamlFormatterBuilder.Default
+                .SerializeExactAs(fun (_: TestBaseType) -> "FOO")
+                .Build()
 
         use _ = Formatter.With(format)
 
-        fun () -> "a".Should().FailWith("Value", new MemoryStream())
+        let x = TestSubType()
+        x :> TestBaseType |> ignore // Sanity check to avoid false negatives
+
+        fun () -> "a".Should().FailWith("Value", x)
         |> assertExnMsg
             """
 Subject: '"a"'
 Should: FailWith
-Value: System.IO.MemoryStream
+Value: {}
 """
 
 
@@ -890,17 +896,20 @@ Value: System.IO.MemoryStream
     let ``SerializeExactAs does not apply to interfaces`` () =
         let format =
             YamlFormatterBuilder.Default
-                .SerializeExactAs(fun (_: IDisposable) -> "FOO")
+                .SerializeExactAs(fun (_: TestInterface) -> "FOO")
                 .Build()
 
         use _ = Formatter.With(format)
 
-        fun () -> "a".Should().FailWith("Value", new MemoryStream())
+        let x = TestSubType()
+        x :> TestInterface |> ignore // Sanity check to avoid false negatives
+
+        fun () -> "a".Should().FailWith("Value", x)
         |> assertExnMsg
             """
 Subject: '"a"'
 Should: FailWith
-Value: System.IO.MemoryStream
+Value: {}
 """
 
 
