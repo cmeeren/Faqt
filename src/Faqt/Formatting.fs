@@ -280,7 +280,11 @@ type YamlFormatterBuilder = {
     static member Empty = {
         configureJsonSerializerOptions = fun _ _ -> ()
         getJsonFSharpOptions = fun _ -> JsonFSharpOptions.Default()
-        tryFormatFallback = fun _ x -> x.ToString()
+        tryFormatFallback =
+            fun ex obj -> {|
+                ``SERIALIZATION EXCEPTION`` = ex
+                ToString = obj.ToString()
+            |}
         getYamlVisitor = fun _ -> NoOpYamlVisitor()
     }
 
