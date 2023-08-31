@@ -134,7 +134,7 @@ derived state from an assertion, so you can track the transformations on the ori
    -p:DebugType=embedded -p:EmbedAllSources=true
    ```
 
-   Note that `DebugType=embeded` is automatically set
+   Note that `DebugType=embedded` is automatically set
    by [DotNet.ReproducibleBuilds](https://github.com/dotnet/reproducible-builds) if you use that.
 
 ## Faqt in a nutshell
