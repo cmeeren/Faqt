@@ -87,7 +87,7 @@ type ComparisonAssertions =
         t.Compare((<=), other, because)
 
 
-    /// Asserts that the subject is positive.
+    /// Asserts that the subject is greater than zero.
     [<Extension>]
     static member inline BePositive(t: Testable<'a>, ?because) : And<'a> =
         use _ = t.Assert()
@@ -98,7 +98,7 @@ type ComparisonAssertions =
         And(t)
 
 
-    /// Asserts that the subject is negative.
+    /// Asserts that the subject is less than zero.
     [<Extension>]
     static member inline BeNegative(t: Testable<'a>, ?because) : And<'a> =
         use _ = t.Assert()
@@ -109,7 +109,7 @@ type ComparisonAssertions =
         And(t)
 
 
-    /// Asserts that the subject is non-negative (i.e., is zero or positive).
+    /// Asserts that the subject is greater than or equal to zero.
     [<Extension>]
     static member inline BeNonNegative(t: Testable<'a>, ?because) : And<'a> =
         use _ = t.Assert()
@@ -120,7 +120,7 @@ type ComparisonAssertions =
         And(t)
 
 
-    /// Asserts that the subject is non-positive (i.e., is zero or negative).
+    /// Asserts that the subject is less than or equal to zero.
     [<Extension>]
     static member inline BeNonPositive(t: Testable<'a>, ?because) : And<'a> =
         use _ = t.Assert()
