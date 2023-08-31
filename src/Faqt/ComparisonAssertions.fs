@@ -39,8 +39,8 @@ type ComparisonAssertions =
         // Alternative implementations could require op_Subtraction only one way, but additionally require Abs or ~-
         // (negation).
         if
-            isNull (box t.Subject)
-            || not (t.Subject - target > tolerance || target - t.Subject > tolerance)
+            not (isNull (box t.Subject))
+            && not (t.Subject - target > tolerance || target - t.Subject > tolerance)
         then
             t
                 .With("Target", target)
