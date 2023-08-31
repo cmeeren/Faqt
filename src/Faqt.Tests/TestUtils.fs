@@ -61,6 +61,10 @@ type TestSubType<'a, 'b>() =
     interface TestInterface<'a, 'b>
 
 
+type Unserializable() =
+    member _.WillThrow = failwith<int> "Foo"
+
+
 module CultureInfo =
 
     let withCurrentCulture (cultureName: string) =

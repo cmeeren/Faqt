@@ -15,10 +15,6 @@ open YamlDotNet.Core
 open YamlDotNet.RepresentationModel
 
 
-type Unserializable() =
-    member _.WillThrow = failwith<int> "Foo"
-
-
 [<Extension>]
 type private Assertions =
 
