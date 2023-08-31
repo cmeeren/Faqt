@@ -1,7 +1,4 @@
-Faqt documentation
-====
-
-## Table of contents
+# Table of contents
 
 <!-- TOC -->
 
@@ -21,7 +18,7 @@ Faqt documentation
 
 <!-- TOC -->
 
-## Writing your own assertions
+# Writing your own assertions
 
 Writing your own assertions is easy! Custom assertions are implemented exactly like Faqt’s built-in assertions, so you
 can always look at those for inspiration (see all files ending with `Assertions` in [this
@@ -175,7 +172,7 @@ If you want all the details, here they are:
 * If your assertion calls `Should` at any point, make sure you use the overload that takes the original `Testable` as an
   argument (`.Should(t)`), since it contains important state relating to the end user’s original assertion call.
 
-## Multiple assertion chains without `|> ignore`
+# Multiple assertion chains without `|> ignore`
 
 Since assertions return `And` or `AndDerived`, F# will warn you if an assertion chain is not the last line of an
 expression. You have to `|> ignore` all lines (except the last) in order to remove this warning.
@@ -197,7 +194,7 @@ If you want to use another operator, you can define your own just as easily.
 See [this StackOverflow answer](https://stackoverflow.com/a/34188952/2978652) for valid prefix operators. However, your
 custom operator will then be shown in the subject name (whereas `%` is automatically removed).
 
-## Customizing the format
+# Customizing the format
 
 Faqt's formatter is implemented as a simple function with signature `FailureData -> string`.
 
@@ -233,7 +230,7 @@ Formatter.Set(myFormatter)
 use _ = Formatter.With(myFormatter)
 ```
 
-## Security considerations
+# Security considerations
 
 **Treat assertion exception messages (and therefore test failure messages) as securely as you treat your source code.**
 
@@ -241,15 +238,15 @@ Faqt derives subject names from your source code. Known existing limitations (se
 to use a lot more of your code in the subject name than intended (up to entire source files). Therefore, do not give
 anyone access to Faqt assertion failure messages that should not have access to your source code.
 
-## FAQ
+# FAQ
 
-### Which testing frameworks does Faqt work with?
+## Which testing frameworks does Faqt work with?
 
 All of them. XUnit, NUnit, MSTest, NSpec, MSpec, Expecto, you name it. Faqt is agnostic to the test framework (and can
 also be used in non-test production code, as previously described); it simply throws a custom exception when an
 assertion fails.
 
-### Why is the subject name not correct in my specific example?
+## Why is the subject name not correct in my specific example?
 
 The automatic subject name (the first part of the assertion message) is correct in most situations, but there are edge
 cases where it may produce unexpected results:
@@ -278,7 +275,7 @@ simple regex-based processing/replacement of the call chain based on which asser
 If you would like to help make the automatic subject name functionality more robust, please raise an issue. You can find
 the relevant code in [SubjectName.fs](https://github.com/cmeeren/Faqt/blob/main/src/Faqt/SubjectName.fs).
 
-### Why do I have to use `Should(())` inside an assertion chain?
+## Why do I have to use `Should(())` inside an assertion chain?
 
 This is due to how subject names are implemented, and the solution was chosen as the lesser of several evils. The
 details are probably boring, but in short, when an assertion fails, Faqt needs to know the chain of assertions
@@ -292,7 +289,7 @@ entirely), or make the subject name incorrect in many more cases (e.g. by removi
 assertion history altogether, thereby only giving correct subject names up to the first assertion of any given name in a
 chain).
 
-### Why does this assertion pass/fail for null?
+## Why does this assertion pass/fail for null?
 
 Note: I recognize that the below is not the only way to look at the issue. If you fundamentally disagree with this
 policy, I am open to discussing it. Please raise an issue.
@@ -325,7 +322,7 @@ The only exceptions are for assertions that check equality, such as `Be` or `BeS
 to `null` (which is consistent with the default F# implementations of structural and reference equality). This also
 extends to `SequenceEqual` and `HaveSameItemsAs`, which will pass if both sequences are `null`.
 
-### Why not FluentAssertions?
+## Why not FluentAssertions?
 
 FluentAssertions is a fantastic library, and very much the inspiration for Faqt. Unfortunately, its API design causes
 trouble for F#. Here are the reasons I decided to make Faqt instead of just using FluentAssertions:
@@ -348,13 +345,13 @@ Note that Faqt does not aim for feature parity with FluentAssertions. For exampl
 multiple assertions simultaneously; like almost all assertion libraries, it stops at the first failure ("monadic"
 instead of "applicative" behavior).
 
-### Why not Shouldly?
+## Why not Shouldly?
 
 I will admit I have not used Shouldly myself, but its feature set (ignoring the actual assertions) seem to be a subset
 of that of FluentAssertions. For example, it does not support chaining assertions. However, I like its easy-to-read
 assertion failure messages, and have used those as inspiration for Faqt's assertion messages.
 
-### Why not Unquote?
+## Why not Unquote?
 
 [Unquote](https://github.com/SwensenSoftware/unquote) is a great library built on a great idea: Use code quotations with
 arbitrary `bool`-returning F# expressions as your assertions, and Unquote will display step-by-step evaluations if the
@@ -372,7 +369,7 @@ Unfortunately, I stopped using it because of several issues:
 * I need assertions that can work in production code, too, and I assume that evaluating quotations has a significant
   performance impact (I have admittedly not measured this, since I stopped using it for the reasons above anyway).
 
-### Can I use Faqt from C#?
+## Can I use Faqt from C#?
 
 Faqt is designed only for F#. The subject names only work correctly for F#, and the API design and assertion choices are
 based on F# idioms and expected usage. Any support for C# is incidental, and improving or even preserving C# support is
