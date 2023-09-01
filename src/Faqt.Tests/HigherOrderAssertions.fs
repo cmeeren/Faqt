@@ -8,12 +8,17 @@ module Satisfy =
 
 
     [<Fact>]
-    let ``Passes if the inner assertion passes and can be chained with And`` () =
+    let ``Can be chained with And`` () =
         "asd"
             .Should()
             .Satisfy(fun x -> x.Should().Pass())
             .Id<And<string>>()
             .And.Be("asd")
+
+
+    [<Fact>]
+    let ``Passes if the inner assertion passes`` () =
+        "asd".Should().Satisfy(fun x -> x.Should().Pass())
 
 
     [<Fact>]
@@ -47,12 +52,17 @@ module NotSatisfy =
 
 
     [<Fact>]
-    let ``Passes if the inner assertion fails and can be chained with And`` () =
+    let ``Can be chained with And`` () =
         "asd"
             .Should()
             .NotSatisfy(fun x -> x.Should().Fail())
             .Id<And<string>>()
             .And.Be("asd")
+
+
+    [<Fact>]
+    let ``Passes if the inner assertion fails`` () =
+        "asd".Should().NotSatisfy(fun x -> x.Should().Fail())
 
 
     [<Fact>]
@@ -80,7 +90,16 @@ module SatisfyAll =
 
 
     [<Fact>]
-    let ``Passes if all of the inner assertions passes and can be chained with And`` () =
+    let ``Can be chained with And`` () =
+        "asd".Should().SatisfyAll([]).Id<And<string>>().And.Be("asd")
+
+
+    [<Fact>]
+    let ``Passes if assertion list is empty`` () = "asd".Should().SatisfyAll([])
+
+
+    [<Fact>]
+    let ``Passes if all of the inner assertions passes`` () =
         "asd"
             .Should()
             .SatisfyAll(
@@ -92,10 +111,6 @@ module SatisfyAll =
             )
             .Id<And<string>>()
             .And.Be("asd")
-
-
-    [<Fact>]
-    let ``Passes if assertion list is empty`` () = "asd".Should().SatisfyAll([])
 
 
     [<Fact>]
@@ -160,16 +175,19 @@ module SatisfyAny =
 
 
     [<Fact>]
-    let ``Passes if all of the inner assertions passes and can be chained with And`` () =
-        "asd"
-            .Should()
-            .SatisfyAny([ (fun s1 -> s1.Length.Should().Pass()); (fun s2 -> s2.Length.Should().Pass()) ])
-            .Id<And<string>>()
-            .And.Be("asd")
+    let ``Can be chained with And`` () =
+        "asd".Should().SatisfyAny([]).Id<And<string>>().And.Be("asd")
 
 
     [<Fact>]
     let ``Passes if assertion list is empty`` () = "asd".Should().SatisfyAny([])
+
+
+    [<Fact>]
+    let ``Passes if all of the inner assertions passes`` () =
+        "asd"
+            .Should()
+            .SatisfyAny([ (fun s1 -> s1.Length.Should().Pass()); (fun s2 -> s2.Length.Should().Pass()) ])
 
 
     [<Fact>]
