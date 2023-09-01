@@ -643,6 +643,17 @@ Value: 1.02:03:04.0050060
 
 
     [<Fact>]
+    let ``Rendering of DateTime`` () =
+        fun () -> "a".Should().FailWith("Value", DateTime(2000, 1, 2, 3, 4, 5, 6))
+        |> assertExnMsg
+            """
+Subject: '"a"'
+Should: FailWith
+Value: 2000-01-02T03:04:05.006
+"""
+
+
+    [<Fact>]
     let ``Rendering of CultureInfo.InvariantCulture`` () =
         fun () -> "a".Should().FailWith("Value", CultureInfo.InvariantCulture)
         |> assertExnMsg
