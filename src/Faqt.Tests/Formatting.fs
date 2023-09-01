@@ -632,6 +632,17 @@ Value: nb-NO
 
 
     [<Fact>]
+    let ``Rendering of TimeSpan`` () =
+        fun () -> "a".Should().FailWith("Value", TimeSpan(1, 2, 3, 4, 5, 6))
+        |> assertExnMsg
+            """
+Subject: '"a"'
+Should: FailWith
+Value: 1.02:03:04.0050060
+"""
+
+
+    [<Fact>]
     let ``Rendering of CultureInfo.InvariantCulture`` () =
         fun () -> "a".Should().FailWith("Value", CultureInfo.InvariantCulture)
         |> assertExnMsg
