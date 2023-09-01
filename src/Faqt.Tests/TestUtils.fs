@@ -9,6 +9,10 @@ open AssertionHelpers
 open Xunit
 
 
+let assertFails f =
+    Assert.Throws<AssertionFailedException>(f >> ignore)
+
+
 let assertExnMsg (msg: string) (f: unit -> 'a) =
     let ex = Assert.Throws<AssertionFailedException>(f >> ignore)
 
