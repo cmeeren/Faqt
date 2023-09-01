@@ -127,7 +127,7 @@ type BasicAssertions =
         try
             AndDerived(t, f t.Subject)
         with ex ->
-            t.With("But threw", ex).With("For value", t.Subject).Fail(because)
+            t.With("But threw", ex).With("Subject value", t.Subject).Fail(because)
 
 
     /// Asserts that the subject can be transformed using the specified function (fails if the function returns None or
@@ -140,11 +140,11 @@ type BasicAssertions =
             try
                 f t.Subject
             with ex ->
-                t.With("But threw", ex).With("For value", t.Subject).Fail(because)
+                t.With("But threw", ex).With("Subject value", t.Subject).Fail(because)
 
         match result with
         | Some x -> AndDerived(t, x)
-        | None -> t.With("But got", None).With("For value", t.Subject).Fail(because)
+        | None -> t.With("But got", None).With("Subject value", t.Subject).Fail(because)
 
 
     /// Asserts that the subject can be transformed using the specified function (fails if the function returns
@@ -157,11 +157,11 @@ type BasicAssertions =
             try
                 f t.Subject
             with ex ->
-                t.With("But threw", ex).With("For value", t.Subject).Fail(because)
+                t.With("But threw", ex).With("Subject value", t.Subject).Fail(because)
 
         match result with
         | ValueSome x -> AndDerived(t, x)
-        | ValueNone -> t.With("But got", ValueNone).With("For value", t.Subject).Fail(because)
+        | ValueNone -> t.With("But got", ValueNone).With("Subject value", t.Subject).Fail(because)
 
 
     /// Asserts that the subject can be transformed using the specified function (fails if the function returns Error or
@@ -174,11 +174,11 @@ type BasicAssertions =
             try
                 f t.Subject
             with ex ->
-                t.With("But threw", ex).With("For value", t.Subject).Fail(because)
+                t.With("But threw", ex).With("Subject value", t.Subject).Fail(because)
 
         match result with
         | Ok x -> AndDerived(t, x)
-        | Error err -> t.With("But got", Error err).With("For value", t.Subject).Fail(because)
+        | Error err -> t.With("But got", Error err).With("Subject value", t.Subject).Fail(because)
 
 
     /// Asserts that the subject can be transformed using the specified function (fails if the function returns false or
@@ -191,8 +191,8 @@ type BasicAssertions =
             try
                 f t.Subject
             with ex ->
-                t.With("But threw", ex).With("For value", t.Subject).Fail(because)
+                t.With("But threw", ex).With("Subject value", t.Subject).Fail(because)
 
         match result with
         | true, x -> AndDerived(t, x)
-        | false, _ -> t.With("But got", false).With("For value", t.Subject).Fail(because)
+        | false, _ -> t.With("But got", false).With("Subject value", t.Subject).Fail(because)
