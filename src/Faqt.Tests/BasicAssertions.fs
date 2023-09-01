@@ -427,12 +427,8 @@ module BeNull =
 
 
     [<Fact>]
-    let ``Can be chained with And`` () =
+    let ``Passes if null and can be chained with And`` () =
         (null: string).Should().BeNull().Id<And<string>>().And.BeNull()
-
-
-    [<Fact>]
-    let ``Passes if null`` () = (null: obj).Should().BeNull()
 
 
     [<Fact>]
@@ -466,12 +462,8 @@ module NotBeNull =
 
 
     [<Fact>]
-    let ``Can be chained with And`` () =
+    let ``Passes if not null and can be chained with And`` () =
         "a".Should().NotBeNull().Id<And<string>>().And.Be("a")
-
-
-    [<Fact>]
-    let ``Passes if not null`` () = obj().Should().NotBeNull()
 
 
     [<Fact>]
@@ -567,7 +559,7 @@ But was: null
 
 
     [<Fact>]
-    let ``Fails with expected message for generic types`` () =
+    let ``Fails with expected message for different generic types`` () =
         fun () ->
             let x = TestSubType<string, int>()
             x.Should().BeOfType(typeof<TestInterface<string, int>>)
@@ -672,7 +664,7 @@ But was: null
 
 
     [<Fact>]
-    let ``Fails with expected message for generic types`` () =
+    let ``Fails with expected message for different generic types`` () =
         fun () ->
             let x = TestSubType<string, int>()
             x.Should().BeOfType<TestInterface<string, int>>()
@@ -768,7 +760,7 @@ But was: null
 
 
     [<Fact>]
-    let ``Fails with expected message for generic types`` () =
+    let ``Fails with expected message for incompatible generic types`` () =
         fun () ->
             let x = TestBaseType<string, int>()
             x.Should().BeAssignableTo(typeof<TestSubType<string, int>>)
@@ -873,7 +865,7 @@ But was: null
 
 
     [<Fact>]
-    let ``Fails with expected message for generic types`` () =
+    let ``Fails with expected message for incompatible generic types`` () =
         fun () ->
             let x = TestBaseType<string, int>()
             x.Should().BeAssignableTo<TestSubType<string, int>>()
@@ -907,17 +899,13 @@ module Transform =
 
 
     [<Fact>]
-    let ``Can be chained with AndDerived with transformed value`` () =
+    let ``Passes when the function does not throw and can be chained with AndDerived with transformed value`` () =
         "a"
             .Should()
             .Transform(fun s -> s.Length)
             .Id<AndDerived<string, int>>()
             .WhoseValue.Should(())
             .Be(1)
-
-
-    [<Fact>]
-    let ``Passes when the function does not throw`` () = "a".Should().Transform(id)
 
 
     [<Fact>]
@@ -953,17 +941,13 @@ module ``TryTransform option`` =
 
 
     [<Fact>]
-    let ``Can be chained with AndDerived with transformed value`` () =
+    let ``Passes when function returns Some and can be chained with AndDerived with transformed value`` () =
         "a"
             .Should()
             .TryTransform(fun s -> Some s.Length)
             .Id<AndDerived<string, int>>()
             .WhoseValue.Should(())
             .Be(1)
-
-
-    [<Fact>]
-    let ``Passes when function returns Some`` () = "a".Should().TryTransform(Some)
 
 
     [<Fact>]
@@ -1027,17 +1011,13 @@ module ``TryTransform voption`` =
 
 
     [<Fact>]
-    let ``Can be chained with AndDerived with transformed value`` () =
+    let ``Passes when function returns ValueSome and can be chained with AndDerived with transformed value`` () =
         "a"
             .Should()
             .TryTransform(fun s -> ValueSome s.Length)
             .Id<AndDerived<string, int>>()
             .WhoseValue.Should(())
             .Be(1)
-
-
-    [<Fact>]
-    let ``Passes when function returns Some`` () = "a".Should().TryTransform(ValueSome)
 
 
     [<Fact>]
@@ -1104,17 +1084,13 @@ module ``TryTransform Result`` =
 
 
     [<Fact>]
-    let ``Can be chained with AndDerived with transformed value`` () =
+    let ``Passes when function returns Ok and can be chained with AndDerived with transformed value`` () =
         "a"
             .Should()
             .TryTransform(fun s -> Ok s.Length)
             .Id<AndDerived<string, int>>()
             .WhoseValue.Should(())
             .Be(1)
-
-
-    [<Fact>]
-    let ``Passes when function returns Some`` () = "a".Should().TryTransform(Ok)
 
 
     [<Fact>]
@@ -1183,18 +1159,18 @@ module ``TryTransform parse`` =
 
 
     [<Fact>]
-    let ``Can be chained with AndDerived with transformed value`` () =
-        "1"
-            .Should()
-            .TryTransform(fun s -> Int32.TryParse s)
-            .Id<AndDerived<string, int>>()
-            .WhoseValue.Should(())
-            .Be(1)
+    let ``Can be called with functions with signatures like Int32.TryParse`` () =
+        "1".Should().TryTransform(fun s -> Int32.TryParse s)
 
 
     [<Fact>]
-    let ``Passes when function returns true`` () =
-        "a".Should().TryTransform(fun _ -> true, ())
+    let ``Passes when function returns true and can be chained with AndDerived with transformed value`` () =
+        "a"
+            .Should()
+            .TryTransform(fun s -> true, s.Length)
+            .Id<AndDerived<string, int>>()
+            .WhoseValue.Should(())
+            .Be(1)
 
 
     [<Fact>]
