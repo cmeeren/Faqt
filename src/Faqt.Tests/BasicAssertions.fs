@@ -436,12 +436,7 @@ module BeNull =
 
 
     [<Fact>]
-    let ``Fails if not null`` () =
-        assertFails (fun () -> obj().Should().BeNull())
-
-
-    [<Fact>]
-    let ``Fails with expected message`` () =
+    let ``Fails with expected message if not null`` () =
         fun () ->
             let x = "asd"
             x.Should().BeNull()
@@ -454,7 +449,7 @@ But was: asd
 
 
     [<Fact>]
-    let ``Fails with expected message with because`` () =
+    let ``Fails with expected message with because if not null`` () =
         fun () ->
             let x = "asd"
             x.Should().BeNull("Some reason")
@@ -480,12 +475,7 @@ module NotBeNull =
 
 
     [<Fact>]
-    let ``Fails if null`` () =
-        assertFails (fun () -> (null: obj).Should().NotBeNull())
-
-
-    [<Fact>]
-    let ``Fails with expected message`` () =
+    let ``Fails with expected message if null`` () =
         fun () ->
             let x: obj = null
             x.Should().NotBeNull()
@@ -498,7 +488,7 @@ But was: null
 
 
     [<Fact>]
-    let ``Fails with expected message with because`` () =
+    let ``Fails with expected message with because if null`` () =
         fun () ->
             let x: obj = null
             x.Should().NotBeNull("Some reason")
@@ -931,12 +921,7 @@ module Transform =
 
 
     [<Fact>]
-    let ``Fails when the function throws`` () =
-        assertFails (fun () -> "a".Should().Transform(fun _ -> failwith "foo"))
-
-
-    [<Fact>]
-    let ``Fails with expected message`` () =
+    let ``Fails with expected message when the function throws`` () =
         fun () -> "a".Should().Transform(fun _ -> failwith "foo")
         |> assertExnMsgWildcard
             """
