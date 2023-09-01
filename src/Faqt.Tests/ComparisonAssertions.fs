@@ -205,12 +205,8 @@ module BeGreaterThan =
 
 
     [<Fact>]
-    let ``Can be chained with And`` () =
+    let ``Passes if subject > other and can be chained with And`` () =
         (1).Should().BeGreaterThan(0).Id<And<int>>().And.Be(1)
-
-
-    [<Fact>]
-    let ``Passes if subject > other`` () = (1).Should().BeGreaterThan(0)
 
 
     [<Theory>]
@@ -275,17 +271,12 @@ module BeGreaterThanOrEqualTo =
 
 
     [<Fact>]
-    let ``Fails if subject < other`` () =
-        assertFails (fun () -> (0).Should().BeGreaterThanOrEqualTo(1))
-
-
-    [<Fact>]
     let ``Fails if null`` () =
         assertFails (fun () -> Unchecked.defaultof<Comparison>.Should().BeGreaterThanOrEqualTo(Comparison 0))
 
 
     [<Fact>]
-    let ``Fails with expected message`` () =
+    let ``Fails with expected message if subject < other`` () =
         fun () ->
             let x = 0
             x.Should().BeGreaterThanOrEqualTo(1)
@@ -299,7 +290,7 @@ But was: 0
 
 
     [<Fact>]
-    let ``Fails with expected message with because`` () =
+    let ``Fails with expected message with because if subject < other`` () =
         fun () ->
             let x = 0
             x.Should().BeGreaterThanOrEqualTo(1, "Some reason")
@@ -322,12 +313,8 @@ module BeLessThan =
 
 
     [<Fact>]
-    let ``Can be chained with And`` () =
+    let ``Passes if subject < other and can be chained with And`` () =
         (0).Should().BeLessThan(1).Id<And<int>>().And.Be(0)
-
-
-    [<Fact>]
-    let ``Passes if subject < other`` () = (0).Should().BeLessThan(1)
 
 
     [<Theory>]
@@ -392,17 +379,12 @@ module BeLessThanOrEqualTo =
 
 
     [<Fact>]
-    let ``Fails if subject > other`` () =
-        assertFails (fun () -> (1).Should().BeLessThanOrEqualTo(0))
-
-
-    [<Fact>]
     let ``Fails if null`` () =
         assertFails (fun () -> Unchecked.defaultof<Comparison>.Should().BeLessThanOrEqualTo(Comparison 0))
 
 
     [<Fact>]
-    let ``Fails with expected message`` () =
+    let ``Fails with expected message if subject > other`` () =
         fun () ->
             let x = 1
             x.Should().BeLessThanOrEqualTo(0)
@@ -416,7 +398,7 @@ But was: 1
 
 
     [<Fact>]
-    let ``Fails with expected message with because`` () =
+    let ``Fails with expected message with because if subject > other`` () =
         fun () ->
             let x = 1
             x.Should().BeLessThanOrEqualTo(0, "Some reason")
@@ -439,12 +421,8 @@ module BePositive =
 
 
     [<Fact>]
-    let ``Can be chained with And`` () =
+    let ``Passes if subject is positive and can be chained with And`` () =
         (1).Should().BePositive().Id<And<int>>().And.Be(1)
-
-
-    [<Fact>]
-    let ``Passes if subject is positive`` () = (1).Should().BePositive()
 
 
     [<Theory>]
@@ -495,12 +473,8 @@ module BeNegative =
 
 
     [<Fact>]
-    let ``Can be chained with And`` () =
+    let ``Passes if subject is negative and can be chained with And`` () =
         (-1).Should().BeNegative().Id<And<int>>().And.Be(-1)
-
-
-    [<Fact>]
-    let ``Passes if subject is negative`` () = (-1).Should().BeNegative()
 
 
     [<Theory>]
@@ -558,12 +532,7 @@ module BeNonNegative =
     [<Theory>]
     [<InlineData(0)>]
     [<InlineData(1)>]
-    let ``passes if subject is zero or positive`` (subject: int) = subject.Should().BeNonNegative()
-
-
-    [<Fact>]
-    let ``Fails if subject is negative`` () =
-        assertFails (fun () -> (-1).Should().BeNonNegative())
+    let ``Passes if subject is zero or positive`` (subject: int) = subject.Should().BeNonNegative()
 
 
     [<Fact>]
@@ -572,7 +541,7 @@ module BeNonNegative =
 
 
     [<Fact>]
-    let ``Fails with expected message`` () =
+    let ``Fails with expected message if subject is negative`` () =
         fun () ->
             let x = -1
             x.Should().BeNonNegative()
@@ -585,7 +554,7 @@ But was: -1
 
 
     [<Fact>]
-    let ``Fails with expected message with because`` () =
+    let ``Fails with expected message with because if subject is negative`` () =
         fun () ->
             let x = -1
             x.Should().BeNonNegative("Some reason")
@@ -614,12 +583,7 @@ module BeNonPositive =
     [<Theory>]
     [<InlineData(0)>]
     [<InlineData(-1)>]
-    let ``passes if subject is zero or negative`` (subject: int) = subject.Should().BeNonPositive()
-
-
-    [<Fact>]
-    let ``Fails if subject is positive`` () =
-        assertFails (fun () -> (1).Should().BeNonPositive())
+    let ``Passes if subject is zero or negative`` (subject: int) = subject.Should().BeNonPositive()
 
 
     [<Fact>]
@@ -628,7 +592,7 @@ module BeNonPositive =
 
 
     [<Fact>]
-    let ``Fails with expected message`` () =
+    let ``Fails with expected message if subject is positive`` () =
         fun () ->
             let x = 1
             x.Should().BeNonPositive()
@@ -641,7 +605,7 @@ But was: 1
 
 
     [<Fact>]
-    let ``Fails with expected message with because`` () =
+    let ``Fails with expected message with because if subject is positive`` () =
         fun () ->
             let x = 1
             x.Should().BeNonPositive("Some reason")
