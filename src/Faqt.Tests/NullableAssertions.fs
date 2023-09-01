@@ -9,7 +9,7 @@ module HaveValue =
 
 
     [<Fact>]
-    let ``Passes for nullable values that have a value and can be chained with AndDerived with inner value`` () =
+    let ``Passes if not null and can be chained with AndDerived with inner value`` () =
         Nullable(1)
             .Should()
             .HaveValue()
@@ -19,7 +19,7 @@ module HaveValue =
 
 
     [<Fact>]
-    let ``Fails with expected message`` () =
+    let ``Fails with expected message if null`` () =
         fun () ->
             let x = Nullable<int>()
             x.Should().HaveValue()
@@ -32,7 +32,7 @@ But was: null
 
 
     [<Fact>]
-    let ``Fails with expected message with because`` () =
+    let ``Fails with expected message with because if null`` () =
         fun () ->
             let x = Nullable<int>()
             x.Should().HaveValue("Some reason")
@@ -49,7 +49,7 @@ module NotHaveValue =
 
 
     [<Fact>]
-    let ``Passes for nullable values that do not have a value and can be chained with And`` () =
+    let ``Passes if null and can be chained with And`` () =
         Nullable<int>()
             .Should()
             .NotHaveValue()
@@ -58,7 +58,7 @@ module NotHaveValue =
 
 
     [<Fact>]
-    let ``Fails with expected message`` () =
+    let ``Fails with expected message if not null`` () =
         fun () ->
             let x = Nullable(1)
             x.Should().NotHaveValue()
@@ -71,7 +71,7 @@ But was: 1
 
 
     [<Fact>]
-    let ``Fails with expected message with because`` () =
+    let ``Fails with expected message with because if not null`` () =
         fun () ->
             let x = Nullable(1)
             x.Should().NotHaveValue("Some reason")
@@ -88,12 +88,12 @@ module BeNull =
 
 
     [<Fact>]
-    let ``Passes for nullable values that do not have a value and can be chained with And`` () =
+    let ``Passes if null and can be chained with And`` () =
         Nullable<int>().Should().BeNull().Id<And<Nullable<int>>>().And.Be(Nullable())
 
 
     [<Fact>]
-    let ``Fails with expected message`` () =
+    let ``Fails with expected message if not null`` () =
         fun () ->
             let x = Nullable(1)
             x.Should().BeNull()
@@ -106,7 +106,7 @@ But was: 1
 
 
     [<Fact>]
-    let ``Fails with expected message with because`` () =
+    let ``Fails with expected message with because if not null`` () =
         fun () ->
             let x = Nullable(1)
             x.Should().BeNull("Some reason")
@@ -123,7 +123,7 @@ module NotBeNull =
 
 
     [<Fact>]
-    let ``Passes for nullable values that have a value and can be chained with AndDerived with inner value`` () =
+    let ``Passes if not null and can be chained with AndDerived with inner value`` () =
         Nullable(1)
             .Should()
             .NotBeNull()
@@ -133,7 +133,7 @@ module NotBeNull =
 
 
     [<Fact>]
-    let ``Fails with expected message`` () =
+    let ``Fails with expected message if null`` () =
         fun () ->
             let x = Nullable<int>()
             x.Should().NotBeNull()
@@ -146,7 +146,7 @@ But was: null
 
 
     [<Fact>]
-    let ``Fails with expected message with because`` () =
+    let ``Fails with expected message with because if null`` () =
         fun () ->
             let x = Nullable<int>()
             x.Should().NotBeNull("Some reason")
