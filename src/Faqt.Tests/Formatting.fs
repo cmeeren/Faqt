@@ -460,6 +460,17 @@ Value:
 
 
     [<Fact>]
+    let ``Rendering of null`` () =
+        fun () -> "a".Should().FailWith("Value", null)
+        |> assertExnMsg
+            """
+Subject: '"a"'
+Should: FailWith
+Value: null
+"""
+
+
+    [<Fact>]
     let ``Subject name uses block style, but other Subject string sequences uses flow style`` () =
         fun () ->
             (Some "a")
