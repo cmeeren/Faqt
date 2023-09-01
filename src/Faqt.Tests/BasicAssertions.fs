@@ -917,17 +917,26 @@ module Transform =
 
 
     [<Fact>]
-    let ``Passes when parsing string integer using int and can be chained with AndDerived with transformed value`` () =
-        "1"
+    let ``Can be chained with AndDerived with transformed value`` () =
+        "a"
             .Should()
-            .Transform(int)
+            .Transform(fun s -> s.Length)
             .Id<AndDerived<string, int>>()
             .WhoseValue.Should(())
             .Be(1)
 
 
     [<Fact>]
-    let ``Fails with expected message when function throws`` () =
+    let ``Passes when the function does not throw`` () = "a".Should().Transform(id)
+
+
+    [<Fact>]
+    let ``Fails when the function throws`` () =
+        assertFails (fun () -> "a".Should().Transform(fun _ -> failwith "foo"))
+
+
+    [<Fact>]
+    let ``Fails with expected message`` () =
         fun () -> "a".Should().Transform(fun _ -> failwith "foo")
         |> assertExnMsgWildcard
             """
@@ -959,13 +968,17 @@ module ``TryTransform option`` =
 
 
     [<Fact>]
-    let ``Passes when function returns Some`` () =
-        "1"
+    let ``Can be chained with AndDerived with transformed value`` () =
+        "a"
             .Should()
-            .TryTransform(int >> Some)
+            .TryTransform(fun s -> Some s.Length)
             .Id<AndDerived<string, int>>()
             .WhoseValue.Should(())
             .Be(1)
+
+
+    [<Fact>]
+    let ``Passes when function returns Some`` () = "a".Should().TryTransform(Some)
 
 
     [<Fact>]
@@ -974,6 +987,19 @@ module ``TryTransform option`` =
         |> assertExnMsg
             """
 Subject: '"a"'
+Should: TryTransform
+But got: null
+Subject value: a
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because when function returns None`` () =
+        fun () -> "a".Should().TryTransform((fun _ -> Option<string>.None), "Some reason")
+        |> assertExnMsg
+            """
+Subject: '"a"'
+Because: Some reason
 Should: TryTransform
 But got: null
 Subject value: a
@@ -990,19 +1016,6 @@ Should: TryTransform
 But threw: |-
   System.Exception: foo
      at *
-Subject value: a
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message with because when returning None`` () =
-        fun () -> "a".Should().TryTransform((fun _ -> Option<string>.None), "Some reason")
-        |> assertExnMsg
-            """
-Subject: '"a"'
-Because: Some reason
-Should: TryTransform
-But got: null
 Subject value: a
 """
 
@@ -1029,21 +1042,41 @@ module ``TryTransform voption`` =
 
 
     [<Fact>]
-    let ``Passes when function returns ValueSome`` () =
-        "1"
+    let ``Can be chained with AndDerived with transformed value`` () =
+        "a"
             .Should()
-            .TryTransform(int >> ValueSome)
+            .TryTransform(fun s -> ValueSome s.Length)
             .Id<AndDerived<string, int>>()
             .WhoseValue.Should(())
             .Be(1)
 
 
     [<Fact>]
-    let ``Fails with expected message when function returns ValueNone`` () =
+    let ``Passes when function returns Some`` () = "a".Should().TryTransform(ValueSome)
+
+
+    [<Fact>]
+    let ``Fails with expected message when function returns None`` () =
         fun () -> "a".Should().TryTransform(fun _ -> ValueOption<string>.ValueNone)
         |> assertExnMsg
             """
 Subject: '"a"'
+Should: TryTransform
+But got: ValueNone
+Subject value: a
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because when function returns None`` () =
+        fun () ->
+            "a"
+                .Should()
+                .TryTransform((fun _ -> ValueOption<string>.ValueNone), "Some reason")
+        |> assertExnMsg
+            """
+Subject: '"a"'
+Because: Some reason
 Should: TryTransform
 But got: ValueNone
 Subject value: a
@@ -1065,31 +1098,15 @@ Subject value: a
 
 
     [<Fact>]
-    let ``Fails with expected message with because when returning ValueNone`` () =
-        fun () ->
-            "a"
-                .Should()
-                .TryTransform((fun _ -> ValueOption<string>.ValueNone), "ValueSome reason")
-        |> assertExnMsg
-            """
-Subject: '"a"'
-Because: ValueSome reason
-Should: TryTransform
-But got: ValueNone
-Subject value: a
-"""
-
-
-    [<Fact>]
     let ``Fails with expected message with because when function throws`` () =
         fun () ->
             "a"
                 .Should()
-                .TryTransform((fun _ -> failwith<string voption> "foo"), "ValueSome reason")
+                .TryTransform((fun _ -> failwith<string voption> "foo"), "Some reason")
         |> assertExnMsgWildcard
             """
 Subject: '"a"'
-Because: ValueSome reason
+Because: Some reason
 Should: TryTransform
 But threw: |-
   System.Exception: foo
@@ -1102,13 +1119,17 @@ module ``TryTransform Result`` =
 
 
     [<Fact>]
-    let ``Passes when function returns Ok`` () =
-        "1"
+    let ``Can be chained with AndDerived with transformed value`` () =
+        "a"
             .Should()
-            .TryTransform(int >> Ok)
+            .TryTransform(fun s -> Ok s.Length)
             .Id<AndDerived<string, int>>()
             .WhoseValue.Should(())
             .Be(1)
+
+
+    [<Fact>]
+    let ``Passes when function returns Some`` () = "a".Should().TryTransform(Ok)
 
 
     [<Fact>]
@@ -1117,6 +1138,23 @@ module ``TryTransform Result`` =
         |> assertExnMsg
             """
 Subject: '"a"'
+Should: TryTransform
+But got:
+  Error: foo
+Subject value: a
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because when function returns Error`` () =
+        fun () ->
+            "a"
+                .Should()
+                .TryTransform((fun _ -> Result<string, _>.Error "foo"), "Some reason")
+        |> assertExnMsg
+            """
+Subject: '"a"'
+Because: Some reason
 Should: TryTransform
 But got:
   Error: foo
@@ -1134,23 +1172,6 @@ Should: TryTransform
 But threw: |-
   System.Exception: foo
      at *
-Subject value: a
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message with because when returning Error`` () =
-        fun () ->
-            "a"
-                .Should()
-                .TryTransform((fun _ -> Result<string, _>.Error "foo"), "Some reason")
-        |> assertExnMsg
-            """
-Subject: '"a"'
-Because: Some reason
-Should: TryTransform
-But got:
-  Error: foo
 Subject value: a
 """
 
@@ -1177,7 +1198,7 @@ module ``TryTransform parse`` =
 
 
     [<Fact>]
-    let ``Passes when function returns true`` () =
+    let ``Can be chained with AndDerived with transformed value`` () =
         "1"
             .Should()
             .TryTransform(fun s -> Int32.TryParse s)
@@ -1187,8 +1208,13 @@ module ``TryTransform parse`` =
 
 
     [<Fact>]
+    let ``Passes when function returns true`` () =
+        "a".Should().TryTransform(fun _ -> true, ())
+
+
+    [<Fact>]
     let ``Fails with expected message when function returns false`` () =
-        fun () -> "a".Should().TryTransform(fun s -> Int32.TryParse s)
+        fun () -> "a".Should().TryTransform(fun _ -> false, ())
         |> assertExnMsg
             """
 Subject: '"a"'
@@ -1199,8 +1225,21 @@ Subject value: a
 
 
     [<Fact>]
+    let ``Fails with expected message with because when returning false`` () =
+        fun () -> "a".Should().TryTransform((fun _ -> false, ()), "Some reason")
+        |> assertExnMsg
+            """
+Subject: '"a"'
+Because: Some reason
+Should: TryTransform
+But got: false
+Subject value: a
+"""
+
+
+    [<Fact>]
     let ``Fails with expected message when function throws`` () =
-        fun () -> "a".Should().TryTransform(fun _ -> failwith<bool * int> "foo")
+        fun () -> "a".Should().TryTransform(fun _ -> failwith<bool * unit> "foo")
         |> assertExnMsgWildcard
             """
 Subject: '"a"'
@@ -1213,21 +1252,8 @@ Subject value: a
 
 
     [<Fact>]
-    let ``Fails with expected message with because when returning false`` () =
-        fun () -> "a".Should().TryTransform((fun s -> Int32.TryParse s), "Some reason")
-        |> assertExnMsg
-            """
-Subject: '"a"'
-Because: Some reason
-Should: TryTransform
-But got: false
-Subject value: a
-"""
-
-
-    [<Fact>]
     let ``Fails with expected message with because when function throws`` () =
-        fun () -> "a".Should().TryTransform((fun _ -> failwith<bool * int> "foo"), "Some reason")
+        fun () -> "a".Should().TryTransform((fun _ -> failwith<bool * unit> "foo"), "Some reason")
         |> assertExnMsgWildcard
             """
 Subject: '"a"'
