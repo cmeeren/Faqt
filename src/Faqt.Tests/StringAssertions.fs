@@ -149,7 +149,7 @@ But was: null
 
 
     [<Fact>]
-    let ``Fails with expected message if null with because`` () =
+    let ``Fails with expected message with because if null`` () =
         fun () ->
             let x: string = null
             x.Should().BeUpperCase(CultureInfo.InvariantCulture, "Some reason")
@@ -219,7 +219,7 @@ But was: null
 
 
     [<Fact>]
-    let ``Fails with expected message if null with because`` () =
+    let ``Fails with expected message with because if null`` () =
         fun () ->
             let x: string = null
             x.Should().BeUpperCase("Some reason")
@@ -294,7 +294,7 @@ But was: null
 
 
     [<Fact>]
-    let ``Fails with expected message if null with because`` () =
+    let ``Fails with expected message with because if null`` () =
         fun () ->
             let x: string = null
             x.Should().BeLowerCase(CultureInfo.InvariantCulture, "Some reason")
@@ -392,7 +392,7 @@ But was: null
 
 
     [<Fact>]
-    let ``Fails with expected message if null with because`` () =
+    let ``Fails with expected message with because if null`` () =
         fun () ->
             let x: string = null
             x.Should().BeLowerCase("Some reason")
@@ -483,7 +483,7 @@ But was: null
 
 
     [<Fact>]
-    let ``Fails with expected message if null with because`` () =
+    let ``Fails with expected message with because if null`` () =
         fun () ->
             let x: string = null
             x.Should().Contain("f", StringComparison.Ordinal, "Some reason")
@@ -606,7 +606,7 @@ But was: null
 
 
     [<Fact>]
-    let ``Fails with expected message if null with because`` () =
+    let ``Fails with expected message with because if null`` () =
         fun () ->
             let x: string = null
             x.Should().Contain("f", "Some reason")
@@ -860,7 +860,7 @@ But was: null
 
 
     [<Fact>]
-    let ``Fails with expected message if null with because`` () =
+    let ``Fails with expected message with because if null`` () =
         fun () ->
             let x: string = null
             x.Should().StartWith("A", StringComparison.Ordinal, "Some reason")
@@ -979,7 +979,7 @@ But was: null
 
 
     [<Fact>]
-    let ``Fails with expected message if null with because`` () =
+    let ``Fails with expected message with because if null`` () =
         fun () ->
             let x: string = null
             x.Should().StartWith("A", "Some reason")
@@ -1226,7 +1226,7 @@ But was: null
 
 
     [<Fact>]
-    let ``Fails with expected message if null with because`` () =
+    let ``Fails with expected message with because if null`` () =
         fun () ->
             let x: string = null
             x.Should().EndWith("D", StringComparison.Ordinal, "Some reason")
@@ -1345,7 +1345,7 @@ But was: null
 
 
     [<Fact>]
-    let ``Fails with expected message if null with because`` () =
+    let ``Fails with expected message with because if null`` () =
         fun () ->
             let x: string = null
             x.Should().EndWith("D", "Some reason")
@@ -1574,7 +1574,7 @@ But was: null
 
 
     [<Fact>]
-    let ``Fails with expected message if null with because`` () =
+    let ``Fails with expected message with because if null`` () =
         fun () ->
             let x: string = null
             x.Should().MatchRegex(Regex("b.*"), "Some reason")
@@ -1669,7 +1669,7 @@ But was: null
 
 
     [<Fact>]
-    let ``Fails with expected message if null with because`` () =
+    let ``Fails with expected message with because if null`` () =
         fun () ->
             let x: string = null
             x.Should().MatchRegex("b.*", RegexOptions.None, "Some reason")
@@ -1757,7 +1757,7 @@ But was: null
 
 
     [<Fact>]
-    let ``Fails with expected message if null with because`` () =
+    let ``Fails with expected message with because if null`` () =
         fun () ->
             let x: string = null
             x.Should().MatchRegex("b.*", "Some reason")

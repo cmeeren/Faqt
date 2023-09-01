@@ -37,7 +37,7 @@ But was: null
 
 
     [<Fact>]
-    let ``Fails with expected message if subject is null with because`` () =
+    let ``Fails with expected message with because if subject is null`` () =
         fun () ->
             let x: seq<string> = null
 
@@ -142,7 +142,7 @@ But was: null
 
 
     [<Fact>]
-    let ``Fails with expected message if subject is null with because`` () =
+    let ``Fails with expected message with because if subject is null`` () =
         fun () ->
             let x: seq<string> = null
 
@@ -177,7 +177,7 @@ Subject value: [asd, test, '1234']
 
 
     [<Fact>]
-    let ``Fails with expected message if subject does not contain one item per assertion with because`` () =
+    let ``Fails with expected message with because if subject does not contain one item per assertion`` () =
         fun () ->
             let x = [ "asd"; "test"; "1234" ]
 
@@ -229,7 +229,7 @@ Subject value: [asd, test, '1234']
 
 
     [<Fact>]
-    let ``Fails with expected message if at least one of the items fail to satisfy the assertion with because`` () =
+    let ``Fails with expected message with because if at least one of the items fail to satisfy the assertion`` () =
         fun () ->
             let x = [ "asd"; "test"; "1234" ]
 
@@ -304,7 +304,7 @@ But was: null
 
 
     [<Fact>]
-    let ``Fails with expected message if null with because`` () =
+    let ``Fails with expected message with because if null`` () =
         fun () ->
             let x: seq<int> = null
             x.Should().HaveLength(0, "Some reason")
@@ -334,7 +334,7 @@ Subject value: []
 
 
     [<Fact>]
-    let ``Fails with expected message if length does not match with because`` () =
+    let ``Fails with expected message with because if length does not match`` () =
         fun () ->
             let x = List<int>.Empty
             x.Should().HaveLength(1, "Some reason")
@@ -375,7 +375,7 @@ But was: null
 
 
     [<Fact>]
-    let ``Fails with expected message if null with because`` () =
+    let ``Fails with expected message with because if null`` () =
         fun () ->
             let x: seq<int> = null
             x.Should().BeEmpty("Some reason")
@@ -402,7 +402,7 @@ But was: [1]
 
 
     [<Fact>]
-    let ``Fails with expected message if not empty with because`` () =
+    let ``Fails with expected message with because if not empty`` () =
         fun () ->
             let x = [ 1 ]
             x.Should().BeEmpty("Some reason")
@@ -441,7 +441,7 @@ But was: null
 
 
     [<Fact>]
-    let ``Fails with expected message if null with because`` () =
+    let ``Fails with expected message with because if null`` () =
         fun () ->
             let x: seq<int> = null
             x.Should().NotBeEmpty("Some reason")
@@ -468,7 +468,7 @@ But was: []
 
 
     [<Fact>]
-    let ``Fails with expected message if empty with because`` () =
+    let ``Fails with expected message with because if empty`` () =
         fun () ->
             let x = List<int>.Empty
             x.Should().NotBeEmpty("Some reason")
@@ -512,7 +512,7 @@ But was: [1]
 
 
     [<Fact>]
-    let ``Fails with expected message if not empty with because`` () =
+    let ``Fails with expected message with because if not empty`` () =
         fun () ->
             let x = seq { 1 }
             x.Should().BeNullOrEmpty("Some reason")
@@ -557,7 +557,7 @@ But was: null
 
 
     [<Fact>]
-    let ``Fails with expected message if null with because`` () =
+    let ``Fails with expected message with because if null`` () =
         fun () ->
             let x: seq<int> = null
             x.Should().Contain(1, "Some reason")
@@ -586,7 +586,7 @@ But was: []
 
 
     [<Fact>]
-    let ``Fails with expected message if not containing value with because`` () =
+    let ``Fails with expected message with because if not containing value`` () =
         fun () ->
             let x = List<int>.Empty
             x.Should().Contain(1, "Some reason")
@@ -636,7 +636,7 @@ But was: [1, 2]
 
 
     [<Fact>]
-    let ``Fails with expected message if containing the value with because`` () =
+    let ``Fails with expected message with because if containing the value`` () =
         fun () ->
             let x = [ 1; 2 ]
             x.Should().NotContain(2, "Some reason")
@@ -690,7 +690,7 @@ But was: null
 
 
     [<Fact>]
-    let ``Fails with expected message if only subject is null with because`` () =
+    let ``Fails with expected message with because if only subject is null`` () =
         fun () ->
             let x: seq<int> = null
             x.Should().SequenceEqual([], "Some reason")
@@ -721,7 +721,7 @@ Actual: [1, 2, 3]
 
 
     [<Fact>]
-    let ``Fails with expected message if different length with because`` () =
+    let ``Fails with expected message with because if different length`` () =
         fun () ->
             let x = [ 1; 2; 3 ]
             x.Should().SequenceEqual([ 1; 2 ], "Some reason")
@@ -759,7 +759,7 @@ Actual: [1, 3, 2]
 
 
     [<Fact>]
-    let ``Fails with expected message if items are not equal with because`` () =
+    let ``Fails with expected message with because if items are not equal`` () =
         fun () ->
             let x = [ 1; 3; 2 ]
             x.Should().SequenceEqual([ 1; 2; 3 ], "Some reason")
@@ -825,7 +825,7 @@ But was: null
 
 
     [<Fact>]
-    let ``Fails with expected message if only subject is null with because`` () =
+    let ``Fails with expected message with because if only subject is null`` () =
         fun () ->
             let x: seq<int> = null
             x.Should().HaveSameItemsAs([], "Some reason")
@@ -855,7 +855,7 @@ Actual: [7, 1, 3, 1, 2, 5, 4, 2]
 
 
     [<Fact>]
-    let ``Fails with expected message if items are not equal with duplicates with because`` () =
+    let ``Fails with expected message with because if items are not equal with duplicates`` () =
         fun () ->
             let x = [ 7; 1; 3; 1; 2; 5; 4; 2 ]
             x.Should().HaveSameItemsAs([ 1; 3; 3; 5; 4; 9; 2 ], "Some reason")
@@ -912,7 +912,7 @@ But was: null
 
 
     [<Fact>]
-    let ``Fails with expected message if subject is null with because`` () =
+    let ``Fails with expected message with because if subject is null`` () =
         fun () ->
             let x: seq<int> = null
             x.Should().ContainExactlyOneItem("Some reason")
@@ -940,7 +940,7 @@ Subject value: [1, 2]
 
 
     [<Fact>]
-    let ``Fails with expected message if subject contains more than one item with because`` () =
+    let ``Fails with expected message with because if subject contains more than one item`` () =
         fun () ->
             let x = [ 1; 2 ]
             x.Should().ContainExactlyOneItem("Some reason")
@@ -986,7 +986,7 @@ But was: null
 
 
     [<Fact>]
-    let ``Fails with expected message if subject is null with because`` () =
+    let ``Fails with expected message with because if subject is null`` () =
         fun () ->
             let x: seq<int> = null
             x.Should().ContainExactlyOneItemMatching((fun _ -> true), "Some reason")
@@ -1015,7 +1015,7 @@ Subject value: [1, 2, 3]
 
 
     [<Fact>]
-    let ``Fails with expected message if more than one item matches the predicate with because`` () =
+    let ``Fails with expected message with because if more than one item matches the predicate`` () =
         fun () ->
             let x = [ 1; 2; 3 ]
             x.Should().ContainExactlyOneItemMatching((fun x -> x < 3), "Some reason")
@@ -1066,7 +1066,7 @@ But was: null
 
 
     [<Fact>]
-    let ``Fails with expected message if subject is null with because`` () =
+    let ``Fails with expected message with because if subject is null`` () =
         fun () ->
             let x: seq<int> = null
             x.Should().ContainAtLeastOneItem("Some reason")
@@ -1093,7 +1093,7 @@ But was: []
 
 
     [<Fact>]
-    let ``Fails with expected message if subject is empty with because`` () =
+    let ``Fails with expected message with because if subject is empty`` () =
         fun () ->
             let x = List<int>.Empty
             x.Should().ContainAtLeastOneItem("Some reason")
@@ -1143,7 +1143,7 @@ But was: null
 
 
     [<Fact>]
-    let ``Fails with expected message if subject is null with because`` () =
+    let ``Fails with expected message with because if subject is null`` () =
         fun () ->
             let x: seq<int> = null
             x.Should().ContainAtLeastOneItemMatching((fun _ -> true), "Some reason")
@@ -1172,7 +1172,7 @@ Subject value: [1, 2, 3]
 
 
     [<Fact>]
-    let ``Fails with expected message if no items match the predicate with because`` () =
+    let ``Fails with expected message with because if no items match the predicate`` () =
         fun () ->
             let x = [ 1; 2; 3 ]
             x.Should().ContainAtLeastOneItemMatching((fun x -> x > 3), "Some reason")
@@ -1224,7 +1224,7 @@ But was: null
 
 
     [<Fact>]
-    let ``Fails with expected message if subject is null with because`` () =
+    let ``Fails with expected message with because if subject is null`` () =
         fun () ->
             let x: seq<int> = null
             x.Should().ContainItemsMatching((fun _ -> true), "Some reason")
@@ -1252,7 +1252,7 @@ Subject value: [1, 2, 3]
 
 
     [<Fact>]
-    let ``Fails with expected message if no items match the predicate with because`` () =
+    let ``Fails with expected message with because if no items match the predicate`` () =
         fun () ->
             let x = [ 1; 2; 3 ]
             x.Should().ContainItemsMatching((fun x -> x > 3), "Some reason")
@@ -1292,7 +1292,7 @@ But was: null
 
 
     [<Fact>]
-    let ``Fails with expected message if null with because`` () =
+    let ``Fails with expected message with because if null`` () =
         fun () ->
             let x: seq<int> = null
             x.Should().BeDistinct("Some reason")
@@ -1324,7 +1324,7 @@ Subject value: [1, 2, 2, 2, 5, 5, 0]
 
 
     [<Fact>]
-    let ``Fails with expected message if not distinct with because`` () =
+    let ``Fails with expected message with because if not distinct`` () =
         fun () ->
             let x = [ 1; 2; 2; 2; 5; 5; 0 ]
             x.Should().BeDistinct("Some reason")
@@ -1369,7 +1369,7 @@ But was: null
 
 
     [<Fact>]
-    let ``Fails with expected message if null with because`` () =
+    let ``Fails with expected message with because if null`` () =
         fun () ->
             let x: seq<int> = null
             x.Should().BeDistinctBy(id, "Some reason")
@@ -1403,7 +1403,7 @@ Subject value: [a, as, asd, abc, b, foobar]
 
 
     [<Fact>]
-    let ``Fails with expected message if not distinct by the specified projection with because`` () =
+    let ``Fails with expected message with because if not distinct by the specified projection`` () =
         fun () ->
             let x = [ "a"; "as"; "asd"; "abc"; "b"; "foobar" ]
             x.Should().BeDistinctBy((fun s -> s.Length), "Some reason")
@@ -1459,7 +1459,7 @@ But was: null
 
 
     [<Fact>]
-    let ``Fails with expected message if null with because`` () =
+    let ``Fails with expected message with because if null`` () =
         fun () ->
             let x: seq<int> = null
             x.Should().BeAscending("Some reason")
@@ -1491,7 +1491,7 @@ Subject value: [1, 2, 6, 3, 1, 3]
 
 
     [<Fact>]
-    let ``Fails with expected message if not in ascending order with because`` () =
+    let ``Fails with expected message with because if not in ascending order`` () =
         fun () ->
             let x = [ 1; 2; 6; 3; 1; 3 ]
             x.Should().BeAscending("Some reason")
@@ -1546,7 +1546,7 @@ But was: null
 
 
     [<Fact>]
-    let ``Fails with expected message if null with because`` () =
+    let ``Fails with expected message with because if null`` () =
         fun () ->
             let x: seq<int> = null
             x.Should().BeAscendingBy(id, "Some reason")
@@ -1580,7 +1580,7 @@ Subject value: [a, as, foobar, asd, a, bar]
 
 
     [<Fact>]
-    let ``Fails with expected message if not in ascending order by the specified projection with because`` () =
+    let ``Fails with expected message with because if not in ascending order by the specified projection`` () =
         fun () ->
             let x = [ "a"; "as"; "foobar"; "asd"; "a"; "bar" ]
             x.Should().BeAscendingBy((fun s -> s.Length), "Some reason")
@@ -1636,7 +1636,7 @@ But was: null
 
 
     [<Fact>]
-    let ``Fails with expected message if null with because`` () =
+    let ``Fails with expected message with because if null`` () =
         fun () ->
             let x: seq<int> = null
             x.Should().BeDescending("Some reason")
@@ -1668,7 +1668,7 @@ Subject value: [3, 1, 3, 6, 2, 1]
 
 
     [<Fact>]
-    let ``Fails with expected message if not in descending order with because`` () =
+    let ``Fails with expected message with because if not in descending order`` () =
         fun () ->
             let x = [ 3; 1; 3; 6; 2; 1 ]
             x.Should().BeDescending("Some reason")
@@ -1723,7 +1723,7 @@ But was: null
 
 
     [<Fact>]
-    let ``Fails with expected message if null with because`` () =
+    let ``Fails with expected message with because if null`` () =
         fun () ->
             let x: seq<int> = null
             x.Should().BeDescendingBy(id, "Some reason")
@@ -1757,7 +1757,7 @@ Subject value: [bar, as, a, foobar, asd, a]
 
 
     [<Fact>]
-    let ``Fails with expected message if not in descending order by the specified projection with because`` () =
+    let ``Fails with expected message with because if not in descending order by the specified projection`` () =
         fun () ->
             let x = [ "bar"; "as"; "a"; "foobar"; "asd"; "a" ]
             x.Should().BeDescendingBy((fun s -> s.Length), "Some reason")
@@ -1813,7 +1813,7 @@ But was: null
 
 
     [<Fact>]
-    let ``Fails with expected message if null with because`` () =
+    let ``Fails with expected message with because if null`` () =
         fun () ->
             let x: seq<int> = null
             x.Should().BeStrictlyAscending("Some reason")
@@ -1845,7 +1845,7 @@ Subject value: [1, 2, 3, 3, 5]
 
 
     [<Fact>]
-    let ``Fails with expected message if items are in non-strictly ascending order with because`` () =
+    let ``Fails with expected message with because if items are in non-strictly ascending order`` () =
         fun () ->
             let x = [ 1; 2; 3; 3; 5 ]
             x.Should().BeStrictlyAscending("Some reason")
@@ -1900,7 +1900,7 @@ But was: null
 
 
     [<Fact>]
-    let ``Fails with expected message if null with because`` () =
+    let ``Fails with expected message with because if null`` () =
         fun () ->
             let x: seq<int> = null
             x.Should().BeStrictlyAscendingBy(id, "Some reason")
@@ -1934,7 +1934,7 @@ Subject value: [a, as, asd, foo, foobar]
 
 
     [<Fact>]
-    let ``Fails with expected message if items are in non-strictly ascending order by the specified projection with because``
+    let ``Fails with expected message with because if items are in non-strictly ascending order by the specified projection``
         ()
         =
         fun () ->
@@ -1992,7 +1992,7 @@ But was: null
 
 
     [<Fact>]
-    let ``Fails with expected message if null with because`` () =
+    let ``Fails with expected message with because if null`` () =
         fun () ->
             let x: seq<int> = null
             x.Should().BeStrictlyDescending("Some reason")
@@ -2024,7 +2024,7 @@ Subject value: [6, 5, 3, 3, 2, 1]
 
 
     [<Fact>]
-    let ``Fails with expected message if items are in non-strictly descending order with because`` () =
+    let ``Fails with expected message with because if items are in non-strictly descending order`` () =
         fun () ->
             let x = [ 6; 5; 3; 3; 2; 1 ]
             x.Should().BeStrictlyDescending("Some reason")
@@ -2079,7 +2079,7 @@ But was: null
 
 
     [<Fact>]
-    let ``Fails with expected message if null with because`` () =
+    let ``Fails with expected message with because if null`` () =
         fun () ->
             let x: seq<int> = null
             x.Should().BeStrictlyDescendingBy(id, "Some reason")
@@ -2113,7 +2113,7 @@ Subject value: [foobar, foo, bar, as, a]
 
 
     [<Fact>]
-    let ``Fails with expected message if items are in non-strictly descending order by the specified projection with because``
+    let ``Fails with expected message with because if items are in non-strictly descending order by the specified projection``
         ()
         =
         fun () ->
@@ -2195,7 +2195,7 @@ But was: null
 
 
     [<Fact>]
-    let ``Fails with expected message if null with because`` () =
+    let ``Fails with expected message with because if null`` () =
         fun () ->
             let x: seq<int> = null
             x.Should().BeSupersetOf([], "Some reason")
@@ -2225,7 +2225,7 @@ Subject value: [1, 2, 3]
 
 
     [<Fact>]
-    let ``Fails with expected message if subject is missing a duplicate item in the subset with because`` () =
+    let ``Fails with expected message with because if subject is missing a duplicate item in the subset`` () =
         fun () ->
             let x = [ 1; 2; 3 ]
             x.Should().BeSupersetOf([ 1; 2; 2; 3 ], "Some reason")
@@ -2301,7 +2301,7 @@ But was: null
 
 
     [<Fact>]
-    let ``Fails with expected message if null with because`` () =
+    let ``Fails with expected message with because if null`` () =
         fun () ->
             let x: seq<int> = null
             x.Should().BeProperSupersetOf([], "Some reason")
@@ -2331,7 +2331,7 @@ Subject value: [1, 2, 3]
 
 
     [<Fact>]
-    let ``Fails with expected message if subject is missing a duplicate item in the subset with because`` () =
+    let ``Fails with expected message with because if subject is missing a duplicate item in the subset`` () =
         fun () ->
             let x = [ 1; 2; 3 ]
             x.Should().BeProperSupersetOf([ 1; 2; 2; 3 ], "Some reason")
@@ -2362,7 +2362,7 @@ Subject value: [1, 2, 3]
 
 
     [<Fact>]
-    let ``Fails with expected message if subject has no extra items with because`` () =
+    let ``Fails with expected message with because if subject has no extra items`` () =
         fun () ->
             let x = [ 1; 2; 3 ]
             x.Should().BeProperSupersetOf([ 1; 2; 3 ], "Some reason")
@@ -2437,7 +2437,7 @@ But was: null
 
 
     [<Fact>]
-    let ``Fails with expected message if null with because`` () =
+    let ``Fails with expected message with because if null`` () =
         fun () ->
             let x: seq<int> = null
             x.Should().BeSubsetOf([], "Some reason")
@@ -2467,7 +2467,7 @@ Subject value: [1, 2, 2, 3]
 
 
     [<Fact>]
-    let ``Fails with expected message if subject has only an extra duplicate item with because`` () =
+    let ``Fails with expected message with because if subject has only an extra duplicate item`` () =
         fun () ->
             let x = [ 1; 2; 2; 3 ]
             x.Should().BeSubsetOf([ 1; 2; 3 ], "Some reason")
@@ -2543,7 +2543,7 @@ But was: null
 
 
     [<Fact>]
-    let ``Fails with expected message if null with because`` () =
+    let ``Fails with expected message with because if null`` () =
         fun () ->
             let x: seq<int> = null
             x.Should().BeProperSubsetOf([], "Some reason")
@@ -2573,7 +2573,7 @@ Subject value: [1, 2, 2, 3]
 
 
     [<Fact>]
-    let ``Fails with expected message if subject has only an extra duplicate item with because`` () =
+    let ``Fails with expected message with because if subject has only an extra duplicate item`` () =
         fun () ->
             let x = [ 1; 2; 2; 3 ]
             x.Should().BeProperSubsetOf([ 1; 2; 3 ], "Some reason")
@@ -2604,7 +2604,7 @@ Subject value: [1, 2, 3]
 
 
     [<Fact>]
-    let ``Fails with expected message if superset has no extra items with because`` () =
+    let ``Fails with expected message with because if superset has no extra items`` () =
         fun () ->
             let x = [ 1; 2; 3 ]
             x.Should().BeProperSubsetOf([ 1; 2; 3 ], "Some reason")
@@ -2676,7 +2676,7 @@ But was: null
 
 
     [<Fact>]
-    let ``Fails with expected message if null with because`` () =
+    let ``Fails with expected message with because if null`` () =
         fun () ->
             let x: seq<int> = null
             x.Should().IntersectWith([], "Some reason")
@@ -2706,7 +2706,7 @@ Subject value: [1, 2]
 
 
     [<Fact>]
-    let ``Fails with expected message if the sets are disjoint with because`` () =
+    let ``Fails with expected message with because if the sets are disjoint`` () =
         fun () ->
             let x = [ 1; 2 ]
             x.Should().IntersectWith([ 3; 4 ], "Some reason")
@@ -2784,7 +2784,7 @@ Subject value: [1, 2, 3]
 
 
     [<Fact>]
-    let ``Fails with expected message if the sets intersect with because`` () =
+    let ``Fails with expected message with because if the sets intersect`` () =
         fun () ->
             let x = [ 1; 2; 3 ]
             x.Should().NotIntersectWith([ 2; 3; 4 ], "Some reason")

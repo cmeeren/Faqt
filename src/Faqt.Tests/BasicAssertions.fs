@@ -562,7 +562,7 @@ But was: null
 
 
     [<Fact>]
-    let ``Fails with expected message if null with because`` () =
+    let ``Fails with expected message with because if null`` () =
         fun () ->
             let (x: string) = null
             x.Should().BeOfType(typeof<string>, "Some reason")
@@ -667,7 +667,7 @@ But was: null
 
 
     [<Fact>]
-    let ``Fails with expected message if null with because`` () =
+    let ``Fails with expected message with because if null`` () =
         fun () ->
             let (x: string) = null
             x.Should().BeOfType<string>("Some reason")
@@ -763,7 +763,7 @@ But was: null
 
 
     [<Fact>]
-    let ``Fails with expected message if null with because`` () =
+    let ``Fails with expected message with because if null`` () =
         fun () ->
             let (x: string) = null
             x.Should().BeAssignableTo(typeof<string>, "Some reason")
@@ -868,7 +868,7 @@ But was: null
 
 
     [<Fact>]
-    let ``Fails with expected message if null with because`` () =
+    let ``Fails with expected message with because if null`` () =
         fun () ->
             let (x: string) = null
             x.Should().BeAssignableTo<string>("Some reason")

@@ -38,7 +38,7 @@ But was: null
 
 
     [<Fact>]
-    let ``Fails with expected message if subject is null with because`` () =
+    let ``Fails with expected message with because if subject is null`` () =
         fun () ->
             let x: IDictionary<string, int> = null
             x.Should().AllSatisfy((fun _ -> failwith "unreachable"), "Some reason")
@@ -147,7 +147,7 @@ But was: null
 
 
     [<Fact>]
-    let ``Fails with expected message if subject is null with because`` () =
+    let ``Fails with expected message with because if subject is null`` () =
         fun () ->
             let x: IDictionary<string, int> = null
             x.Should().SatisfyRespectively([ (fun x -> x.Should().Pass()) ], "Some reason")
@@ -183,7 +183,7 @@ Subject value:
 
 
     [<Fact>]
-    let ``Fails with expected message if subject does not contain one item per assertion with because`` () =
+    let ``Fails with expected message with because if subject does not contain one item per assertion`` () =
         fun () ->
             let x = dict [ "asd", 1; "test", 2; "foobar", 3 ]
 
@@ -241,7 +241,7 @@ Subject value:
 
 
     [<Fact>]
-    let ``Fails with expected message if at least one of the items fail to satisfy the assertion with because`` () =
+    let ``Fails with expected message with because if at least one of the items fail to satisfy the assertion`` () =
         fun () ->
             let x = dict [ "asd", 1; "test", 2; "foobar", 3 ]
 
@@ -436,7 +436,7 @@ But was: null
 
 
     [<Fact>]
-    let ``Fails with expected message if null with because`` () =
+    let ``Fails with expected message with because if null`` () =
         fun () ->
             let x: IDictionary<string, int> = null
             x.Should().Contain("a", 1, "Some reason")
@@ -471,7 +471,7 @@ But was:
 
 
     [<Fact>]
-    let ``Fails with expected message if not containing value with because`` () =
+    let ``Fails with expected message with because if not containing value`` () =
         fun () ->
             let x = dict [ "a", 1; "b", 2 ]
             x.Should().Contain("a", 2, "Some reason")
@@ -618,7 +618,7 @@ But was: null
 
 
     [<Fact>]
-    let ``Fails with expected message if only subject is null with because`` () =
+    let ``Fails with expected message with because if only subject is null`` () =
         fun () ->
             let x: IDictionary<string, int> = null
             x.Should().HaveSameItemsAs(dict [], "Some reason")
@@ -1042,7 +1042,7 @@ But was: null
 
 
     [<Fact>]
-    let ``Fails with expected message if null with because`` () =
+    let ``Fails with expected message with because if null`` () =
         fun () ->
             let x: IDictionary<string, int> = null
             x.Should().ContainKey("a", "Some reason")
@@ -1072,7 +1072,7 @@ But was:
 
 
     [<Fact>]
-    let ``Fails with expected message if not containing key with because`` () =
+    let ``Fails with expected message with because if not containing key`` () =
         fun () ->
             let x = dict [ "a", 1 ]
             x.Should().ContainKey("b", "Some reason")
@@ -1128,7 +1128,7 @@ Subject value:
 
 
     [<Fact>]
-    let ``Fails with expected message if containing key with because`` () =
+    let ``Fails with expected message with because if containing key`` () =
         fun () ->
             let x = dict [ "a", 1 ]
             x.Should().NotContainKey("a", "Some reason")
@@ -1179,7 +1179,7 @@ But was: null
 
 
     [<Fact>]
-    let ``Fails with expected message if null with because`` () =
+    let ``Fails with expected message with because if null`` () =
         fun () ->
             let x: IDictionary<string, int> = null
             x.Should().ContainValue(1, "Some reason")
@@ -1209,7 +1209,7 @@ But was:
 
 
     [<Fact>]
-    let ``Fails with expected message if not containing value with because`` () =
+    let ``Fails with expected message with because if not containing value`` () =
         fun () ->
             let x = dict [ "a", 1 ]
             x.Should().ContainValue(2, "Some reason")
@@ -1266,7 +1266,7 @@ Subject value:
 
 
     [<Fact>]
-    let ``Fails with expected message if containing value with because`` () =
+    let ``Fails with expected message with because if containing value`` () =
         fun () ->
             let x = dict [ "a", 1; "b", 1 ]
             x.Should().NotContainValue(1, "Some reason")
