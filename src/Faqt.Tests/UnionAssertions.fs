@@ -140,7 +140,7 @@ module BeSome =
 
 
     [<Fact>]
-    let ``Fails with expected message for None`` () =
+    let ``Fails with expected message if None`` () =
         fun () ->
             let x = Option<int>.None
             x.Should().BeSome()
@@ -175,7 +175,7 @@ module BeNone =
 
 
     [<Fact>]
-    let ``Fails with expected message for Some`` () =
+    let ``Fails with expected message if Some`` () =
         fun () ->
             let x = Some 1
             x.Should().BeNone()
@@ -217,7 +217,7 @@ module BeOk =
 
 
     [<Fact>]
-    let ``Fails with expected message for Error`` () =
+    let ``Fails with expected message if Error`` () =
         fun () ->
             let x = Error "asd"
             x.Should().BeOk()
@@ -259,7 +259,7 @@ module BeError =
 
 
     [<Fact>]
-    let ``Fails with expected message for Ok`` () =
+    let ``Fails with expected message if Ok`` () =
         fun () ->
             let x = Ok "asd"
             x.Should().BeError()

@@ -13,7 +13,7 @@ module BeTrue =
 
 
     [<Fact>]
-    let ``Fails with expected message for false values`` () =
+    let ``Fails with expected message if false`` () =
         fun () ->
             let x = false
             x.Should().BeTrue()
@@ -48,7 +48,7 @@ module BeFalse =
 
 
     [<Fact>]
-    let ``Fails with expected message for true values`` () =
+    let ``Fails with expected message if true`` () =
         fun () ->
             let x = true
             x.Should().BeFalse()

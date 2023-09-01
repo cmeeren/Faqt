@@ -19,7 +19,7 @@ module HaveValue =
 
 
     [<Fact>]
-    let ``Fails with expected message for nullable values without a value`` () =
+    let ``Fails with expected message`` () =
         fun () ->
             let x = Nullable<int>()
             x.Should().HaveValue()
@@ -58,7 +58,7 @@ module NotHaveValue =
 
 
     [<Fact>]
-    let ``Fails with expected message for nullable values with a value`` () =
+    let ``Fails with expected message`` () =
         fun () ->
             let x = Nullable(1)
             x.Should().NotHaveValue()
@@ -93,7 +93,7 @@ module BeNull =
 
 
     [<Fact>]
-    let ``Fails with expected message for nullable values with a value`` () =
+    let ``Fails with expected message`` () =
         fun () ->
             let x = Nullable(1)
             x.Should().BeNull()
@@ -133,7 +133,7 @@ module NotBeNull =
 
 
     [<Fact>]
-    let ``Fails with expected message for nullable values without a value`` () =
+    let ``Fails with expected message`` () =
         fun () ->
             let x = Nullable<int>()
             x.Should().NotBeNull()
