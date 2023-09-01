@@ -539,10 +539,7 @@ module NotContain =
 
     [<Fact>]
     let ``Fails if expected is null, null and dict contains null, null`` () =
-        Assert.Throws<AssertionFailedException>(fun () ->
-            Map.empty<string, string>.Add(null, null).Should().NotContain(null, null)
-            |> ignore
-        )
+        assertFails (fun () -> Map.empty<string, string>.Add(null, null).Should().NotContain(null, null))
 
 
     [<Fact>]

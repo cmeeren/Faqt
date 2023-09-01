@@ -281,12 +281,12 @@ module HaveLength =
 
     [<Fact>]
     let ``Fails if length < expected`` () =
-        Assert.Throws<AssertionFailedException>(fun () -> List<int>.Empty.Should().HaveLength(1) |> ignore)
+        assertFails (fun () -> List<int>.Empty.Should().HaveLength(1))
 
 
     [<Fact>]
     let ``Fails if length > expected`` () =
-        Assert.Throws<AssertionFailedException>(fun () -> [ 1; 2 ].Should().HaveLength(1) |> ignore)
+        assertFails (fun () -> [ 1; 2 ].Should().HaveLength(1))
 
 
     [<Fact>]
@@ -618,7 +618,7 @@ module NotContain =
 
     [<Fact>]
     let ``Fails if expected is null and sequence contains null`` () =
-        Assert.Throws<AssertionFailedException>(fun () -> [ (null: string) ].Should().NotContain(null) |> ignore)
+        assertFails (fun () -> [ (null: string) ].Should().NotContain(null))
 
 
     [<Fact>]
@@ -807,7 +807,7 @@ module HaveSameItemsAs =
 
     [<Fact>]
     let ``Fails if have same counts and distinct items, but different number of duplicate items`` () =
-        Assert.Throws<AssertionFailedException>(fun () -> [ 1; 1; 2 ].Should().HaveSameItemsAs([ 1; 2; 2 ]) |> ignore)
+        assertFails (fun () -> [ 1; 1; 2 ].Should().HaveSameItemsAs([ 1; 2; 2 ]))
 
 
     [<Fact>]
@@ -890,12 +890,12 @@ module ContainExactlyOneItem =
 
     [<Fact>]
     let ``Fails if empty`` () =
-        Assert.Throws<AssertionFailedException>(fun () -> List<int>.Empty.Should().ContainExactlyOneItem() |> ignore)
+        assertFails (fun () -> List<int>.Empty.Should().ContainExactlyOneItem())
 
 
     [<Fact>]
     let ``Fails if more than one item`` () =
-        Assert.Throws<AssertionFailedException>(fun () -> [ 1; 2 ].Should().ContainExactlyOneItem() |> ignore)
+        assertFails (fun () -> [ 1; 2 ].Should().ContainExactlyOneItem())
 
 
     [<Fact>]
@@ -2172,7 +2172,7 @@ module BeSupersetOf =
     [<Theory>]
     [<MemberData(nameof failData)>]
     let ``Fails if not superset`` (subject: int list) (subset: int list) =
-        Assert.Throws<AssertionFailedException>(fun () -> subject.Should().BeSupersetOf(subset) |> ignore)
+        assertFails (fun () -> subject.Should().BeSupersetOf(subset))
 
 
     [<Fact>]
@@ -2278,7 +2278,7 @@ module BeProperSupersetOf =
     [<Theory>]
     [<MemberData(nameof failData)>]
     let ``Fails if not proper superset`` (subject: int list) (subset: int list) =
-        Assert.Throws<AssertionFailedException>(fun () -> subject.Should().BeProperSupersetOf(subset) |> ignore)
+        assertFails (fun () -> subject.Should().BeProperSupersetOf(subset))
 
 
     [<Fact>]
@@ -2414,7 +2414,7 @@ module BeSubsetOf =
     [<Theory>]
     [<MemberData(nameof failData)>]
     let ``Fails if not subset`` (subject: int list) (superset: int list) =
-        Assert.Throws<AssertionFailedException>(fun () -> subject.Should().BeSubsetOf(superset) |> ignore)
+        assertFails (fun () -> subject.Should().BeSubsetOf(superset))
 
 
     [<Fact>]
@@ -2520,7 +2520,7 @@ module BeProperSubsetOf =
     [<Theory>]
     [<MemberData(nameof failData)>]
     let ``Fails if not proper subset`` (subject: int list) (superset: int list) =
-        Assert.Throws<AssertionFailedException>(fun () -> subject.Should().BeProperSubsetOf(superset) |> ignore)
+        assertFails (fun () -> subject.Should().BeProperSubsetOf(superset))
 
 
     [<Fact>]
@@ -2653,7 +2653,7 @@ module IntersectWith =
     [<Theory>]
     [<MemberData(nameof failData)>]
     let ``Fails if not intersects`` (subject: int list) (other: int list) =
-        Assert.Throws<AssertionFailedException>(fun () -> subject.Should().IntersectWith(other) |> ignore)
+        assertFails (fun () -> subject.Should().IntersectWith(other))
 
 
     [<Fact>]
@@ -2760,7 +2760,7 @@ module NotIntersectWith =
     [<Theory>]
     [<MemberData(nameof failData)>]
     let ``Fails if intersects`` (subject: int list) (other: int list) =
-        Assert.Throws<AssertionFailedException>(fun () -> subject.Should().NotIntersectWith(other) |> ignore)
+        assertFails (fun () -> subject.Should().NotIntersectWith(other))
 
 
     [<Fact>]

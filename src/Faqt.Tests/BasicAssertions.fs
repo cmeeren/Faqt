@@ -24,7 +24,7 @@ module Be =
     [<InlineData("a", null)>]
     [<InlineData(null, "a")>]
     let ``Fails if not equal`` (a: string, b: string) =
-        Assert.Throws<AssertionFailedException>(fun () -> a.Should().Be(b) |> ignore)
+        assertFails (fun () -> a.Should().Be(b))
 
 
     [<Fact>]
@@ -80,7 +80,7 @@ module ``Be with custom comparer`` =
         a.Should().Be(b, (fun _ _ -> true)) |> ignore
 
         // Fail
-        Assert.Throws<AssertionFailedException>(fun () -> a.Should().Be(b, (fun _ _ -> false)) |> ignore)
+        assertFails (fun () -> a.Should().Be(b, (fun _ _ -> false)))
 
 
     [<Fact>]
@@ -132,7 +132,7 @@ module NotBe =
     [<InlineData("a", "a")>]
     [<InlineData(null, null)>]
     let ``Fails if equal`` (a: string, b: string) =
-        Assert.Throws<AssertionFailedException>(fun () -> a.Should().NotBe(b) |> ignore)
+        assertFails (fun () -> a.Should().NotBe(b))
 
 
     [<Fact>]
@@ -187,7 +187,7 @@ module ``NotBe with custom comparer`` =
         a.Should().NotBe(b, (fun _ _ -> false)) |> ignore
 
         // Fail
-        Assert.Throws<AssertionFailedException>(fun () -> a.Should().NotBe(b, (fun _ _ -> true)) |> ignore)
+        assertFails (fun () -> a.Should().NotBe(b, (fun _ _ -> true)))
 
 
     [<Fact>]
@@ -260,7 +260,7 @@ module BeSameAs =
     [<Theory>]
     [<MemberData(nameof failData)>]
     let ``Fails if not reference equal`` (subject: obj) (expected: obj) =
-        Assert.Throws<AssertionFailedException>(fun () -> subject.Should().BeSameAs(expected) |> ignore)
+        assertFails (fun () -> subject.Should().BeSameAs(expected))
 
 
     [<Fact>]
@@ -377,7 +377,7 @@ module NotBeSameAs =
     [<Theory>]
     [<MemberData(nameof failData)>]
     let ``Fails if reference equal`` (subject: obj) (expected: obj) =
-        Assert.Throws<AssertionFailedException>(fun () -> subject.Should().NotBeSameAs(expected) |> ignore)
+        assertFails (fun () -> subject.Should().NotBeSameAs(expected))
 
 
     [<Fact>]
@@ -437,7 +437,7 @@ module BeNull =
 
     [<Fact>]
     let ``Fails if not null`` () =
-        Assert.Throws<AssertionFailedException>(fun () -> obj().Should().BeNull() |> ignore)
+        assertFails (fun () -> obj().Should().BeNull())
 
 
     [<Fact>]
@@ -481,7 +481,7 @@ module NotBeNull =
 
     [<Fact>]
     let ``Fails if null`` () =
-        Assert.Throws<AssertionFailedException>(fun () -> (null: obj).Should().NotBeNull() |> ignore)
+        assertFails (fun () -> (null: obj).Should().NotBeNull())
 
 
     [<Fact>]

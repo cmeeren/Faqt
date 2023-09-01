@@ -686,9 +686,7 @@ module ``NotContain with StringComparison`` =
 
     [<Fact>]
     let ``Fails if substring is empty`` () =
-        Assert.Throws<AssertionFailedException>(fun () ->
-            "".Should().NotContain("", StringComparison.Ordinal) |> ignore
-        )
+        assertFails (fun () -> "".Should().NotContain("", StringComparison.Ordinal) |> ignore)
 
 
     [<Fact>]
@@ -785,7 +783,7 @@ module ``NotContain without StringComparison`` =
 
     [<Fact>]
     let ``Fails if substring is empty`` () =
-        Assert.Throws<AssertionFailedException>(fun () -> "".Should().NotContain("") |> ignore)
+        assertFails (fun () -> "".Should().NotContain(""))
 
 
     [<Fact>]

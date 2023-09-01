@@ -53,7 +53,7 @@ module BeCloseTo =
 
     [<Fact>]
     let ``Fails below lower bound`` () =
-        Assert.Throws<AssertionFailedException>(fun () -> (-1.1).Should().BeCloseTo(0., 1.) |> ignore)
+        assertFails (fun () -> (-1.1).Should().BeCloseTo(0., 1.))
 
 
     [<Fact>]
@@ -66,7 +66,7 @@ module BeCloseTo =
 
     [<Fact>]
     let ``Throws above upper bound`` () =
-        Assert.Throws<AssertionFailedException>(fun () -> (1.1).Should().BeCloseTo(0., 1.) |> ignore)
+        assertFails (fun () -> (1.1).Should().BeCloseTo(0., 1.))
 
 
     [<Fact>]
@@ -162,12 +162,12 @@ module NotBeCloseTo =
 
     [<Fact>]
     let ``Fails above lower bound`` () =
-        Assert.Throws<AssertionFailedException>(fun () -> (-0.9).Should().NotBeCloseTo(0., 1.) |> ignore)
+        assertFails (fun () -> (-0.9).Should().NotBeCloseTo(0., 1.))
 
 
     [<Fact>]
     let ``Fails at lower bound`` () =
-        Assert.Throws<AssertionFailedException>(fun () -> (-1.0).Should().NotBeCloseTo(0., 1.) |> ignore)
+        assertFails (fun () -> (-1.0).Should().NotBeCloseTo(0., 1.))
 
 
     [<Fact>]
@@ -176,12 +176,12 @@ module NotBeCloseTo =
 
     [<Fact>]
     let ``Fails below upper bound`` () =
-        Assert.Throws<AssertionFailedException>(fun () -> (0.9).Should().NotBeCloseTo(0., 1.) |> ignore)
+        assertFails (fun () -> (0.9).Should().NotBeCloseTo(0., 1.))
 
 
     [<Fact>]
     let ``Fails at upper bound`` () =
-        Assert.Throws<AssertionFailedException>(fun () -> (1.0).Should().NotBeCloseTo(0., 1.) |> ignore)
+        assertFails (fun () -> (1.0).Should().NotBeCloseTo(0., 1.))
 
 
     [<Fact>]
@@ -267,12 +267,12 @@ module BeGreaterThan =
 
     [<Fact>]
     let ``Fails if subject = other`` () =
-        Assert.Throws<AssertionFailedException>(fun () -> (0).Should().BeGreaterThan(0) |> ignore)
+        assertFails (fun () -> (0).Should().BeGreaterThan(0))
 
 
     [<Fact>]
     let ``Fails if subject < other`` () =
-        Assert.Throws<AssertionFailedException>(fun () -> (-1).Should().BeGreaterThan(0) |> ignore)
+        assertFails (fun () -> (-1).Should().BeGreaterThan(0))
 
 
     [<Fact>]
@@ -355,7 +355,7 @@ module BeGreaterThanOrEqualTo =
 
     [<Fact>]
     let ``Fails if subject < other`` () =
-        Assert.Throws<AssertionFailedException>(fun () -> (-1).Should().BeGreaterThanOrEqualTo(0) |> ignore)
+        assertFails (fun () -> (-1).Should().BeGreaterThanOrEqualTo(0))
 
 
     [<Fact>]
@@ -434,12 +434,12 @@ module BeLessThan =
 
     [<Fact>]
     let ``Fails if subject = other`` () =
-        Assert.Throws<AssertionFailedException>(fun () -> (0).Should().BeLessThan(0) |> ignore)
+        assertFails (fun () -> (0).Should().BeLessThan(0))
 
 
     [<Fact>]
     let ``Fails if subject > other`` () =
-        Assert.Throws<AssertionFailedException>(fun () -> (1).Should().BeLessThan(0) |> ignore)
+        assertFails (fun () -> (1).Should().BeLessThan(0))
 
 
     [<Fact>]
@@ -522,7 +522,7 @@ module BeLessThanOrEqualTo =
 
     [<Fact>]
     let ``Fails if subject > other`` () =
-        Assert.Throws<AssertionFailedException>(fun () -> (1).Should().BeLessThanOrEqualTo(0) |> ignore)
+        assertFails (fun () -> (1).Should().BeLessThanOrEqualTo(0))
 
 
     [<Fact>]
@@ -601,12 +601,12 @@ module BePositive =
 
     [<Fact>]
     let ``Fails if subject = 0`` () =
-        Assert.Throws<AssertionFailedException>(fun () -> (0).Should().BePositive() |> ignore)
+        assertFails (fun () -> (0).Should().BePositive())
 
 
     [<Fact>]
     let ``Fails if subject < 0`` () =
-        Assert.Throws<AssertionFailedException>(fun () -> (-1).Should().BePositive() |> ignore)
+        assertFails (fun () -> (-1).Should().BePositive())
 
 
     [<Fact>]
@@ -668,12 +668,12 @@ module BeNegative =
 
     [<Fact>]
     let ``Fails if subject = 0`` () =
-        Assert.Throws<AssertionFailedException>(fun () -> (0).Should().BeNegative() |> ignore)
+        assertFails (fun () -> (0).Should().BeNegative())
 
 
     [<Fact>]
     let ``Fails if subject > 0`` () =
-        Assert.Throws<AssertionFailedException>(fun () -> (1).Should().BeNegative() |> ignore)
+        assertFails (fun () -> (1).Should().BeNegative())
 
 
     [<Fact>]
@@ -739,7 +739,7 @@ module BeNonNegative =
 
     [<Fact>]
     let ``Fails if subject < 0`` () =
-        Assert.Throws<AssertionFailedException>(fun () -> (-1).Should().BeNonNegative() |> ignore)
+        assertFails (fun () -> (-1).Should().BeNonNegative())
 
 
     [<Fact>]
@@ -805,7 +805,7 @@ module BeNonPositive =
 
     [<Fact>]
     let ``Fails if subject > 0`` () =
-        Assert.Throws<AssertionFailedException>(fun () -> (1).Should().BeNonPositive() |> ignore)
+        assertFails (fun () -> (1).Should().BeNonPositive())
 
 
     [<Fact>]
@@ -875,12 +875,12 @@ module BeInRange =
 
     [<Fact>]
     let ``Fails if subject is above the upper bound`` () =
-        Assert.Throws<AssertionFailedException>(fun () -> (4).Should().BeInRange(1, 3) |> ignore)
+        assertFails (fun () -> (4).Should().BeInRange(1, 3))
 
 
     [<Fact>]
     let ``Fails if subject is below the lower bound`` () =
-        Assert.Throws<AssertionFailedException>(fun () -> (0).Should().BeInRange(1, 3) |> ignore)
+        assertFails (fun () -> (0).Should().BeInRange(1, 3))
 
 
     [<Fact>]
