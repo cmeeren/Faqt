@@ -201,7 +201,7 @@ module BeGreaterThan =
 
     [<Fact>]
     let ``Can be called with any type that has comparison`` () =
-        (Comparison 2).Should().BeGreaterThan(Comparison 1)
+        (Comparison 1).Should().BeGreaterThan(Comparison 0)
 
 
     [<Fact>]
@@ -213,62 +213,36 @@ module BeGreaterThan =
     let ``Passes if subject > other`` () = (1).Should().BeGreaterThan(0)
 
 
-    [<Fact>]
-    let ``Fails if subject = other`` () =
-        assertFails (fun () -> (0).Should().BeGreaterThan(0))
+    [<Theory>]
+    [<InlineData(0, 0)>] // subject = other
+    [<InlineData(0, 1)>] // subject < other
+    let ``Fails if subject <= other`` (subject: int) (other: int) =
+        assertFails (fun () -> subject.Should().BeGreaterThan(other))
 
 
     [<Fact>]
-    let ``Fails if subject < other`` () =
-        assertFails (fun () -> (-1).Should().BeGreaterThan(0))
+    let ``Fails if null`` () =
+        assertFails (fun () -> Unchecked.defaultof<Comparison>.Should().BeGreaterThan(Comparison 0))
 
 
     [<Fact>]
-    let ``Fails with expected message if null`` () =
+    let ``Fails with expected message`` () =
         fun () ->
-            let x = Unchecked.defaultof<Comparison>
-            x.Should().BeGreaterThan(Comparison 1)
-        |> assertExnMsg
-            """
-Subject: x
-Should: BeGreaterThan
-Other: 1
-But was: null
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message for ints`` () =
-        fun () ->
-            let x = -1
+            let x = 0
             x.Should().BeGreaterThan(0)
         |> assertExnMsg
             """
 Subject: x
 Should: BeGreaterThan
 Other: 0
-But was: -1
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message for TimeSpan`` () =
-        fun () ->
-            let x = TimeSpan(0, 4, 0)
-            x.Should().BeGreaterThan(TimeSpan(0, 5, 0))
-        |> assertExnMsg
-            """
-Subject: x
-Should: BeGreaterThan
-Other: 00:05:00
-But was: 00:04:00
+But was: 0
 """
 
 
     [<Fact>]
     let ``Fails with expected message with because`` () =
         fun () ->
-            let x = -1
+            let x = 0
             x.Should().BeGreaterThan(0, "Some reason")
         |> assertExnMsg
             """
@@ -276,7 +250,7 @@ Subject: x
 Because: Some reason
 Should: BeGreaterThan
 Other: 0
-But was: -1
+But was: 0
 """
 
 
@@ -285,7 +259,7 @@ module BeGreaterThanOrEqualTo =
 
     [<Fact>]
     let ``Can be called with any type that has comparison`` () =
-        (Comparison 2).Should().BeGreaterThanOrEqualTo(Comparison 1)
+        (Comparison 0).Should().BeGreaterThanOrEqualTo(Comparison 0)
 
 
     [<Fact>]
@@ -293,73 +267,49 @@ module BeGreaterThanOrEqualTo =
         (1).Should().BeGreaterThanOrEqualTo(0).Id<And<int>>().And.Be(1)
 
 
-    [<Fact>]
-    let ``Passes if subject > other`` () = (1).Should().BeGreaterThanOrEqualTo(0)
-
-
-    [<Fact>]
-    let ``Passes if subject = other`` () = (0).Should().BeGreaterThanOrEqualTo(0)
+    [<Theory>]
+    [<InlineData(1, 0)>] // subject > other
+    [<InlineData(0, 0)>] // subject = other
+    let ``Passes if subject >= other`` (subject: int) (other: int) =
+        subject.Should().BeGreaterThanOrEqualTo(other)
 
 
     [<Fact>]
     let ``Fails if subject < other`` () =
-        assertFails (fun () -> (-1).Should().BeGreaterThanOrEqualTo(0))
+        assertFails (fun () -> (0).Should().BeGreaterThanOrEqualTo(1))
 
 
     [<Fact>]
-    let ``Fails with expected message if null`` () =
+    let ``Fails if null`` () =
+        assertFails (fun () -> Unchecked.defaultof<Comparison>.Should().BeGreaterThanOrEqualTo(Comparison 0))
+
+
+    [<Fact>]
+    let ``Fails with expected message`` () =
         fun () ->
-            let x = Unchecked.defaultof<Comparison>
-            x.Should().BeGreaterThanOrEqualTo(Comparison 1)
+            let x = 0
+            x.Should().BeGreaterThanOrEqualTo(1)
         |> assertExnMsg
             """
 Subject: x
 Should: BeGreaterThanOrEqualTo
 Other: 1
-But was: null
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message for ints`` () =
-        fun () ->
-            let x = -1
-            x.Should().BeGreaterThanOrEqualTo(0)
-        |> assertExnMsg
-            """
-Subject: x
-Should: BeGreaterThanOrEqualTo
-Other: 0
-But was: -1
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message for TimeSpan`` () =
-        fun () ->
-            let x = TimeSpan(0, 4, 0)
-            x.Should().BeGreaterThanOrEqualTo(TimeSpan(0, 5, 0))
-        |> assertExnMsg
-            """
-Subject: x
-Should: BeGreaterThanOrEqualTo
-Other: 00:05:00
-But was: 00:04:00
+But was: 0
 """
 
 
     [<Fact>]
     let ``Fails with expected message with because`` () =
         fun () ->
-            let x = -1
-            x.Should().BeGreaterThanOrEqualTo(0, "Some reason")
+            let x = 0
+            x.Should().BeGreaterThanOrEqualTo(1, "Some reason")
         |> assertExnMsg
             """
 Subject: x
 Because: Some reason
 Should: BeGreaterThanOrEqualTo
-Other: 0
-But was: -1
+Other: 1
+But was: 0
 """
 
 
@@ -368,74 +318,48 @@ module BeLessThan =
 
     [<Fact>]
     let ``Can be called with any type that has comparison`` () =
-        (Comparison 1).Should().BeLessThan(Comparison 2)
+        (Comparison 0).Should().BeLessThan(Comparison 1)
 
 
     [<Fact>]
     let ``Can be chained with And`` () =
-        (-1).Should().BeLessThan(0).Id<And<int>>().And.Be(-1)
+        (0).Should().BeLessThan(1).Id<And<int>>().And.Be(0)
 
 
     [<Fact>]
-    let ``Passes if subject < other`` () = (-1).Should().BeLessThan(0)
+    let ``Passes if subject < other`` () = (0).Should().BeLessThan(1)
+
+
+    [<Theory>]
+    [<InlineData(0, 0)>] // subject = other
+    [<InlineData(1, 0)>] // subject > other
+    let ``Fails if subject >= other`` (subject: int) (other: int) =
+        assertFails (fun () -> subject.Should().BeLessThan(other))
 
 
     [<Fact>]
-    let ``Fails if subject = other`` () =
-        assertFails (fun () -> (0).Should().BeLessThan(0))
+    let ``Fails if null`` () =
+        assertFails (fun () -> Unchecked.defaultof<Comparison>.Should().BeLessThan(Comparison 0))
 
 
     [<Fact>]
-    let ``Fails if subject > other`` () =
-        assertFails (fun () -> (1).Should().BeLessThan(0))
-
-
-    [<Fact>]
-    let ``Fails with expected message if null`` () =
+    let ``Fails with expected message`` () =
         fun () ->
-            let x = Unchecked.defaultof<Comparison>
-            x.Should().BeLessThan(Comparison 1)
-        |> assertExnMsg
-            """
-Subject: x
-Should: BeLessThan
-Other: 1
-But was: null
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message for ints`` () =
-        fun () ->
-            let x = 1
+            let x = 0
             x.Should().BeLessThan(0)
         |> assertExnMsg
             """
 Subject: x
 Should: BeLessThan
 Other: 0
-But was: 1
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message for TimeSpan`` () =
-        fun () ->
-            let x = TimeSpan(0, 5, 0)
-            x.Should().BeLessThan(TimeSpan(0, 4, 0))
-        |> assertExnMsg
-            """
-Subject: x
-Should: BeLessThan
-Other: 00:04:00
-But was: 00:05:00
+But was: 0
 """
 
 
     [<Fact>]
     let ``Fails with expected message with because`` () =
         fun () ->
-            let x = 1
+            let x = 0
             x.Should().BeLessThan(0, "Some reason")
         |> assertExnMsg
             """
@@ -443,7 +367,7 @@ Subject: x
 Because: Some reason
 Should: BeLessThan
 Other: 0
-But was: 1
+But was: 0
 """
 
 
@@ -452,20 +376,19 @@ module BeLessThanOrEqualTo =
 
     [<Fact>]
     let ``Can be called with any type that has comparison`` () =
-        (Comparison 1).Should().BeLessThanOrEqualTo(Comparison 2)
+        (Comparison 0).Should().BeLessThanOrEqualTo(Comparison 0)
 
 
     [<Fact>]
     let ``Can be chained with And`` () =
-        (-1).Should().BeLessThanOrEqualTo(0).Id<And<int>>().And.Be(-1)
+        (0).Should().BeLessThanOrEqualTo(1).Id<And<int>>().And.Be(0)
 
 
-    [<Fact>]
-    let ``Passes if subject < other`` () = (-1).Should().BeLessThanOrEqualTo(0)
-
-
-    [<Fact>]
-    let ``Passes if subject = other`` () = (0).Should().BeLessThanOrEqualTo(0)
+    [<Theory>]
+    [<InlineData(0, 1)>] // subject < other
+    [<InlineData(0, 0)>] // subject = other
+    let ``Passes if subject <= other`` (subject: int) (other: int) =
+        subject.Should().BeLessThanOrEqualTo(other)
 
 
     [<Fact>]
@@ -474,21 +397,12 @@ module BeLessThanOrEqualTo =
 
 
     [<Fact>]
-    let ``Fails with expected message if null`` () =
-        fun () ->
-            let x = Unchecked.defaultof<Comparison>
-            x.Should().BeLessThanOrEqualTo(Comparison 1)
-        |> assertExnMsg
-            """
-Subject: x
-Should: BeLessThanOrEqualTo
-Other: 1
-But was: null
-"""
+    let ``Fails if null`` () =
+        assertFails (fun () -> Unchecked.defaultof<Comparison>.Should().BeLessThanOrEqualTo(Comparison 0))
 
 
     [<Fact>]
-    let ``Fails with expected message for ints`` () =
+    let ``Fails with expected message`` () =
         fun () ->
             let x = 1
             x.Should().BeLessThanOrEqualTo(0)
@@ -498,20 +412,6 @@ Subject: x
 Should: BeLessThanOrEqualTo
 Other: 0
 But was: 1
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message for TimeSpan`` () =
-        fun () ->
-            let x = TimeSpan(0, 5, 0)
-            x.Should().BeLessThanOrEqualTo(TimeSpan(0, 4, 0))
-        |> assertExnMsg
-            """
-Subject: x
-Should: BeLessThanOrEqualTo
-Other: 00:04:00
-But was: 00:05:00
 """
 
 
