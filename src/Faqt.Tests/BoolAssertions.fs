@@ -8,7 +8,7 @@ module BeTrue =
 
 
     [<Fact>]
-    let ``Passes for true values can be chained with And`` () =
+    let ``Passes if true and can be chained with And`` () =
         true.Should().BeTrue().Id<And<bool>>().And.Be(true)
 
 
@@ -26,7 +26,7 @@ But was: false
 
 
     [<Fact>]
-    let ``Fails with expected message with because`` () =
+    let ``Fails with expected message with because if false`` () =
         fun () ->
             let x = false
             x.Should().BeTrue("Some reason")
@@ -43,7 +43,7 @@ module BeFalse =
 
 
     [<Fact>]
-    let ``Passes for false values can be chained with And`` () =
+    let ``Passes if false and can be chained with And`` () =
         false.Should().BeFalse().Id<And<bool>>().And.Be(false)
 
 
@@ -61,7 +61,7 @@ But was: true
 
 
     [<Fact>]
-    let ``Fails with expected message with because`` () =
+    let ``Fails with expected message with because if true`` () =
         fun () ->
             let x = true
             x.Should().BeFalse("Some reason")
@@ -78,16 +78,15 @@ module Imply =
 
 
     [<Fact>]
-    let ``Passes if subject is false and other is false and can be chained with And`` () =
-        false.Should().Imply(false).Id<And<bool>>().And.Be(false)
+    let ``Can be chained with And`` () =
+        true.Should().Imply(true).Id<And<bool>>().And.Be(true)
 
 
-    [<Fact>]
-    let ``Passes if subject is false and other is true`` () = false.Should().Imply(true)
-
-
-    [<Fact>]
-    let ``Passes if subject is true and other is true`` () = true.Should().Imply(true)
+    [<Theory>]
+    [<InlineData(false, false)>]
+    [<InlineData(false, true)>]
+    [<InlineData(true, true)>]
+    let ``Passes if subject is false or both are true`` (subject: bool) (other: bool) = subject.Should().Imply(other)
 
 
     [<Fact>]
@@ -105,7 +104,7 @@ With other: false
 
 
     [<Fact>]
-    let ``Fails with expected message with because`` () =
+    let ``Fails with expected message with because if subject is true and other is false`` () =
         fun () ->
             let x = true
             x.Should().Imply(false, "Some reason")
@@ -123,16 +122,16 @@ module BeImpliedBy =
 
 
     [<Fact>]
-    let ``Passes if subject is false and other is false and can be chained with And`` () =
-        false.Should().BeImpliedBy(false).Id<And<bool>>().And.Be(false)
+    let ``Can be chained with And`` () =
+        true.Should().BeImpliedBy(true).Id<And<bool>>().And.Be(true)
 
 
-    [<Fact>]
-    let ``Passes if subject is true and other is false`` () = true.Should().BeImpliedBy(false)
-
-
-    [<Fact>]
-    let ``Passes if subject is true and other is true`` () = true.Should().BeImpliedBy(true)
+    [<Theory>]
+    [<InlineData(false, false)>]
+    [<InlineData(true, false)>]
+    [<InlineData(true, true)>]
+    let ``Passes if subject is true or both are true`` (subject: bool) (other: bool) =
+        subject.Should().BeImpliedBy(other)
 
 
     [<Fact>]
@@ -150,7 +149,7 @@ But was: false
 
 
     [<Fact>]
-    let ``Fails with expected message with because`` () =
+    let ``Fails with expected message with because if subject is false and other is true`` () =
         fun () ->
             let x = false
             x.Should().BeImpliedBy(true, "Some reason")
