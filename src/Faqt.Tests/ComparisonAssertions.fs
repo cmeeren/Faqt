@@ -659,77 +659,61 @@ module BeInRange =
 
     [<Fact>]
     let ``Can be called with any type that has comparison`` () =
-        (Comparison 1).Should().BeInRange(Comparison 0, Comparison 2)
+        (Comparison 0).Should().BeInRange(Comparison 0, Comparison 0)
 
 
     [<Fact>]
     let ``Can be chained with And`` () =
-        (2).Should().BeInRange(1, 3).Id<And<int>>().And.Be(2)
+        (0).Should().BeInRange(0, 0).Id<And<int>>().And.Be(0)
+
+
+    [<Theory>]
+    [<InlineData(0, 0, 0)>] // Zero range
+    [<InlineData(1, 0, 2)>] // Inside range
+    [<InlineData(0, 0, 1)>] // At lower bound
+    [<InlineData(1, 0, 1)>] // At upper bound
+    let ``Passes if within range`` (subject: int) (lower: int) (upper: int) =
+        subject.Should().BeInRange(lower, upper)
+
+
+    [<Theory>]
+    [<InlineData(0, 1, 2)>] // Below lower bound
+    [<InlineData(2, 0, 1)>] // Above upper bound
+    let ``Fails if outside range`` (subject: int) (lower: int) (upper: int) =
+        assertFails (fun () -> subject.Should().BeInRange(lower, upper))
 
 
     [<Fact>]
-    let ``Passes if subject is inside the range`` () = (2).Should().BeInRange(1, 3)
-
-
-    [<Fact>]
-    let ``Passes if subject is at the lower bound`` () = (1).Should().BeInRange(1, 3)
-
-
-    [<Fact>]
-    let ``Passes if subject is at the upper bound`` () = (3).Should().BeInRange(1, 3)
-
-
-    [<Fact>]
-    let ``Fails if subject is above the upper bound`` () =
-        assertFails (fun () -> (4).Should().BeInRange(1, 3))
-
-
-    [<Fact>]
-    let ``Fails if subject is below the lower bound`` () =
-        assertFails (fun () -> (0).Should().BeInRange(1, 3))
-
-
-    [<Fact>]
-    let ``Fails with expected message if null`` () =
-        fun () ->
-            let x = Unchecked.defaultof<Comparison>
-            x.Should().BeInRange(Comparison 0, Comparison 2)
-        |> assertExnMsg
-            """
-Subject: x
-Should: BeInRange
-Lower: 0
-Upper: 2
-But was: null
-"""
+    let ``Fails if null`` () =
+        assertFails (fun () -> Unchecked.defaultof<Comparison>.Should().BeInRange(Comparison 0, Comparison 0))
 
 
     [<Fact>]
     let ``Fails with expected message`` () =
         fun () ->
-            let x = 1
-            x.Should().BeInRange(2, 4)
+            let x = 0
+            x.Should().BeInRange(1, 2)
         |> assertExnMsg
             """
 Subject: x
 Should: BeInRange
-Lower: 2
-Upper: 4
-But was: 1
+Lower: 1
+Upper: 2
+But was: 0
 """
 
 
     [<Fact>]
     let ``Fails with expected message with because`` () =
         fun () ->
-            let x = 1
-            x.Should().BeInRange(2, 4, "Some reason")
+            let x = 0
+            x.Should().BeInRange(1, 2, "Some reason")
         |> assertExnMsg
             """
 Subject: x
 Because: Some reason
 Should: BeInRange
-Lower: 2
-Upper: 4
-But was: 1
+Lower: 1
+Upper: 2
+But was: 0
 """
