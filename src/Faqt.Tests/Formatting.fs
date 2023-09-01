@@ -654,6 +654,34 @@ Value: 2000-01-02T03:04:05.006
 
 
     [<Fact>]
+    let ``Rendering of DateTimeOffset with zero offset`` () =
+        fun () ->
+            "a"
+                .Should()
+                .FailWith("Value", DateTimeOffset(2000, 1, 2, 3, 4, 5, 6, TimeSpan.Zero))
+        |> assertExnMsg
+            """
+Subject: '"a"'
+Should: FailWith
+Value: 2000-01-02T03:04:05.006+00:00
+"""
+
+
+    [<Fact>]
+    let ``Rendering of DateTimeOffset with non-zero offset`` () =
+        fun () ->
+            "a"
+                .Should()
+                .FailWith("Value", DateTimeOffset(2000, 1, 2, 3, 4, 5, 6, TimeSpan.FromHours(7)))
+        |> assertExnMsg
+            """
+Subject: '"a"'
+Should: FailWith
+Value: 2000-01-02T03:04:05.006+07:00
+"""
+
+
+    [<Fact>]
     let ``Rendering of CultureInfo.InvariantCulture`` () =
         fun () -> "a".Should().FailWith("Value", CultureInfo.InvariantCulture)
         |> assertExnMsg
