@@ -654,6 +654,17 @@ Value: invariant
 
 
     [<Fact>]
+    let ``Rendering of CultureInfo("")`` () =
+        fun () -> "a".Should().FailWith("Value", CultureInfo(""))
+        |> assertExnMsg
+            """
+Subject: '"a"'
+Should: FailWith
+Value: invariant
+"""
+
+
+    [<Fact>]
     let ``Rendering of TimeSpan`` () =
         fun () -> "a".Should().FailWith("Value", TimeSpan(1, 2, 3, 4, 5, 6))
         |> assertExnMsg
