@@ -153,7 +153,7 @@ But was: null
 
 
     [<Fact>]
-    let ``Fails with expected message with because`` () =
+    let ``Fails with expected message with because if None`` () =
         fun () ->
             let x = Option<int>.None
             x.Should().BeSome("Some reason")
@@ -189,7 +189,7 @@ But was:
 
 
     [<Fact>]
-    let ``Fails with expected message with because`` () =
+    let ``Fails with expected message with because if Some`` () =
         fun () ->
             let x = Some 1
             x.Should().BeNone("Some reason")
@@ -231,7 +231,7 @@ But was:
 
 
     [<Fact>]
-    let ``Fails with expected message with because`` () =
+    let ``Fails with expected message with because if Error`` () =
         fun () ->
             let x = Error "asd"
             x.Should().BeOk("Some reason")
@@ -273,7 +273,7 @@ But was:
 
 
     [<Fact>]
-    let ``Fails with expected message with because`` () =
+    let ``Fails with expected message with because if Ok`` () =
         fun () ->
             let x = Ok "asd"
             x.Should().BeError("Some reason")
