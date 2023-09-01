@@ -31,61 +31,54 @@ module BeCloseTo =
     let ``Can be called with any set of 3 types where subject or target can be subtracted both ways and tolerance has comparison``
         ()
         =
-        (NumberWithoutOps 1).Should().BeCloseTo(NumberWithSubtraction 1, Comparison 0)
+        (NumberWithoutOps 0).Should().BeCloseTo(NumberWithSubtraction 0, Comparison 0)
         |> ignore
 
-        (NumberWithSubtraction 1).Should().BeCloseTo(NumberWithoutOps 1, Comparison 0)
+        (NumberWithSubtraction 0).Should().BeCloseTo(NumberWithoutOps 0, Comparison 0)
         |> ignore
 
 
     [<Fact>]
-    let ``Passes for equal integers with zero tolerance and can be chained with And`` () =
-        (1).Should().BeCloseTo(1, 0).Id<And<int>>().And.Be(1)
+    let ``Can be called common combinations of types`` () =
+        DateTime.MinValue.Should().BeCloseTo(DateTime.MinValue, TimeSpan.Zero) |> ignore
+        (0).Should().BeCloseTo(0, 0) |> ignore
+        (0.).Should().BeCloseTo(0., 0.) |> ignore
+        0m.Should().BeCloseTo(0m, 0m) |> ignore
 
 
     [<Fact>]
-    let ``Passes above lower bound`` () = (-0.9).Should().BeCloseTo(0., 1.)
+    let ``Can be chained with And`` () =
+        (0).Should().BeCloseTo(0, 0).Id<And<int>>().And.Be(0)
+
+
+    [<Theory>]
+    [<InlineData(1., 1., 0.)>] // Equal with zero tolerance
+    [<InlineData(1., 1., 1.)>] // Equal with non-zero tolerance
+    [<InlineData(0.5, 1., 1.)>] // Inside interval
+    [<InlineData(0.5, 1., 0.5)>] // At lower bound
+    [<InlineData(1.5, 1., 0.5)>] // At upper bound
+    let ``Passes if within tolerance`` (subject: float) (target: float) (tolerance: float) =
+        subject.Should().BeCloseTo(target, tolerance)
+
+
+    [<Theory>]
+    [<InlineData(0.4, 1., 0.5)>] // Below lower bound
+    [<InlineData(1.6, 1., 0.5)>] // Above upper bound
+    let ``Fails if outside tolerance`` (subject: float) (target: float) (tolerance: float) =
+        assertFails (fun () -> subject.Should().BeCloseTo(target, tolerance))
 
 
     [<Fact>]
-    let ``Passes at lower bound`` () = (-1.0).Should().BeCloseTo(0., 1.)
+    let ``Fails if null`` () =
+        assertFails (fun () ->
+            Unchecked.defaultof<NumberWithoutOps>
+                .Should()
+                .BeCloseTo(NumberWithSubtraction 1, Comparison 0)
+        )
 
 
     [<Fact>]
-    let ``Fails below lower bound`` () =
-        assertFails (fun () -> (-1.1).Should().BeCloseTo(0., 1.))
-
-
-    [<Fact>]
-    let ``Passes below upper bound`` () = (0.9).Should().BeCloseTo(0., 1.)
-
-
-    [<Fact>]
-    let ``Passes at upper bound`` () = (1.0).Should().BeCloseTo(0., 1.)
-
-
-    [<Fact>]
-    let ``Throws above upper bound`` () =
-        assertFails (fun () -> (1.1).Should().BeCloseTo(0., 1.))
-
-
-    [<Fact>]
-    let ``Fails with expected message if null`` () =
-        fun () ->
-            let x = Unchecked.defaultof<NumberWithoutOps>
-            x.Should().BeCloseTo(NumberWithSubtraction 1, Comparison 0)
-        |> assertExnMsg
-            """
-Subject: x
-Should: BeCloseTo
-Target: 1
-With tolerance: 0
-But was: null
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message for floats`` () =
+    let ``Fails with expected message`` () =
         fun () ->
             let x = 1.09
             x.Should().BeCloseTo(1.0, 0.05)
@@ -97,28 +90,6 @@ Target: 1
 With tolerance: 0.05
 But was: 1.09
 """
-
-
-    [<Fact>]
-    let ``Fails with expected message for TimeSpan`` () =
-        fun () ->
-            let x = TimeSpan(0, 5, 2)
-            x.Should().BeCloseTo(TimeSpan(0, 5, 0), TimeSpan(0, 0, 1))
-        |> assertExnMsg
-            """
-Subject: x
-Should: BeCloseTo
-Target: 00:05:00
-With tolerance: 00:00:01
-But was: 00:05:02
-"""
-
-
-    [<Fact>]
-    let ``Can be called with DateTime and TimeSpan`` () =
-        DateTime(2000, 1, 2, 3, 4, 5)
-            .Should()
-            .BeCloseTo(DateTime(2000, 1, 2, 3, 4, 6), TimeSpan(0, 0, 1))
 
 
     [<Fact>]
@@ -144,48 +115,47 @@ module NotBeCloseTo =
     let ``Can be called with any set of 3 types where subject or target can be subtracted both ways and tolerance has comparison``
         ()
         =
-        (NumberWithoutOps 2)
+        (NumberWithoutOps 0)
             .Should()
             .NotBeCloseTo(NumberWithSubtraction 1, Comparison 0)
         |> ignore
 
-        (NumberWithSubtraction 2)
+        (NumberWithSubtraction 0)
             .Should()
             .NotBeCloseTo(NumberWithoutOps 1, Comparison 0)
         |> ignore
 
 
     [<Fact>]
-    let ``Passes for non-equal integers with zero tolerance and can be chained with And`` () =
-        (2).Should().NotBeCloseTo(1, 0).Id<And<int>>().And.Be(2)
+    let ``Can be called common combinations of types`` () =
+        DateTime.MinValue.Should().NotBeCloseTo(DateTime.MaxValue, TimeSpan.Zero)
+        |> ignore
+
+        (0).Should().NotBeCloseTo(1, 0) |> ignore
+        (0.).Should().NotBeCloseTo(1., 0.) |> ignore
+        0m.Should().NotBeCloseTo(1m, 0m) |> ignore
 
 
     [<Fact>]
-    let ``Fails above lower bound`` () =
-        assertFails (fun () -> (-0.9).Should().NotBeCloseTo(0., 1.))
+    let ``Can be chained with And`` () =
+        (0).Should().NotBeCloseTo(1, 0).Id<And<int>>().And.Be(0)
 
 
-    [<Fact>]
-    let ``Fails at lower bound`` () =
-        assertFails (fun () -> (-1.0).Should().NotBeCloseTo(0., 1.))
+    [<Theory>]
+    [<InlineData(0.4, 1., 0.5)>] // Below lower bound
+    [<InlineData(1.6, 1., 0.5)>] // Above upper bound
+    let ``Passes if outside tolerance`` (subject: float) (target: float) (tolerance: float) =
+        subject.Should().NotBeCloseTo(target, tolerance)
 
 
-    [<Fact>]
-    let ``Passes below lower bound`` () = (-1.1).Should().NotBeCloseTo(0., 1.)
-
-
-    [<Fact>]
-    let ``Fails below upper bound`` () =
-        assertFails (fun () -> (0.9).Should().NotBeCloseTo(0., 1.))
-
-
-    [<Fact>]
-    let ``Fails at upper bound`` () =
-        assertFails (fun () -> (1.0).Should().NotBeCloseTo(0., 1.))
-
-
-    [<Fact>]
-    let ``Passes above upper bound`` () = (1.1).Should().NotBeCloseTo(0., 1.)
+    [<Theory>]
+    [<InlineData(1., 1., 0.)>] // Equal with zero tolerance
+    [<InlineData(1., 1., 1.)>] // Equal with non-zero tolerance
+    [<InlineData(0.5, 1., 1.)>] // Inside interval
+    [<InlineData(0.5, 1., 0.5)>] // At lower bound
+    [<InlineData(1.5, 1., 0.5)>] // At upper bound
+    let ``Fails if within tolerance`` (subject: float) (target: float) (tolerance: float) =
+        assertFails (fun () -> subject.Should().NotBeCloseTo(target, tolerance))
 
 
     [<Fact>]
@@ -196,7 +166,7 @@ module NotBeCloseTo =
 
 
     [<Fact>]
-    let ``Fails with expected message for floats`` () =
+    let ``Fails with expected message`` () =
         fun () ->
             let x = 1.02
             x.Should().NotBeCloseTo(1.0, 0.05)
@@ -208,28 +178,6 @@ Target: 1
 With tolerance: 0.05
 But was: 1.02
 """
-
-
-    [<Fact>]
-    let ``Fails with expected message for TimeSpan`` () =
-        fun () ->
-            let x = TimeSpan(0, 5, 1)
-            x.Should().NotBeCloseTo(TimeSpan(0, 5, 0), TimeSpan(0, 0, 2))
-        |> assertExnMsg
-            """
-Subject: x
-Should: NotBeCloseTo
-Target: 00:05:00
-With tolerance: 00:00:02
-But was: 00:05:01
-"""
-
-
-    [<Fact>]
-    let ``Can be called with DateTime and TimeSpan`` () =
-        DateTime(2000, 1, 2, 3, 4, 5)
-            .Should()
-            .NotBeCloseTo(DateTime(2000, 1, 2, 3, 4, 7), TimeSpan(0, 0, 1))
 
 
     [<Fact>]
