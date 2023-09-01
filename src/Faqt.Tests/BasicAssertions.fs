@@ -515,13 +515,36 @@ module ``BeOfType non-generic`` =
 
 
     [<Fact>]
-    let ``Passes for instance of specified type and can be chained with And`` () =
+    let ``Can be chained with And`` () =
         "asd".Should().BeOfType(typeof<string>).Id<And<string>>().And.Be("asd")
 
 
-    [<Fact>]
-    let ``Passes for boxed instance of specified type and can be chained with And`` () =
-        (box "asd").Should().BeOfType(typeof<string>).Id<And<obj>>().And.Be("asd")
+    let passData = [
+        [| box "a"; typeof<string> |]
+        [| 1; typeof<int> |]
+        [| TestSubType(); typeof<TestSubType> |]
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof passData)>]
+    let ``Passes for instances of the specified type`` (subject: obj) (expected: Type) =
+        subject.Should().BeOfType(expected)
+
+
+    let failData = [
+        [| box (null: string); typeof<string> |]
+        [| 1; typeof<string> |]
+        // Cast as sanity check to avoid false negatives
+        [| TestSubType() :> TestBaseType :> obj; typeof<TestBaseType> |]
+        [| TestSubType() :> TestInterface :> obj; typeof<TestInterface> |]
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof failData)>]
+    let ``Fails for null or instances of other types than the specified type`` (subject: obj) (expected: Type) =
+        assertFails (fun () -> subject.Should().BeOfType(expected))
 
 
     [<Fact>]
@@ -539,41 +562,24 @@ But was: null
 
 
     [<Fact>]
-    let ``Fails with expected message for different types`` () =
+    let ``Fails with expected message if null with because`` () =
         fun () ->
-            let x = "asd"
-            x.Should().BeOfType(typeof<int>)
+            let (x: string) = null
+            x.Should().BeOfType(typeof<string>, "Some reason")
         |> assertExnMsg
             """
 Subject: x
+Because: Some reason
 Should: BeOfType
-Expected: System.Int32
-But was: System.String
-Subject value: asd
+Expected: System.String
+But was: null
 """
 
 
     [<Fact>]
-    let ``Fails with expected message if non-generic interface, even if type implements it`` () =
-        fun () ->
-            let x = TestSubType()
-            x :> TestInterface |> ignore // Sanity check to avoid false negatives
-            x.Should().BeOfType(typeof<TestInterface>)
-        |> assertExnMsg
-            """
-Subject: x
-Should: BeOfType
-Expected: TestUtils+TestInterface
-But was: TestUtils+TestSubType
-Subject value: {}
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message if generic interface, even if type implements it`` () =
+    let ``Fails with expected message for generic types`` () =
         fun () ->
             let x = TestSubType<string, int>()
-            x :> TestInterface<string, int> |> ignore // Sanity check to avoid false negatives
             x.Should().BeOfType(typeof<TestInterface<string, int>>)
         |> assertExnMsg
             """
@@ -581,22 +587,6 @@ Subject: x
 Should: BeOfType
 Expected: TestUtils+TestInterface<System.String, System.Int32>
 But was: TestUtils+TestSubType<System.String, System.Int32>
-Subject value: {}
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message if sub-type`` () =
-        fun () ->
-            let x = TestSubType()
-            x :> TestBaseType |> ignore // Sanity check to avoid false negatives
-            x.Should().BeOfType(typeof<TestBaseType>)
-        |> assertExnMsg
-            """
-Subject: x
-Should: BeOfType
-Expected: TestUtils+TestBaseType
-But was: TestUtils+TestSubType
 Subject value: {}
 """
 
@@ -621,23 +611,45 @@ module ``BeOfType generic`` =
 
 
     [<Fact>]
-    let ``Passes for instance of specified type and can be chained with AndDerived with cast value`` () =
-        "asd"
+    let ``Can be chained with AndDerived with cast value`` () =
+        let x = TestSubType()
+
+        (x :> TestBaseType)
             .Should()
-            .BeOfType<string>()
-            .Id<AndDerived<string, string>>()
+            .BeOfType<TestSubType>()
+            .Id<AndDerived<TestBaseType, TestSubType>>()
             .WhoseValue.Should(())
-            .Be("asd")
+            .Be(x)
 
 
-    [<Fact>]
-    let ``Passes for boxed instance of specified type and can be chained with AndDerived with cast value`` () =
-        (box "asd")
-            .Should()
-            .BeOfType<string>()
-            .Id<AndDerived<obj, string>>()
-            .WhoseValue.Should(())
-            .Be("asd")
+    let beOfType<'a> (t: Testable<obj>) = t.BeOfType<'a>() |> ignore
+
+
+    let passData = [
+        [| box "a"; beOfType<string> |]
+        [| 1; beOfType<int> |]
+        [| TestSubType(); beOfType<TestSubType> |]
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof passData)>]
+    let ``Passes for instances of the specified type`` (subject: obj) run = run (subject.Should())
+
+
+    let failData = [
+        [| box (null: string); beOfType<string> |]
+        [| 1; beOfType<string> |]
+        // Cast as sanity check to avoid false negatives
+        [| TestSubType() :> TestBaseType :> obj; beOfType<TestBaseType> |]
+        [| TestSubType() :> TestInterface :> obj; beOfType<TestInterface> |]
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof failData)>]
+    let ``Fails for null or instances of other types than the specified type`` (subject: obj) run =
+        assertFails (fun () -> run (subject.Should()))
 
 
     [<Fact>]
@@ -655,41 +667,24 @@ But was: null
 
 
     [<Fact>]
-    let ``Fails with expected message for different types`` () =
+    let ``Fails with expected message if null with because`` () =
         fun () ->
-            let x = "asd"
-            x.Should().BeOfType<int>()
+            let (x: string) = null
+            x.Should().BeOfType<string>("Some reason")
         |> assertExnMsg
             """
 Subject: x
+Because: Some reason
 Should: BeOfType
-Expected: System.Int32
-But was: System.String
-Subject value: asd
+Expected: System.String
+But was: null
 """
 
 
     [<Fact>]
-    let ``Fails with expected message if non-generic interface, even if type implements it`` () =
-        fun () ->
-            let x = TestSubType()
-            x :> TestInterface |> ignore // Sanity check to avoid false negatives
-            x.Should().BeOfType<TestInterface>()
-        |> assertExnMsg
-            """
-Subject: x
-Should: BeOfType
-Expected: TestUtils+TestInterface
-But was: TestUtils+TestSubType
-Subject value: {}
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message if generic interface, even if type implements it`` () =
+    let ``Fails with expected message for generic types`` () =
         fun () ->
             let x = TestSubType<string, int>()
-            x :> TestInterface<string, int> |> ignore // Sanity check to avoid false negatives
             x.Should().BeOfType<TestInterface<string, int>>()
         |> assertExnMsg
             """
@@ -697,22 +692,6 @@ Subject: x
 Should: BeOfType
 Expected: TestUtils+TestInterface<System.String, System.Int32>
 But was: TestUtils+TestSubType<System.String, System.Int32>
-Subject value: {}
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message if sub-type`` () =
-        fun () ->
-            let x = TestSubType()
-            x :> TestBaseType |> ignore // Sanity check to avoid false negatives
-            x.Should().BeOfType<TestBaseType>()
-        |> assertExnMsg
-            """
-Subject: x
-Should: BeOfType
-Expected: TestUtils+TestBaseType
-But was: TestUtils+TestSubType
 Subject value: {}
 """
 
@@ -737,37 +716,36 @@ module ``BeAssignableTo non-generic`` =
 
 
     [<Fact>]
-    let ``Passes for instance of specified type and can be chained with And`` () =
+    let ``Can be chained with And`` () =
         "asd".Should().BeAssignableTo(typeof<string>).Id<And<string>>().And.Be("asd")
 
 
-    [<Fact>]
-    let ``Passes for boxed instance of specified type and can be chained with And`` () =
-        (box "asd").Should().BeAssignableTo(typeof<string>).Id<And<obj>>().And.Be("asd")
+    let passData = [
+        [| box "a"; typeof<string> |]
+        [| 1; typeof<int> |]
+        [| TestSubType(); typeof<TestSubType> |]
+        [| TestSubType(); typeof<TestBaseType> |]
+        [| TestSubType(); typeof<TestInterface> |]
+    ]
 
 
-    [<Fact>]
-    let ``Passes for instance of type that implements specified interface`` () =
-        let x = TestSubType()
-        x.Should().BeAssignableTo(typeof<TestInterface>)
+    [<Theory>]
+    [<MemberData(nameof passData)>]
+    let ``Passes for instances of a compatible type`` (subject: obj) (expected: Type) =
+        subject.Should().BeAssignableTo(expected)
 
 
-    [<Fact>]
-    let ``Passes for boxed instance of type that implements specified interface`` () =
-        let x = TestSubType()
-        (box x).Should().BeAssignableTo(typeof<TestInterface>)
+    let failData = [
+        [| box (null: string); typeof<string> |]
+        [| 1; typeof<string> |]
+        [| TestBaseType(); typeof<TestSubType> |]
+    ]
 
 
-    [<Fact>]
-    let ``Passes for instance of subtype of specified type`` () =
-        let x = TestSubType()
-        x.Should().BeAssignableTo(typeof<TestBaseType>)
-
-
-    [<Fact>]
-    let ``Passes for boxed instance of subtype of specified type`` () =
-        let x = TestSubType()
-        (box x).Should().BeAssignableTo(typeof<TestBaseType>)
+    [<Theory>]
+    [<MemberData(nameof failData)>]
+    let ``Fails for null or instances of incompatible types`` (subject: obj) (expected: Type) =
+        assertFails (fun () -> subject.Should().BeAssignableTo(expected))
 
 
     [<Fact>]
@@ -785,17 +763,32 @@ But was: null
 
 
     [<Fact>]
-    let ``Fails with expected message for incompatible types`` () =
+    let ``Fails with expected message if null with because`` () =
         fun () ->
-            let x = "asd"
-            x.Should().BeAssignableTo(typeof<int>)
+            let (x: string) = null
+            x.Should().BeAssignableTo(typeof<string>, "Some reason")
+        |> assertExnMsg
+            """
+Subject: x
+Because: Some reason
+Should: BeAssignableTo
+Expected: System.String
+But was: null
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message for generic types`` () =
+        fun () ->
+            let x = TestBaseType<string, int>()
+            x.Should().BeAssignableTo(typeof<TestSubType<string, int>>)
         |> assertExnMsg
             """
 Subject: x
 Should: BeAssignableTo
-Expected: System.Int32
-But was: System.String
-Subject value: asd
+Expected: TestUtils+TestSubType<System.String, System.Int32>
+But was: TestUtils+TestBaseType<System.String, System.Int32>
+Subject value: {}
 """
 
 
@@ -819,45 +812,45 @@ module ``BeAssignableTo generic`` =
 
 
     [<Fact>]
-    let ``Passes for instance of specified type and can be chained with AndDerived with cast value`` () =
-        "asd"
+    let ``Can be chained with AndDerived with cast value`` () =
+        let x = TestSubType()
+
+        (x :> TestBaseType)
             .Should()
-            .BeAssignableTo<string>()
-            .Id<AndDerived<string, string>>()
-            .And.Be("asd")
+            .BeAssignableTo<TestSubType>()
+            .Id<AndDerived<TestBaseType, TestSubType>>()
+            .WhoseValue.Should(())
+            .Be(x)
 
 
-    [<Fact>]
-    let ``Passes for boxed instance of specified type and can be chained with AndDerived with cast value`` () =
-        (box "asd")
-            .Should()
-            .BeAssignableTo<string>()
-            .Id<AndDerived<obj, string>>()
-            .And.Be("asd")
+    let beAssignableTo<'a> (t: Testable<obj>) = t.BeAssignableTo<'a>() |> ignore
 
 
-    [<Fact>]
-    let ``Passes for instance of type that implements specified interface`` () =
-        let x = TestSubType()
-        x.Should().BeAssignableTo<TestInterface>()
+    let passData = [
+        [| box "a"; beAssignableTo<string> |]
+        [| 1; beAssignableTo<int> |]
+        [| TestSubType(); beAssignableTo<TestSubType> |]
+        [| TestSubType(); beAssignableTo<TestBaseType> |]
+        [| TestSubType(); beAssignableTo<TestInterface> |]
+    ]
 
 
-    [<Fact>]
-    let ``Passes for boxed instance of type that implements specified interface`` () =
-        let x = TestSubType()
-        (box x).Should().BeAssignableTo<TestInterface>()
+    [<Theory>]
+    [<MemberData(nameof passData)>]
+    let ``Passes for instances of a compatible type`` (subject: obj) run = run (subject.Should())
 
 
-    [<Fact>]
-    let ``Passes for instance of subtype of specified type`` () =
-        let x = TestSubType()
-        x.Should().BeAssignableTo<TestBaseType>()
+    let failData = [
+        [| box (null: string); beAssignableTo<string> |]
+        [| 1; beAssignableTo<string> |]
+        [| TestBaseType(); beAssignableTo<TestSubType> |]
+    ]
 
 
-    [<Fact>]
-    let ``Passes for boxed instance of subtype of specified type`` () =
-        let x = TestSubType()
-        (box x).Should().BeAssignableTo<TestBaseType>()
+    [<Theory>]
+    [<MemberData(nameof failData)>]
+    let ``Fails for null or instances of incompatible types`` (subject: obj) run =
+        assertFails (fun () -> run (subject.Should()))
 
 
     [<Fact>]
@@ -875,17 +868,32 @@ But was: null
 
 
     [<Fact>]
-    let ``Fails with expected message for incompatible types`` () =
+    let ``Fails with expected message if null with because`` () =
         fun () ->
-            let x = "asd"
-            x.Should().BeAssignableTo<int>()
+            let (x: string) = null
+            x.Should().BeAssignableTo<string>("Some reason")
+        |> assertExnMsg
+            """
+Subject: x
+Because: Some reason
+Should: BeAssignableTo
+Expected: System.String
+But was: null
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message for generic types`` () =
+        fun () ->
+            let x = TestBaseType<string, int>()
+            x.Should().BeAssignableTo<TestSubType<string, int>>()
         |> assertExnMsg
             """
 Subject: x
 Should: BeAssignableTo
-Expected: System.Int32
-But was: System.String
-Subject value: asd
+Expected: TestUtils+TestSubType<System.String, System.Int32>
+But was: TestUtils+TestBaseType<System.String, System.Int32>
+Subject value: {}
 """
 
 
