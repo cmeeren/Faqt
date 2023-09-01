@@ -17,8 +17,8 @@ let assertExnMsg (msg: string) (f: unit -> 'a) =
     let ex = Assert.Throws<AssertionFailedException>(f >> ignore)
 
     Assert.Equal(
-        ("\n\n" + msg.Replace("\r\n", "\n").Trim() + "\n") :> obj, // Cast to obj to force full output
-        ("\n\n" + ex.Message.Replace("\r\n", "\n").Trim() + "\n")
+        ("\n\n" + msg.ReplaceLineEndings("\n").Trim() + "\n") :> obj, // Cast to obj to force full output
+        ("\n\n" + ex.Message.ReplaceLineEndings("\n").Trim() + "\n")
     )
 
 
@@ -27,9 +27,9 @@ let assertExnMsgWildcard (msg: string) (f: unit -> 'a) =
 
     match msg.Split('*') with
     | [| a; b |] ->
-        let exnMsg = "\n\n" + ex.Message.Replace("\r\n", "\n").Trim() + "\n"
-        let a = "\n\n" + a.Replace("\r\n", "\n").Trim()
-        let b = b.Replace("\r\n", "\n").Trim() + "\n"
+        let exnMsg = "\n\n" + ex.Message.ReplaceLineEndings("\n").Trim() + "\n"
+        let a = "\n\n" + a.ReplaceLineEndings("\n").Trim()
+        let b = b.ReplaceLineEndings("\n").Trim() + "\n"
         Assert.StartsWith(a, exnMsg)
         Assert.EndsWith(b, exnMsg)
     | _ -> failwith "Expected msg to contain a single *"
