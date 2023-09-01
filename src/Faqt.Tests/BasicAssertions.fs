@@ -229,15 +229,38 @@ module BeSameAs =
 
 
     [<Fact>]
-    let ``Passes for reference equal values and can be chained with And`` () =
-        let x = "asd"
-        let y = x
-        x.Should().BeSameAs(y).Id<And<string>>().And.Be("asd")
+    let ``Can be chained with And`` () =
+        "a".Should().BeSameAs("a").Id<And<string>>().And.Be("a")
 
 
-    [<Fact>]
-    let ``Passes if both subject and expected are null references`` () =
-        (null: string).Should().BeSameAs(null).Id<And<string>>().And.BeNull()
+    let passData = [
+        [| box TestRefEqualityType.Instance; TestRefEqualityType.Instance |]
+        [| null; null |]
+        // Interned strings (.NET implementation detail, not a requirement, just documenting behavior; remove test case
+        // if it causes trouble)
+        [| "a"; "a" |]
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof passData)>]
+    let ``Passes if reference equal`` (subject: obj) (expected: obj) = subject.Should().BeSameAs(expected)
+
+
+    let failData = [
+        [| box (TestRefEqualityType()); TestRefEqualityType() |]
+        [| TestRefEqualityType(); null |]
+        [| null; TestRefEqualityType() |]
+        [| "a" + "b"; "ab" |] // Non-interned strings
+        [| {| A = 1 |}; {| A = 1 |} |] // Structurally equal values
+        [| box 1; box 1 |] // Separately boxed (but otherwise equal) value types
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof failData)>]
+    let ``Fails if not reference equal`` (subject: obj) (expected: obj) =
+        Assert.Throws<AssertionFailedException>(fun () -> subject.Should().BeSameAs(expected) |> ignore)
 
 
     [<Fact>]
@@ -260,7 +283,7 @@ But was: null
 
     [<Fact>]
     let ``Fails with expected message if only expected is null`` () =
-        let x = "asd"
+        let x = "a"
         let y: string = null
 
         fun () -> x.Should().BeSameAs(y)
@@ -272,15 +295,14 @@ Expected: null
 But was:
   PhysicalHash: %i{LanguagePrimitives.PhysicalHash x}
   Type: System.String
-  Value: asd
+  Value: a
 """
 
 
     [<Fact>]
-    let ``Fails with expected message for non-reference-equal values of generic type even if they are equal`` () =
-        let x = Map.empty.Add("a", 1)
-        let y = Map.empty.Add("a", 1)
-        Assert.True((x = y)) // Sanity check
+    let ``Fails with expected message`` () =
+        let x = box "a"
+        let y = box 1
 
         fun () -> x.Should().BeSameAs(y)
         |> assertExnMsg
@@ -289,21 +311,19 @@ Subject: x
 Should: BeSameAs
 Expected:
   PhysicalHash: %i{LanguagePrimitives.PhysicalHash y}
-  Type: Microsoft.FSharp.Collections.FSharpMap<System.String, System.Int32>
-  Value:
-    a: 1
+  Type: System.Int32
+  Value: 1
 But was:
   PhysicalHash: %i{LanguagePrimitives.PhysicalHash x}
-  Type: Microsoft.FSharp.Collections.FSharpMap<System.String, System.Int32>
-  Value:
-    a: 1
+  Type: System.String
+  Value: a
 """
 
 
     [<Fact>]
     let ``Fails with expected message with because`` () =
-        let x = "a"
-        let y = "b"
+        let x = box "a"
+        let y = box 1
 
         fun () -> x.Should().BeSameAs(y, "Some reason")
         |> assertExnMsg
@@ -313,8 +333,8 @@ Because: Some reason
 Should: BeSameAs
 Expected:
   PhysicalHash: %i{LanguagePrimitives.PhysicalHash y}
-  Type: System.String
-  Value: b
+  Type: System.Int32
+  Value: 1
 But was:
   PhysicalHash: %i{LanguagePrimitives.PhysicalHash x}
   Type: System.String
@@ -326,23 +346,46 @@ module NotBeSameAs =
 
 
     [<Fact>]
-    let ``Passes for non-reference equal values and can be chained with And`` () =
-        "asd".Should().NotBeSameAs("foo").Id<And<string>>().And.Be("asd")
+    let ``Can be chained with And`` () =
+        "a".Should().NotBeSameAs("b").Id<And<string>>().And.Be("a")
+
+
+    let passData = [
+        [| box (TestRefEqualityType()); TestRefEqualityType() |]
+        [| TestRefEqualityType(); null |]
+        [| null; TestRefEqualityType() |]
+        [| "a" + "b"; "ab" |] // Non-interned strings
+        [| {| A = 1 |}; {| A = 1 |} |] // Structurally equal values
+        [| box 1; box 1 |] // Separately boxed (but otherwise equal) value types
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof passData)>]
+    let ``Passes if not reference equal`` (subject: obj) (expected: obj) = subject.Should().NotBeSameAs(expected)
+
+
+    let failData = [
+        [| box TestRefEqualityType.Instance; TestRefEqualityType.Instance |]
+        [| null; null |]
+        // Interned strings (.NET implementation detail, not a requirement, just documenting behavior; remove test case
+        // if it causes trouble)
+        [| "a"; "a" |]
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof failData)>]
+    let ``Fails if reference equal`` (subject: obj) (expected: obj) =
+        Assert.Throws<AssertionFailedException>(fun () -> subject.Should().NotBeSameAs(expected) |> ignore)
 
 
     [<Fact>]
-    let ``Passes if only subject is null reference`` () = null.Should().NotBeSameAs("asd")
+    let ``Fails with expected message if both are null`` () =
+        let x: obj = null
+        let y: obj = null
 
-
-    [<Fact>]
-    let ``Passes if only expected is null reference`` () = "asd".Should().NotBeSameAs(null)
-
-
-    [<Fact>]
-    let ``Fails with expected message if both subject and expected are null references`` () =
-        fun () ->
-            let x = null
-            x.Should().NotBeSameAs(null)
+        fun () -> x.Should().NotBeSameAs(y)
         |> assertExnMsg
             """
 Subject: x
@@ -352,8 +395,8 @@ Other: null
 
 
     [<Fact>]
-    let ``Fails with expected message for reference-equal values of generic type`` () =
-        let x = Map.empty.Add("a", 1)
+    let ``Fails with expected message`` () =
+        let x = "asd"
         let y = x
 
         fun () -> x.Should().NotBeSameAs(y)
@@ -361,23 +404,22 @@ Other: null
             """
 Subject: x
 Should: NotBeSameAs
-Other:
-  a: 1
+Other: asd
 """
 
 
     [<Fact>]
     let ``Fails with expected message with because`` () =
-        let x = "a"
+        let x = "asd"
         let y = x
 
         fun () -> x.Should().NotBeSameAs(y, "Some reason")
         |> assertExnMsg
-            $"""
+            """
 Subject: x
 Because: Some reason
 Should: NotBeSameAs
-Other: a
+Other: asd
 """
 
 

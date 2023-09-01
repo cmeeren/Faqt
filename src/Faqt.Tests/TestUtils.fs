@@ -65,6 +65,10 @@ type TestUnserializableType() =
     member _.WillThrow = failwith<int> "Foo"
 
 
+type TestRefEqualityType() =
+    static member val Instance = TestRefEqualityType()
+
+
 module CultureInfo =
 
     let withCurrentCulture (cultureName: string) =
