@@ -444,56 +444,45 @@ module BePositive =
 
 
     [<Fact>]
-    let ``Passes if subject > 0`` () = (1).Should().BePositive()
+    let ``Passes if subject is positive`` () = (1).Should().BePositive()
+
+
+    [<Theory>]
+    [<InlineData(0)>]
+    [<InlineData(-1)>]
+    let ``Fails if subject is zero or negative`` (subject: int) =
+        assertFails (fun () -> subject.Should().BePositive())
 
 
     [<Fact>]
-    let ``Fails if subject = 0`` () =
-        assertFails (fun () -> (0).Should().BePositive())
-
-
-    [<Fact>]
-    let ``Fails if subject < 0`` () =
-        assertFails (fun () -> (-1).Should().BePositive())
-
-
-    [<Fact>]
-    let ``Fails with expected message if null`` () =
-        fun () ->
-            let x = Unchecked.defaultof<ComparisonZero>
-            x.Should().BePositive()
-        |> assertExnMsg
-            """
-Subject: x
-Should: BePositive
-But was: null
-"""
+    let ``Fails if null`` () =
+        assertFails (fun () -> Unchecked.defaultof<ComparisonZero>.Should().BePositive())
 
 
     [<Fact>]
     let ``Fails with expected message`` () =
         fun () ->
-            let x = -1
+            let x = 0
             x.Should().BePositive()
         |> assertExnMsg
             """
 Subject: x
 Should: BePositive
-But was: -1
+But was: 0
 """
 
 
     [<Fact>]
     let ``Fails with expected message with because`` () =
         fun () ->
-            let x = -1
+            let x = 0
             x.Should().BePositive("Some reason")
         |> assertExnMsg
             """
 Subject: x
 Because: Some reason
 Should: BePositive
-But was: -1
+But was: 0
 """
 
 
@@ -511,56 +500,45 @@ module BeNegative =
 
 
     [<Fact>]
-    let ``Passes if subject < 0`` () = (-1).Should().BeNegative()
+    let ``Passes if subject is negative`` () = (-1).Should().BeNegative()
+
+
+    [<Theory>]
+    [<InlineData(0)>]
+    [<InlineData(1)>]
+    let ``Fails if subject is zero or positive`` (subject: int) =
+        assertFails (fun () -> subject.Should().BeNegative())
 
 
     [<Fact>]
-    let ``Fails if subject = 0`` () =
-        assertFails (fun () -> (0).Should().BeNegative())
-
-
-    [<Fact>]
-    let ``Fails if subject > 0`` () =
-        assertFails (fun () -> (1).Should().BeNegative())
-
-
-    [<Fact>]
-    let ``Fails with expected message if null`` () =
-        fun () ->
-            let x = Unchecked.defaultof<ComparisonZero>
-            x.Should().BeNegative()
-        |> assertExnMsg
-            """
-Subject: x
-Should: BeNegative
-But was: null
-"""
+    let ``Fails if null`` () =
+        assertFails (fun () -> Unchecked.defaultof<ComparisonZero>.Should().BeNegative())
 
 
     [<Fact>]
     let ``Fails with expected message`` () =
         fun () ->
-            let x = 1
+            let x = 0
             x.Should().BeNegative()
         |> assertExnMsg
             """
 Subject: x
 Should: BeNegative
-But was: 1
+But was: 0
 """
 
 
     [<Fact>]
     let ``Fails with expected message with because`` () =
         fun () ->
-            let x = 1
+            let x = 0
             x.Should().BeNegative("Some reason")
         |> assertExnMsg
             """
 Subject: x
 Because: Some reason
 Should: BeNegative
-But was: 1
+But was: 0
 """
 
 
@@ -569,38 +547,28 @@ module BeNonNegative =
 
     [<Fact>]
     let ``Can be called with any type that has comparison and Zero`` () =
-        (ComparisonZero 1).Should().BeNonNegative()
+        (ComparisonZero 0).Should().BeNonNegative()
 
 
     [<Fact>]
     let ``Can be chained with And`` () =
-        (1).Should().BeNonNegative().Id<And<int>>().And.Be(1)
+        (0).Should().BeNonNegative().Id<And<int>>().And.Be(0)
+
+
+    [<Theory>]
+    [<InlineData(0)>]
+    [<InlineData(1)>]
+    let ``passes if subject is zero or positive`` (subject: int) = subject.Should().BeNonNegative()
 
 
     [<Fact>]
-    let ``Passes if subject > 0`` () = (1).Should().BeNonNegative()
-
-
-    [<Fact>]
-    let ``Passes if subject = 0`` () = (0).Should().BeNonNegative()
-
-
-    [<Fact>]
-    let ``Fails if subject < 0`` () =
+    let ``Fails if subject is negative`` () =
         assertFails (fun () -> (-1).Should().BeNonNegative())
 
 
     [<Fact>]
-    let ``Fails with expected message if null`` () =
-        fun () ->
-            let x = Unchecked.defaultof<ComparisonZero>
-            x.Should().BeNonNegative()
-        |> assertExnMsg
-            """
-Subject: x
-Should: BeNonNegative
-But was: null
-"""
+    let ``Fails if null`` () =
+        assertFails (fun () -> Unchecked.defaultof<ComparisonZero>.Should().BeNonNegative())
 
 
     [<Fact>]
@@ -635,38 +603,28 @@ module BeNonPositive =
 
     [<Fact>]
     let ``Can be called with any type that has comparison and Zero`` () =
-        (ComparisonZero -1).Should().BeNonPositive()
+        (ComparisonZero 0).Should().BeNonPositive()
 
 
     [<Fact>]
     let ``Can be chained with And`` () =
-        (-1).Should().BeNonPositive().Id<And<int>>().And.Be(-1)
+        (0).Should().BeNonPositive().Id<And<int>>().And.Be(0)
+
+
+    [<Theory>]
+    [<InlineData(0)>]
+    [<InlineData(-1)>]
+    let ``passes if subject is zero or negative`` (subject: int) = subject.Should().BeNonPositive()
 
 
     [<Fact>]
-    let ``Passes if subject < 0`` () = (-1).Should().BeNonPositive()
-
-
-    [<Fact>]
-    let ``Passes if subject = 0`` () = (0).Should().BeNonPositive()
-
-
-    [<Fact>]
-    let ``Fails if subject > 0`` () =
+    let ``Fails if subject is positive`` () =
         assertFails (fun () -> (1).Should().BeNonPositive())
 
 
     [<Fact>]
-    let ``Fails with expected message if null`` () =
-        fun () ->
-            let x = Unchecked.defaultof<ComparisonZero>
-            x.Should().BeNonPositive()
-        |> assertExnMsg
-            """
-Subject: x
-Should: BeNonPositive
-But was: null
-"""
+    let ``Fails if null`` () =
+        assertFails (fun () -> Unchecked.defaultof<ComparisonZero>.Should().BeNonPositive())
 
 
     [<Fact>]
