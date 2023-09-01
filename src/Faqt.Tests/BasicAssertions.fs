@@ -300,7 +300,7 @@ But was:
 
 
     [<Fact>]
-    let ``Fails with expected message`` () =
+    let ``Fails with expected message if not reference equal`` () =
         let x = box "a"
         let y = box 1
 
@@ -395,7 +395,7 @@ Other: null
 
 
     [<Fact>]
-    let ``Fails with expected message`` () =
+    let ``Fails with expected message if not reference equal`` () =
         let x = "asd"
         let y = x
 
@@ -427,12 +427,21 @@ module BeNull =
 
 
     [<Fact>]
-    let ``Passes for null and can be chained with And`` () =
+    let ``Can be chained with And`` () =
         (null: string).Should().BeNull().Id<And<string>>().And.BeNull()
 
 
     [<Fact>]
-    let ``Fails with expected message if not null`` () =
+    let ``Passes if null`` () = (null: obj).Should().BeNull()
+
+
+    [<Fact>]
+    let ``Fails if not null`` () =
+        Assert.Throws<AssertionFailedException>(fun () -> obj().Should().BeNull() |> ignore)
+
+
+    [<Fact>]
+    let ``Fails with expected message`` () =
         fun () ->
             let x = "asd"
             x.Should().BeNull()
@@ -462,14 +471,23 @@ module NotBeNull =
 
 
     [<Fact>]
-    let ``Passes for non-null and can be chained with And`` () =
-        "asd".Should().NotBeNull().Id<And<string>>().And.Be("asd")
+    let ``Can be chained with And`` () =
+        "a".Should().NotBeNull().Id<And<string>>().And.Be("a")
 
 
     [<Fact>]
-    let ``Fails with expected message if null`` () =
+    let ``Passes if not null`` () = obj().Should().NotBeNull()
+
+
+    [<Fact>]
+    let ``Fails if null`` () =
+        Assert.Throws<AssertionFailedException>(fun () -> (null: obj).Should().NotBeNull() |> ignore)
+
+
+    [<Fact>]
+    let ``Fails with expected message`` () =
         fun () ->
-            let (x: string) = null
+            let x: obj = null
             x.Should().NotBeNull()
         |> assertExnMsg
             """
@@ -482,7 +500,7 @@ But was: null
     [<Fact>]
     let ``Fails with expected message with because`` () =
         fun () ->
-            let (x: string) = null
+            let x: obj = null
             x.Should().NotBeNull("Some reason")
         |> assertExnMsg
             """
