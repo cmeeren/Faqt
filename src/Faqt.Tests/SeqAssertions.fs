@@ -911,7 +911,7 @@ module ContainExactlyOneItem =
 
 
     [<Fact>]
-    let ``Can be chained with AndDerived with inner value`` () =
+    let ``Passes if sequence contains exactly one item and can be chained with AndDerived with inner value`` () =
         [ 1 ]
             .Should()
             .ContainExactlyOneItem()
@@ -920,18 +920,18 @@ module ContainExactlyOneItem =
             .Be(1)
 
 
-    [<Fact>]
-    let ``Passes if sequence contains a single item`` () = [ 1 ].Should().ContainExactlyOneItem()
+    let failData = [
+        // Comment to force break for readability
+        [| box null |]
+        [| List<string>.Empty |]
+        [| [ "a"; "b" ] |]
+    ]
 
 
-    [<Fact>]
-    let ``Fails if empty`` () =
-        assertFails (fun () -> List<int>.Empty.Should().ContainExactlyOneItem())
-
-
-    [<Fact>]
-    let ``Fails if more than one item`` () =
-        assertFails (fun () -> [ 1; 2 ].Should().ContainExactlyOneItem())
+    [<Theory>]
+    [<MemberData(nameof failData)>]
+    let ``Fails if not containing exactly one item`` (subject: seq<string>) =
+        assertFails (fun () -> subject.Should().ContainExactlyOneItem()) |> ignore
 
 
     [<Fact>]
@@ -994,7 +994,9 @@ module ContainExactlyOneItemMatching =
 
 
     [<Fact>]
-    let ``Can be chained with AndDerived with matched value`` () =
+    let ``Passes if sequence contains exactly one item matching the predicate and can be chained with AndDerived with matched value``
+        ()
+        =
         [ 1; 2 ]
             .Should()
             .ContainExactlyOneItemMatching((=) 2)
@@ -1003,9 +1005,19 @@ module ContainExactlyOneItemMatching =
             .Be(2)
 
 
-    [<Fact>]
-    let ``Passes if sequence contains a single item matching the predicate`` () =
-        [ 1; 2 ].Should().ContainExactlyOneItemMatching((=) 1)
+    let failData = [
+        // Comment to force break for readability
+        [| box null |]
+        [| List<int>.Empty |]
+        [| [ 1; 1 ] |]
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof failData)>]
+    let ``Fails if not containing exactly one item matching the predicate`` (subject: seq<int>) =
+        assertFails (fun () -> subject.Should().ContainExactlyOneItemMatching((=) 1))
+        |> ignore
 
 
     [<Fact>]
@@ -1070,7 +1082,7 @@ module ContainAtLeastOneItem =
 
 
     [<Fact>]
-    let ``Can be chained with AndDerived with inner value`` () =
+    let ``Can be chained with AndDerived with first value`` () =
         [ 1; 2 ]
             .Should()
             .ContainAtLeastOneItem()
@@ -1079,13 +1091,17 @@ module ContainAtLeastOneItem =
             .Be(1)
 
 
-    [<Fact>]
-    let ``Passes if sequence contains a single item`` () = [ 1 ].Should().ContainAtLeastOneItem()
+    let passData = [
+        // Comment to force break for readability
+        [| [ 1 ] |]
+        [| [ 1; 2 ] |]
+    ]
 
 
-    [<Fact>]
-    let ``Passes if sequence contains multiple items`` () =
-        [ 1; 2 ].Should().ContainAtLeastOneItem()
+    [<Theory>]
+    [<MemberData(nameof passData)>]
+    let ``Passes if contains at least one item`` (subject: seq<int>) =
+        subject.Should().ContainAtLeastOneItem()
 
 
     [<Fact>]
@@ -1146,7 +1162,7 @@ module ContainAtLeastOneItemMatching =
 
 
     [<Fact>]
-    let ``Can be chained with AndDerived with matched value`` () =
+    let ``Can be chained with AndDerived with first matched value`` () =
         [ 1; 2; 3 ]
             .Should()
             .ContainAtLeastOneItemMatching(fun x -> x > 1)
@@ -1155,14 +1171,17 @@ module ContainAtLeastOneItemMatching =
             .Be(2)
 
 
-    [<Fact>]
-    let ``Passes if sequence contains a single item matching the predicate`` () =
-        [ 1; 2 ].Should().ContainAtLeastOneItemMatching((=) 1)
+    let passData = [
+        // Comment to force break for readability
+        [| [ 1 ] |]
+        [| [ 1; 2 ] |]
+    ]
 
 
-    [<Fact>]
-    let ``Passes if sequence contains multiple items matching the predicate`` () =
-        [ 1; 2 ].Should().ContainAtLeastOneItemMatching(fun x -> x < 3)
+    [<Theory>]
+    [<MemberData(nameof passData)>]
+    let ``Passes if contains at least one item matching the predicate`` (subject: seq<int>) =
+        subject.Should().ContainAtLeastOneItemMatching(fun x -> x < 3)
 
 
     [<Fact>]
@@ -1193,7 +1212,7 @@ But was: null
 
 
     [<Fact>]
-    let ``Fails with expected message if no items match the predicate`` () =
+    let ``Fails with expected message if no item matches the predicate`` () =
         fun () ->
             let x = [ 1; 2; 3 ]
             x.Should().ContainAtLeastOneItemMatching(fun x -> x > 3)
@@ -1208,7 +1227,7 @@ Subject value: [1, 2, 3]
 
 
     [<Fact>]
-    let ``Fails with expected message with because if no items match the predicate`` () =
+    let ``Fails with expected message with because if no item matches the predicate`` () =
         fun () ->
             let x = [ 1; 2; 3 ]
             x.Should().ContainAtLeastOneItemMatching((fun x -> x > 3), "Some reason")
@@ -1236,14 +1255,17 @@ module ContainItemsMatching =
             .SequenceEqual([ 2; 3 ])
 
 
-    [<Fact>]
-    let ``Passes if sequence contains a single item matching the predicate`` () =
-        [ 1; 2 ].Should().ContainItemsMatching((=) 1)
+    let passData = [
+        // Comment to force break for readability
+        [| [ 1 ] |]
+        [| [ 1; 2 ] |]
+    ]
 
 
-    [<Fact>]
-    let ``Passes if sequence contains multiple items matching the predicate`` () =
-        [ 1; 2 ].Should().ContainItemsMatching(fun x -> x < 3)
+    [<Theory>]
+    [<MemberData(nameof passData)>]
+    let ``Passes if contains at least one item matching the predicate`` (subject: seq<int>) =
+        subject.Should().ContainItemsMatching(fun x -> x < 3)
 
 
     [<Fact>]
