@@ -371,6 +371,190 @@ But was: A
 """
 
 
+module ``Be with StringComparison`` =
+
+
+    [<Fact>]
+    let ``Can be chained with And`` () =
+        "a".Should().Be("a", StringComparison.Ordinal).Id<And<string>>().And.Be("a")
+
+
+    [<Theory>]
+    [<InlineData(null, null, StringComparison.Ordinal, "")>]
+    [<InlineData("", "", StringComparison.Ordinal, "")>]
+    [<InlineData("a", "a", StringComparison.Ordinal, "")>]
+    [<InlineData("asd", "asd", StringComparison.Ordinal, "")>]
+    [<InlineData("ASD", "asd", StringComparison.OrdinalIgnoreCase, "")>]
+    [<InlineData("i", "İ", StringComparison.CurrentCultureIgnoreCase, "tr-TR")>] // Different casings of same letter in Turkish, but not invariant
+    let ``Passes if string equals expected using the specified StringComparison``
+        (subject: string)
+        (substring: string)
+        (comparison: StringComparison)
+        (culture: string)
+        =
+        use _ = CultureInfo.withCurrentCulture culture
+        subject.Should().Be(substring, comparison)
+
+
+    [<Theory>]
+    [<InlineData(null, "", StringComparison.Ordinal, "")>]
+    [<InlineData("", null, StringComparison.Ordinal, "")>]
+    [<InlineData("", "a", StringComparison.Ordinal, "")>]
+    [<InlineData("a", "", StringComparison.Ordinal, "")>]
+    [<InlineData("a", "b", StringComparison.Ordinal, "")>]
+    [<InlineData("a", "A", StringComparison.Ordinal, "")>]
+    [<InlineData("i", "İ", StringComparison.InvariantCultureIgnoreCase, "")>] // Different casings of same letter in Turkish, but not invariant
+    let ``Fails if not equals expected using the specified StringComparison``
+        (subject: string)
+        (substring: string)
+        (comparison: StringComparison)
+        (culture: string)
+        =
+        use _ = CultureInfo.withCurrentCulture culture
+        assertFails (fun () -> subject.Should().Be(substring, comparison))
+
+
+    [<Fact>]
+    let ``Fails with expected message using StringComparison.Ordinal`` () =
+        fun () ->
+            let x = "asd"
+            x.Should().Be("a", StringComparison.Ordinal)
+        |> assertExnMsg
+            """
+Subject: x
+Should: Be
+Expected: a
+StringComparison: Ordinal
+But was: asd
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message using StringComparison.CurrentCulture`` () =
+        use _ = CultureInfo.withCurrentCulture "nb-NO"
+
+        fun () ->
+            let x = "asd"
+            x.Should().Be("a", StringComparison.CurrentCulture)
+        |> assertExnMsg
+            """
+Subject: x
+Should: Be
+Expected: a
+StringComparison: CurrentCulture
+CurrentCulture: nb-NO
+But was: asd
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because`` () =
+        fun () ->
+            let x = "asd"
+            x.Should().Be("a", StringComparison.Ordinal, "Some reason")
+        |> assertExnMsg
+            """
+Subject: x
+Because: Some reason
+Should: Be
+Expected: a
+StringComparison: Ordinal
+But was: asd
+"""
+
+
+module ``NotBe with StringComparison`` =
+
+
+    [<Fact>]
+    let ``Can be chained with And`` () =
+        "a".Should().NotBe("b", StringComparison.Ordinal).Id<And<string>>().And.Be("a")
+
+
+    [<Theory>]
+    [<InlineData(null, "", StringComparison.Ordinal, "")>]
+    [<InlineData("", null, StringComparison.Ordinal, "")>]
+    [<InlineData("", "a", StringComparison.Ordinal, "")>]
+    [<InlineData("a", "", StringComparison.Ordinal, "")>]
+    [<InlineData("a", "b", StringComparison.Ordinal, "")>]
+    [<InlineData("a", "A", StringComparison.Ordinal, "")>]
+    [<InlineData("i", "İ", StringComparison.InvariantCultureIgnoreCase, "")>] // Different casings of same letter in Turkish, but not invariant
+    let ``Passes if not equals expected using the specified StringComparison``
+        (subject: string)
+        (substring: string)
+        (comparison: StringComparison)
+        (culture: string)
+        =
+        use _ = CultureInfo.withCurrentCulture culture
+        subject.Should().NotBe(substring, comparison)
+
+
+    [<Theory>]
+    [<InlineData(null, null, StringComparison.Ordinal, "")>]
+    [<InlineData("", "", StringComparison.Ordinal, "")>]
+    [<InlineData("a", "a", StringComparison.Ordinal, "")>]
+    [<InlineData("asd", "asd", StringComparison.Ordinal, "")>]
+    [<InlineData("ASD", "asd", StringComparison.OrdinalIgnoreCase, "")>]
+    [<InlineData("i", "İ", StringComparison.CurrentCultureIgnoreCase, "tr-TR")>] // Different casings of same letter in Turkish, but not invariant
+    let ``Fails if string equals expected using the specified StringComparison``
+        (subject: string)
+        (substring: string)
+        (comparison: StringComparison)
+        (culture: string)
+        =
+        use _ = CultureInfo.withCurrentCulture culture
+        assertFails (fun () -> subject.Should().NotBe(substring, comparison))
+
+
+    [<Fact>]
+    let ``Fails with expected message using StringComparison.Ordinal`` () =
+        fun () ->
+            let x = "asd"
+            x.Should().NotBe("asd", StringComparison.Ordinal)
+        |> assertExnMsg
+            """
+Subject: x
+Should: NotBe
+Other: asd
+StringComparison: Ordinal
+But was: asd
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message using StringComparison.CurrentCulture`` () =
+        use _ = CultureInfo.withCurrentCulture "nb-NO"
+
+        fun () ->
+            let x = "asd"
+            x.Should().NotBe("asd", StringComparison.CurrentCulture)
+        |> assertExnMsg
+            """
+Subject: x
+Should: NotBe
+Other: asd
+StringComparison: CurrentCulture
+CurrentCulture: nb-NO
+But was: asd
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because`` () =
+        fun () ->
+            let x = "asd"
+            x.Should().NotBe("asd", StringComparison.Ordinal, "Some reason")
+        |> assertExnMsg
+            """
+Subject: x
+Because: Some reason
+Should: NotBe
+Other: asd
+StringComparison: Ordinal
+But was: asd
+"""
+
+
 module ``Contain with StringComparison`` =
 
 

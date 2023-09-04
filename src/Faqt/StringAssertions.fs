@@ -14,6 +14,34 @@ open AssertionHelpers
 module private Helpers =
 
 
+    let expectedFail (t: Testable<string>) expected comparisonType because =
+        t
+            .With("Expected", expected)
+            .With("StringComparison", comparisonType)
+            .With(
+                comparisonType = StringComparison.CurrentCulture
+                || comparisonType = StringComparison.CurrentCultureIgnoreCase,
+                "CurrentCulture",
+                CultureInfo.CurrentCulture
+            )
+            .With("But was", t.Subject)
+            .Fail(because)
+
+
+    let otherFail (t: Testable<string>) other comparisonType because =
+        t
+            .With("Other", other)
+            .With("StringComparison", comparisonType)
+            .With(
+                comparisonType = StringComparison.CurrentCulture
+                || comparisonType = StringComparison.CurrentCultureIgnoreCase,
+                "CurrentCulture",
+                CultureInfo.CurrentCulture
+            )
+            .With("But was", t.Subject)
+            .Fail(because)
+
+
     let substringFail (t: Testable<string>) substring comparisonType because =
         t
             .With("Substring", substring)
@@ -78,6 +106,28 @@ type StringAssertions =
     static member BeLowerCase(t: Testable<string>, ?because) : And<string> =
         use _ = t.Assert()
         t.BeLowerCase(CultureInfo.InvariantCulture, ?because = because)
+
+
+    /// Asserts that the subject is equal to the specified value using the specified string comparison type.
+    [<Extension>]
+    static member Be(t: Testable<string>, expected: string, comparisonType: StringComparison, ?because) : And<string> =
+        use _ = t.Assert()
+
+        if not (String.Equals(t.Subject, expected, comparisonType)) then
+            expectedFail t expected comparisonType because
+
+        And(t)
+
+
+    /// Asserts that the subject is not equal to the specified value using the specified string comparison type.
+    [<Extension>]
+    static member NotBe(t: Testable<string>, other: string, comparisonType: StringComparison, ?because) : And<string> =
+        use _ = t.Assert()
+
+        if String.Equals(t.Subject, other, comparisonType) then
+            otherFail t other comparisonType because
+
+        And(t)
 
 
     /// Asserts that the subject contains the specified string using the specified string comparison type.
