@@ -26,7 +26,7 @@ module AllSatisfy =
     let ``Fails with expected message if subject is null`` () =
         fun () ->
             let x: seq<string> = null
-            x.Should().AllSatisfy(fun y -> y.Length.Should().Test(y.Length = 3))
+            x.Should().AllSatisfy(fun _ -> failwith "unreachable")
         |> assertExnMsg
             """
 Subject: x
@@ -39,10 +39,7 @@ But was: null
     let ``Fails with expected message with because if subject is null`` () =
         fun () ->
             let x: seq<string> = null
-
-            x
-                .Should()
-                .AllSatisfy((fun y -> y.Length.Should().Test(y.Length = 3)), "Some reason")
+            x.Should().AllSatisfy((fun _ -> failwith "unreachable"), "Some reason")
         |> assertExnMsg
             """
 Subject: x
@@ -119,7 +116,7 @@ module SatisfyRespectively =
 
     [<Fact>]
     let ``Throws ArgumentNullException if assertions is null`` () =
-        Assert.Throws<ArgumentNullException>(fun () -> [ 1 ].Should().SatisfyRespectively(null) |> ignore)
+        Assert.Throws<ArgumentNullException>(fun () -> List<int>.Empty.Should().SatisfyRespectively(null) |> ignore)
 
 
     [<Fact>]
