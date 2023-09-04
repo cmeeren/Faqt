@@ -130,9 +130,7 @@ module SatisfyRespectively =
     let ``Fails with expected message if subject is null`` () =
         fun () ->
             let x: seq<string> = null
-
             x.Should().SatisfyRespectively([ (fun x -> x.Should().Pass()) ])
-
         |> assertExnMsg
             """
 Subject: x
@@ -145,9 +143,7 @@ But was: null
     let ``Fails with expected message with because if subject is null`` () =
         fun () ->
             let x: seq<string> = null
-
             x.Should().SatisfyRespectively([ (fun x -> x.Should().Pass()) ], "Some reason")
-
         |> assertExnMsg
             """
 Subject: x
@@ -165,7 +161,6 @@ But was: null
             x
                 .Should()
                 .SatisfyRespectively([ (fun x -> x.Should().Pass()); fun x -> x.Should().Pass() ])
-
         |> assertExnMsg
             """
 Subject: x
@@ -184,7 +179,6 @@ Subject value: [asd, test, '1234']
             x
                 .Should()
                 .SatisfyRespectively([ (fun x -> x.Should().Pass()); fun x -> x.Should().Pass() ], "Some reason")
-
         |> assertExnMsg
             """
 Subject: x
@@ -210,7 +204,6 @@ Subject value: [asd, test, '1234']
                         (fun x3 -> x3.Should().Fail())
                     ]
                 )
-
         |> assertExnMsg
             """
 Subject: x
@@ -243,7 +236,6 @@ Subject value: [asd, test, '1234']
                     ],
                     "Some reason"
                 )
-
         |> assertExnMsg
             """
 Subject: x

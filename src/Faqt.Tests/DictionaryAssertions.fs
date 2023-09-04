@@ -168,7 +168,6 @@ But was: null
             x
                 .Should()
                 .SatisfyRespectively([ (fun x -> x.Should().Pass()); fun x -> x.Should().Pass() ])
-
         |> assertExnMsg
             """
 Subject: x
@@ -190,7 +189,6 @@ Subject value:
             x
                 .Should()
                 .SatisfyRespectively([ (fun x -> x.Should().Pass()); fun x -> x.Should().Pass() ], "Some reason")
-
         |> assertExnMsg
             """
 Subject: x
@@ -219,7 +217,6 @@ Subject value:
                         (fun x3 -> x3.Should().Fail())
                     ]
                 )
-
         |> assertExnMsg
             """
 Subject: x
@@ -255,7 +252,6 @@ Subject value:
                     ],
                     "Some reason"
                 )
-
         |> assertExnMsg
             """
 Subject: x
