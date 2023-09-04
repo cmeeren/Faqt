@@ -791,35 +791,50 @@ module HaveSameItemsAs =
 
     [<Fact>]
     let ``Can be chained with And`` () =
-        [ 1 ].Should().HaveSameItemsAs([ 1 ]).Id<And<int list>>().And.Be([ 1 ])
+        Map.empty<string, int>
+            .Should()
+            .HaveSameItemsAs(Map.empty<string, int>)
+            .Id<And<Map<string, int>>>()
+            .And.Be(Map.empty<string, int>)
 
 
-    [<Fact>]
-    let ``Passes if sequence contains all values ignoring order`` () =
-        let x = ResizeArray([ 1; 2; 1; 3 ])
-        x.Should().HaveSameItemsAs([ 1; 1; 2; 3 ])
+    let passData = [
+        [| box null; null |]
+        [| List<string>.Empty; List<string>.Empty |]
+        [| [ "a" ]; [ "a" ] |]
+        [| [ "a"; "b" ]; [ "a"; "b" ] |]
+        [| [ "a"; "b" ]; [ "b"; "a" ] |]
+        [| [ "a"; (null: string) ]; [ (null: string); "a" ] |]
+    ]
 
 
-    [<Fact>]
-    let ``Passes if sequence contains all values ignoring order including null values`` () =
-        let x = ResizeArray([ "a"; "b"; null; "c" ])
-        x.Should().HaveSameItemsAs([ "c"; null; "a"; "b" ])
+    [<Theory>]
+    [<MemberData(nameof passData)>]
+    let ``Passes if both are null or contain the same values`` (subject: seq<string>) (expected: seq<string>) =
+        subject.Should().HaveSameItemsAs(expected)
 
 
-    [<Fact>]
-    let ``Passes if both subject and expected is null`` () =
-        (null: seq<int>).Should().HaveSameItemsAs(null)
+    let failData = [
+        [| box null; List<string>.Empty |]
+        [| List<string>.Empty; [ "a" ] |]
+        [| [ "a" ]; [ "a"; "a" ] |]
+        [| [ "a" ]; [ "a"; "b" ] |]
+        [| [ "a" ]; [ "b" ] |]
+        [| [ "a" ]; [ (null: string) ] |]
+    ]
 
 
-    [<Fact>]
-    let ``Fails if have same counts and distinct items, but different number of duplicate items`` () =
-        assertFails (fun () -> [ 1; 1; 2 ].Should().HaveSameItemsAs([ 1; 2; 2 ]))
+    [<Theory>]
+    [<MemberData(nameof failData)>]
+    let ``Fails if only one is null or they do not contain the same values`` (a: seq<string>) (b: seq<string>) =
+        assertFails (fun () -> a.Should().HaveSameItemsAs(b)) |> ignore
+        assertFails (fun () -> b.Should().HaveSameItemsAs(a))
 
 
     [<Fact>]
     let ``Fails with expected message if only subject is null`` () =
         fun () ->
-            let x: seq<int> = null
+            let x: seq<string> = null
             x.Should().HaveSameItemsAs([])
         |> assertExnMsg
             """
@@ -831,9 +846,23 @@ But was: null
 
 
     [<Fact>]
+    let ``Fails with expected message if only expected is null`` () =
+        fun () ->
+            let x = List<string>.Empty
+            x.Should().HaveSameItemsAs(null)
+        |> assertExnMsg
+            """
+Subject: x
+Should: HaveSameItemsAs
+Expected: null
+But was: []
+"""
+
+
+    [<Fact>]
     let ``Fails with expected message with because if only subject is null`` () =
         fun () ->
-            let x: seq<int> = null
+            let x: seq<string> = null
             x.Should().HaveSameItemsAs([], "Some reason")
         |> assertExnMsg
             """
@@ -843,6 +872,7 @@ Should: HaveSameItemsAs
 Expected: []
 But was: null
 """
+
 
     [<Fact>]
     let ``Fails with expected message if items are not equal with duplicates`` () =
@@ -861,19 +891,19 @@ Actual: [7, 1, 3, 1, 2, 5, 4, 2]
 
 
     [<Fact>]
-    let ``Fails with expected message with because if items are not equal with duplicates`` () =
+    let ``Fails with expected message with because`` () =
         fun () ->
-            let x = [ 7; 1; 3; 1; 2; 5; 4; 2 ]
-            x.Should().HaveSameItemsAs([ 1; 3; 3; 5; 4; 9; 2 ], "Some reason")
+            let x = [ 1 ]
+            x.Should().HaveSameItemsAs([ 1; 2 ], "Some reason")
         |> assertExnMsg
             """
 Subject: x
 Because: Some reason
 Should: HaveSameItemsAs
-Missing items: [3, 9]
-Additional items: [7, 1, 2]
-Expected: [1, 3, 3, 5, 4, 9, 2]
-Actual: [7, 1, 3, 1, 2, 5, 4, 2]
+Missing items: [2]
+Additional items: []
+Expected: [1, 2]
+Actual: [1]
 """
 
 
