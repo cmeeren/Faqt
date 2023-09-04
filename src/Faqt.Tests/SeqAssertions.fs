@@ -78,7 +78,7 @@ Subject value: [asd, test, '1234']
 
 
     [<Fact>]
-    let ``Fails with expected message with because`` () =
+    let ``Fails with expected message with because if at least one of the items fail to satisfy the assertion`` () =
         fun () ->
             let x = [ "asd"; "test"; "1234" ]
 

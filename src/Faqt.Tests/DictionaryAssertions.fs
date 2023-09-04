@@ -78,7 +78,7 @@ Subject value:
 
 
     [<Fact>]
-    let ``Fails with expected message with because`` () =
+    let ``Fails with expected message with because if at least one of the items fail to satisfy the assertion`` () =
         fun () ->
             let x = dict [ "asd", 1; "test", 2; "foobar", 3 ]
 
