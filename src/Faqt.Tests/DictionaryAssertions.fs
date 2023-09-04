@@ -639,10 +639,11 @@ module HaveSameItemsAs =
     [<Theory>]
     [<MemberData(nameof failData)>]
     let ``Fails if only one is null or they do not contain the same key-value pairs``
-        (subject: IDictionary<string, string>)
-        (expected: IDictionary<string, string>)
+        (a: IDictionary<string, string>)
+        (b: IDictionary<string, string>)
         =
-        assertFails (fun () -> subject.Should().HaveSameItemsAs(expected))
+        assertFails (fun () -> a.Should().HaveSameItemsAs(b)) |> ignore
+        assertFails (fun () -> b.Should().HaveSameItemsAs(a))
 
 
     [<Fact>]
@@ -656,6 +657,20 @@ Subject: x
 Should: HaveSameItemsAs
 Expected: {}
 But was: null
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if only expected is null`` () =
+        fun () ->
+            let x = dict<string, int> []
+            x.Should().HaveSameItemsAs(null)
+        |> assertExnMsg
+            """
+Subject: x
+Should: HaveSameItemsAs
+Expected: null
+But was: {}
 """
 
 
