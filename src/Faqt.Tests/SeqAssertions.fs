@@ -27,7 +27,6 @@ module AllSatisfy =
         fun () ->
             let x: seq<string> = null
             x.Should().AllSatisfy(fun y -> y.Length.Should().Test(y.Length = 3))
-
         |> assertExnMsg
             """
 Subject: x
@@ -44,7 +43,6 @@ But was: null
             x
                 .Should()
                 .AllSatisfy((fun y -> y.Length.Should().Test(y.Length = 3)), "Some reason")
-
         |> assertExnMsg
             """
 Subject: x
@@ -59,7 +57,6 @@ But was: null
         fun () ->
             let x = [ "asd"; "test"; "1234" ]
             x.Should().AllSatisfy(fun y -> y.Length.Should().Test(y.Length = 3))
-
         |> assertExnMsg
             """
 Subject: x
@@ -85,7 +82,6 @@ Subject value: [asd, test, '1234']
             x
                 .Should()
                 .AllSatisfy((fun y -> y.Length.Should().Test(y.Length = 3)), "Some reason")
-
         |> assertExnMsg
             """
 Subject: x
