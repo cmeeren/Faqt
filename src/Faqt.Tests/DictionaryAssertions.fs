@@ -392,7 +392,7 @@ But was:
 """
 
 
-module ``Contain(key, value)`` =
+module ``Contain key and value`` =
 
 
     [<Fact>]
