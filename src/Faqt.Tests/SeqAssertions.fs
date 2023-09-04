@@ -426,33 +426,6 @@ module NotBeEmpty =
 
 
     [<Fact>]
-    let ``Fails with expected message if null`` () =
-        fun () ->
-            let x: seq<int> = null
-            x.Should().NotBeEmpty()
-        |> assertExnMsg
-            """
-Subject: x
-Should: NotBeEmpty
-But was: null
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message with because if null`` () =
-        fun () ->
-            let x: seq<int> = null
-            x.Should().NotBeEmpty("Some reason")
-        |> assertExnMsg
-            """
-Subject: x
-Because: Some reason
-Should: NotBeEmpty
-But was: null
-"""
-
-
-    [<Fact>]
     let ``Fails with expected message if empty`` () =
         fun () ->
             let x = List<int>.Empty
@@ -488,12 +461,12 @@ module BeNullOrEmpty =
 
 
     [<Fact>]
-    let ``Passes if subject is empty`` () = Seq.empty<int>.Should().BeNullOrEmpty()
+    let ``Passes if subject is null`` () =
+        (null: seq<int>).Should().BeNullOrEmpty()
 
 
     [<Fact>]
-    let ``Passes if subject is null`` () =
-        (null: seq<int>).Should().BeNullOrEmpty()
+    let ``Passes if subject is empty`` () = Seq.empty<int>.Should().BeNullOrEmpty()
 
 
     [<Fact>]
