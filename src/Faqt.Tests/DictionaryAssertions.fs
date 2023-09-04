@@ -605,16 +605,44 @@ module HaveSameItemsAs =
             .And.Be(Map.empty<string, int>)
 
 
-    [<Fact>]
-    let ``Passes if dict contains the same key-value pairs`` () =
-        let x = dict [ "a", "1"; "b", "2"; null, null ]
-        let y = dict [ "b", "2"; null, null; "a", "1" ]
-        x.Should().HaveSameItemsAs(y)
+    let passData = [
+        [| box null; null |]
+        [| dict<string, string> []; dict<string, string> [] |]
+        [| dict [ "a", "1" ]; dict [ "a", "1" ] |]
+        [| dict [ "a", "1"; "b", "2" ]; dict [ "b", "2"; "a", "1" ] |]
+        [| dict [ "a", "1"; null, null ]; dict [ null, null; "a", "1" ] |]
+        [| dict [ "a", "1"; null, "2" ]; dict [ null, "2"; "a", "1" ] |]
+        [| dict [ "a", "1"; "b", null ]; dict [ "b", null; "a", "1" ] |]
+    ]
 
 
-    [<Fact>]
-    let ``Passes if both subject and expected is null`` () =
-        (null: IDictionary<string, int>).Should().HaveSameItemsAs(null)
+    [<Theory>]
+    [<MemberData(nameof passData)>]
+    let ``Passes if both are null or contain the same key-value pairs``
+        (subject: IDictionary<string, string>)
+        (expected: IDictionary<string, string>)
+        =
+        subject.Should().HaveSameItemsAs(expected)
+
+
+    let failData = [
+        [| box null; dict<string, string> [] |]
+        [| dict<string, string> []; dict [ "a", "1" ] |]
+        [| dict [ "a", "1" ]; dict [ "a", "1"; "b", "2" ] |]
+        [| dict [ "a", "1" ]; dict [ "b", "2" ] |]
+        [| dict [ "a", "1"; null, null ]; dict [ "a", "1" ] |]
+        [| dict [ "a", "1"; null, "2" ]; dict [ "a", "1" ] |]
+        [| dict [ "a", "1"; "b", null ]; dict [ "a", "1" ] |]
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof failData)>]
+    let ``Fails if only one is null or they do not contain the same key-value pairs``
+        (subject: IDictionary<string, string>)
+        (expected: IDictionary<string, string>)
+        =
+        assertFails (fun () -> subject.Should().HaveSameItemsAs(expected))
 
 
     [<Fact>]
