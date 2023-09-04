@@ -255,23 +255,36 @@ module HaveLength =
         [].Should().HaveLength(0).Id<And<int list>>().And.Be([])
 
 
-    [<Fact>]
-    let ``Passes if length = expected`` () = [ 1 ].Should().HaveLength(1)
+    let passData = [
+        // Comment to force break for readability
+        [| box List<int>.Empty; 0 |]
+        [| [ 1 ]; 1 |]
+        [| [ 1; 2 ]; 2 |]
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof passData)>]
+    let ``Passes if length = expected`` (subject: seq<int>) (expected: int) = subject.Should().HaveLength(expected)
+
+
+    let failData = [
+        // Comment to force break for readability
+        [| box List<int>.Empty; 1 |]
+        [| [ 1 ]; 2 |]
+        [| [ 1; 2 ]; 0 |]
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof failData)>]
+    let ``Fails if length <> expected`` (subject: seq<int>) (expected: int) =
+        assertFails (fun () -> subject.Should().HaveLength(expected))
 
 
     [<Fact>]
     let ``Throws ArgumentException if length is negative`` () =
         Assert.Throws<ArgumentException>(fun () -> [ 1 ].Should().HaveLength(-1) |> ignore)
-
-
-    [<Fact>]
-    let ``Fails if length < expected`` () =
-        assertFails (fun () -> List<int>.Empty.Should().HaveLength(1))
-
-
-    [<Fact>]
-    let ``Fails if length > expected`` () =
-        assertFails (fun () -> [ 1; 2 ].Should().HaveLength(1))
 
 
     [<Fact>]
