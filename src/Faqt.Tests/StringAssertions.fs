@@ -7,6 +7,22 @@ open Faqt
 open Xunit
 
 
+[<AutoOpen>]
+module private Helpers =
+
+
+    let asciiExceptLetters =
+        [| yield! [| 0..64 |]; yield! [| 91..96 |]; yield! [| 123..126 |] |]
+        |> Array.map char
+        |> String
+
+
+    let asciiUppercaseLetters = [| 65..90 |] |> Array.map char |> String
+
+
+    let asciiLowercaseLetters = [| 97..122 |] |> Array.map char |> String
+
+
 module HaveLength =
 
 
@@ -101,94 +117,67 @@ module ``BeUpperCase with culture`` =
             .And.Be("A")
 
 
-    [<Fact>]
-    let ``Passes if string does not contain lower-case characters`` () =
-        "A 1".Should().BeUpperCase(CultureInfo.InvariantCulture)
+    let passData = [
+        [| box asciiUppercaseLetters; CultureInfo.InvariantCulture |]
+        [| asciiExceptLetters; CultureInfo.InvariantCulture |]
+        [| "Å"; CultureInfo.InvariantCulture |]
+        [| "ı"; CultureInfo.InvariantCulture |] // No casing in invariant culture, lower in Turkish
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof passData)>]
+    let ``Passes if containing lower-case characters in the specified culture``
+        (subject: string)
+        (culture: CultureInfo)
+        =
+        subject.Should().BeUpperCase(culture)
+
+
+    let failData = [
+        [| box null; CultureInfo.InvariantCulture |]
+        [| "a"; CultureInfo.InvariantCulture |]
+        [| "Aa"; CultureInfo.InvariantCulture |]
+        [| "å"; CultureInfo.InvariantCulture |]
+        [| "ı"; CultureInfo("tr-TR") |] // No casing in invariant culture, lower in Turkish
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof failData)>]
+    let ``Fails if null or containing lower-case characters in the specified culture``
+        (subject: string)
+        (culture: CultureInfo)
+        =
+        assertFails (fun () -> subject.Should().BeUpperCase(culture))
 
 
     [<Fact>]
-    let ``Fails with expected message if subject contains lower-case characters, CultureInfo.InvariantCulture`` () =
+    let ``Fails with expected message`` () =
         fun () ->
-            let x = "Aa"
-            x.Should().BeUpperCase(CultureInfo.InvariantCulture)
-        |> assertExnMsg
-            """
-Subject: x
-Should: BeUpperCase
-In culture: invariant
-But was: Aa
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message if subject contains lower-case characters, CultureInfo("")`` () =
-        fun () ->
-            let x = "Aa"
-            x.Should().BeUpperCase(CultureInfo(""))
-        |> assertExnMsg
-            """
-Subject: x
-Should: BeUpperCase
-In culture: invariant
-But was: Aa
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message if null`` () =
-        fun () ->
-            let x: string = null
-            x.Should().BeUpperCase(CultureInfo.InvariantCulture)
-        |> assertExnMsg
-            """
-Subject: x
-Should: BeUpperCase
-In culture: invariant
-But was: null
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message with because if null`` () =
-        fun () ->
-            let x: string = null
-            x.Should().BeUpperCase(CultureInfo.InvariantCulture, "Some reason")
-        |> assertExnMsg
-            """
-Subject: x
-Because: Some reason
-Should: BeUpperCase
-In culture: invariant
-But was: null
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message if subject contains lower-case characters, CultureInfo("nb-NO")`` () =
-        fun () ->
-            let x = "Aa"
+            let x = "a"
             x.Should().BeUpperCase(CultureInfo("nb-NO"))
         |> assertExnMsg
             """
 Subject: x
 Should: BeUpperCase
 In culture: nb-NO
-But was: Aa
+But was: a
 """
 
 
     [<Fact>]
     let ``Fails with expected message with because`` () =
         fun () ->
-            let x = "Aa"
-            x.Should().BeUpperCase(CultureInfo.InvariantCulture, "Some reason")
+            let x = "a"
+            x.Should().BeUpperCase(CultureInfo("nb-NO"), "Some reason")
         |> assertExnMsg
             """
 Subject: x
 Because: Some reason
 Should: BeUpperCase
-In culture: invariant
-But was: Aa
+In culture: nb-NO
+But was: a
 """
 
 
@@ -200,57 +189,42 @@ module ``BeUpperCase without culture`` =
         "A".Should().BeUpperCase().Id<And<string>>().And.Be("A")
 
 
-    [<Fact>]
-    let ``Passes if string does not contain lower-case characters`` () = "A 1".Should().BeUpperCase()
+    let passData = [ [| box asciiUppercaseLetters |]; [| asciiExceptLetters |]; [| "Å" |] ]
+
+
+    [<Theory>]
+    [<MemberData(nameof passData)>]
+    let ``Passes if containing lower-case characters in the specified culture`` (subject: string) =
+        subject.Should().BeUpperCase()
+
+
+    let failData = [ [| null |]; [| "a" |]; [| "Aa" |]; [| "å" |] ]
+
+
+    [<Theory>]
+    [<MemberData(nameof failData)>]
+    let ``Fails if null or containing lower-case characters in the specified culture`` (subject: string) =
+        assertFails (fun () -> subject.Should().BeUpperCase())
 
 
     [<Fact>]
-    let ``Fails with expected message if null`` () =
+    let ``Fails with expected message`` () =
         fun () ->
-            let x: string = null
+            let x = "a"
             x.Should().BeUpperCase()
         |> assertExnMsg
             """
 Subject: x
 Should: BeUpperCase
 In culture: invariant
-But was: null
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message with because if null`` () =
-        fun () ->
-            let x: string = null
-            x.Should().BeUpperCase("Some reason")
-        |> assertExnMsg
-            """
-Subject: x
-Because: Some reason
-Should: BeUpperCase
-In culture: invariant
-But was: null
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message if subject contains lower-case characters`` () =
-        fun () ->
-            let x = "Aa"
-            x.Should().BeUpperCase()
-        |> assertExnMsg
-            """
-Subject: x
-Should: BeUpperCase
-In culture: invariant
-But was: Aa
+But was: a
 """
 
 
     [<Fact>]
     let ``Fails with expected message with because`` () =
         fun () ->
-            let x = "Aa"
+            let x = "a"
             x.Should().BeUpperCase("Some reason")
         |> assertExnMsg
             """
@@ -258,7 +232,7 @@ Subject: x
 Because: Some reason
 Should: BeUpperCase
 In culture: invariant
-But was: Aa
+But was: a
 """
 
 
@@ -274,94 +248,67 @@ module ``BeLowerCase with culture`` =
             .And.Be("a")
 
 
-    [<Fact>]
-    let ``Passes if string does not contain upper-case characters`` () =
-        "a 1".Should().BeLowerCase(CultureInfo.InvariantCulture)
+    let passData = [
+        [| box asciiLowercaseLetters; CultureInfo.InvariantCulture |]
+        [| asciiExceptLetters; CultureInfo.InvariantCulture |]
+        [| "å"; CultureInfo.InvariantCulture |]
+        [| "ı"; CultureInfo.InvariantCulture |] // No casing in invariant culture, lower in Turkish
+        [| "ı"; CultureInfo("tr-TR") |]
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof passData)>]
+    let ``Passes if containing lower-case characters in the specified culture``
+        (subject: string)
+        (culture: CultureInfo)
+        =
+        subject.Should().BeLowerCase(culture)
+
+
+    let failData = [
+        [| box null; CultureInfo.InvariantCulture |]
+        [| "A"; CultureInfo.InvariantCulture |]
+        [| "Aa"; CultureInfo.InvariantCulture |]
+        [| "Å"; CultureInfo.InvariantCulture |]
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof failData)>]
+    let ``Fails if null or containing lower-case characters in the specified culture``
+        (subject: string)
+        (culture: CultureInfo)
+        =
+        assertFails (fun () -> subject.Should().BeLowerCase(culture))
 
 
     [<Fact>]
-    let ``Fails with expected message if null`` () =
+    let ``Fails with expected message`` () =
         fun () ->
-            let x: string = null
-            x.Should().BeLowerCase(CultureInfo.InvariantCulture)
-        |> assertExnMsg
-            """
-Subject: x
-Should: BeLowerCase
-In culture: invariant
-But was: null
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message with because if null`` () =
-        fun () ->
-            let x: string = null
-            x.Should().BeLowerCase(CultureInfo.InvariantCulture, "Some reason")
-        |> assertExnMsg
-            """
-Subject: x
-Because: Some reason
-Should: BeLowerCase
-In culture: invariant
-But was: null
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message if subject contains upper-case characters, CultureInfo.InvariantCulture`` () =
-        fun () ->
-            let x = "Aa"
-            x.Should().BeLowerCase(CultureInfo.InvariantCulture)
-        |> assertExnMsg
-            """
-Subject: x
-Should: BeLowerCase
-In culture: invariant
-But was: Aa
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message if subject contains upper-case characters, CultureInfo("")`` () =
-        fun () ->
-            let x = "Aa"
-            x.Should().BeLowerCase(CultureInfo(""))
-        |> assertExnMsg
-            """
-Subject: x
-Should: BeLowerCase
-In culture: invariant
-But was: Aa
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message if subject contains upper-case characters, CultureInfo("nb-NO")`` () =
-        fun () ->
-            let x = "Aa"
+            let x = "A"
             x.Should().BeLowerCase(CultureInfo("nb-NO"))
         |> assertExnMsg
             """
 Subject: x
 Should: BeLowerCase
 In culture: nb-NO
-But was: Aa
+But was: A
 """
 
 
     [<Fact>]
     let ``Fails with expected message with because`` () =
         fun () ->
-            let x = "Aa"
-            x.Should().BeLowerCase(CultureInfo.InvariantCulture, "Some reason")
+            let x = "A"
+            x.Should().BeLowerCase(CultureInfo("nb-NO"), "Some reason")
         |> assertExnMsg
             """
 Subject: x
 Because: Some reason
 Should: BeLowerCase
-In culture: invariant
-But was: Aa
+In culture: nb-NO
+But was: A
 """
 
 
@@ -370,60 +317,49 @@ module ``BeLowerCase without culture`` =
 
     [<Fact>]
     let ``Can be chained with And`` () =
-        "a".Should().BeLowerCase().Id<And<string>>().And.Be("a")
+        "a"
+            .Should()
+            .BeLowerCase(CultureInfo.InvariantCulture)
+            .Id<And<string>>()
+            .And.Be("a")
+
+
+    let passData = [ [| box asciiLowercaseLetters |]; [| asciiExceptLetters |]; [| "å" |] ]
+
+
+    [<Theory>]
+    [<MemberData(nameof passData)>]
+    let ``Passes if containing lower-case characters in the specified culture`` (subject: string) =
+        subject.Should().BeLowerCase()
+
+
+    let failData = [ [| null |]; [| "A" |]; [| "Aa" |]; [| "Å" |] ]
+
+
+    [<Theory>]
+    [<MemberData(nameof failData)>]
+    let ``Fails if null or containing lower-case characters in the specified culture`` (subject: string) =
+        assertFails (fun () -> subject.Should().BeLowerCase())
 
 
     [<Fact>]
-    let ``Passes if string does not contain upper-case characters`` () = "a 1".Should().BeLowerCase()
-
-
-    [<Fact>]
-    let ``Fails with expected message if null`` () =
+    let ``Fails with expected message`` () =
         fun () ->
-            let x: string = null
+            let x = "A"
             x.Should().BeLowerCase()
         |> assertExnMsg
             """
 Subject: x
 Should: BeLowerCase
 In culture: invariant
-But was: null
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message with because if null`` () =
-        fun () ->
-            let x: string = null
-            x.Should().BeLowerCase("Some reason")
-        |> assertExnMsg
-            """
-Subject: x
-Because: Some reason
-Should: BeLowerCase
-In culture: invariant
-But was: null
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message if subject contains upper-case characters`` () =
-        fun () ->
-            let x = "Aa"
-            x.Should().BeLowerCase()
-        |> assertExnMsg
-            """
-Subject: x
-Should: BeLowerCase
-In culture: invariant
-But was: Aa
+But was: A
 """
 
 
     [<Fact>]
     let ``Fails with expected message with because`` () =
         fun () ->
-            let x = "Aa"
+            let x = "A"
             x.Should().BeLowerCase("Some reason")
         |> assertExnMsg
             """
@@ -431,7 +367,7 @@ Subject: x
 Because: Some reason
 Should: BeLowerCase
 In culture: invariant
-But was: Aa
+But was: A
 """
 
 
