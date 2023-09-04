@@ -1507,18 +1507,19 @@ module BeAscending =
         [].Should().BeAscending().Id<And<string list>>().And.Be([])
 
 
-    [<Fact>]
-    let ``Passes if empty`` () =
-        List<string>.Empty.Should().BeAscending()
+    let passData = [
+        // Comment to force break for readability
+        [| List<int>.Empty |]
+        [| [ 1 ] |]
+        [| [ 1; 1 ] |]
+        [| [ 1; 2 ] |]
+        [| [ 1; 3 ] |]
+    ]
 
 
-    [<Fact>]
-    let ``Passes if only one item`` () = [ 1 ].Should().BeAscending()
-
-
-    [<Fact>]
-    let ``Passes if items are in non-strictly ascending order`` () =
-        [ 1; 2; 3; 3; 6 ].Should().BeAscending()
+    [<Theory>]
+    [<MemberData(nameof passData)>]
+    let ``Passes if non-strictly ascending`` (subject: seq<int>) = subject.Should().BeAscending()
 
 
     [<Fact>]
@@ -1593,19 +1594,19 @@ module BeAscendingBy =
         [].Should().BeAscendingBy(id).Id<And<string list>>().And.Be([])
 
 
-    [<Fact>]
-    let ``Passes if empty`` () =
-        List<string>.Empty.Should().BeAscendingBy(fun s -> s.Length)
+    let passData = [
+        // Comment to force break for readability
+        [| List<string>.Empty |]
+        [| [ "a" ] |]
+        [| [ "a"; "a" ] |]
+        [| [ "a"; "as"; "baz"; "asd" ] |]
+    ]
 
 
-    [<Fact>]
-    let ``Passes if only one item`` () =
-        [ "asd" ].Should().BeAscendingBy(fun s -> s.Length)
-
-
-    [<Fact>]
-    let ``Passes if items are in non-strictly ascending order by the specified projection`` () =
-        [ "a"; "as"; "foo"; "asd" ].Should().BeAscendingBy(fun s -> s.Length)
+    [<Theory>]
+    [<MemberData(nameof passData)>]
+    let ``Passes if non-strictly ascending by the specified projection`` (subject: seq<string>) =
+        subject.Should().BeAscendingBy(fun s -> s.Length)
 
 
     [<Fact>]
@@ -1684,18 +1685,19 @@ module BeDescending =
         [].Should().BeDescending().Id<And<string list>>().And.Be([])
 
 
-    [<Fact>]
-    let ``Passes if empty`` () =
-        List<string>.Empty.Should().BeDescending()
+    let passData = [
+        // Comment to force break for readability
+        [| List<int>.Empty |]
+        [| [ 1 ] |]
+        [| [ 1; 1 ] |]
+        [| [ 2; 1 ] |]
+        [| [ 3; 1 ] |]
+    ]
 
 
-    [<Fact>]
-    let ``Passes if only one item`` () = [ 1 ].Should().BeDescending()
-
-
-    [<Fact>]
-    let ``Passes if items are in non-strictly descending order`` () =
-        [ 6; 3; 3; 2; 1 ].Should().BeDescending()
+    [<Theory>]
+    [<MemberData(nameof passData)>]
+    let ``Passes if non-strictly descending`` (subject: seq<int>) = subject.Should().BeDescending()
 
 
     [<Fact>]
@@ -1770,19 +1772,19 @@ module BeDescendingBy =
         [].Should().BeDescendingBy(id).Id<And<string list>>().And.Be([])
 
 
-    [<Fact>]
-    let ``Passes if empty`` () =
-        List<string>.Empty.Should().BeDescendingBy(fun s -> s.Length)
+    let passData = [
+        // Comment to force break for readability
+        [| List<string>.Empty |]
+        [| [ "a" ] |]
+        [| [ "a"; "a" ] |]
+        [| [ "asd"; "baz"; "as"; "a" ] |]
+    ]
 
 
-    [<Fact>]
-    let ``Passes if only one item`` () =
-        [ "asd" ].Should().BeDescendingBy(fun s -> s.Length)
-
-
-    [<Fact>]
-    let ``Passes if items are in non-strictly descending order by the specified projection`` () =
-        [ "asd"; "foo"; "as"; "a" ].Should().BeDescendingBy(fun s -> s.Length)
+    [<Theory>]
+    [<MemberData(nameof passData)>]
+    let ``Passes if non-strictly descending by the specified projection`` (subject: seq<string>) =
+        subject.Should().BeDescendingBy(fun s -> s.Length)
 
 
     [<Fact>]
@@ -1861,18 +1863,32 @@ module BeStrictlyAscending =
         [].Should().BeStrictlyAscending().Id<And<string list>>().And.Be([])
 
 
-    [<Fact>]
-    let ``Passes if empty`` () =
-        List<string>.Empty.Should().BeStrictlyAscending()
+    let passData = [
+        // Comment to force break for readability
+        [| List<int>.Empty |]
+        [| [ 1 ] |]
+        [| [ 1 ] |]
+        [| [ 1; 2 ] |]
+        [| [ 1; 3 ] |]
+    ]
 
 
-    [<Fact>]
-    let ``Passes if only one item`` () = [ 1 ].Should().BeStrictlyAscending()
+    [<Theory>]
+    [<MemberData(nameof passData)>]
+    let ``Passes if strictly ascending`` (subject: seq<int>) = subject.Should().BeStrictlyAscending()
 
 
-    [<Fact>]
-    let ``Passes if items are in strictly ascending order`` () =
-        [ 1; 2; 3; 5; 6 ].Should().BeStrictlyAscending()
+    let failData = [
+        // Comment to force break for readability
+        [| [ 2; 1 ] |]
+        [| [ 1; 1 ] |]
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof failData)>]
+    let ``Fails if not strictly ascending`` (subject: seq<int>) =
+        assertFails (fun () -> subject.Should().BeStrictlyAscending())
 
 
     [<Fact>]
@@ -1903,7 +1919,7 @@ But was: null
 
 
     [<Fact>]
-    let ``Fails with expected message if items are in non-strictly ascending order`` () =
+    let ``Fails with expected message if not strictly ascending`` () =
         fun () ->
             let x = [ 1; 2; 3; 3; 5 ]
             x.Should().BeStrictlyAscending()
@@ -1921,7 +1937,7 @@ Subject value: [1, 2, 3, 3, 5]
 
 
     [<Fact>]
-    let ``Fails with expected message with because if items are in non-strictly ascending order`` () =
+    let ``Fails with expected message with because if not strictly ascending`` () =
         fun () ->
             let x = [ 1; 2; 3; 3; 5 ]
             x.Should().BeStrictlyAscending("Some reason")
@@ -1947,19 +1963,31 @@ module BeStrictlyAscendingBy =
         [].Should().BeStrictlyAscendingBy(id).Id<And<string list>>().And.Be([])
 
 
-    [<Fact>]
-    let ``Passes if empty`` () =
-        List<string>.Empty.Should().BeStrictlyAscendingBy(fun s -> s.Length)
+    let passData = [
+        // Comment to force break for readability
+        [| List<string>.Empty |]
+        [| [ "a" ] |]
+        [| [ "a"; "as"; "lorem"; "foobar" ] |]
+    ]
 
 
-    [<Fact>]
-    let ``Passes if only one item`` () =
-        [ "asd" ].Should().BeStrictlyAscendingBy(fun s -> s.Length)
+    [<Theory>]
+    [<MemberData(nameof passData)>]
+    let ``Passes if strictly ascending by the specified projection`` (subject: seq<string>) =
+        subject.Should().BeStrictlyAscendingBy(fun s -> s.Length)
 
 
-    [<Fact>]
-    let ``Passes if items are in strictly ascending order by the specified projection`` () =
-        [ "a"; "as"; "foo"; "foobar" ].Should().BeStrictlyAscendingBy(fun s -> s.Length)
+    let failData = [
+        // Comment to force break for readability
+        [| [ "a"; "b" ] |]
+        [| [ "asd"; "a" ] |]
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof failData)>]
+    let ``Fails if not strictly ascending by the specified projection`` (subject: seq<string>) =
+        assertFails (fun () -> subject.Should().BeStrictlyAscendingBy(fun s -> s.Length))
 
 
     [<Fact>]
@@ -1990,7 +2018,7 @@ But was: null
 
 
     [<Fact>]
-    let ``Fails with expected message if items are in non-strictly ascending order by the specified projection`` () =
+    let ``Fails with expected message if not strictly ascending by the specified projection`` () =
         fun () ->
             let x = [ "a"; "as"; "asd"; "foo"; "foobar" ]
             x.Should().BeStrictlyAscendingBy(fun s -> s.Length)
@@ -2010,9 +2038,7 @@ Subject value: [a, as, asd, foo, foobar]
 
 
     [<Fact>]
-    let ``Fails with expected message with because if items are in non-strictly ascending order by the specified projection``
-        ()
-        =
+    let ``Fails with expected message with because if not strictly ascending by the specified projection`` () =
         fun () ->
             let x = [ "a"; "as"; "asd"; "foo"; "foobar" ]
             x.Should().BeStrictlyAscendingBy((fun s -> s.Length), "Some reason")
@@ -2040,18 +2066,32 @@ module BeStrictlyDescending =
         [].Should().BeStrictlyDescending().Id<And<string list>>().And.Be([])
 
 
-    [<Fact>]
-    let ``Passes if empty`` () =
-        List<string>.Empty.Should().BeStrictlyDescending()
+    let passData = [
+        // Comment to force break for readability
+        [| List<int>.Empty |]
+        [| [ 1 ] |]
+        [| [ 1 ] |]
+        [| [ 2; 1 ] |]
+        [| [ 3; 1 ] |]
+    ]
 
 
-    [<Fact>]
-    let ``Passes if only one item`` () = [ 1 ].Should().BeStrictlyDescending()
+    [<Theory>]
+    [<MemberData(nameof passData)>]
+    let ``Passes if strictly descending`` (subject: seq<int>) = subject.Should().BeStrictlyDescending()
 
 
-    [<Fact>]
-    let ``Passes if items are in strictly descending order`` () =
-        [ 6; 5; 3; 2; 1 ].Should().BeStrictlyDescending()
+    let failData = [
+        // Comment to force break for readability
+        [| [ 1; 2 ] |]
+        [| [ 1; 1 ] |]
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof failData)>]
+    let ``Fails if not strictly descending`` (subject: seq<int>) =
+        assertFails (fun () -> subject.Should().BeStrictlyDescending())
 
 
     [<Fact>]
@@ -2082,7 +2122,7 @@ But was: null
 
 
     [<Fact>]
-    let ``Fails with expected message if items are in non-strictly descending order`` () =
+    let ``Fails with expected message if not strictly descending`` () =
         fun () ->
             let x = [ 6; 5; 3; 3; 2; 1 ]
             x.Should().BeStrictlyDescending()
@@ -2100,7 +2140,7 @@ Subject value: [6, 5, 3, 3, 2, 1]
 
 
     [<Fact>]
-    let ``Fails with expected message with because if items are in non-strictly descending order`` () =
+    let ``Fails with expected message with because if not strictly descending`` () =
         fun () ->
             let x = [ 6; 5; 3; 3; 2; 1 ]
             x.Should().BeStrictlyDescending("Some reason")
@@ -2126,19 +2166,31 @@ module BeStrictlyDescendingBy =
         [].Should().BeStrictlyDescendingBy(id).Id<And<string list>>().And.Be([])
 
 
-    [<Fact>]
-    let ``Passes if empty`` () =
-        List<string>.Empty.Should().BeStrictlyDescendingBy(fun s -> s.Length)
+    let passData = [
+        // Comment to force break for readability
+        [| List<string>.Empty |]
+        [| [ "a" ] |]
+        [| [ "foobar"; "lorem"; "as"; "a" ] |]
+    ]
 
 
-    [<Fact>]
-    let ``Passes if only one item`` () =
-        [ "asd" ].Should().BeStrictlyDescendingBy(fun s -> s.Length)
+    [<Theory>]
+    [<MemberData(nameof passData)>]
+    let ``Passes if strictly descending by the specified projection`` (subject: seq<string>) =
+        subject.Should().BeStrictlyDescendingBy(fun s -> s.Length)
 
 
-    [<Fact>]
-    let ``Passes if items are in strictly descending order by the specified projection`` () =
-        [ "asd"; "as"; "a" ].Should().BeStrictlyDescendingBy(fun s -> s.Length)
+    let failData = [
+        // Comment to force break for readability
+        [| [ "a"; "b" ] |]
+        [| [ "a"; "asd" ] |]
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof failData)>]
+    let ``Fails if not strictly descending by the specified projection`` (subject: seq<string>) =
+        assertFails (fun () -> subject.Should().BeStrictlyDescendingBy(fun s -> s.Length))
 
 
     [<Fact>]
@@ -2169,7 +2221,7 @@ But was: null
 
 
     [<Fact>]
-    let ``Fails with expected message if items are in non-strictly descending order by the specified projection`` () =
+    let ``Fails with expected message if not in strictly descending order by the specified projection`` () =
         fun () ->
             let x = [ "foobar"; "foo"; "bar"; "as"; "a" ]
             x.Should().BeStrictlyDescendingBy(fun s -> s.Length)
@@ -2189,7 +2241,7 @@ Subject value: [foobar, foo, bar, as, a]
 
 
     [<Fact>]
-    let ``Fails with expected message with because if items are in non-strictly descending order by the specified projection``
+    let ``Fails with expected message with because if not in strictly descending order by the specified projection``
         ()
         =
         fun () ->
