@@ -14,37 +14,9 @@ open AssertionHelpers
 module private Helpers =
 
 
-    let expectedFail (t: Testable<string>) expected comparisonType because =
+    let comparisonFail (t: Testable<string>) otherName other comparisonType because =
         t
-            .With("Expected", expected)
-            .With("StringComparison", comparisonType)
-            .With(
-                comparisonType = StringComparison.CurrentCulture
-                || comparisonType = StringComparison.CurrentCultureIgnoreCase,
-                "CurrentCulture",
-                CultureInfo.CurrentCulture
-            )
-            .With("But was", t.Subject)
-            .Fail(because)
-
-
-    let otherFail (t: Testable<string>) other comparisonType because =
-        t
-            .With("Other", other)
-            .With("StringComparison", comparisonType)
-            .With(
-                comparisonType = StringComparison.CurrentCulture
-                || comparisonType = StringComparison.CurrentCultureIgnoreCase,
-                "CurrentCulture",
-                CultureInfo.CurrentCulture
-            )
-            .With("But was", t.Subject)
-            .Fail(because)
-
-
-    let substringFail (t: Testable<string>) substring comparisonType because =
-        t
-            .With("Substring", substring)
+            .With(otherName, other)
             .With("StringComparison", comparisonType)
             .With(
                 comparisonType = StringComparison.CurrentCulture
@@ -114,7 +86,7 @@ type StringAssertions =
         use _ = t.Assert()
 
         if not (String.Equals(t.Subject, expected, comparisonType)) then
-            expectedFail t expected comparisonType because
+            comparisonFail t "Expected" expected comparisonType because
 
         And(t)
 
@@ -125,7 +97,7 @@ type StringAssertions =
         use _ = t.Assert()
 
         if String.Equals(t.Subject, other, comparisonType) then
-            otherFail t other comparisonType because
+            comparisonFail t "Other" other comparisonType because
 
         And(t)
 
@@ -145,7 +117,7 @@ type StringAssertions =
             nullArg (nameof substring)
 
         if isNull t.Subject || not (t.Subject.Contains(substring, comparisonType)) then
-            substringFail t substring comparisonType because
+            comparisonFail t "Substring" substring comparisonType because
 
         And(t)
 
@@ -173,7 +145,7 @@ type StringAssertions =
             nullArg (nameof substring)
 
         if not (isNull t.Subject) && t.Subject.Contains(substring, comparisonType) then
-            substringFail t substring comparisonType because
+            comparisonFail t "Substring" substring comparisonType because
 
         And(t)
 
@@ -201,7 +173,7 @@ type StringAssertions =
             nullArg (nameof substring)
 
         if isNull t.Subject || not (t.Subject.StartsWith(substring, comparisonType)) then
-            substringFail t substring comparisonType because
+            comparisonFail t "Substring" substring comparisonType because
 
         And(t)
 
@@ -229,7 +201,7 @@ type StringAssertions =
             nullArg (nameof substring)
 
         if not (isNull t.Subject) && t.Subject.StartsWith(substring, comparisonType) then
-            substringFail t substring comparisonType because
+            comparisonFail t "Substring" substring comparisonType because
 
         And(t)
 
@@ -257,7 +229,7 @@ type StringAssertions =
             nullArg (nameof substring)
 
         if isNull t.Subject || not (t.Subject.EndsWith(substring, comparisonType)) then
-            substringFail t substring comparisonType because
+            comparisonFail t "Substring" substring comparisonType because
 
         And(t)
 
@@ -285,7 +257,7 @@ type StringAssertions =
             nullArg (nameof substring)
 
         if not (isNull t.Subject) && t.Subject.EndsWith(substring, comparisonType) then
-            substringFail t substring comparisonType because
+            comparisonFail t "Substring" substring comparisonType because
 
         And(t)
 
