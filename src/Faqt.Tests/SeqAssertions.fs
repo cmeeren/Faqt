@@ -504,46 +504,35 @@ module Contain =
         [ 1 ].Should().Contain(1).Id<AndDerived<int list, int>>().That.Should().Be(1)
 
 
-    [<Fact>]
-    let ``Passes if sequence contains value`` () = [ 1 ].Should().Contain(1)
+    let passData = [
+        [| box [ "a" ]; "a" |]
+        [| [ "a"; "b" ]; "a" |]
+        [| [ (null: string) ]; (null: string) |]
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof passData)>]
+    let ``Passes if sequence contains value`` (subject: seq<string>) (value: string) = subject.Should().Contain(value)
+
+
+    let failData = [
+        [| box<seq<string>> null; "a" |]
+        [| List<string>.Empty; "a" |]
+        [| [ "a" ]; "b" |]
+        [| [ (null: string) ]; "a" |]
+        [| [ "a" ]; (null: string) |]
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof failData)>]
+    let ``Fails if null or not containing value`` (subject: seq<string>) (value: string) =
+        assertFails (fun () -> subject.Should().Contain(value))
 
 
     [<Fact>]
-    let ``Passes if expected is null and sequence contains null`` () =
-        [ (null: string) ].Should().Contain(null)
-
-
-    [<Fact>]
-    let ``Fails with expected message if null`` () =
-        fun () ->
-            let x: seq<int> = null
-            x.Should().Contain(1)
-        |> assertExnMsg
-            """
-Subject: x
-Should: Contain
-Item: 1
-But was: null
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message with because if null`` () =
-        fun () ->
-            let x: seq<int> = null
-            x.Should().Contain(1, "Some reason")
-        |> assertExnMsg
-            """
-Subject: x
-Because: Some reason
-Should: Contain
-Item: 1
-But was: null
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message if not containing value`` () =
+    let ``Fails with expected message`` () =
         fun () ->
             let x = List<int>.Empty
             x.Should().Contain(1)
@@ -557,7 +546,7 @@ But was: []
 
 
     [<Fact>]
-    let ``Fails with expected message with because if not containing value`` () =
+    let ``Fails with expected message with because`` () =
         fun () ->
             let x = List<int>.Empty
             x.Should().Contain(1, "Some reason")
@@ -579,21 +568,36 @@ module NotContain =
         [ 1 ].Should().NotContain(2).Id<And<int list>>().And.Be([ 1 ])
 
 
-    [<Fact>]
-    let ``Passes if sequence does not contain the value`` () = [ 1 ].Should().NotContain(2)
+    let passData = [
+        [| box<seq<string>> null; "a" |]
+        [| List<string>.Empty; "a" |]
+        [| [ "a" ]; "b" |]
+        [| [ (null: string) ]; "a" |]
+        [| [ "a" ]; (null: string) |]
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof passData)>]
+    let ``Passes if null or not containing value`` (subject: seq<string>) (value: string) =
+        subject.Should().NotContain(value)
+
+
+    let failData = [
+        [| box [ "a" ]; "a" |]
+        [| [ "a"; "b" ]; "a" |]
+        [| [ (null: string) ]; (null: string) |]
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof failData)>]
+    let ``Fails if sequence contains value`` (subject: seq<string>) (value: string) =
+        assertFails (fun () -> subject.Should().NotContain(value))
 
 
     [<Fact>]
-    let ``Passes if subject is null`` () = (null: seq<int>).Should().NotContain(2)
-
-
-    [<Fact>]
-    let ``Fails if expected is null and sequence contains null`` () =
-        assertFails (fun () -> [ (null: string) ].Should().NotContain(null))
-
-
-    [<Fact>]
-    let ``Fails with expected message if containing the value`` () =
+    let ``Fails with expected message`` () =
         fun () ->
             let x = [ 1; 2 ]
             x.Should().NotContain(2)
@@ -607,7 +611,7 @@ But was: [1, 2]
 
 
     [<Fact>]
-    let ``Fails with expected message with because if containing the value`` () =
+    let ``Fails with expected message with because`` () =
         fun () ->
             let x = [ 1; 2 ]
             x.Should().NotContain(2, "Some reason")
