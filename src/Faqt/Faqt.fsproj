@@ -37,6 +37,7 @@
     <Compile Include="StringAssertions.fs" />
     <Compile Include="DictionaryAssertions.fs" />
     <Compile Include="SeqAssertions.fs" />
+    <Compile Include="GuidAssertions.fs" />
   </ItemGroup>
 
   <ItemGroup>
