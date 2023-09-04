@@ -1332,8 +1332,17 @@ module BeDistinct =
         [].Should().BeDistinct().Id<And<int list>>().And.Be([])
 
 
-    [<Fact>]
-    let ``Passes if distinct`` () = [ 1; 2; 3 ].Should().BeDistinct()
+    let passData = [
+        // Comment to force break for readability
+        [| List<int>.Empty |]
+        [| [ 1 ] |]
+        [| [ 1; 2 ] |]
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof passData)>]
+    let ``Passes if distinct`` (subject: seq<int>) = subject.Should().BeDistinct()
 
 
     [<Fact>]
@@ -1408,9 +1417,18 @@ module BeDistinctBy =
         [].Should().BeDistinctBy(id).Id<And<string list>>().And.Be([])
 
 
-    [<Fact>]
-    let ``Passes if distinct by the specified projection`` () =
-        [ "a"; "as"; "asd" ].Should().BeDistinctBy(fun s -> s.Length)
+    let passData = [
+        // Comment to force break for readability
+        [| List<string>.Empty |]
+        [| [ "a" ] |]
+        [| [ "a"; "as"; "asd" ] |]
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof passData)>]
+    let ``Passes if distinct by the specified projection`` (subject: seq<string>) =
+        subject.Should().BeDistinctBy(fun s -> s.Length)
 
 
     [<Fact>]
