@@ -675,15 +675,15 @@ type SeqAssertions =
         And(t)
 
 
-    /// Asserts that the subject contains all items in the specified sequence (including any duplicates).
+    /// Asserts that the subject contains all items in the specified non-null sequence (including any duplicates).
     [<Extension>]
     static member BeSupersetOf(t: Testable<#seq<'a>>, subset: seq<'a>, ?because) : And<_> =
         use _ = t.Assert()
         t.BeSupersetOf'(subset, false, ?because = because)
 
 
-    /// Asserts that the subject contains all items in the specified sequence (including any duplicates) and at least
-    /// one additional item.
+    /// Asserts that the subject contains all items in the specified non-null sequence (including any duplicates) and at
+    /// least one additional item.
     [<Extension>]
     static member BeProperSupersetOf(t: Testable<#seq<'a>>, subset: seq<'a>, ?because) : And<_> =
         use _ = t.Assert()
@@ -721,23 +721,23 @@ type SeqAssertions =
         And(t)
 
 
-    /// Asserts that the specified sequence contains all items in the subject (including any duplicates).
+    /// Asserts that the specified non-null sequence contains all items in the subject (including any duplicates).
     [<Extension>]
     static member BeSubsetOf(t: Testable<#seq<'a>>, superset: seq<'a>, ?because) : And<_> =
         use _ = t.Assert()
         t.BeSubsetOf'(superset, false, ?because = because)
 
 
-    /// Asserts that the specified sequence contains all items in the subject (including any duplicates) and at least
-    /// one additional item.
+    /// Asserts that the specified non-null sequence contains all items in the subject (including any duplicates) and at
+    /// least one additional item.
     [<Extension>]
     static member BeProperSubsetOf(t: Testable<#seq<'a>>, superset: seq<'a>, ?because) : And<_> =
         use _ = t.Assert()
         t.BeSubsetOf'(superset, true, ?because = because)
 
 
-    /// Asserts that the subject has at least one item in common with the other sequence. Fails if one or both sequences
-    /// are empty.
+    /// Asserts that the subject has at least one item in common with the other non-null sequence. Fails if one or both
+    /// sequences are empty.
     [<Extension>]
     static member IntersectWith(t: Testable<#seq<'a>>, other: seq<'a>, ?because) : And<_> =
         use _ = t.Assert()
@@ -760,8 +760,8 @@ type SeqAssertions =
         And(t)
 
 
-    /// Asserts that the subject has no items in common with the other sequence. Passes if the subject is null or if
-    /// either sequence is empty.
+    /// Asserts that the subject has no items in common with the other non-null sequence. Passes if the subject is null
+    /// or if either sequence is empty.
     [<Extension>]
     static member NotIntersectWith(t: Testable<#seq<'a>>, other: seq<'a>, ?because) : And<_> =
         use _ = t.Assert()
