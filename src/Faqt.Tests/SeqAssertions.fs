@@ -633,21 +633,38 @@ module SequenceEqual =
         [ 1 ].Should().SequenceEqual([ 1 ]).Id<And<int list>>().And.Be([ 1 ])
 
 
-    [<Fact>]
-    let ``Passes if sequence contains all values in order`` () =
-        let x = ResizeArray([ 1; 2; 1; 3; 2 ])
-        x.Should().SequenceEqual([ 1; 2; 1; 3; 2 ])
+    let passData = [
+        [| box null; null |]
+        [| List<string>.Empty; List<string>.Empty |]
+        [| [ "a" ]; [ "a" ] |]
+        [| [ "a"; null ]; [ "a"; null ] |]
+        [| [ "a"; "b" ]; [ "a"; "b" ] |]
+    ]
 
 
-    [<Fact>]
-    let ``Passes if sequence contains all values in order including null values`` () =
-        let x = ResizeArray([ "a"; "b"; null; "c" ])
-        x.Should().SequenceEqual([ "a"; "b"; null; "c" ])
+    [<Theory>]
+    [<MemberData(nameof passData)>]
+    let ``Passes if both are null or have the same items in the same order``
+        (subject: seq<string>)
+        (expected: seq<string>)
+        =
+        subject.Should().SequenceEqual(expected)
 
 
-    [<Fact>]
-    let ``Passes if both subject and expected is null`` () =
-        (null: seq<int>).Should().SequenceEqual(null)
+    let failData = [
+        [| box null; List<string>.Empty |]
+        [| List<string>.Empty; [ "a" ] |]
+        [| [ "a" ]; [ "a"; null ] |]
+        [| [ "a" ]; [ "b" ] |]
+        [| [ "a"; "b" ]; [ "b"; "a" ] |]
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof failData)>]
+    let ``Fails if not containing the same items in the same order`` (a: seq<string>) (b: seq<string>) =
+        assertFails (fun () -> a.Should().SequenceEqual(b)) |> ignore
+        assertFails (fun () -> b.Should().SequenceEqual(a)) |> ignore
 
 
     [<Fact>]
@@ -676,6 +693,20 @@ Because: Some reason
 Should: SequenceEqual
 Expected: []
 But was: null
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if only expected is null`` () =
+        fun () ->
+            let x = List<int>.Empty
+            x.Should().SequenceEqual(null)
+        |> assertExnMsg
+            """
+Subject: x
+Should: SequenceEqual
+Expected: null
+But was: []
 """
 
 
