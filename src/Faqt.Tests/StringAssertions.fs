@@ -1326,45 +1326,29 @@ module ``MatchRegex with Regex`` =
 
     [<Fact>]
     let ``Can be chained with And`` () =
-        "asd".Should().MatchRegex(Regex(".*")).Id<And<string>>().And.Be("asd")
+        "a".Should().MatchRegex(Regex(".*")).Id<And<string>>().And.Be("a")
+
+
+    [<Theory>]
+    [<InlineData("", ".*", RegexOptions.None)>]
+    [<InlineData("asd", ".*", RegexOptions.None)>]
+    [<InlineData("asd", "^asd$", RegexOptions.None)>]
+    [<InlineData("asd", "^ASD$", RegexOptions.IgnoreCase)>]
+    let ``Passes if string matches regex`` (subject: string) (pattern: string) (options: RegexOptions) =
+        subject.Should().MatchRegex(Regex(pattern, options))
+
+
+    [<Theory>]
+    [<InlineData(null, ".*", RegexOptions.None)>]
+    [<InlineData("", ".+", RegexOptions.None)>]
+    [<InlineData("asd", "^as$", RegexOptions.None)>]
+    [<InlineData("asd", "^ASD$", RegexOptions.None)>]
+    let ``Fails if null or not matching regex`` (subject: string) (pattern: string) (options: RegexOptions) =
+        assertFails (fun () -> subject.Should().MatchRegex(Regex(pattern, options)))
 
 
     [<Fact>]
-    let ``Passes if string matches regex`` () =
-        "asd".Should().MatchRegex(Regex("as.*"))
-
-
-    [<Fact>]
-    let ``Fails with expected message if null`` () =
-        fun () ->
-            let x: string = null
-            x.Should().MatchRegex(Regex("b.*"))
-        |> assertExnMsg
-            """
-Subject: x
-Should: MatchRegex
-Pattern: b.*
-But was: null
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message with because if null`` () =
-        fun () ->
-            let x: string = null
-            x.Should().MatchRegex(Regex("b.*"), "Some reason")
-        |> assertExnMsg
-            """
-Subject: x
-Because: Some reason
-Should: MatchRegex
-Pattern: b.*
-But was: null
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message if string does not match regex`` () =
+    let ``Fails with expected message`` () =
         fun () ->
             let x = "asd"
             x.Should().MatchRegex(Regex("b.*"))
@@ -1378,9 +1362,7 @@ But was: asd
 
 
     [<Fact>]
-    let ``Fails with expected message if string does not match regex using custom RegexOptions`` () =
-        use _ = CultureInfo.withCurrentCulture "nb-NO"
-
+    let ``Fails with expected message using custom RegexOptions`` () =
         fun () ->
             let x = "asd"
 
@@ -1417,49 +1399,33 @@ module ``MatchRegex with string and options`` =
 
     [<Fact>]
     let ``Can be chained with And`` () =
-        "asd"
-            .Should()
-            .MatchRegex(".*", RegexOptions.None)
-            .Id<And<string>>()
-            .And.Be("asd")
+        "a".Should().MatchRegex(".*", RegexOptions.None).Id<And<string>>().And.Be("a")
+
+
+    [<Theory>]
+    [<InlineData("", ".*", RegexOptions.None)>]
+    [<InlineData("asd", ".*", RegexOptions.None)>]
+    [<InlineData("asd", "^asd$", RegexOptions.None)>]
+    [<InlineData("asd", "^ASD$", RegexOptions.IgnoreCase)>]
+    let ``Passes if string matches pattern with options`` (subject: string) (pattern: string) (options: RegexOptions) =
+        subject.Should().MatchRegex(pattern, options)
+
+
+    [<Theory>]
+    [<InlineData(null, ".*", RegexOptions.None)>]
+    [<InlineData("", ".+", RegexOptions.None)>]
+    [<InlineData("asd", "^as$", RegexOptions.None)>]
+    [<InlineData("asd", "^ASD$", RegexOptions.None)>]
+    let ``Fails if null or not matching pattern with options``
+        (subject: string)
+        (pattern: string)
+        (options: RegexOptions)
+        =
+        assertFails (fun () -> subject.Should().MatchRegex(pattern, options))
 
 
     [<Fact>]
-    let ``Passes if string matches regex`` () =
-        "asd".Should().MatchRegex("as.*", RegexOptions.None)
-
-
-    [<Fact>]
-    let ``Fails with expected message if null`` () =
-        fun () ->
-            let x: string = null
-            x.Should().MatchRegex("b.*", RegexOptions.None)
-        |> assertExnMsg
-            """
-Subject: x
-Should: MatchRegex
-Pattern: b.*
-But was: null
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message with because if null`` () =
-        fun () ->
-            let x: string = null
-            x.Should().MatchRegex("b.*", RegexOptions.None, "Some reason")
-        |> assertExnMsg
-            """
-Subject: x
-Because: Some reason
-Should: MatchRegex
-Pattern: b.*
-But was: null
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message if string does not match regex`` () =
+    let ``Fails with expected message using default RegexOptions`` () =
         fun () ->
             let x = "asd"
             x.Should().MatchRegex("b.*", RegexOptions.None)
@@ -1473,9 +1439,7 @@ But was: asd
 
 
     [<Fact>]
-    let ``Fails with expected message if string does not match regex using multiple RegexOptions`` () =
-        use _ = CultureInfo.withCurrentCulture "nb-NO"
-
+    let ``Fails with expected message using custom RegexOptions`` () =
         fun () ->
             let x = "asd"
 
@@ -1510,44 +1474,27 @@ module ``MatchRegex with string`` =
 
     [<Fact>]
     let ``Can be chained with And`` () =
-        "asd".Should().MatchRegex(".*").Id<And<string>>().And.Be("asd")
+        "a".Should().MatchRegex(".*").Id<And<string>>().And.Be("a")
+
+
+    [<Theory>]
+    [<InlineData("", ".*")>]
+    [<InlineData("asd", ".*")>]
+    [<InlineData("asd", "^asd$")>]
+    let ``Passes if string matches pattern`` (subject: string) (pattern: string) = subject.Should().MatchRegex(pattern)
+
+
+    [<Theory>]
+    [<InlineData(null, ".*")>]
+    [<InlineData("", ".+")>]
+    [<InlineData("asd", "^as$")>]
+    [<InlineData("asd", "^ASD$")>]
+    let ``Fails if null or not matching pattern with options`` (subject: string) (pattern: string) =
+        assertFails (fun () -> subject.Should().MatchRegex(pattern))
 
 
     [<Fact>]
-    let ``Passes if string matches regex`` () = "asd".Should().MatchRegex("as.*")
-
-
-    [<Fact>]
-    let ``Fails with expected message if null`` () =
-        fun () ->
-            let x: string = null
-            x.Should().MatchRegex("b.*")
-        |> assertExnMsg
-            """
-Subject: x
-Should: MatchRegex
-Pattern: b.*
-But was: null
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message with because if null`` () =
-        fun () ->
-            let x: string = null
-            x.Should().MatchRegex("b.*", "Some reason")
-        |> assertExnMsg
-            """
-Subject: x
-Because: Some reason
-Should: MatchRegex
-Pattern: b.*
-But was: null
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message if string does not match regex`` () =
+    let ``Fails with expected message`` () =
         fun () ->
             let x = "asd"
             x.Should().MatchRegex("b.*")
@@ -1580,48 +1527,54 @@ module ``NotMatchRegex with Regex`` =
 
     [<Fact>]
     let ``Can be chained with And`` () =
-        "asd".Should().NotMatchRegex(Regex("f.*")).Id<And<string>>().And.Be("asd")
+        "a".Should().NotMatchRegex(Regex("b.*")).Id<And<string>>().And.Be("a")
+
+
+    [<Theory>]
+    [<InlineData(null, ".*", RegexOptions.None)>]
+    [<InlineData("", ".+", RegexOptions.None)>]
+    [<InlineData("asd", "^as$", RegexOptions.None)>]
+    [<InlineData("asd", "^ASD$", RegexOptions.None)>]
+    let ``Passes if null or not matching regex`` (subject: string) (pattern: string) (options: RegexOptions) =
+        subject.Should().NotMatchRegex(Regex(pattern, options))
+
+
+    [<Theory>]
+    [<InlineData("", ".*", RegexOptions.None)>]
+    [<InlineData("asd", ".*", RegexOptions.None)>]
+    [<InlineData("asd", "^asd$", RegexOptions.None)>]
+    [<InlineData("asd", "^ASD$", RegexOptions.IgnoreCase)>]
+    let ``Fails if string matches regex`` (subject: string) (pattern: string) (options: RegexOptions) =
+        assertFails (fun () -> subject.Should().NotMatchRegex(Regex(pattern, options)))
 
 
     [<Fact>]
-    let ``Passes if string matches regex`` () =
-        "asd".Should().NotMatchRegex(Regex("f.*"))
-
-
-    [<Fact>]
-    let ``Passes if string is null`` () =
-        (null: string).Should().NotMatchRegex(Regex(".*"))
-
-
-    [<Fact>]
-    let ``Fails with expected message if string matches regex`` () =
+    let ``Fails with expected message`` () =
         fun () ->
             let x = "asd"
-            x.Should().NotMatchRegex(Regex(".*"))
+            x.Should().NotMatchRegex(Regex("a.*"))
         |> assertExnMsg
             """
 Subject: x
 Should: NotMatchRegex
-Pattern: .*
+Pattern: a.*
 But was: asd
 """
 
 
     [<Fact>]
-    let ``Fails with expected message if string matches regex using custom RegexOptions`` () =
-        use _ = CultureInfo.withCurrentCulture "nb-NO"
-
+    let ``Fails with expected message using custom RegexOptions`` () =
         fun () ->
             let x = "asd"
 
             x
                 .Should()
-                .NotMatchRegex(Regex(".*", RegexOptions.IgnoreCase ||| RegexOptions.Multiline))
+                .NotMatchRegex(Regex("a.*", RegexOptions.IgnoreCase ||| RegexOptions.Multiline))
         |> assertExnMsg
             """
 Subject: x
 Should: NotMatchRegex
-Pattern: .*
+Pattern: a.*
 RegexOptions: IgnoreCase, Multiline
 But was: asd
 """
@@ -1631,13 +1584,13 @@ But was: asd
     let ``Fails with expected message with because`` () =
         fun () ->
             let x = "asd"
-            x.Should().NotMatchRegex(Regex(".*"), "Some reason")
+            x.Should().NotMatchRegex(Regex("a.*"), "Some reason")
         |> assertExnMsg
             """
 Subject: x
 Because: Some reason
 Should: NotMatchRegex
-Pattern: .*
+Pattern: a.*
 But was: asd
 """
 
@@ -1647,52 +1600,62 @@ module ``NotMatchRegex with string and options`` =
 
     [<Fact>]
     let ``Can be chained with And`` () =
-        "asd"
+        "a"
             .Should()
-            .NotMatchRegex("f.*", RegexOptions.None)
+            .NotMatchRegex("b.*", RegexOptions.None)
             .Id<And<string>>()
-            .And.Be("asd")
+            .And.Be("a")
+
+
+    [<Theory>]
+    [<InlineData(null, ".*", RegexOptions.None)>]
+    [<InlineData("", ".+", RegexOptions.None)>]
+    [<InlineData("asd", "^as$", RegexOptions.None)>]
+    [<InlineData("asd", "^ASD$", RegexOptions.None)>]
+    let ``Passes if null or not matching pattern with options``
+        (subject: string)
+        (pattern: string)
+        (options: RegexOptions)
+        =
+        subject.Should().NotMatchRegex(pattern, options)
+
+
+    [<Theory>]
+    [<InlineData("", ".*", RegexOptions.None)>]
+    [<InlineData("asd", ".*", RegexOptions.None)>]
+    [<InlineData("asd", "^asd$", RegexOptions.None)>]
+    [<InlineData("asd", "^ASD$", RegexOptions.IgnoreCase)>]
+    let ``Fails if string matches pattern with options`` (subject: string) (pattern: string) (options: RegexOptions) =
+        assertFails (fun () -> subject.Should().NotMatchRegex(pattern, options))
 
 
     [<Fact>]
-    let ``Passes if string matches regex`` () =
-        "asd".Should().NotMatchRegex("f.*", RegexOptions.None)
-
-
-    [<Fact>]
-    let ``Passes if string is null`` () =
-        (null: string).Should().NotMatchRegex(".*", RegexOptions.None)
-
-
-    [<Fact>]
-    let ``Fails with expected message if string matches regex`` () =
+    let ``Fails with expected message using default RegexOptions`` () =
         fun () ->
             let x = "asd"
-            x.Should().NotMatchRegex(".*", RegexOptions.None)
+            x.Should().NotMatchRegex("a.*", RegexOptions.None)
         |> assertExnMsg
             """
 Subject: x
 Should: NotMatchRegex
-Pattern: .*
+Pattern: a.*
 But was: asd
 """
 
 
     [<Fact>]
-    let ``Fails with expected message if string matches regex using multiple RegexOptions`` () =
-        use _ = CultureInfo.withCurrentCulture "nb-NO"
-
+    let ``Fails with expected message using custom RegexOptions`` () =
         fun () ->
             let x = "asd"
 
             x
                 .Should()
-                .NotMatchRegex(".*", RegexOptions.IgnoreCase ||| RegexOptions.Multiline)
+                .NotMatchRegex("a.*", RegexOptions.IgnoreCase ||| RegexOptions.Multiline)
         |> assertExnMsg
             """
 Subject: x
 Should: NotMatchRegex
-Pattern: .*
+Pattern: a.*
 RegexOptions: IgnoreCase, Multiline
 But was: asd
 """
@@ -1702,13 +1665,13 @@ But was: asd
     let ``Fails with expected message with because`` () =
         fun () ->
             let x = "asd"
-            x.Should().NotMatchRegex(".*", RegexOptions.None, "Some reason")
+            x.Should().NotMatchRegex("a.*", RegexOptions.None, "Some reason")
         |> assertExnMsg
             """
 Subject: x
 Because: Some reason
 Should: NotMatchRegex
-Pattern: .*
+Pattern: a.*
 But was: asd
 """
 
@@ -1718,28 +1681,36 @@ module ``NotMatchRegex with string`` =
 
     [<Fact>]
     let ``Can be chained with And`` () =
-        "asd".Should().NotMatchRegex("f.*").Id<And<string>>().And.Be("asd")
+        "a".Should().NotMatchRegex("b.*").Id<And<string>>().And.Be("a")
+
+
+    [<Theory>]
+    [<InlineData(null, ".*")>]
+    [<InlineData("", ".+")>]
+    [<InlineData("asd", "^as$")>]
+    [<InlineData("asd", "^ASD$")>]
+    let ``Passes if null or not matching pattern with options`` (subject: string) (pattern: string) =
+        subject.Should().NotMatchRegex(pattern)
+
+
+    [<Theory>]
+    [<InlineData("", ".*")>]
+    [<InlineData("asd", ".*")>]
+    [<InlineData("asd", "^asd$")>]
+    let ``Fails if string matches pattern`` (subject: string) (pattern: string) =
+        assertFails (fun () -> subject.Should().NotMatchRegex(pattern))
 
 
     [<Fact>]
-    let ``Passes if string matches regex`` () = "asd".Should().NotMatchRegex("f.*")
-
-
-    [<Fact>]
-    let ``Passes if string is null`` () =
-        (null: string).Should().NotMatchRegex(".*")
-
-
-    [<Fact>]
-    let ``Fails with expected message if string matches regex`` () =
+    let ``Fails with expected message`` () =
         fun () ->
             let x = "asd"
-            x.Should().NotMatchRegex(".*")
+            x.Should().NotMatchRegex("a.*")
         |> assertExnMsg
             """
 Subject: x
 Should: NotMatchRegex
-Pattern: .*
+Pattern: a.*
 But was: asd
 """
 
@@ -1748,12 +1719,12 @@ But was: asd
     let ``Fails with expected message with because`` () =
         fun () ->
             let x = "asd"
-            x.Should().NotMatchRegex(".*", "Some reason")
+            x.Should().NotMatchRegex("a.*", "Some reason")
         |> assertExnMsg
             """
 Subject: x
 Because: Some reason
 Should: NotMatchRegex
-Pattern: .*
+Pattern: a.*
 But was: asd
 """
