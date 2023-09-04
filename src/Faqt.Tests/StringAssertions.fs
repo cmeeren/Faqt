@@ -376,26 +376,43 @@ module ``Contain with StringComparison`` =
 
     [<Fact>]
     let ``Can be chained with And`` () =
-        "asd"
+        "a"
             .Should()
-            .Contain("s", StringComparison.Ordinal)
+            .Contain("a", StringComparison.Ordinal)
             .Id<And<string>>()
-            .And.Be("asd")
+            .And.Be("a")
 
 
-    [<Fact>]
-    let ``Passes if string contains substring`` () =
-        "asd".Should().Contain("s", StringComparison.Ordinal)
+    [<Theory>]
+    [<InlineData("a", "", StringComparison.Ordinal, "")>]
+    [<InlineData("a", "a", StringComparison.Ordinal, "")>]
+    [<InlineData("asd", "s", StringComparison.Ordinal, "")>]
+    [<InlineData("asd", "S", StringComparison.OrdinalIgnoreCase, "")>]
+    [<InlineData("ASD", "s", StringComparison.OrdinalIgnoreCase, "")>]
+    [<InlineData("i", "İ", StringComparison.CurrentCultureIgnoreCase, "tr-TR")>] // Different casings of same letter in Turkish, but not invariant
+    let ``Passes if substring is empty or string contains substring using the specified StringComparison``
+        (subject: string)
+        (substring: string)
+        (comparison: StringComparison)
+        (culture: string)
+        =
+        use _ = CultureInfo.withCurrentCulture culture
+        subject.Should().Contain(substring, comparison)
 
 
-    [<Fact>]
-    let ``Passes if string contains substring using StringComparison.OrdinalIgnoreCase`` () =
-        "asd".Should().Contain("S", StringComparison.OrdinalIgnoreCase)
-
-
-    [<Fact>]
-    let ``Passes if substring is empty`` () =
-        "asd".Should().Contain("", StringComparison.OrdinalIgnoreCase)
+    [<Theory>]
+    [<InlineData(null, "", StringComparison.Ordinal, "")>]
+    [<InlineData("a", "A", StringComparison.Ordinal, "")>]
+    [<InlineData("asd", "f", StringComparison.Ordinal, "")>]
+    [<InlineData("i", "İ", StringComparison.InvariantCultureIgnoreCase, "")>] // Different casings of same letter in Turkish, but not invariant
+    let ``Fails if null or not containing substring using the specified StringComparison``
+        (subject: string)
+        (substring: string)
+        (comparison: StringComparison)
+        (culture: string)
+        =
+        use _ = CultureInfo.withCurrentCulture culture
+        assertFails (fun () -> subject.Should().Contain(substring, comparison))
 
 
     [<Fact>]
@@ -404,9 +421,9 @@ module ``Contain with StringComparison`` =
 
 
     [<Fact>]
-    let ``Fails with expected message if null`` () =
+    let ``Fails with expected message using StringComparison.Ordinal`` () =
         fun () ->
-            let x: string = null
+            let x = "asd"
             x.Should().Contain("f", StringComparison.Ordinal)
         |> assertExnMsg
             """
@@ -414,45 +431,12 @@ Subject: x
 Should: Contain
 Substring: f
 StringComparison: Ordinal
-But was: null
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message with because if null`` () =
-        fun () ->
-            let x: string = null
-            x.Should().Contain("f", StringComparison.Ordinal, "Some reason")
-        |> assertExnMsg
-            """
-Subject: x
-Because: Some reason
-Should: Contain
-Substring: f
-StringComparison: Ordinal
-But was: null
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message if string does not contain substring`` () =
-        fun () ->
-            let x = "asd"
-            x.Should().Contain("S", StringComparison.Ordinal)
-        |> assertExnMsg
-            """
-Subject: x
-Should: Contain
-Substring: S
-StringComparison: Ordinal
 But was: asd
 """
 
 
     [<Fact>]
-    let ``Fails with expected message if string does not contain substring using StringComparison.CurrentCulture with nb-NO``
-        ()
-        =
+    let ``Fails with expected message using StringComparison.CurrentCulture`` () =
         use _ = CultureInfo.withCurrentCulture "nb-NO"
 
         fun () ->
@@ -465,26 +449,6 @@ Should: Contain
 Substring: f
 StringComparison: CurrentCulture
 CurrentCulture: nb-NO
-But was: asd
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message if string does not contain substring using StringComparison.CurrentCulture with invariant culture``
-        ()
-        =
-        use _ = CultureInfo.withCurrentCulture ""
-
-        fun () ->
-            let x = "asd"
-            x.Should().Contain("f", StringComparison.CurrentCulture)
-        |> assertExnMsg
-            """
-Subject: x
-Should: Contain
-Substring: f
-StringComparison: CurrentCulture
-CurrentCulture: invariant
 But was: asd
 """
 
@@ -510,15 +474,23 @@ module ``Contain without StringComparison`` =
 
     [<Fact>]
     let ``Can be chained with And`` () =
-        "asd".Should().Contain("s").Id<And<string>>().And.Be("asd")
+        "a".Should().Contain("a").Id<And<string>>().And.Be("a")
 
 
-    [<Fact>]
-    let ``Passes if string contains substring`` () = "asd".Should().Contain("s")
+    [<Theory>]
+    [<InlineData("a", "")>]
+    [<InlineData("a", "a")>]
+    [<InlineData("asd", "s")>]
+    let ``Passes if substring is empty or string contains substring`` (subject: string) (substring: string) =
+        subject.Should().Contain(substring)
 
 
-    [<Fact>]
-    let ``Passes if substring is empty`` () = "asd".Should().Contain("")
+    [<Theory>]
+    [<InlineData(null, "")>]
+    [<InlineData("a", "A")>]
+    [<InlineData("asd", "f")>]
+    let ``Fails if null or not containing substring`` (subject: string) (substring: string) =
+        assertFails (fun () -> subject.Should().Contain(substring))
 
 
     [<Fact>]
@@ -527,46 +499,15 @@ module ``Contain without StringComparison`` =
 
 
     [<Fact>]
-    let ``Fails with expected message if null`` () =
+    let ``Fails with expected message`` () =
         fun () ->
-            let x: string = null
+            let x = "asd"
             x.Should().Contain("f")
         |> assertExnMsg
             """
 Subject: x
 Should: Contain
 Substring: f
-StringComparison: Ordinal
-But was: null
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message with because if null`` () =
-        fun () ->
-            let x: string = null
-            x.Should().Contain("f", "Some reason")
-        |> assertExnMsg
-            """
-Subject: x
-Because: Some reason
-Should: Contain
-Substring: f
-StringComparison: Ordinal
-But was: null
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message if string does not contain substring`` () =
-        fun () ->
-            let x = "asd"
-            x.Should().Contain("S")
-        |> assertExnMsg
-            """
-Subject: x
-Should: Contain
-Substring: S
 StringComparison: Ordinal
 But was: asd
 """
@@ -593,26 +534,43 @@ module ``NotContain with StringComparison`` =
 
     [<Fact>]
     let ``Can be chained with And`` () =
-        "asd"
+        "a"
             .Should()
-            .NotContain("f", StringComparison.Ordinal)
+            .NotContain("b", StringComparison.Ordinal)
             .Id<And<string>>()
-            .And.Be("asd")
+            .And.Be("a")
 
 
-    [<Fact>]
-    let ``Passes if string does not contain substring`` () =
-        "asd".Should().NotContain("S", StringComparison.Ordinal)
+    [<Theory>]
+    [<InlineData(null, "", StringComparison.Ordinal, "")>]
+    [<InlineData("a", "A", StringComparison.Ordinal, "")>]
+    [<InlineData("asd", "f", StringComparison.Ordinal, "")>]
+    [<InlineData("i", "İ", StringComparison.InvariantCultureIgnoreCase, "")>] // Different casings of same letter in Turkish, but not invariant
+    let ``Passes if null or not containing substring using the specified StringComparison``
+        (subject: string)
+        (substring: string)
+        (comparison: StringComparison)
+        (culture: string)
+        =
+        use _ = CultureInfo.withCurrentCulture culture
+        subject.Should().NotContain(substring, comparison)
 
 
-    [<Fact>]
-    let ``Passes if string does not contain substring using StringComparison.OrdinalIgnoreCase`` () =
-        "asd".Should().NotContain("f", StringComparison.OrdinalIgnoreCase)
-
-
-    [<Fact>]
-    let ``Passes if subject is null`` () =
-        (null: string).Should().NotContain("d", StringComparison.Ordinal)
+    [<Theory>]
+    [<InlineData("a", "", StringComparison.Ordinal, "")>]
+    [<InlineData("a", "a", StringComparison.Ordinal, "")>]
+    [<InlineData("asd", "s", StringComparison.Ordinal, "")>]
+    [<InlineData("asd", "S", StringComparison.OrdinalIgnoreCase, "")>]
+    [<InlineData("ASD", "s", StringComparison.OrdinalIgnoreCase, "")>]
+    [<InlineData("i", "İ", StringComparison.CurrentCultureIgnoreCase, "tr-TR")>] // Different casings of same letter in Turkish, but not invariant
+    let ``Fails if substring is empty or string contains substring using the specified StringComparison``
+        (subject: string)
+        (substring: string)
+        (comparison: StringComparison)
+        (culture: string)
+        =
+        use _ = CultureInfo.withCurrentCulture culture
+        assertFails (fun () -> subject.Should().NotContain(substring, comparison))
 
 
     [<Fact>]
@@ -621,12 +579,7 @@ module ``NotContain with StringComparison`` =
 
 
     [<Fact>]
-    let ``Fails if substring is empty`` () =
-        assertFails (fun () -> "".Should().NotContain("", StringComparison.Ordinal) |> ignore)
-
-
-    [<Fact>]
-    let ``Fails with expected message if string contains substring`` () =
+    let ``Fails with expected message using StringComparison.Ordinal`` () =
         fun () ->
             let x = "asd"
             x.Should().NotContain("s", StringComparison.Ordinal)
@@ -641,9 +594,7 @@ But was: asd
 
 
     [<Fact>]
-    let ``Fails with expected message if string contains substring using StringComparison.CurrentCulture with nb-NO``
-        ()
-        =
+    let ``Fails with expected message using StringComparison.CurrentCulture`` () =
         use _ = CultureInfo.withCurrentCulture "nb-NO"
 
         fun () ->
@@ -656,26 +607,6 @@ Should: NotContain
 Substring: s
 StringComparison: CurrentCulture
 CurrentCulture: nb-NO
-But was: asd
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message if string does not contain substring using StringComparison.CurrentCulture with invariant culture``
-        ()
-        =
-        use _ = CultureInfo.withCurrentCulture ""
-
-        fun () ->
-            let x = "asd"
-            x.Should().NotContain("s", StringComparison.CurrentCulture)
-        |> assertExnMsg
-            """
-Subject: x
-Should: NotContain
-Substring: s
-StringComparison: CurrentCulture
-CurrentCulture: invariant
 But was: asd
 """
 
@@ -701,15 +632,23 @@ module ``NotContain without StringComparison`` =
 
     [<Fact>]
     let ``Can be chained with And`` () =
-        "asd".Should().NotContain("f").Id<And<string>>().And.Be("asd")
+        "a".Should().NotContain("b").Id<And<string>>().And.Be("a")
 
 
-    [<Fact>]
-    let ``Passes if string does not contain substring`` () = "asd".Should().NotContain("f")
+    [<Theory>]
+    [<InlineData(null, "")>]
+    [<InlineData("a", "A")>]
+    [<InlineData("asd", "f")>]
+    let ``Passes if null or not containing substring`` (subject: string) (substring: string) =
+        subject.Should().NotContain(substring)
 
 
-    [<Fact>]
-    let ``Passes if subject is null`` () = (null: string).Should().NotContain("f")
+    [<Theory>]
+    [<InlineData("a", "")>]
+    [<InlineData("a", "a")>]
+    [<InlineData("asd", "s")>]
+    let ``Fails if substring is empty or string contains substring`` (subject: string) (substring: string) =
+        assertFails (fun () -> subject.Should().NotContain(substring))
 
 
     [<Fact>]
@@ -718,12 +657,7 @@ module ``NotContain without StringComparison`` =
 
 
     [<Fact>]
-    let ``Fails if substring is empty`` () =
-        assertFails (fun () -> "".Should().NotContain(""))
-
-
-    [<Fact>]
-    let ``Fails with expected message if string contains substring`` () =
+    let ``Fails with expected message`` () =
         fun () ->
             let x = "asd"
             x.Should().NotContain("s")
