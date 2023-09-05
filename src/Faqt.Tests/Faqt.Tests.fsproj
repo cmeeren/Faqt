@@ -25,6 +25,7 @@
     <Compile Include="SeqAssertions.fs" />
     <Compile Include="GuidAssertions.fs" />
     <Compile Include="EnumAssertions.fs" />
+    <Compile Include="FunctionAssertions.fs" />
   </ItemGroup>
 
   <ItemGroup>
