@@ -7,6 +7,9 @@ open System.Collections.Generic
 #if NET7_0_OR_GREATER
 open System.Diagnostics.CodeAnalysis
 #endif
+open System.IO
+open System.Net.Http
+open System.Text
 open System.Text.RegularExpressions
 open Microsoft.FSharp.Reflection
 
@@ -171,3 +174,79 @@ module Seq =
         match box xs with
         | :? string as x -> x.Length = 0
         | _ -> Seq.isEmpty xs
+
+
+module HttpContent =
+
+
+    let serializeAppend (sb: StringBuilder) (c: HttpContent) =
+        try
+            if not (isNull c) && c.Headers.ContentLength <> Nullable(0L) then
+                for h in c.Headers do
+                    for v in h.Value do
+                        sb.AppendLine().Append(h.Key).Append(": ").Append(v) |> ignore
+
+                let s = c.ReadAsStream()
+                let a = Array.zeroCreate (int s.Length)
+                s.Seek(0, SeekOrigin.Begin) |> ignore
+                s.Read(Span(a)) |> ignore
+
+                let strContent =
+                    Encoding.UTF8.GetString(a)
+                    |> String.truncate "<content truncated>" (1024 * 1024)
+
+                sb.AppendLine().AppendLine().Append(strContent) |> ignore
+        with ex ->
+            sb
+                .AppendLine()
+                .AppendLine()
+                .AppendLine("An exception occured trying to get the content:")
+                .Append(ex.ToString())
+            |> ignore
+
+
+module HttpRequestMessage =
+
+
+    let serialize (m: HttpRequestMessage) =
+        let sb = StringBuilder()
+
+        sb
+            .Append(m.Method.ToString())
+            .Append(" ")
+            .Append(m.RequestUri.ToString())
+            .Append(" HTTP/")
+            .Append(m.Version.ToString())
+        |> ignore
+
+        for h in m.Headers do
+            for v in h.Value do
+                sb.AppendLine().Append(h.Key).Append(": ").Append(v) |> ignore
+
+        HttpContent.serializeAppend sb m.Content
+
+        sb.ToString()
+
+
+module HttpResponseMessage =
+
+
+    let serialize (m: HttpResponseMessage) =
+        let sb = StringBuilder()
+
+        sb
+            .Append("HTTP/")
+            .Append(m.Version.ToString())
+            .Append(" ")
+            .Append(int m.StatusCode)
+            .Append(" ")
+            .Append(m.ReasonPhrase)
+        |> ignore
+
+        for h in m.Headers do
+            for v in h.Value do
+                sb.AppendLine().Append(h.Key).Append(": ").Append(v) |> ignore
+
+        HttpContent.serializeAppend sb m.Content
+
+        sb.ToString()

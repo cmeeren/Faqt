@@ -3,6 +3,9 @@
 open System
 open System.Collections.Generic
 open System.Globalization
+open System.Net
+open System.Net.Http
+open System.Net.Http.Json
 open System.Runtime.CompilerServices
 open System.Text.Json
 open System.Text.Json.Serialization
@@ -791,6 +794,184 @@ Subject: x
 Should: FailWith
 Value:
   '1': 1
+"""
+
+
+    [<Fact>]
+    let ``Rendering of HttpRequestMessage without headers or content`` () =
+        fun () ->
+            let x = new HttpRequestMessage(HttpMethod.Patch, "https://foo.bar/asd?x=y&x=z#a")
+            x.Version <- Version.Parse("0.5")
+            x.Should().FailWith("Value", x)
+        |> assertExnMsg
+            """
+Subject: x
+Should: FailWith
+Value: PATCH https://foo.bar/asd?x=y&x=z#a HTTP/0.5
+"""
+
+
+    [<Fact>]
+    let ``Rendering of HttpRequestMessage with headers and without content`` () =
+        fun () ->
+            let x = new HttpRequestMessage(HttpMethod.Patch, "https://foo.bar/asd?x=y&x=z#a")
+            x.Version <- Version.Parse("0.5")
+            x.Headers.Add("Lorem", "Ipsum")
+            x.Headers.Add("Foo", "Baz")
+            x.Headers.Add("Foo", "Bar")
+            x.Should().FailWith("Value", x)
+        |> assertExnMsg
+            """
+Subject: x
+Should: FailWith
+Value: |-
+  PATCH https://foo.bar/asd?x=y&x=z#a HTTP/0.5
+  Lorem: Ipsum
+  Foo: Baz
+  Foo: Bar
+"""
+
+
+    [<Fact>]
+    let ``Rendering of HttpRequestMessage with headers and content`` () =
+        fun () ->
+            let x = new HttpRequestMessage(HttpMethod.Patch, "https://foo.bar/asd?x=y&x=z#a")
+            x.Version <- Version.Parse("0.5")
+            x.Headers.Add("Lorem", "Ipsum")
+            x.Headers.Add("Foo", "Baz")
+            x.Headers.Add("Foo", "Bar")
+            x.Content <- JsonContent.Create({| a = "foo"; b = null; c = [ 3; 4 ] |})
+            x.Should().FailWith("Value", x)
+        |> assertExnMsg
+            """
+Subject: x
+Should: FailWith
+Value: |-
+  PATCH https://foo.bar/asd?x=y&x=z#a HTTP/0.5
+  Lorem: Ipsum
+  Foo: Baz
+  Foo: Bar
+  Content-Type: application/json; charset=utf-8
+  Content-Length: 30
+
+  {"a":"foo","b":null,"c":[3,4]}
+"""
+
+
+    [<Fact>]
+    let ``Rendering of HttpRequestMessage with headers and content when disposed`` () =
+        fun () ->
+            let x = new HttpRequestMessage(HttpMethod.Patch, "https://foo.bar/asd?x=y&x=z#a")
+            x.Version <- Version.Parse("0.5")
+            x.Headers.Add("Lorem", "Ipsum")
+            x.Headers.Add("Foo", "Baz")
+            x.Headers.Add("Foo", "Bar")
+            x.Content <- JsonContent.Create({| a = "foo"; b = null; c = [ 3; 4 ] |})
+            x.Dispose()
+            x.Should().FailWith("Value", x)
+        |> assertExnMsgWildcard
+            """
+Subject: x
+Should: FailWith
+Value: |-
+  PATCH https://foo.bar/asd?x=y&x=z#a HTTP/0.5
+  Lorem: Ipsum
+  Foo: Baz
+  Foo: Bar
+
+  An exception occured trying to get the content:
+  System.ObjectDisposedException: Cannot access a disposed object.
+  Object name: 'System.Net.Http.Json.JsonContent'.
+     at *
+"""
+
+
+    [<Fact>]
+    let ``Rendering of HttpResponseMessage without headers or content`` () =
+        fun () ->
+            let x = new HttpResponseMessage(HttpStatusCode.NotFound)
+            x.Version <- Version.Parse("0.5")
+            x.Should().FailWith("Value", x)
+        |> assertExnMsg
+            """
+Subject: x
+Should: FailWith
+Value: HTTP/0.5 404 Not Found
+"""
+
+
+    [<Fact>]
+    let ``Rendering of HttpResponseMessage with headers and without content`` () =
+        fun () ->
+            let x = new HttpResponseMessage(HttpStatusCode.NotFound)
+            x.Version <- Version.Parse("0.5")
+            x.Headers.Add("Lorem", "Ipsum")
+            x.Headers.Add("Foo", "Baz")
+            x.Headers.Add("Foo", "Bar")
+            x.Should().FailWith("Value", x)
+        |> assertExnMsg
+            """
+Subject: x
+Should: FailWith
+Value: |-
+  HTTP/0.5 404 Not Found
+  Lorem: Ipsum
+  Foo: Baz
+  Foo: Bar
+"""
+
+
+    [<Fact>]
+    let ``Rendering of HttpResponseMessage with headers and content`` () =
+        fun () ->
+            let x = new HttpResponseMessage(HttpStatusCode.NotFound)
+            x.Version <- Version.Parse("0.5")
+            x.Headers.Add("Lorem", "Ipsum")
+            x.Headers.Add("Foo", "Baz")
+            x.Headers.Add("Foo", "Bar")
+            x.Content <- JsonContent.Create({| a = "foo"; b = null; c = [ 3; 4 ] |})
+            x.Should().FailWith("Value", x)
+        |> assertExnMsg
+            """
+Subject: x
+Should: FailWith
+Value: |-
+  HTTP/0.5 404 Not Found
+  Lorem: Ipsum
+  Foo: Baz
+  Foo: Bar
+  Content-Type: application/json; charset=utf-8
+  Content-Length: 30
+
+  {"a":"foo","b":null,"c":[3,4]}
+"""
+
+
+    [<Fact>]
+    let ``Rendering of HttpResponseMessage with headers and content when disposed`` () =
+        fun () ->
+            let x = new HttpResponseMessage(HttpStatusCode.NotFound)
+            x.Version <- Version.Parse("0.5")
+            x.Headers.Add("Lorem", "Ipsum")
+            x.Headers.Add("Foo", "Baz")
+            x.Headers.Add("Foo", "Bar")
+            x.Content <- JsonContent.Create({| a = "foo"; b = null; c = [ 3; 4 ] |})
+            x.Dispose()
+            x.Should().FailWith("Value", x)
+        |> assertExnMsgWildcard
+            """
+Subject: x
+Should: FailWith
+Value: |-
+  HTTP/0.5 404 Not Found
+  Lorem: Ipsum
+  Foo: Baz
+  Foo: Bar
+
+  An exception occured trying to get the content:
+  System.ObjectDisposedException: Cannot access a disposed object.
+  Object name: 'System.Net.Http.Json.JsonContent'.
+     at *
 """
 
 

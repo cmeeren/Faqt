@@ -312,6 +312,8 @@ type YamlFormatterBuilder = {
             .SerializeAs(string<Exception>)
             .SerializeAs(fun (t: Type) -> t.AssertionName)
             .SerializeAs(fun (ci: CultureInfo) -> if ci.Name = "" then "invariant" else ci.Name)
+            .SerializeAs(HttpRequestMessage.serialize)
+            .SerializeAs(HttpResponseMessage.serialize)
             .SetYamlVisitor(fun doc -> JsonToYamlConverterVisitor(doc))
 
 
