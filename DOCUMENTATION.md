@@ -230,6 +230,28 @@ Formatter.Set(myFormater)
 use _ = Formatter.With(myConfig)
 ```
 
+# Configuring options
+
+Faqt contains some configurable options, such as the maximum length to display when rendering `HttpContent`. Options are
+configured similarly to the formatter:
+
+```f#
+open Faqt
+open Faqt.Configuration
+
+// Create a configuration
+let myConfig = FaqtConfig.Default.Format(myFormatter)
+
+// Set the default config
+Config.Set(myConfig)
+
+// Set the config for a certain scope (until the returned value is disposed)
+use _ = Config.With(myConfig)
+
+// Use Config.Current if you need to use the config values (e.g. in your own converters/formatters)
+myFormatter Config.Current
+```
+
 # Security considerations
 
 **Treat assertion exception messages (and therefore test failure messages) as securely as you treat your source code.**
