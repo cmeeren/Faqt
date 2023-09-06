@@ -172,6 +172,34 @@ If you want all the details, here they are:
 * If your assertion calls `Should` at any point, make sure you use the overload that takes the original `Testable` as an
   argument (`.Should(t)`), since it contains important state relating to the end user’s original assertion call.
 
+* If your assertion calls other assertions, consider how your assertion name will read when used with the assertion
+  message from the called assertion. For example, `Be` has a message like:
+
+  ```
+  Subject: x
+  Should: Be
+  Expected: true
+  But was: false
+  ```
+
+  If the `bool` assertion `BeTrue` just called `Be(true)` internally, it would read like:
+
+  ```
+  Subject: x
+  Should: BeTrue
+  Expected: true
+  But was: false
+  ```
+
+  The `Expected: true` line is superfluous given the name of the assertion. Therefore, it's better with a
+  separate assertion message for `BeTrue`:
+
+  ```
+  Subject: x
+  Should: BeTrue
+  But was: false
+  ```
+
 # Multiple assertion chains without `|> ignore`
 
 Since assertions return `And` or `AndDerived`, F# will warn you if an assertion chain is not the last line of an
