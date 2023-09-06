@@ -25,7 +25,7 @@ type Config private () =
     static let currentConfig: AsyncLocal<FaqtConfig> = AsyncLocal()
 
 
-    static member internal Config =
+    static member Current =
         if isNull (box currentConfig.Value) then
             globalConfig
         else
