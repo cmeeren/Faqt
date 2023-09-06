@@ -1,4 +1,4 @@
-﻿module Faqt.Formatting
+﻿namespace Faqt.Formatting
 
 open System
 open System.Globalization
@@ -172,20 +172,24 @@ type private JsonToYamlConverterVisitor(doc: YamlDocument) =
         base.Visit(mapping)
 
 
-let private formatAsYaml getYamlVisitor (json: string) =
-    let yaml = YamlStream()
-    yaml.Load(new StringReader(json))
-    yaml.Accept(getYamlVisitor yaml.Documents[0])
-    let outputYaml = new StringWriter()
-    yaml.Save(outputYaml, false)
-    outputYaml.Flush()
-    outputYaml.ToString().Trim().Trim('.', '-').Trim()
+[<AutoOpen>]
+module private FormattingHelpers =
 
 
-let private getFormatter configureOptions formatAsYaml =
-    let options = JsonSerializerOptions()
-    configureOptions options
-    fun data -> JsonSerializer.Serialize(data, options) |> formatAsYaml
+    let formatAsYaml getYamlVisitor (json: string) =
+        let yaml = YamlStream()
+        yaml.Load(new StringReader(json))
+        yaml.Accept(getYamlVisitor yaml.Documents[0])
+        let outputYaml = new StringWriter()
+        yaml.Save(outputYaml, false)
+        outputYaml.Flush()
+        outputYaml.ToString().Trim().Trim('.', '-').Trim()
+
+
+    let getFormatter configureOptions formatAsYaml =
+        let options = JsonSerializerOptions()
+        configureOptions options
+        fun data -> JsonSerializer.Serialize(data, options) |> formatAsYaml
 
 
 /// A type to help configure the default YAML-based assertion message format.

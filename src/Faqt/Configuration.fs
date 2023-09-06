@@ -1,8 +1,8 @@
-﻿module Faqt.Configuration
+﻿namespace Faqt.Configuration
 
 open System
 open System.Threading
-open Formatting
+open Faqt.Formatting
 
 
 type FaqtConfig = private {

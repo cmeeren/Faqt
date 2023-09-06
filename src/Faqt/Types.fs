@@ -4,8 +4,8 @@ open System
 open System.Reflection
 open System.Runtime.CompilerServices
 open System.Runtime.InteropServices
-open Configuration
-open Formatting
+open Faqt.Configuration
+open Faqt.Formatting
 
 
 /// The exception raised for all Faqt assertion failures.

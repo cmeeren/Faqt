@@ -10,9 +10,9 @@ open System.Runtime.CompilerServices
 open System.Text.Json
 open System.Text.Json.Serialization
 open Faqt
+open Faqt.Configuration
+open Faqt.Formatting
 open AssertionHelpers
-open Configuration
-open Formatting
 open Xunit
 open YamlDotNet.Core
 open YamlDotNet.RepresentationModel

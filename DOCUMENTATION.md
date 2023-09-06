@@ -79,8 +79,8 @@ asserts for every item in a sequence:
 open System
 open System.Runtime.CompilerServices
 open Faqt
+open Faqt.Formatting
 open AssertionHelpers
-open Formatting
 
 type private SatisfyReportItem = { Index: int; Failure: FailureData }
 
@@ -200,8 +200,8 @@ Faqt's formatter is implemented as a simple function with signature `FailureData
 
 ```f#
 open Faqt
-open Configuration
-open Formatting
+open Faqt.Configuration
+open Faqt.Formatting
 
 let myFormatter : FailureData -> string =
     // You can implement your own formatter from scratch, or modify the default one as shown here

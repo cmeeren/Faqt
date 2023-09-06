@@ -2,8 +2,8 @@
 
 open System.Collections.Generic
 open System.Runtime.CompilerServices
+open Faqt.Formatting
 open AssertionHelpers
-open Formatting
 
 
 [<AutoOpen>]

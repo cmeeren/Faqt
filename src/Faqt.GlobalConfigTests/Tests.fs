@@ -1,7 +1,7 @@
 ﻿module Tests
 
 open Faqt
-open Configuration
+open Faqt.Configuration
 open Xunit
 
 

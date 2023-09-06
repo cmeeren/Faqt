@@ -1,8 +1,8 @@
 ﻿namespace Faqt
 
 open System.Runtime.CompilerServices
+open Faqt.Formatting
 open AssertionHelpers
-open Formatting
 
 
 [<Extension>]
