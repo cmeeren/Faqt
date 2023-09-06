@@ -3,6 +3,7 @@
 open System
 open System.Globalization
 open System.IO
+open System.Net
 open System.Net.Http
 open System.Text
 open System.Text.Encodings.Web
@@ -423,6 +424,15 @@ type YamlFormatterBuilder = private {
             )
             .SerializeAs(fun x ->
                 HttpResponseMessage.serialize Config.Current.FormatHttpContent Config.Current.HttpContentMaxLength x
+            )
+            .SerializeAs(fun (c: HttpStatusCode) ->
+                let reasonPhrase =
+                    match (new HttpResponseMessage(c)).ReasonPhrase with
+                    | null
+                    | "" -> string c
+                    | s -> s
+
+                $"%i{int c} %s{reasonPhrase}"
             )
             .SetYamlVisitor(fun doc -> JsonToYamlConverterVisitor(doc))
 

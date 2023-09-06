@@ -1024,6 +1024,19 @@ Value: |-
 """
 
 
+    [<Fact>]
+    let ``Rendering of HttpStatusCode`` () =
+        fun () ->
+            let x = HttpStatusCode.BadRequest
+            x.Should().FailWith("Value", x)
+        |> assertExnMsg
+            """
+Subject: x
+Should: FailWith
+Value: 400 Bad Request
+"""
+
+
 module YamlFormatterBuilder =
 
 
