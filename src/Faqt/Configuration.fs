@@ -5,14 +5,24 @@ open System.Threading
 
 
 type FaqtConfig = private {
-    // TODO
-    dummy: unit
+    httpContentMaxLength: int
 } with
 
 
-    /// Returns the default config. Note that changes to this config is not considered a breaking change. The config is
-    /// immutable; all instance methods return a new instance.
-    static member Default = { dummy = () }
+    /// Returns the default configuration. Note that changes to this configuration is not considered a breaking change.
+    /// The configuration is immutable; all instance methods return a new instance.
+    static member Default = { httpContentMaxLength = 1024 * 1024 }
+
+
+    /// Gets the maximum length of rendered HttpContent in assertion failure output.
+    member this.MaxHttpContentLength = this.MaxHttpContentLength
+
+
+    /// Sets the maximum length of rendered HttpContent in assertion failure output.
+    member this.SetMaxHttpContentLength(length) = {
+        this with
+            httpContentMaxLength = length
+    }
 
 
 /// Allows changing the current formatter, either temporarily (for the current thread) or globally.
