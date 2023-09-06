@@ -479,7 +479,7 @@ module Be200OK =
     let ``Passes for the correct status code and can be chained with And`` () =
         (resp 200)
             .Should()
-            .Be200OK()
+            .Be200Ok()
             .Id<And<HttpResponseMessage>>()
             .And.Subject.StatusCode.Should(())
             .Be(HttpStatusCode.OK)
@@ -489,11 +489,11 @@ module Be200OK =
     let ``Fails with expected message for incorrect status codes`` () =
         fun () ->
             let x = resp 100
-            x.Should().Be200OK()
+            x.Should().Be200Ok()
         |> assertExnMsg
             """
 Subject: x
-Should: Be200OK
+Should: Be200Ok
 But was: 100 Continue
 Response: HTTP/0.5 100 Continue
 Request: GET / HTTP/0.5
@@ -504,12 +504,12 @@ Request: GET / HTTP/0.5
     let ``Fails with expected message with because for incorrect status codes`` () =
         fun () ->
             let x = resp 100
-            x.Should().Be200OK("Some reason")
+            x.Should().Be200Ok("Some reason")
         |> assertExnMsg
             """
 Subject: x
 Because: Some reason
-Should: Be200OK
+Should: Be200Ok
 But was: 100 Continue
 Response: HTTP/0.5 100 Continue
 Request: GET / HTTP/0.5

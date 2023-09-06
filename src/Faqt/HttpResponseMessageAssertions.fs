@@ -110,7 +110,7 @@ type HttpResponseMessageAssertions =
 
     /// Asserts that the subject has status code 200 OK.
     [<Extension>]
-    static member Be200OK(t: Testable<HttpResponseMessage>, ?because) : And<HttpResponseMessage> =
+    static member Be200Ok(t: Testable<HttpResponseMessage>, ?because) : And<HttpResponseMessage> =
         use _ = t.Assert()
         t.BeStatusCode(HttpStatusCode.OK, ?because = because)
 
