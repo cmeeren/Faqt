@@ -42,6 +42,7 @@
     <Compile Include="GuidAssertions.fs" />
     <Compile Include="EnumAssertions.fs" />
     <Compile Include="FunctionAssertions.fs" />
+    <Compile Include="HttpResponseMessageAssertions.fs" />
   </ItemGroup>
 
   <ItemGroup>
