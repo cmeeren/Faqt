@@ -11,6 +11,7 @@ open System.Text.Json
 open System.Text.Json.Serialization
 open Faqt
 open Faqt.AssertionHelpers
+open Faqt.Configuration
 open Faqt.Formatting
 open Xunit
 open YamlDotNet.Core
@@ -887,6 +888,29 @@ Value: |-
 
 
     [<Fact>]
+    let ``Rendering of HttpRequestMessage with custom max content length`` () =
+        use _ = Config.With(FaqtConfig.Default.SetHttpContentMaxLength(10))
+
+        fun () ->
+            let x = new HttpRequestMessage(HttpMethod.Get, "/")
+            x.Version <- Version.Parse("0.5")
+            x.Content <- new StringContent("lorem ipsum dolor sit amet")
+            x.Should().FailWith("Value", x)
+        |> assertExnMsg
+            """
+Subject: x
+Should: FailWith
+Value: |-
+  GET / HTTP/0.5
+  Content-Type: text/plain; charset=utf-8
+  Content-Length: 26
+
+  lorem ipsu…
+  [content truncated after 10 characters]
+"""
+
+
+    [<Fact>]
     let ``Rendering of HttpResponseMessage without headers or content`` () =
         fun () ->
             let x = new HttpResponseMessage(HttpStatusCode.NotFound)
@@ -972,6 +996,29 @@ Value: |-
   System.ObjectDisposedException: Cannot access a disposed object.
   Object name: 'System.Net.Http.Json.JsonContent'.
      at *
+"""
+
+
+    [<Fact>]
+    let ``Rendering of HttpResponseMessage with custom max content length`` () =
+        use _ = Config.With(FaqtConfig.Default.SetHttpContentMaxLength(10))
+
+        fun () ->
+            let x = new HttpResponseMessage(HttpStatusCode.NotFound)
+            x.Version <- Version.Parse("0.5")
+            x.Content <- new StringContent("lorem ipsum dolor sit amet")
+            x.Should().FailWith("Value", x)
+        |> assertExnMsg
+            """
+Subject: x
+Should: FailWith
+Value: |-
+  HTTP/0.5 404 Not Found
+  Content-Type: text/plain; charset=utf-8
+  Content-Length: 26
+
+  lorem ipsu…
+  [content truncated after 10 characters]
 """
 
 
