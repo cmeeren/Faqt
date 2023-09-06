@@ -146,9 +146,11 @@ module String =
         ||> Seq.fold (fun str (i, arg) -> str |> replace $"{{%i{i}}}" arg)
 
 
+    /// If the string is longer than the specified length, replaces the overshooting part of the string with the
+    /// indicator string (which could be an ellipsis or a truncation notice).
     let truncate (indicator: string) length (str: string) =
         if str.Length > length then
-            str.Substring(0, length - indicator.Length) + indicator
+            str.Substring(0, length) + indicator
         else
             str
 
