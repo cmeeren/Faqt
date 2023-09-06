@@ -181,7 +181,7 @@ module Seq =
 module HttpContent =
 
 
-    let serializeAppend (sb: StringBuilder) (c: HttpContent) =
+    let serializeAppend maxLength (sb: StringBuilder) (c: HttpContent) =
         try
             if not (isNull c) && c.Headers.ContentLength <> Nullable(0L) then
                 for h in c.Headers do
@@ -210,7 +210,7 @@ module HttpContent =
 module HttpRequestMessage =
 
 
-    let serialize (m: HttpRequestMessage) =
+    let serialize maxLength (m: HttpRequestMessage) =
         let sb = StringBuilder()
 
         sb
@@ -225,7 +225,7 @@ module HttpRequestMessage =
             for v in h.Value do
                 sb.AppendLine().Append(h.Key).Append(": ").Append(v) |> ignore
 
-        HttpContent.serializeAppend sb m.Content
+        HttpContent.serializeAppend maxLength sb m.Content
 
         sb.ToString()
 
@@ -233,7 +233,7 @@ module HttpRequestMessage =
 module HttpResponseMessage =
 
 
-    let serialize (m: HttpResponseMessage) =
+    let serialize maxLength (m: HttpResponseMessage) =
         let sb = StringBuilder()
 
         sb
@@ -249,6 +249,6 @@ module HttpResponseMessage =
             for v in h.Value do
                 sb.AppendLine().Append(h.Key).Append(": ").Append(v) |> ignore
 
-        HttpContent.serializeAppend sb m.Content
+        HttpContent.serializeAppend maxLength sb m.Content
 
         sb.ToString()

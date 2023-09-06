@@ -11,6 +11,7 @@ open YamlDotNet.Core
 open YamlDotNet.Core.Events
 open YamlDotNet.RepresentationModel
 open Faqt
+open Faqt.Configuration
 
 
 /// Wrap values in TryFormat to catch serialization exceptions and use a safe fallback serialization format for the
@@ -317,8 +318,8 @@ type YamlFormatterBuilder = private {
             .SerializeAs(string<Exception>)
             .SerializeAs(fun (t: Type) -> t.AssertionName)
             .SerializeAs(fun (ci: CultureInfo) -> if ci.Name = "" then "invariant" else ci.Name)
-            .SerializeAs(HttpRequestMessage.serialize)
-            .SerializeAs(HttpResponseMessage.serialize)
+            .SerializeAs(fun x -> HttpRequestMessage.serialize Config.Current.HttpContentMaxLength x)
+            .SerializeAs(fun x -> HttpResponseMessage.serialize Config.Current.HttpContentMaxLength x)
             .SetYamlVisitor(fun doc -> JsonToYamlConverterVisitor(doc))
 
 
