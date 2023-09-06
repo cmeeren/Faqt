@@ -190,7 +190,7 @@ let private getFormatter configureOptions formatAsYaml =
 
 
 /// A type to help configure the default YAML-based assertion message format.
-type YamlFormatterBuilder = {
+type YamlFormatterBuilder = private {
     configureJsonSerializerOptions: YamlFormatterBuilder -> JsonSerializerOptions -> unit
     getJsonFSharpOptions: unit -> JsonFSharpOptions
     tryFormatFallback: exn -> obj -> obj
