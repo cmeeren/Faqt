@@ -432,7 +432,10 @@ type YamlFormatterBuilder = private {
                     | "" -> string c
                     | s -> s
 
-                $"%i{int c} %s{reasonPhrase}"
+                if reasonPhrase = string (int c) then
+                    string (int c)
+                else
+                    $"%i{int c} %s{reasonPhrase}"
             )
             .SetYamlVisitor(fun doc -> JsonToYamlConverterVisitor(doc))
 

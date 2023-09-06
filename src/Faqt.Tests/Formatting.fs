@@ -1037,6 +1037,19 @@ Value: 400 Bad Request
 """
 
 
+    [<Fact>]
+    let ``Rendering of non-existent HttpStatusCode`` () =
+        fun () ->
+            let x = enum<HttpStatusCode> 999
+            x.Should().FailWith("Value", x)
+        |> assertExnMsg
+            """
+Subject: x
+Should: FailWith
+Value: '999'
+"""
+
+
 module YamlFormatterBuilder =
 
 
