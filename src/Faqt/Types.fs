@@ -4,7 +4,6 @@ open System
 open System.Reflection
 open System.Runtime.CompilerServices
 open System.Runtime.InteropServices
-open Faqt.Configuration
 open Faqt.Formatting
 
 
@@ -87,7 +86,7 @@ type FailureBuilder<'a> = private {
             Extra = this.Data
         }
 
-        AssertionFailedException(Config.Config.Formatter data, data) |> raise
+        AssertionFailedException(Formatter.Format data, data) |> raise
 
 
 /// A type which allows chaining assertions.

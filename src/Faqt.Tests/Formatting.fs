@@ -11,7 +11,6 @@ open System.Text.Json
 open System.Text.Json.Serialization
 open Faqt
 open Faqt.AssertionHelpers
-open Faqt.Configuration
 open Faqt.Formatting
 open Xunit
 open YamlDotNet.Core
@@ -43,7 +42,7 @@ Should: Fail
 """
 
     do
-        use _ = Config.With(FaqtConfig.Default.Format(fun _ -> "OVERRIDDEN FORMATTER"))
+        use _ = Formatter.With(fun _ -> "OVERRIDDEN FORMATTER")
 
         fun () -> "a".Should().Fail()
         |> assertExnMsg
@@ -71,7 +70,7 @@ Should: Fail
 """
 
         do
-            use _ = Config.With(FaqtConfig.Default.Format(fun _ -> "OVERRIDDEN FORMATTER"))
+            use _ = Formatter.With(fun _ -> "OVERRIDDEN FORMATTER")
 
             fun () -> "a".Should().Fail()
             |> assertExnMsg
@@ -115,7 +114,7 @@ EXTRA
 %A{data.Extra}
         """
 
-    use _ = Config.With(FaqtConfig.Default.Format(format))
+    use _ = Formatter.With(format)
 
     fun () -> "a".Should().Fail()
     |> assertExnMsg
@@ -987,7 +986,7 @@ module YamlFormatterBuilder =
                 .ConfigureJsonSerializerOptions(fun opts -> opts.NumberHandling <- JsonNumberHandling.WriteAsString)
                 .Build()
 
-        use _ = Config.With(FaqtConfig.Default.Format(format))
+        use _ = Formatter.With(format)
 
         fun () -> "a".Should().FailWith("Value", {| A = 1 |})
         |> assertExnMsg
@@ -1009,7 +1008,7 @@ Value:
                 .ConfigureJsonFSharpOptions(fun _ -> JsonFSharpOptions.Default().WithUnionUnwrapSingleCaseUnions(true))
                 .Build()
 
-        use _ = Config.With(FaqtConfig.Default.Format(format))
+        use _ = Formatter.With(format)
 
         fun () -> "a".Should().FailWith("Value", SingleCaseDu 1)
         |> assertExnMsg
@@ -1029,7 +1028,7 @@ Value: 1
                 .ConfigureJsonFSharpOptions(fun opts -> opts.WithUnionTagName("Test2"))
                 .Build()
 
-        use _ = Config.With(FaqtConfig.Default.Format(format))
+        use _ = Formatter.With(format)
 
         fun () -> "a".Should().FailWith("Value", SingleCaseDu 1)
         |> assertExnMsg
@@ -1064,7 +1063,7 @@ Value:
                 .AddConverter(StringOptionConverter(true))
                 .Build()
 
-        use _ = Config.With(FaqtConfig.Default.Format(format))
+        use _ = Formatter.With(format)
 
         fun () -> "a".Should().FailWith("Value", Some "b")
         |> assertExnMsg
@@ -1083,7 +1082,7 @@ Value: SOME B
                 .SerializeAs(string<string option> >> fun s -> s.ToUpperInvariant())
                 .Build()
 
-        use _ = Config.With(FaqtConfig.Default.Format(format))
+        use _ = Formatter.With(format)
 
         fun () -> "a".Should().FailWith("Value", Some "b")
         |> assertExnMsg
@@ -1099,7 +1098,7 @@ Value: SOME(B)
         let format =
             YamlFormatterBuilder.Default.SerializeAs(fun (_: TestBaseType) -> "FOO").Build()
 
-        use _ = Config.With(FaqtConfig.Default.Format(format))
+        use _ = Formatter.With(format)
 
         fun () -> "a".Should().FailWith("Value", TestSubType())
         |> assertExnMsg
@@ -1117,7 +1116,7 @@ Value: FOO
                 .SerializeAs(fun (_: TestInterface) -> "FOO")
                 .Build()
 
-        use _ = Config.With(FaqtConfig.Default.Format(format))
+        use _ = Formatter.With(format)
 
         fun () -> "a".Should().FailWith("Value", TestSubType())
         |> assertExnMsg
@@ -1147,7 +1146,7 @@ Value: FOO
                 .SerializeAs(string<string option> >> fun s -> s.ToUpperInvariant())
                 .Build()
 
-        use _ = Config.With(FaqtConfig.Default.Format(format))
+        use _ = Formatter.With(format)
 
         fun () -> "a".Should().FailWith("Value", Some "b")
         |> assertExnMsg
@@ -1165,7 +1164,7 @@ Value: SOME(B)
                 .SerializeExactAs(fun (_: TestBaseType) -> "FOO")
                 .Build()
 
-        use _ = Config.With(FaqtConfig.Default.Format(format))
+        use _ = Formatter.With(format)
 
         let x = TestSubType()
         x :> TestBaseType |> ignore // Sanity check to avoid false negatives
@@ -1186,7 +1185,7 @@ Value: {}
         let format =
             YamlFormatterBuilder.Default.SerializeExactAs(fun (_: obj) -> "FOO").Build()
 
-        use _ = Config.With(FaqtConfig.Default.Format(format))
+        use _ = Formatter.With(format)
 
         fun () -> "a".Should().FailWith("Value", "asd")
         |> assertExnMsg
@@ -1204,7 +1203,7 @@ Value: asd
                 .SerializeExactAs(fun (_: TestInterface) -> "FOO")
                 .Build()
 
-        use _ = Config.With(FaqtConfig.Default.Format(format))
+        use _ = Formatter.With(format)
 
         let x = TestSubType()
         x :> TestInterface |> ignore // Sanity check to avoid false negatives
@@ -1242,7 +1241,7 @@ Value: {}
                 |})
                 .Build()
 
-        use _ = Config.With(FaqtConfig.Default.Format(format))
+        use _ = Formatter.With(format)
 
         fun () -> "a".Should().FailWithUnserializableAtTopAndNested()
         |> assertExnMsg
@@ -1265,7 +1264,7 @@ B:
                 .TryFormatFallback(fun _ _ -> invalidOp "foo")
                 .Build()
 
-        use _ = Config.With(FaqtConfig.Default.Format(format))
+        use _ = Formatter.With(format)
 
         let f () =
             "a".Should().FailWithUnserializableAtTopAndNested()
@@ -1290,7 +1289,7 @@ B:
                 .SetYamlVisitor(fun doc -> TestYamlVisitor(doc, ScalarStyle.SingleQuoted))
                 .Build()
 
-        use _ = Config.With(FaqtConfig.Default.Format(format))
+        use _ = Formatter.With(format)
 
         fun () -> "a".Should().Fail()
         |> assertExnMsg

@@ -200,7 +200,6 @@ Faqt's formatter is implemented as a simple function with signature `FailureData
 
 ```f#
 open Faqt
-open Faqt.Configuration
 open Faqt.Formatting
 
 let myFormatter : FailureData -> string =
@@ -231,7 +230,7 @@ let myConfig = FaqtConfig.Default.Format(myFormatter)
 Config.Set(myConfig)
 
 // Set the config for a certain scope (until the returned value is disposed)
-use _ = Config.With(myConfig)
+use _ = Formatter.With(myConfig)
 ```
 
 # Security considerations

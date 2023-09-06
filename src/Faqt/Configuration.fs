@@ -2,27 +2,17 @@
 
 open System
 open System.Threading
-open Faqt.Formatting
 
 
 type FaqtConfig = private {
-    formatter: FailureData -> string
+    // TODO
+    dummy: unit
 } with
 
 
-    /// Returns the default config. Note that changes to this config (such as the format) is not considered a breaking
-    /// change. The config is immutable; all instance methods return a new instance.
-    static member Default = {
-        formatter = YamlFormatterBuilder.Default.Build()
-    }
-
-
-    /// Gets the function used to format assertion failure output.
-    member this.Formatter = this.formatter
-
-
-    /// Uses the specified function to format assertion failure messages.
-    member this.Format(formatter: FailureData -> string) = { this with formatter = formatter }
+    /// Returns the default config. Note that changes to this config is not considered a breaking change. The config is
+    /// immutable; all instance methods return a new instance.
+    static member Default = { dummy = () }
 
 
 /// Allows changing the current formatter, either temporarily (for the current thread) or globally.

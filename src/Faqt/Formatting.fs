@@ -6,6 +6,7 @@ open System.IO
 open System.Text.Json
 open System.Text.Json.Serialization
 open System.Text.RegularExpressions
+open System.Threading
 open YamlDotNet.Core
 open YamlDotNet.Core.Events
 open YamlDotNet.RepresentationModel
@@ -319,3 +320,36 @@ type YamlFormatterBuilder = private {
             .SerializeAs(HttpRequestMessage.serialize)
             .SerializeAs(HttpResponseMessage.serialize)
             .SetYamlVisitor(fun doc -> JsonToYamlConverterVisitor(doc))
+
+
+/// Allows changing the current formatter, either temporarily (for the current thread) or globally.
+type Formatter private () =
+
+
+    static let mutable globalFormatter: FailureData -> string =
+        YamlFormatterBuilder.Default.Build()
+
+
+    static let currentFormatter: AsyncLocal<FailureData -> string> = AsyncLocal()
+
+
+    static member internal Format =
+        if isNull (box currentFormatter.Value) then
+            globalFormatter
+        else
+            currentFormatter.Value
+
+
+    /// Sets the specified formatter as the default global formatter.
+    static member Set(format) = globalFormatter <- format
+
+
+    /// Sets the specified formatter as the formatter for the current thread. When the returned value is disposed, the
+    /// old formatter is restored.
+    static member With(format) =
+        let oldFormatter = currentFormatter.Value
+        currentFormatter.Value <- format
+
+        { new IDisposable with
+            member _.Dispose() = currentFormatter.Value <- oldFormatter
+        }

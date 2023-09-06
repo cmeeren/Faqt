@@ -1,13 +1,13 @@
 ﻿module Tests
 
 open Faqt
-open Faqt.Configuration
+open Faqt.Formatting
 open Xunit
 
 
 [<Fact>]
 let ``Can set, override and restore custom global formatter`` () =
-    Config.Set(FaqtConfig.Default.Format(fun _ -> "GLOBAL FORMATTER"))
+    Formatter.Set(fun _ -> "GLOBAL FORMATTER")
 
     fun () ->
         let x = 1
@@ -18,7 +18,7 @@ GLOBAL FORMATTER
 """
 
     do
-        (use _ = Config.With(FaqtConfig.Default.Format(fun _ -> "OVERRIDDEN FORMATTER"))
+        (use _ = Formatter.With(fun _ -> "OVERRIDDEN FORMATTER")
 
          fun () ->
              let x = 1
