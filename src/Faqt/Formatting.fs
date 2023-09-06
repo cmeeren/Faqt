@@ -333,7 +333,7 @@ type Formatter private () =
     static let currentFormatter: AsyncLocal<FailureData -> string> = AsyncLocal()
 
 
-    static member internal Format =
+    static member internal Current =
         if isNull (box currentFormatter.Value) then
             globalFormatter
         else

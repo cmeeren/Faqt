@@ -86,7 +86,7 @@ type FailureBuilder<'a> = private {
             Extra = this.Data
         }
 
-        AssertionFailedException(Formatter.Format data, data) |> raise
+        AssertionFailedException(Formatter.Current data, data) |> raise
 
 
 /// A type which allows chaining assertions.
