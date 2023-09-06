@@ -20,6 +20,9 @@ type HttpResponseMessageAssertions =
         ) : And<HttpResponseMessage> =
         use _ = t.Assert()
 
+        if isNull t.Subject then
+            nullArg "subject"
+
         if t.Subject.StatusCode <> statusCode then
             t
                 .With("Expected", statusCode)
@@ -39,6 +42,9 @@ type HttpResponseMessageAssertions =
             upper: HttpStatusCode,
             ?because
         ) : And<HttpResponseMessage> =
+        if isNull t.Subject then
+            nullArg "subject"
+
         if t.Subject.StatusCode < lower || t.Subject.StatusCode > upper then
             t
                 .With("But was", t.Subject.StatusCode)
