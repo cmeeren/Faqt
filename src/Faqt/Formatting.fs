@@ -198,7 +198,6 @@ type YamlFormatterBuilder = private {
 } with
 
 
-    /// Adds a function to configure JsonSerializerOptions. Multiple calls are allowed and will be run in order.
     member private this.ConfigureJsonSerializerOptions'
         (configure: YamlFormatterBuilder -> JsonSerializerOptions -> unit)
         =
