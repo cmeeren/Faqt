@@ -195,7 +195,7 @@ module HttpContent =
 
                 let strContent =
                     Encoding.UTF8.GetString(a)
-                    |> String.truncate "<content truncated>" (1024 * 1024)
+                    |> String.truncate $"…\n[content truncated after %i{maxLength} characters]" maxLength
 
                 sb.AppendLine().AppendLine().Append(strContent) |> ignore
         with ex ->
