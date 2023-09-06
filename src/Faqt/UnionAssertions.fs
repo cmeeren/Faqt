@@ -4,7 +4,7 @@ open System.Runtime.CompilerServices
 open Microsoft.FSharp.Quotations
 open Microsoft.FSharp.Quotations.Patterns
 open Microsoft.FSharp.Reflection
-open AssertionHelpers
+open Faqt.AssertionHelpers
 
 
 [<Extension>]

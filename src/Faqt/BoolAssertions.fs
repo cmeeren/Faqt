@@ -1,7 +1,7 @@
 ﻿namespace Faqt
 
 open System.Runtime.CompilerServices
-open AssertionHelpers
+open Faqt.AssertionHelpers
 
 
 [<Extension>]

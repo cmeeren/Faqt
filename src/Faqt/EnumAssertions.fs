@@ -2,7 +2,7 @@
 
 open System
 open System.Runtime.CompilerServices
-open AssertionHelpers
+open Faqt.AssertionHelpers
 
 
 [<Extension>]

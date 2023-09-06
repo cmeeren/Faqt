@@ -31,7 +31,7 @@ Here is Faqt’s simplest assertion, `Be`:
 ```f#
 open System.Runtime.CompilerServices
 open Faqt
-open AssertionHelpers
+open Faqt.AssertionHelpers
 
 [<Extension>]
 type Assertions =
@@ -54,7 +54,7 @@ Simple, right? Now let's look at an assertion that's just as simple, but uses de
 open System
 open System.Runtime.CompilerServices
 open Faqt
-open AssertionHelpers
+open Faqt.AssertionHelpers
 
 [<Extension>]
 type Assertions =
@@ -79,8 +79,8 @@ asserts for every item in a sequence:
 open System
 open System.Runtime.CompilerServices
 open Faqt
+open Faqt.AssertionHelpers
 open Faqt.Formatting
-open AssertionHelpers
 
 type private SatisfyReportItem = { Index: int; Failure: FailureData }
 

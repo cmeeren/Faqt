@@ -122,37 +122,6 @@ type AndDerived<'a, 'b>(testable: Testable<'a>, derived: 'b) =
     member _.That: 'b = derived
 
 
-module AssertionHelpers =
-
-
-    [<Extension>]
-    type TestableExtensions =
-
-
-        /// Use this overload when calling Should() in custom assertions.
-        [<Extension>]
-        static member Should(this: 'a, continueFrom: Testable<'b>) : Testable<'a> =
-            Testable(this, continueFrom.CallChainOrigin)
-
-
-        /// Raises an AssertionFailedException with the specified message.
-        [<Extension>]
-        static member Fail(this: Testable<'a>, because: string option) =
-            { Testable = this; Data = [] }.Fail(because)
-
-
-        /// Adds the specified key/value to the failure message if condition is true.
-        [<Extension>]
-        static member With(this: Testable<'a>, condition: bool, key: string, value: 'b) =
-            { Testable = this; Data = [] }.With(condition, key, value)
-
-
-        /// Adds the specified key/value to the failure message.
-        [<Extension>]
-        static member With(this: Testable<'a>, key: string, value: 'b) =
-            { Testable = this; Data = [] }.With(key, value)
-
-
 [<Extension>]
 type TestableExtensions =
 
@@ -197,9 +166,6 @@ type TestableExtensions =
         Testable(this, origin)
 
 
-open AssertionHelpers
-
-
 // Note: The type checking assertions below are implemented as intrinsic extension methods so we can get away with only
 // one explicit method type parameter.
 type Testable<'a> with
@@ -211,14 +177,17 @@ type Testable<'a> with
         use _ = this.Assert()
 
         if isNull (box this.Subject) then
-            this.With("Expected", expectedType).With("But was", this.Subject).Fail(because)
+            { Testable = this; Data = [] }
+                .With("Expected", expectedType)
+                .With("But was", this.Subject)
+                .Fail(because)
         else
             let actualType = this.Subject.GetType()
 
             if actualType = expectedType then
                 And(this)
             else
-                this
+                { Testable = this; Data = [] }
                     .With("Expected", expectedType)
                     .With("But was", actualType)
                     .With("Subject value", this.Subject)
@@ -241,14 +210,17 @@ type Testable<'a> with
         use _ = this.Assert()
 
         if isNull (box this.Subject) then
-            this.With("Expected", expectedType).With("But was", this.Subject).Fail(because)
+            { Testable = this; Data = [] }
+                .With("Expected", expectedType)
+                .With("But was", this.Subject)
+                .Fail(because)
         else
             let actualType = this.Subject.GetType()
 
             if actualType.IsAssignableTo(expectedType) then
                 And(this)
             else
-                this
+                { Testable = this; Data = [] }
                     .With("Expected", expectedType)
                     .With("But was", actualType)
                     .With("Subject value", this.Subject)

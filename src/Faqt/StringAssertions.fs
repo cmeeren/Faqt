@@ -7,7 +7,7 @@ open System.Diagnostics.CodeAnalysis
 open System.Globalization
 open System.Runtime.CompilerServices
 open System.Text.RegularExpressions
-open AssertionHelpers
+open Faqt.AssertionHelpers
 
 
 [<AutoOpen>]

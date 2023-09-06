@@ -5,7 +5,7 @@ open System
 open System.Globalization
 open System.Runtime.CompilerServices
 open Faqt
-open AssertionHelpers
+open Faqt.AssertionHelpers
 open Xunit
 
 
