@@ -351,5 +351,6 @@ type Formatter private () =
         localFormatter.Value <- format
 
         { new IDisposable with
-            member _.Dispose() = localFormatter.Value <- oldLocalFormatter
+            member _.Dispose() =
+                localFormatter.Value <- oldLocalFormatter
         }
