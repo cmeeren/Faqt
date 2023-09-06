@@ -15,11 +15,11 @@ type FaqtConfig = private {
 
 
     /// Gets the maximum length of rendered HttpContent in assertion failure output.
-    member this.MaxHttpContentLength = this.MaxHttpContentLength
+    member this.HttpContentMaxLength = this.httpContentMaxLength
 
 
     /// Sets the maximum length of rendered HttpContent in assertion failure output.
-    member this.SetMaxHttpContentLength(length) = {
+    member this.SetHttpContentMaxLength(length) = {
         this with
             httpContentMaxLength = length
     }
