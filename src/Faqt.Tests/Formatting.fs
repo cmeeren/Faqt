@@ -11,7 +11,8 @@ open System.Text.Json
 open System.Text.Json.Serialization
 open Faqt
 open AssertionHelpers
-open Faqt.Formatting
+open Configuration
+open Formatting
 open Xunit
 open YamlDotNet.Core
 open YamlDotNet.RepresentationModel

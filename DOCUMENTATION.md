@@ -200,6 +200,7 @@ Faqt's formatter is implemented as a simple function with signature `FailureData
 
 ```f#
 open Faqt
+open Configuration
 open Formatting
 
 let myFormatter : FailureData -> string =

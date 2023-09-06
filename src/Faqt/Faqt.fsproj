@@ -26,6 +26,7 @@
     <Compile Include="Utils.fs" />
     <Compile Include="SubjectName.fs" />
     <Compile Include="Formatting.fs" />
+    <Compile Include="Configuration.fs" />
     <Compile Include="Types.fs" />
     <Compile Include="Operators.fs" />
     <Compile Include="HigherOrderAssertions.fs" />

@@ -1,7 +1,7 @@
 ﻿module Tests
 
 open Faqt
-open Formatting
+open Configuration
 open Xunit
 
 
