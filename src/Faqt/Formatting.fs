@@ -330,14 +330,14 @@ type Formatter private () =
         YamlFormatterBuilder.Default.Build()
 
 
-    static let currentFormatter: AsyncLocal<FailureData -> string> = AsyncLocal()
+    static let localFormatter: AsyncLocal<FailureData -> string> = AsyncLocal()
 
 
     static member internal Current =
-        if isNull (box currentFormatter.Value) then
+        if isNull (box localFormatter.Value) then
             globalFormatter
         else
-            currentFormatter.Value
+            localFormatter.Value
 
 
     /// Sets the specified formatter as the default global formatter.
@@ -347,9 +347,9 @@ type Formatter private () =
     /// Sets the specified formatter as the formatter for the current thread. When the returned value is disposed, the
     /// old formatter is restored.
     static member With(format) =
-        let oldFormatter = currentFormatter.Value
-        currentFormatter.Value <- format
+        let oldFormatter = localFormatter.Value
+        localFormatter.Value <- format
 
         { new IDisposable with
-            member _.Dispose() = currentFormatter.Value <- oldFormatter
+            member _.Dispose() = localFormatter.Value <- oldFormatter
         }

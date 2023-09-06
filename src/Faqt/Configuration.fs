@@ -22,14 +22,14 @@ type Config private () =
     static let mutable globalConfig: FaqtConfig = FaqtConfig.Default
 
 
-    static let currentConfig: AsyncLocal<FaqtConfig> = AsyncLocal()
+    static let localConfig: AsyncLocal<FaqtConfig> = AsyncLocal()
 
 
     static member Current =
-        if isNull (box currentConfig.Value) then
+        if isNull (box localConfig.Value) then
             globalConfig
         else
-            currentConfig.Value
+            localConfig.Value
 
 
     /// Sets the specified config as the default global config.
@@ -39,9 +39,9 @@ type Config private () =
     /// Sets the specified config as the config for the current thread. When the returned value is disposed, the old
     /// config is restored.
     static member With(config) =
-        let oldFormatter = currentConfig.Value
-        currentConfig.Value <- config
+        let oldFormatter = localConfig.Value
+        localConfig.Value <- config
 
         { new IDisposable with
-            member _.Dispose() = currentConfig.Value <- oldFormatter
+            member _.Dispose() = localConfig.Value <- oldFormatter
         }
