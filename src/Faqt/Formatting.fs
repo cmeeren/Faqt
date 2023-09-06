@@ -275,7 +275,8 @@ type YamlFormatterBuilder = private {
         getFormatter configure (formatAsYaml this.getYamlVisitor)
 
 
-    /// Returns a minimal builder. Note that changes to this format is not considered a breaking change.
+    /// Returns a minimal builder. Note that changes to this format is not considered a breaking change. The builder is
+    /// immutable; all instance methods return a new instance.
     static member Empty = {
         configureJsonSerializerOptions = fun _ _ -> ()
         getJsonFSharpOptions = fun _ -> JsonFSharpOptions.Default()
@@ -288,7 +289,8 @@ type YamlFormatterBuilder = private {
     }
 
 
-    /// Returns the default builder. Note that changes to this format is not considered a breaking change.
+    /// Returns the default builder. Note that changes to this format is not considered a breaking change. The builder
+    /// is immutable; all instance methods return a new instance.
     static member Default =
         YamlFormatterBuilder.Empty
             .ConfigureJsonFSharpOptions(fun opts ->
