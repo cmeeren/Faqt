@@ -7,7 +7,7 @@ open Xunit
 
 [<Fact>]
 let ``Can set, override and restore custom global formatter`` () =
-    Formatter.Set(fun _ -> "GLOBAL FORMATTER")
+    Config.Set(FaqtConfig.Default.Format(fun _ -> "GLOBAL FORMATTER"))
 
     fun () ->
         let x = 1
@@ -18,7 +18,7 @@ GLOBAL FORMATTER
 """
 
     do
-        (use _ = Formatter.With(fun _ -> "OVERRIDDEN FORMATTER")
+        (use _ = Config.With(FaqtConfig.Default.Format(fun _ -> "OVERRIDDEN FORMATTER"))
 
          fun () ->
              let x = 1

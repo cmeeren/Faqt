@@ -223,11 +223,14 @@ let myFormatter : FailureData -> string =
         // Build the formatter
         .Build()
 
-// Set the default formatter
-Formatter.Set(myFormatter)
+// Create a configuration
+let myConfig = FaqtConfig.Default.Format(myFormatter)
 
-// Set the formatter for a certain scope (until the returned value is disposed)
-use _ = Formatter.With(myFormatter)
+// Set the default config
+Config.Set(myConfig)
+
+// Set the config for a certain scope (until the returned value is disposed)
+use _ = Config.With(myConfig)
 ```
 
 # Security considerations
