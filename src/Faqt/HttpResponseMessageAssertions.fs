@@ -454,3 +454,98 @@ type HttpResponseMessageAssertions =
         ) : And<HttpResponseMessage> =
         use _ = t.Assert()
         t.BeStatusCode(HttpStatusCode.NetworkAuthenticationRequired, ?because = because)
+
+
+    /// Asserts that the response has a header with the specified name, and allows continuing to assert on the values of
+    /// that header.
+    [<Extension>]
+    static member HaveHeader
+        (
+            t: Testable<HttpResponseMessage>,
+            name: string,
+            ?because
+        ) : AndDerived<HttpResponseMessage, seq<string>> =
+        use _ = t.Assert()
+
+        if isNull t.Subject then
+            nullArg "subject"
+
+        match t.Subject.Headers.TryGetValues name with
+        | false, _ ->
+            t
+                .With("Header", name)
+                .With("Response", t.Subject)
+                .With("Request", t.Subject.RequestMessage)
+                .Fail(because)
+        | true, values -> AndDerived(t, values)
+
+
+    /// Asserts that the response has at least one header with the specified name and value (or alternatively, that the
+    /// response has a header with the specified name whose possibly comma-separated values contains at least one
+    /// instance of the specified value).
+    ///
+    /// For example, if using the header name "A" and the value "x", the following will pass:
+    ///
+    /// A: x
+    /// A: y
+    ///
+    /// The following will also pass:
+    ///
+    /// A: x,y
+    [<Extension>]
+    static member HaveHeaderValue
+        (
+            t: Testable<HttpResponseMessage>,
+            name: string,
+            value: string,
+            ?because
+        ) : And<HttpResponseMessage> =
+        use _ = t.Assert()
+
+        if isNull t.Subject then
+            nullArg "subject"
+
+        let fail () =
+            t
+                .With("Header", name)
+                .With("Value", value)
+                .With("Response", t.Subject)
+                .With("Request", t.Subject.RequestMessage)
+                .Fail(because)
+
+        match t.Subject.Headers.TryGetValues name with
+        | false, _ -> fail ()
+        | true, values when not (values |> Seq.contains value) -> fail ()
+        | _ -> ()
+
+        And(t)
+
+
+    /// Asserts that the response does not have a header with the specified name.
+    [<Extension>]
+    static member NotHaveHeader(t: Testable<HttpResponseMessage>, name: string, ?because) : And<HttpResponseMessage> =
+        use _ = t.Assert()
+
+        if isNull t.Subject then
+            nullArg "subject"
+
+        match t.Subject.Headers.TryGetValues name with
+        | false, _ -> ()
+        | true, values ->
+            match values |> Seq.tryExactlyOne with
+            | Some value ->
+                t
+                    .With("Header", name)
+                    .With("But was present with value", value)
+                    .With("Response", t.Subject)
+                    .With("Request", t.Subject.RequestMessage)
+                    .Fail(because)
+            | None ->
+                t
+                    .With("Header", name)
+                    .With("But was present with values", values)
+                    .With("Response", t.Subject)
+                    .With("Request", t.Subject.RequestMessage)
+                    .Fail(because)
+
+        And(t)

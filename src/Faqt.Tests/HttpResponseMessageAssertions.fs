@@ -19,6 +19,15 @@ let resp statusCode =
     response
 
 
+let respHeader statusCode (headerAndValues: (string * string) list) =
+    let response = resp statusCode
+
+    for h, v in headerAndValues do
+        response.Headers.Add(h, v)
+
+    response
+
+
 module HaveStatusCode =
 
 
@@ -2492,5 +2501,199 @@ Because: Some reason
 Should: Be511NetworkAuthenticationRequired
 But was: 100 Continue
 Response: HTTP/0.5 100 Continue
+Request: GET / HTTP/0.5
+"""
+
+
+module HaveHeader =
+
+
+    [<Fact>]
+    let ``Passes for single header with single value and can be chained with AndDerived with the header value`` () =
+        (respHeader 200 [ "A", "x" ])
+            .Should()
+            .HaveHeader("A")
+            .Id<AndDerived<HttpResponseMessage, seq<string>>>()
+            .WhoseValue.Should()
+            .SequenceEqual([ "x" ])
+
+
+    [<Fact>]
+    let ``Passes for single header with comma-separated value and can be chained with AndDerived with the header value``
+        ()
+        =
+        (respHeader 200 [ "A", "x,y" ])
+            .Should()
+            .HaveHeader("A")
+            .Id<AndDerived<HttpResponseMessage, seq<string>>>()
+            .WhoseValue.Should()
+            .SequenceEqual([ "x,y" ])
+
+
+    [<Fact>]
+    let ``Passes for multiple headers and can be chained with AndDerived with the header value`` () =
+        (respHeader 200 [ "A", "x"; "A", "y" ])
+            .Should()
+            .HaveHeader("A")
+            .Id<AndDerived<HttpResponseMessage, seq<string>>>()
+            .WhoseValue.Should()
+            .SequenceEqual([ "x"; "y" ])
+
+
+    [<Fact>]
+    let ``Fails with expected message if header is not found`` () =
+        fun () ->
+            let x = respHeader 200 [ "A", "x" ]
+            x.Should().HaveHeader("B")
+        |> assertExnMsg
+            """
+Subject: x
+Should: HaveHeader
+Header: B
+Response: |-
+  HTTP/0.5 200 OK
+  A: x
+Request: GET / HTTP/0.5
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because if header is not found`` () =
+        fun () ->
+            let x = respHeader 200 [ "A", "x" ]
+            x.Should().HaveHeader("B", "Some reason")
+        |> assertExnMsg
+            """
+Subject: x
+Because: Some reason
+Should: HaveHeader
+Header: B
+Response: |-
+  HTTP/0.5 200 OK
+  A: x
+Request: GET / HTTP/0.5
+"""
+
+
+module HaveHeaderValue =
+
+
+    [<Fact>]
+    let ``Passes for single header with single value and can be chained with And`` () =
+        (respHeader 200 [ "A", "x" ])
+            .Should()
+            .HaveHeaderValue("A", "x")
+            .Id<And<HttpResponseMessage>>()
+            .And.Subject.StatusCode.Should(())
+            .Be(HttpStatusCode.OK)
+
+
+    [<Fact>]
+    let ``Passes for single header with comma-separated value and can be chained with AndDerived with the header value``
+        ()
+        =
+        (respHeader 200 [ "A", "x,y" ])
+            .Should()
+            .HaveHeaderValue("A", "x,y")
+            .Id<And<HttpResponseMessage>>()
+            .And.Subject.StatusCode.Should(())
+            .Be(HttpStatusCode.OK)
+
+
+    [<Fact>]
+    let ``Passes for multiple headers and can be chained with AndDerived with the header value`` () =
+        (respHeader 200 [ "A", "x"; "A", "y" ])
+            .Should()
+            .HaveHeaderValue("A", "x")
+            .Id<And<HttpResponseMessage>>()
+            .And.Subject.StatusCode.Should(())
+            .Be(HttpStatusCode.OK)
+
+
+    [<Fact>]
+    let ``Fails with expected message if header is not found`` () =
+        fun () ->
+            let x = respHeader 200 [ "A", "x"; "A", "y" ]
+            x.Should().HaveHeaderValue("A", "z")
+        |> assertExnMsg
+            """
+Subject: x
+Should: HaveHeaderValue
+Header: A
+Value: z
+Response: |-
+  HTTP/0.5 200 OK
+  A: x
+  A: y
+Request: GET / HTTP/0.5
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because if header is not found`` () =
+        fun () ->
+            let x = respHeader 200 [ "A", "x"; "A", "y" ]
+            x.Should().HaveHeaderValue("A", "z", "Some reason")
+        |> assertExnMsg
+            """
+Subject: x
+Because: Some reason
+Should: HaveHeaderValue
+Header: A
+Value: z
+Response: |-
+  HTTP/0.5 200 OK
+  A: x
+  A: y
+Request: GET / HTTP/0.5
+"""
+
+
+module NotHaveHeader =
+
+
+    [<Fact>]
+    let ``Passes if header is not present and can be chained with And`` () =
+        (respHeader 200 [ "A", "x" ])
+            .Should()
+            .NotHaveHeader("B")
+            .Id<And<HttpResponseMessage>>()
+            .And.Subject.StatusCode.Should(())
+            .Be(HttpStatusCode.OK)
+
+
+    [<Fact>]
+    let ``Fails with expected message if header is found with single value`` () =
+        fun () ->
+            let x = respHeader 200 [ "A", "x" ]
+            x.Should().NotHaveHeader("A")
+        |> assertExnMsg
+            """
+Subject: x
+Should: NotHaveHeader
+Header: A
+But was present with value: x
+Response: |-
+  HTTP/0.5 200 OK
+  A: x
+Request: GET / HTTP/0.5
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if header is found with multiple values`` () =
+        fun () ->
+            let x = respHeader 200 [ "A", "x"; "A", "y" ]
+            x.Should().NotHaveHeader("A")
+        |> assertExnMsg
+            """
+Subject: x
+Should: NotHaveHeader
+Header: A
+But was present with values: [x, y]
+Response: |-
+  HTTP/0.5 200 OK
+  A: x
+  A: y
 Request: GET / HTTP/0.5
 """
