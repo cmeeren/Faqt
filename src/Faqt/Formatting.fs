@@ -5,6 +5,7 @@ open System.Globalization
 open System.IO
 open System.Net.Http
 open System.Text
+open System.Text.Encodings.Web
 open System.Text.Json
 open System.Text.Json.Serialization
 open System.Text.RegularExpressions
@@ -47,7 +48,27 @@ type FailureData = {
 module HttpContent =
 
 
-    let serializeAppend maxLength (sb: StringBuilder) (c: HttpContent) =
+    let private tryFormatJson (str: string) =
+        try
+            let serializerOptions =
+                JsonSerializerOptions(WriteIndented = true, Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping)
+
+            let formatter = FracturedJson.Formatter()
+
+            let doc = JsonDocument.Parse(str)
+            formatter.Serialize(doc, 0, serializerOptions).Trim() |> Some
+        with _ ->
+            None
+
+
+    let private tryFormat str =
+        [ tryFormatJson ]
+        |> List.tryPick (fun f -> f str)
+        |> Option.map (sprintf "[content has been formatted]\n%s")
+        |> Option.defaultValue str
+
+
+    let serializeAppend formatContent maxLength (sb: StringBuilder) (c: HttpContent) =
         try
             if not (isNull c) && c.Headers.ContentLength <> Nullable(0L) then
                 for h in c.Headers do
@@ -61,6 +82,7 @@ module HttpContent =
 
                 let strContent =
                     Encoding.UTF8.GetString(a)
+                    |> if formatContent then tryFormat else id
                     |> String.truncate $"…\n[content truncated after %i{maxLength} characters]" maxLength
 
                 sb.AppendLine().AppendLine().Append(strContent) |> ignore
@@ -76,7 +98,7 @@ module HttpContent =
 module HttpRequestMessage =
 
 
-    let serialize maxLength (m: HttpRequestMessage) =
+    let serialize formatContent maxLength (m: HttpRequestMessage) =
         let sb = StringBuilder()
 
         sb
@@ -91,7 +113,7 @@ module HttpRequestMessage =
             for v in h.Value do
                 sb.AppendLine().Append(h.Key).Append(": ").Append(v) |> ignore
 
-        HttpContent.serializeAppend maxLength sb m.Content
+        HttpContent.serializeAppend formatContent maxLength sb m.Content
 
         sb.ToString()
 
@@ -99,7 +121,7 @@ module HttpRequestMessage =
 module HttpResponseMessage =
 
 
-    let serialize maxLength (m: HttpResponseMessage) =
+    let serialize formatContent maxLength (m: HttpResponseMessage) =
         let sb = StringBuilder()
 
         sb
@@ -115,7 +137,7 @@ module HttpResponseMessage =
             for v in h.Value do
                 sb.AppendLine().Append(h.Key).Append(": ").Append(v) |> ignore
 
-        HttpContent.serializeAppend maxLength sb m.Content
+        HttpContent.serializeAppend formatContent maxLength sb m.Content
 
         sb.ToString()
 
@@ -396,8 +418,12 @@ type YamlFormatterBuilder = private {
             .SerializeAs(string<Exception>)
             .SerializeAs(fun (t: Type) -> t.AssertionName)
             .SerializeAs(fun (ci: CultureInfo) -> if ci.Name = "" then "invariant" else ci.Name)
-            .SerializeAs(fun x -> HttpRequestMessage.serialize Config.Current.HttpContentMaxLength x)
-            .SerializeAs(fun x -> HttpResponseMessage.serialize Config.Current.HttpContentMaxLength x)
+            .SerializeAs(fun x ->
+                HttpRequestMessage.serialize Config.Current.FormatHttpContent Config.Current.HttpContentMaxLength x
+            )
+            .SerializeAs(fun x ->
+                HttpResponseMessage.serialize Config.Current.FormatHttpContent Config.Current.HttpContentMaxLength x
+            )
             .SetYamlVisitor(fun doc -> JsonToYamlConverterVisitor(doc))
 
 

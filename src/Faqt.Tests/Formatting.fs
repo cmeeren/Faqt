@@ -855,7 +855,8 @@ Value: |-
   Content-Type: application/json; charset=utf-8
   Content-Length: 30
 
-  {"a":"foo","b":null,"c":[3,4]}
+  [content has been formatted]
+  { "a": "foo", "b": null, "c": [3, 4] }
 """
 
 
@@ -967,7 +968,8 @@ Value: |-
   Content-Type: application/json; charset=utf-8
   Content-Length: 30
 
-  {"a":"foo","b":null,"c":[3,4]}
+  [content has been formatted]
+  { "a": "foo", "b": null, "c": [3, 4] }
 """
 
 
