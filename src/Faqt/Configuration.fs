@@ -39,9 +39,9 @@ type Config private () =
     /// Sets the specified config as the config for the current thread. When the returned value is disposed, the old
     /// config is restored.
     static member With(config) =
-        let oldConfig = localConfig.Value
+        let oldLocalConfig = localConfig.Value
         localConfig.Value <- config
 
         { new IDisposable with
-            member _.Dispose() = localConfig.Value <- oldConfig
+            member _.Dispose() = localConfig.Value <- oldLocalConfig
         }

@@ -347,9 +347,9 @@ type Formatter private () =
     /// Sets the specified formatter as the formatter for the current thread. When the returned value is disposed, the
     /// old formatter is restored.
     static member With(format) =
-        let oldFormatter = localFormatter.Value
+        let oldLocalFormatter = localFormatter.Value
         localFormatter.Value <- format
 
         { new IDisposable with
-            member _.Dispose() = localFormatter.Value <- oldFormatter
+            member _.Dispose() = localFormatter.Value <- oldLocalFormatter
         }
