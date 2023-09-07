@@ -275,6 +275,9 @@ type StringAssertions =
     static member MatchRegex(t: Testable<string>, regex: Regex, ?because) : And<string> =
         use _ = t.Assert()
 
+        if isNull regex then
+            nullArg (nameof regex)
+
         if isNull t.Subject || not (regex.IsMatch(t.Subject)) then
             regexFail t (regex.ToString()) regex.Options because
 
@@ -295,6 +298,9 @@ type StringAssertions =
         ) : And<string> =
         use _ = t.Assert()
 
+        if isNull pattern then
+            nullArg (nameof pattern)
+
         if isNull t.Subject || not (Regex.IsMatch(t.Subject, pattern, options)) then
             regexFail t pattern options because
 
@@ -313,6 +319,10 @@ type StringAssertions =
             ?because
         ) : And<string> =
         use _ = t.Assert()
+
+        if isNull pattern then
+            nullArg (nameof pattern)
+
         t.MatchRegex(pattern, RegexOptions.None, ?because = because)
 
 
@@ -320,6 +330,9 @@ type StringAssertions =
     [<Extension>]
     static member NotMatchRegex(t: Testable<string>, regex: Regex, ?because) : And<string> =
         use _ = t.Assert()
+
+        if isNull regex then
+            nullArg (nameof regex)
 
         if not (isNull t.Subject) && regex.IsMatch(t.Subject) then
             regexFail t (regex.ToString()) regex.Options because
@@ -342,6 +355,9 @@ type StringAssertions =
         ) : And<string> =
         use _ = t.Assert()
 
+        if isNull pattern then
+            nullArg (nameof pattern)
+
         if not (isNull t.Subject) && Regex.IsMatch(t.Subject, pattern, options) then
             regexFail t pattern options because
 
@@ -360,4 +376,8 @@ type StringAssertions =
             ?because
         ) : And<string> =
         use _ = t.Assert()
+
+        if isNull pattern then
+            nullArg (nameof pattern)
+
         t.NotMatchRegex(pattern, RegexOptions.None, ?because = because)

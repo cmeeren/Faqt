@@ -1532,6 +1532,11 @@ module ``MatchRegex with Regex`` =
 
 
     [<Fact>]
+    let ``Throws ArgumentNullException if regex is null`` () =
+        Assert.Throws<ArgumentNullException>(fun () -> "".Should().MatchRegex(null: Regex) |> ignore)
+
+
+    [<Fact>]
     let ``Fails with expected message`` () =
         fun () ->
             let x = "asd"
@@ -1609,6 +1614,13 @@ module ``MatchRegex with string and options`` =
 
 
     [<Fact>]
+    let ``Throws ArgumentNullException if pattern is null`` () =
+        Assert.Throws<ArgumentNullException>(fun () ->
+            "".Should().MatchRegex((null: string), RegexOptions.None) |> ignore
+        )
+
+
+    [<Fact>]
     let ``Fails with expected message using default RegexOptions`` () =
         fun () ->
             let x = "asd"
@@ -1678,6 +1690,11 @@ module ``MatchRegex with string`` =
 
 
     [<Fact>]
+    let ``Throws ArgumentNullException if pattern is null`` () =
+        Assert.Throws<ArgumentNullException>(fun () -> "".Should().MatchRegex(null: string) |> ignore)
+
+
+    [<Fact>]
     let ``Fails with expected message`` () =
         fun () ->
             let x = "asd"
@@ -1730,6 +1747,11 @@ module ``NotMatchRegex with Regex`` =
     [<InlineData("asd", "^ASD$", RegexOptions.IgnoreCase)>]
     let ``Fails if string matches regex`` (subject: string) (pattern: string) (options: RegexOptions) =
         assertFails (fun () -> subject.Should().NotMatchRegex(Regex(pattern, options)))
+
+
+    [<Fact>]
+    let ``Throws ArgumentNullException if regex is null`` () =
+        Assert.Throws<ArgumentNullException>(fun () -> "".Should().NotMatchRegex(null: Regex) |> ignore)
 
 
     [<Fact>]
@@ -1814,6 +1836,13 @@ module ``NotMatchRegex with string and options`` =
 
 
     [<Fact>]
+    let ``Throws ArgumentNullException if pattern is null`` () =
+        Assert.Throws<ArgumentNullException>(fun () ->
+            "".Should().NotMatchRegex((null: string), RegexOptions.None) |> ignore
+        )
+
+
+    [<Fact>]
     let ``Fails with expected message using default RegexOptions`` () =
         fun () ->
             let x = "asd"
@@ -1883,6 +1912,11 @@ module ``NotMatchRegex with string`` =
     [<InlineData("asd", "^asd$")>]
     let ``Fails if string matches pattern`` (subject: string) (pattern: string) =
         assertFails (fun () -> subject.Should().NotMatchRegex(pattern))
+
+
+    [<Fact>]
+    let ``Throws ArgumentNullException if pattern is null`` () =
+        Assert.Throws<ArgumentNullException>(fun () -> "".Should().NotMatchRegex(null: string) |> ignore)
 
 
     [<Fact>]
