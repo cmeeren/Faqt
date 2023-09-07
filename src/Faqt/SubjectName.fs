@@ -79,13 +79,10 @@ type internal CallChain() =
 
 
     static let canPushAssertion callsite =
-        match CallChain.activeUserAssertions with
-        | null -> true
-        | dict ->
-            match dict.TryGetValue callsite with
-            | false, _ -> true
-            | true, [] -> true
-            | true, hd :: _ -> hd.SupportsChildAssertions
+        match CallChain.activeUserAssertions.TryGetValue callsite with
+        | false, _ -> true
+        | true, [] -> true
+        | true, hd :: _ -> hd.SupportsChildAssertions
 
     static member private EnsureInitialized() =
         if isNull CallChain.activeUserAssertions then
@@ -144,10 +141,7 @@ type internal CallChain() =
     static member internal Reset(callsite) =
         CallChain.EnsureInitialized()
 
-        if
-            not (isNull CallChain.topLevelAssertionHistory)
-            && CallChain.topLevelAssertionHistory.ContainsKey(callsite)
-        then
+        if CallChain.topLevelAssertionHistory.ContainsKey(callsite) then
             CallChain.topLevelAssertionHistory.Remove(callsite) |> ignore
 
 
