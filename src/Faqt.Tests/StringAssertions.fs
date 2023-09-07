@@ -1873,7 +1873,7 @@ module ``NotMatchRegex with string`` =
     [<InlineData("", ".+")>]
     [<InlineData("asd", "^as$")>]
     [<InlineData("asd", "^ASD$")>]
-    let ``Passes if null or not matching pattern with options`` (subject: string) (pattern: string) =
+    let ``Passes if null or not matching pattern`` (subject: string) (pattern: string) =
         subject.Should().NotMatchRegex(pattern)
 
 
