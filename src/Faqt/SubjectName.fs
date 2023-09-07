@@ -126,6 +126,8 @@ type internal CallChain() =
 
 
     static member AssertionHistory(callsite) =
+        CallChain.EnsureInitialized()
+
         let topLevelAssertions =
             match CallChain.topLevelAssertionHistory.TryGetValue callsite with
             | true, xs -> xs |> List.map (fun x -> x.Method) |> List.rev
@@ -140,6 +142,8 @@ type internal CallChain() =
 
 
     static member internal Reset(callsite) =
+        CallChain.EnsureInitialized()
+
         if
             not (isNull CallChain.topLevelAssertionHistory)
             && CallChain.topLevelAssertionHistory.ContainsKey(callsite)
