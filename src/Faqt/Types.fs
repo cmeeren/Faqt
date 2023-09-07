@@ -66,15 +66,14 @@ type FailureBuilder<'a> = private {
 
     /// Raises an AssertionFailedException with the specified and previously added data.
     member this.Fail(because: string option) =
+        if List.isEmpty this.Testable.CallChainAssertionHistory then
+            invalidOp
+                "Call chain assertion history is empty. Testable.Assert must be called in all assertions before calling Fail."
+
         let data = {
             Subject = SubjectName.get this.Testable.CallChainOrigin this.Testable.CallChainAssertionHistory
             Because = because
-            Should =
-                if List.isEmpty this.Testable.CallChainAssertionHistory then
-                    invalidOp
-                        "Call chain assertion history is empty. Testable.Assert must be called in all assertions before calling Fail."
-                else
-                    this.Testable.CallChainAssertionHistory |> List.last
+            Should = this.Testable.CallChainAssertionHistory |> List.last
             Extra = this.Data
         }
 
