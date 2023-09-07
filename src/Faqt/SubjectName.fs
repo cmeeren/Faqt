@@ -245,7 +245,7 @@ module internal SubjectName =
     let getFileLines = memoize File.ReadAllLines
 
 
-    let private transformationPlaceholder = Guid.NewGuid().ToString()
+    let private transformationPlaceholder = "23b368b082614294bf7cadd3fda7924b"
 
 
     let get origin (assertions: string list) =
