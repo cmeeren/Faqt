@@ -165,6 +165,11 @@ type TestableExtensions =
         Testable(this, origin)
 
 
+    [<Extension>]
+    static member internal With'(this: Testable<'a>, key: string, value: 'b) =
+        { Testable = this; Data = [] }.With(key, value)
+
+
 // Note: The type checking assertions below are implemented as intrinsic extension methods so we can get away with only
 // one explicit method type parameter.
 type Testable<'a> with
@@ -176,18 +181,15 @@ type Testable<'a> with
         use _ = this.Assert()
 
         if isNull (box this.Subject) then
-            { Testable = this; Data = [] }
-                .With("Expected", expectedType)
-                .With("But was", this.Subject)
-                .Fail(because)
+            this.With'("Expected", expectedType).With("But was", this.Subject).Fail(because)
         else
             let actualType = this.Subject.GetType()
 
             if actualType = expectedType then
                 And(this)
             else
-                { Testable = this; Data = [] }
-                    .With("Expected", expectedType)
+                this
+                    .With'("Expected", expectedType)
                     .With("But was", actualType)
                     .With("Subject value", this.Subject)
                     .Fail(because)
@@ -209,18 +211,15 @@ type Testable<'a> with
         use _ = this.Assert()
 
         if isNull (box this.Subject) then
-            { Testable = this; Data = [] }
-                .With("Expected", expectedType)
-                .With("But was", this.Subject)
-                .Fail(because)
+            this.With'("Expected", expectedType).With("But was", this.Subject).Fail(because)
         else
             let actualType = this.Subject.GetType()
 
             if actualType.IsAssignableTo(expectedType) then
                 And(this)
             else
-                { Testable = this; Data = [] }
-                    .With("Expected", expectedType)
+                this
+                    .With'("Expected", expectedType)
                     .With("But was", actualType)
                     .With("Subject value", this.Subject)
                     .Fail(because)
