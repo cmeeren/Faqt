@@ -1946,3 +1946,207 @@ Should: NotMatchRegex
 Pattern: a.*
 But was: asd
 """
+
+
+module MatchWildcard =
+
+
+    [<Fact>]
+    let ``Can be chained with And`` () =
+        "a".Should().MatchWildcard("a").Id<And<string>>().And.Be("a")
+
+
+    [<Theory>]
+    [<InlineData("", "")>]
+    [<InlineData("", "*")>]
+    [<InlineData(" ", "*")>]
+    [<InlineData(" ", "?")>]
+    [<InlineData("\t", "*")>]
+    [<InlineData("\t", "?")>]
+    [<InlineData("\ta", "\t*")>]
+    [<InlineData("\ta", "\t?")>]
+    [<InlineData(" ", " ")>]
+    [<InlineData("a", "a")>]
+    [<InlineData("Aa", "aA")>]
+    [<InlineData("a", "?")>]
+    [<InlineData("a", "*")>]
+    [<InlineData("a", "**")>]
+    [<InlineData("a", "?*")>]
+    [<InlineData("a", "*?")>]
+    [<InlineData("ab", "??")>]
+    [<InlineData("ab", "*")>]
+    [<InlineData("ab", "a?")>]
+    [<InlineData("ab", "a*")>]
+    [<InlineData("ab", "?b")>]
+    [<InlineData("ab", "*b")>]
+    [<InlineData("ab", "a*b")>]
+    [<InlineData("ab", "a**b")>]
+    [<InlineData("abc", "a**c")>]
+    [<InlineData("aa bb cc", "a*b*c")>]
+    [<InlineData(" abc ", "*abc*")>]
+    [<InlineData("abc\ndef", "abc?def")>]
+    [<InlineData("abc\r\ndef", "abc?def")>]
+    [<InlineData("abc\ndef", "abc*def")>]
+    [<InlineData("abc\ndef", "ab*ef")>]
+    [<InlineData("a$^[]b!@#.|+c", "a$^[]b!@#.|+c")>]
+    [<InlineData("foobar", "f*o?bar")>]
+    [<InlineData("生命", "生?")>]
+    // Note: If adding more data, also add to the failure test for NotMatchWildcard
+    let ``Passes if string matches pattern`` (subject: string) (pattern: string) =
+        subject.Should().MatchWildcard(pattern)
+
+
+    [<Theory>]
+    [<InlineData(null, "")>]
+    [<InlineData(null, "*")>]
+    [<InlineData(null, "?")>]
+    [<InlineData("", "a")>]
+    [<InlineData("", "?")>]
+    [<InlineData("", "*?")>]
+    [<InlineData("", "?*")>]
+    [<InlineData("abc", "a")>]
+    [<InlineData("abc", "b")>]
+    [<InlineData("abc", "c")>]
+    [<InlineData(" abc ", "abc")>]
+    [<InlineData("asd", "^as$")>]
+    [<InlineData("asd", "^ASD$")>]
+    [<InlineData("abc\r\ndef", "abc??def")>]
+    // Note: If adding more data, also add to the pass test for NotMatchWildcard
+    let ``Fails if null or not matching pattern`` (subject: string) (pattern: string) =
+        assertFails (fun () -> subject.Should().MatchWildcard(pattern))
+
+
+    [<Fact>]
+    let ``Throws ArgumentNullException if pattern is null`` () =
+        Assert.Throws<ArgumentNullException>(fun () -> "".Should().MatchWildcard(null) |> ignore)
+
+
+    [<Fact>]
+    let ``Fails with expected message`` () =
+        fun () ->
+            let x = "asd"
+            x.Should().MatchWildcard("b*")
+        |> assertExnMsg
+            """
+Subject: x
+Should: MatchWildcard
+Pattern: b*
+But was: asd
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because`` () =
+        fun () ->
+            let x = "asd"
+            x.Should().MatchWildcard("b*", "Some reason")
+        |> assertExnMsg
+            """
+Subject: x
+Because: Some reason
+Should: MatchWildcard
+Pattern: b*
+But was: asd
+"""
+
+
+module NotMatchWildcard =
+
+
+    [<Fact>]
+    let ``Can be chained with And`` () =
+        "a".Should().NotMatchWildcard("b").Id<And<string>>().And.Be("a")
+
+
+    [<Theory>]
+    [<InlineData(null, "")>]
+    [<InlineData(null, "*")>]
+    [<InlineData(null, "?")>]
+    [<InlineData("", "a")>]
+    [<InlineData("", "?")>]
+    [<InlineData("", "*?")>]
+    [<InlineData("", "?*")>]
+    [<InlineData("abc", "a")>]
+    [<InlineData("abc", "b")>]
+    [<InlineData("abc", "c")>]
+    [<InlineData(" abc ", "abc")>]
+    [<InlineData("asd", "^as$")>]
+    [<InlineData("asd", "^ASD$")>]
+    [<InlineData("abc\r\ndef", "abc??def")>]
+    // Note: If adding more data, also add to the failure test for MatchWildcard
+    let ``Passes if null or not matching pattern`` (subject: string) (pattern: string) =
+        subject.Should().NotMatchWildcard(pattern)
+
+
+    [<Theory>]
+    [<InlineData("", "")>]
+    [<InlineData("", "*")>]
+    [<InlineData(" ", "*")>]
+    [<InlineData(" ", "?")>]
+    [<InlineData("\t", "*")>]
+    [<InlineData("\t", "?")>]
+    [<InlineData("\ta", "\t*")>]
+    [<InlineData("\ta", "\t?")>]
+    [<InlineData(" ", " ")>]
+    [<InlineData("a", "a")>]
+    [<InlineData("Aa", "aA")>]
+    [<InlineData("a", "?")>]
+    [<InlineData("a", "*")>]
+    [<InlineData("a", "**")>]
+    [<InlineData("a", "?*")>]
+    [<InlineData("a", "*?")>]
+    [<InlineData("ab", "??")>]
+    [<InlineData("ab", "*")>]
+    [<InlineData("ab", "a?")>]
+    [<InlineData("ab", "a*")>]
+    [<InlineData("ab", "?b")>]
+    [<InlineData("ab", "*b")>]
+    [<InlineData("ab", "a*b")>]
+    [<InlineData("ab", "a**b")>]
+    [<InlineData("abc", "a**c")>]
+    [<InlineData("aa bb cc", "a*b*c")>]
+    [<InlineData(" abc ", "*abc*")>]
+    [<InlineData("abc\ndef", "abc?def")>]
+    [<InlineData("abc\r\ndef", "abc?def")>]
+    [<InlineData("abc\ndef", "abc*def")>]
+    [<InlineData("abc\ndef", "ab*ef")>]
+    [<InlineData("a$^[]b!@#.|+c", "a$^[]b!@#.|+c")>]
+    [<InlineData("foobar", "f*o?bar")>]
+    [<InlineData("生命", "生?")>]
+    // Note: If adding more data, also add to the pass test for MatchWildcard
+    let ``Fails if string matches pattern`` (subject: string) (pattern: string) =
+        assertFails (fun () -> subject.Should().NotMatchWildcard(pattern))
+
+
+    [<Fact>]
+    let ``Throws ArgumentNullException if pattern is null`` () =
+        Assert.Throws<ArgumentNullException>(fun () -> "".Should().NotMatchWildcard(null) |> ignore)
+
+
+    [<Fact>]
+    let ``Fails with expected message`` () =
+        fun () ->
+            let x = "asd"
+            x.Should().NotMatchWildcard("a*")
+        |> assertExnMsg
+            """
+Subject: x
+Should: NotMatchWildcard
+Pattern: a*
+But was: asd
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because`` () =
+        fun () ->
+            let x = "asd"
+            x.Should().NotMatchWildcard("a*", "Some reason")
+        |> assertExnMsg
+            """
+Subject: x
+Because: Some reason
+Should: NotMatchWildcard
+Pattern: a*
+But was: asd
+"""

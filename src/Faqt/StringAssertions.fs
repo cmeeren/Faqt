@@ -36,6 +36,22 @@ module private Helpers =
             .Fail(because)
 
 
+    let isWildcardMatch (subject: string) (pattern: string) =
+        let asteriskPlaceholder = "40b37b46d8a74affbdf34544f5355b05"
+        let questionMarkPlaceholder = "191590a562c744b499798af900dee217"
+
+        let regexPattern =
+            pattern
+            |> String.replace "*" asteriskPlaceholder
+            |> String.replace "?" questionMarkPlaceholder
+            |> Regex.Escape
+            |> String.replace asteriskPlaceholder ".*"
+            |> String.replace questionMarkPlaceholder "."
+            |> sprintf "^%s$"
+
+        Regex.IsMatch(subject.Replace("\r\n", "\n"), regexPattern, RegexOptions.IgnoreCase ||| RegexOptions.Singleline)
+
+
 [<Extension>]
 type StringAssertions =
 
@@ -381,3 +397,36 @@ type StringAssertions =
             nullArg (nameof pattern)
 
         t.NotMatchRegex(pattern, RegexOptions.None, ?because = because)
+
+
+    /// Asserts that the subject matches the specified wildcard pattern, which is case insensitive and may contain `*`
+    /// (matches zero or more characters, including newlines) and `?` (matches a single character, including newlines).
+    /// Newlines are normalized to \n before matching. For more complicated matching, use MatchRegex.
+    [<Extension>]
+    static member MatchWildcard(t: Testable<string>, pattern: string, ?because) : And<string> =
+        use _ = t.Assert()
+
+        if isNull pattern then
+            nullArg (nameof pattern)
+
+        if isNull t.Subject || not (isWildcardMatch t.Subject pattern) then
+            t.With("Pattern", pattern).With("But was", t.Subject).Fail(because)
+
+        And(t)
+
+
+    /// Asserts that the subject does not match the specified wildcard pattern, which is case insensitive and may
+    /// contain `*` (matches zero or more characters, including newlines) and `?` (matches a single character, including
+    /// newlines). Newlines are normalized to \n before matching. Passes if the subject is null. For more complicated
+    /// matching, use MatchRegex.
+    [<Extension>]
+    static member NotMatchWildcard(t: Testable<string>, pattern: string, ?because) : And<string> =
+        use _ = t.Assert()
+
+        if isNull pattern then
+            nullArg (nameof pattern)
+
+        if not (isNull t.Subject) && isWildcardMatch t.Subject pattern then
+            t.With("Pattern", pattern).With("But was", t.Subject).Fail(because)
+
+        And(t)
