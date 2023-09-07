@@ -18,12 +18,7 @@ type AssertionFailedException internal (message: string, failureData: FailureDat
 [<Struct>]
 type Testable<'a> internal (subject: 'a, origin: CallChainOrigin) =
 
-    /// Call this at the start of your assertions, and make sure to dispose the returned value at the end. This is
-    /// needed to track important state necessary for subject names to work. If your assertion calls user code that is
-    /// expected to call their own assertions (like `Satisfy`), call `t.Assert(true)` instead. In that case, do not call
-    /// other assertions directly in the implementation; the next assertion is assumed to be called by the user. If
-    /// additionally you invoke user assertions for each item in a sequence, tall `t.Assert(true, true)` instead.
-    member _.Assert
+    member internal _.Assert'
         (
             [<Optional; DefaultParameterValue(false)>] supportsChildAssertions,
             [<Optional; DefaultParameterValue(false)>] isSeqAssertion,
@@ -31,10 +26,7 @@ type Testable<'a> internal (subject: 'a, origin: CallChainOrigin) =
         ) =
         CallChain.Assert(origin, assertionMethod, supportsChildAssertions, isSeqAssertion)
 
-    /// If your assertion invokes user-supplied assertions for each item in a sequence, call this before the assertion
-    /// invocation for each item, and make sure to dispose the returned value after the assertion invocation. This is
-    /// needed to track important state necessary for subject names to work.
-    member _.AssertItem() = CallChain.AssertItem(origin)
+    member internal _.AssertItem'() = CallChain.AssertItem(origin)
 
     /// Returns the subject being tested. Alias of Whose.
     member _.Subject: 'a = subject
@@ -178,7 +170,7 @@ type Testable<'a> with
     /// Asserts that the runtime type of the subject is the exact specified type. See 'BeAssignableTo' for allowing
     /// subtypes and interface implementations.
     member this.BeOfType(expectedType: Type, ?because) : And<'a> =
-        use _ = this.Assert()
+        use _ = this.Assert'()
 
         if isNull (box this.Subject) then
             this.With'("Expected", expectedType).With("But was", this.Subject).Fail(because)
@@ -199,7 +191,7 @@ type Testable<'a> with
     /// subtypes and interface implementations.
     [<RequiresExplicitTypeArguments>]
     member this.BeOfType<'b>(?because) : AndDerived<'a, 'b> =
-        use _ = this.Assert()
+        use _ = this.Assert'()
         this.BeOfType(typeof<'b>, ?because = because) |> ignore
         AndDerived(this, box this.Subject :?> 'b)
 
@@ -208,7 +200,7 @@ type Testable<'a> with
     /// specified type, be a subtype of the specified type, or implement the specified interface). See 'BeOfType' for
     /// requiring an exact type.
     member this.BeAssignableTo(expectedType: Type, ?because) : And<'a> =
-        use _ = this.Assert()
+        use _ = this.Assert'()
 
         if isNull (box this.Subject) then
             this.With'("Expected", expectedType).With("But was", this.Subject).Fail(because)
@@ -230,6 +222,6 @@ type Testable<'a> with
     /// requiring an exact type.
     [<RequiresExplicitTypeArguments>]
     member this.BeAssignableTo<'b>(?because) : AndDerived<'a, 'b> =
-        use _ = this.Assert()
+        use _ = this.Assert'()
         this.BeAssignableTo(typeof<'b>, ?because = because) |> ignore
         AndDerived(this, box this.Subject :?> 'b)
