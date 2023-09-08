@@ -1,2 +1,2 @@
-Please read [CONTRIBUTING.md](https://github.com/cmeeren/Faqt/blob/main/CONTRIBUTING.md) before posting, and then remove
-this message.
+Please read the contribution guidelines before posting, and then remove this message.
+https://github.com/cmeeren/Faqt/blob/main/CONTRIBUTING.md
