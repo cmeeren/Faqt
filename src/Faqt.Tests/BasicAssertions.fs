@@ -225,6 +225,142 @@ WithCustomEquality: true
 """
 
 
+module BeOneOf =
+
+
+    [<Fact>]
+    let ``Can be chained with AndDerived with found value`` () =
+        let x = (1, 2)
+        let y = (1, 2)
+
+        x
+            .Should()
+            .BeOneOf([ y ])
+            .Id<AndDerived<int * int, int * int>>()
+            .That.Should(())
+            .BeSameAs(y)
+
+
+    let passData = [
+        [| box<string> null; [ (null: string) ] |]
+        [| box "a"; [ "a" ] |]
+        [| box "a"; [ "a"; "b" ] |]
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof passData)>]
+    let ``Passes if found`` (subject: string) (expected: seq<string>) = subject.Should().BeOneOf(expected)
+
+
+    let failData = [
+        [| box<string> null; List<string>.Empty |]
+        [| "a"; List<string>.Empty |]
+        [| box "a"; List<string>.Empty |]
+        [| box "a"; [ "b" ] |]
+        [| box "a"; [ "b"; "c" ] |]
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof failData)>]
+    let ``Fails if not found`` (subject: string) (expected: seq<string>) =
+        assertFails (fun () -> subject.Should().BeOneOf(expected))
+
+
+    [<Fact>]
+    let ``Fails with expected message`` () =
+        fun () ->
+            let x = 1
+            x.Should().BeOneOf([ 2; 3 ])
+        |> assertExnMsg
+            """
+Subject: x
+Should: BeOneOf
+Candidates: [2, 3]
+But was: 1
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because`` () =
+        fun () ->
+            let x = 1
+            x.Should().BeOneOf([ 2; 3 ], "Some reason")
+        |> assertExnMsg
+            """
+Subject: x
+Because: Some reason
+Should: BeOneOf
+Candidates: [2, 3]
+But was: 1
+"""
+
+
+module NotBeOneOf =
+
+
+    [<Fact>]
+    let ``Can be chained with And`` () =
+        (1).Should().NotBeOneOf([ 2 ]).Id<And<int>>().And.Be(1)
+
+
+    let passData = [
+        [| box<string> null; List<string>.Empty |]
+        [| "a"; List<string>.Empty |]
+        [| box "a"; List<string>.Empty |]
+        [| box "a"; [ "b" ] |]
+        [| box "a"; [ "b"; "c" ] |]
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof passData)>]
+    let ``Passes if not found`` (subject: string) (expected: seq<string>) = subject.Should().NotBeOneOf(expected)
+
+
+    let failData = [
+        [| box<string> null; [ (null: string) ] |]
+        [| box "a"; [ "a" ] |]
+        [| box "a"; [ "a"; "b" ] |]
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof failData)>]
+    let ``Fails if found`` (subject: string) (expected: seq<string>) =
+        assertFails (fun () -> subject.Should().NotBeOneOf(expected))
+
+
+    [<Fact>]
+    let ``Fails with expected message`` () =
+        fun () ->
+            let x = 1
+            x.Should().NotBeOneOf([ 1; 2 ])
+        |> assertExnMsg
+            """
+Subject: x
+Should: NotBeOneOf
+Candidates: [1, 2]
+But was: 1
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because`` () =
+        fun () ->
+            let x = 1
+            x.Should().NotBeOneOf([ 1; 2 ], "Some reason")
+        |> assertExnMsg
+            """
+Subject: x
+Because: Some reason
+Should: NotBeOneOf
+Candidates: [1, 2]
+But was: 1
+"""
+
+
 module BeSameAs =
 
 

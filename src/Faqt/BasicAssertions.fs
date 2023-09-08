@@ -61,6 +61,27 @@ type BasicAssertions =
         And(t)
 
 
+    /// Asserts that the subject is equal to one of the specified values.
+    [<Extension>]
+    static member BeOneOf(t: Testable<'a>, candidates: seq<'a>, ?because) : AndDerived<'a, 'a> =
+        use _ = t.Assert()
+
+        match candidates |> Seq.tryFind ((=) t.Subject) with
+        | None -> t.With("Candidates", candidates).With("But was", t.Subject).Fail(because)
+        | Some x -> AndDerived(t, x)
+
+
+    /// Asserts that the subject is not equal to one of the specified values. Passes if the candidate list is empty.
+    [<Extension>]
+    static member NotBeOneOf(t: Testable<'a>, candidates: seq<'a>, ?because) : And<'a> =
+        use _ = t.Assert()
+
+        if candidates |> Seq.exists ((=) t.Subject) then
+            t.With("Candidates", candidates).With("But was", t.Subject).Fail(because)
+
+        And(t)
+
+
     /// Asserts that the subject is reference equal to the specified value (which must not be null).
     [<Extension>]
     static member BeSameAs(t: Testable<'a>, expected: 'a, ?because) : And<'a> =
