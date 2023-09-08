@@ -21,8 +21,7 @@ to make a strong case to convince the the maintainers of the merits of a feature
 
 - Please search existing issues (both open and closed) before opening a new one.
 - Provide as much relevant info as possible.
-- If it's a bug report, provide a minimal repro.
-  See
+- If it's a bug report, provide a minimal repro. See
   StackOverflow's [How to create a Minimal, Reproducible Example](https://stackoverflow.com/help/minimal-reproducible-example).
   Make code more readable by placing it in Markdown code blocks with the language `f#` or `fsharp` to get syntax
   highlighting:
@@ -32,8 +31,8 @@ to make a strong case to convince the the maintainers of the merits of a feature
   ```
   ``````
 - Be clear and specific.
-- Preview and read your issue before posting, and rewrite it if necessary. We all write issues at times without having
-  a clear idea up front of what we want to communicate. Just don't _post_ a jumbled mess; rewrite it.
+- Preview and read your issue before posting, and rewrite it if necessary. We all write issues at times without having a
+  clear idea up front of what we want to communicate. Just don't _post_ a jumbled mess; rewrite it.
 
 ## Suggesting new assertions
 
