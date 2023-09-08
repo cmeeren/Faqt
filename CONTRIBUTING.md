@@ -61,6 +61,23 @@ the following things in mind:
 - Unless it's a trivial fix, consider opening an issue first to discuss it with the maintainers.
 - For all pull requests, please follow the workflow described below.
 
+### Required unit tests for assertions
+
+When writing tests for your proposed assertions, please take inspiration from tests of similar assertions. For
+consistency, the following tests should be used for all assertions:
+
+* One test to verify chaining.
+* One test per success condition, including edge cases like `null` subject. The tests could be one or more
+  parametrized `Theory` tests. If there is a single success condition and no edge cases, it can be omitted since it is
+  fully covered by the chaining test described above.
+* At least two tests per call to `Fail` to verify failure output with and without `because`. Additional tests to capture
+  all variations of output format, if relevant.
+* One test per failure condition, including edge cases like `null` subject. The tests could be one or more
+  parametrized `Theory` tests. If a `Fact` or a whole `Theory` (not just a test case in a `Theory`) is fully covered by
+  an output test described above, it can be omitted.
+* After tests are written, verify that the tests actually invoke the correct assertion method/overload (easy to miss if
+  copy-pasting).
+
 ### Pull request workflow
 
 1. Fork Faqt on GitHub
