@@ -23,6 +23,7 @@
     <Compile Include="NullableAssertions.fs" />
     <Compile Include="StringAssertions.fs" />
     <Compile Include="DictionaryAssertions.fs" />
+    <Compile Include="SetAssertions.fs" />
     <Compile Include="SeqAssertions.fs" />
     <Compile Include="GuidAssertions.fs" />
     <Compile Include="EnumAssertions.fs" />
