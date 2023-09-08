@@ -24,6 +24,45 @@ module private SeqAssertionsHelpers =
     }
 
 
+    let getMissingFromSupersetAndIsProperSuperset superset subset =
+        let freqMap = Dictionary()
+
+        let increment item =
+            let key = Key item
+
+            let newCount =
+                match freqMap.TryGetValue(key) with
+                | false, _ -> 1
+                | true, count -> count + 1
+
+            freqMap[key] <- newCount
+            newCount
+
+        let decrement item =
+            let key = Key item
+
+            let newCount =
+                match freqMap.TryGetValue(key) with
+                | false, _ -> -1
+                | true, count -> count - 1
+
+            freqMap[key] <- newCount
+            newCount
+
+        superset |> Seq.iter (increment >> ignore)
+        subset |> Seq.iter (decrement >> ignore)
+
+        let containedItemNotInSubset = freqMap |> Seq.exists (fun kvp -> kvp.Value > 0)
+
+        let extraItemsInSubset = ResizeArray()
+
+        for item in subset do
+            if increment item < 1 then
+                extraItemsInSubset.Add item
+
+        extraItemsInSubset, containedItemNotInSubset
+
+
 [<Extension>]
 type SeqAssertions =
 
@@ -652,17 +691,13 @@ type SeqAssertions =
         if isNull (box t.Subject) then
             t.With("Subset", subset).With("But was", t.Subject).Fail(because)
 
-        let remaining = ResizeArray(subset)
-        let mutable containedItemNotInSubset = false
+        let extraItemsInSubset, containedItemNotInSubset =
+            getMissingFromSupersetAndIsProperSuperset t.Subject subset
 
-        for item in t.Subject do
-            if not (remaining.Remove item) then
-                containedItemNotInSubset <- true
-
-        if remaining.Count > 0 then
+        if extraItemsInSubset.Count > 0 then
             t
                 .With("Subset", subset)
-                .With("But lacked", remaining)
+                .With("But lacked", extraItemsInSubset)
                 .With("Subject value", t.Subject)
                 .Fail(because)
         elif proper && not containedItemNotInSubset then
@@ -698,17 +733,13 @@ type SeqAssertions =
         if isNull (box t.Subject) then
             t.With("Superset", superset).With("But was", t.Subject).Fail(because)
 
-        let remaining = ResizeArray(t.Subject)
-        let mutable containedItemNotInSubset = false
+        let extraItemsInSubject, containedItemNotInSubset =
+            getMissingFromSupersetAndIsProperSuperset superset t.Subject
 
-        for item in superset do
-            if not (remaining.Remove item) then
-                containedItemNotInSubset <- true
-
-        if remaining.Count > 0 then
+        if extraItemsInSubject.Count > 0 then
             t
                 .With("Superset", superset)
-                .With("But had extra items", remaining)
+                .With("But had extra items", extraItemsInSubject)
                 .With("Subject value", t.Subject)
                 .Fail(because)
         elif proper && not containedItemNotInSubset then
