@@ -213,6 +213,37 @@ type SeqAssertions =
         And(t)
 
 
+    /// Asserts that all items in the subject are equal to the specified value.
+    [<Extension>]
+    static member AllBe(t: Testable<#seq<'a>>, expected: 'a, ?because) : And<_> =
+        use _ = t.Assert()
+
+        if isNull (box t.Subject) then
+            t.With("Expected", expected).With("But was", t.Subject).Fail(because)
+        else
+            let differentItems =
+                t.Subject
+                |> Seq.indexed
+                |> Seq.choose (fun (i, actualItem) ->
+                    if actualItem <> expected then
+                        Some {|
+                            Index = i
+                            Value = TryFormat actualItem
+                        |}
+                    else
+                        None
+                )
+
+            if not (Seq.isEmpty differentItems) then
+                t
+                    .With("Expected", expected)
+                    .With("Failures", differentItems)
+                    .With("Subject value", t.Subject)
+                    .Fail(because)
+
+        And(t)
+
+
     /// Asserts that the subject contains the same items in the same order as the specified sequence. Passes if both
     /// sequences are null.
     [<Extension>]
