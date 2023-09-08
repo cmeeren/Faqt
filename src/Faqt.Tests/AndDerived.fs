@@ -46,8 +46,8 @@ module Subject =
 
     [<Fact>]
     let ``Realistic example usage`` () =
-        let innerValue = (Some "asd").Should().BeSome().Subject
-        ignore<string option> innerValue
+        let subject = "asd".Should().Pass().Subject
+        ignore<string> subject
 
 
 module Whose =
