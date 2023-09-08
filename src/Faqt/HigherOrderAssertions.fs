@@ -55,20 +55,20 @@ type HigherOrderAssertions =
         use _ = t.Assert(true)
         let assertions = assertions |> Seq.toArray
 
-        let exceptions =
-            assertions
-            |> Array.choose (fun f ->
-                try
-                    f t.Subject |> ignore
-                    None
-                with :? AssertionFailedException as ex ->
-                    Some ex
-            )
+        if assertions.Length > 0 then
+            let failures = ResizeArray()
+            let mutable succeeded = false
 
-        if assertions.Length > 0 && exceptions.Length = assertions.Length then
-            t
-                .With("Failures", exceptions |> Array.map (fun ex -> ex.FailureData))
-                .Fail(because)
+            for f in assertions do
+                if not succeeded then
+                    try
+                        f t.Subject |> ignore
+                        succeeded <- true
+                    with :? AssertionFailedException as ex ->
+                        failures.Add ex.FailureData
+
+            if not succeeded then
+                t.With("Failures", failures).Fail(because)
 
         And(t)
 
