@@ -87,3 +87,17 @@ module WhoseValue =
     [<Fact>]
     let ``Realistic example usage`` () =
         (Some "asd").Should().BeSome().WhoseValue.Should(()).NotBeNull()
+
+
+module Derived =
+
+
+    [<Fact>]
+    let ``Returns the derived value`` () =
+        Assert.Equal("asd", "asd".Should().PassDerived().Derived)
+
+
+    [<Fact>]
+    let ``Realistic example usage`` () =
+        let innerValue = (Some "asd").Should().BeSome().Derived
+        ignore<string> innerValue

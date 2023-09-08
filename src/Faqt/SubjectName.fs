@@ -300,12 +300,12 @@ module internal SubjectName =
             // expression up to the first call to this method.
             |> String.regexRemoveAfterNth lastAssertionCount $"\.{Regex.Escape lastAssertion}( *\<.*\>)? *\("
 
-            // Replace Should...Whose, Should...WhoseValue, and Should...That with the transformation placeholder, since
-            // it's assumed the code contains something returning AndDerived. Make an exception if prefixed by And, since
-            // that would be methods on Testable, not AndDerived. (Not all of those methods exist on Testable yet, but may
-            // be added if realistic use-cases arrive.)
+            // Replace Should...Whose, Should...WhoseValue, Should...That, and Should...Derived with the transformation
+            // placeholder, since it's assumed the code contains something returning AndDerived. Make an exception if
+            // prefixed by And, since that would be methods on Testable, not AndDerived. (Not all of those methods exist
+            // on Testable yet, but may be added if realistic use-cases arrive.)
             |> String.regexReplace
-                "\.Should\((\(\))?\)\..+?\.(?<!And\.)(Whose|WhoseValue|That)\."
+                "\.Should\((\(\))?\)\..+?\.(?<!And\.)(Whose|WhoseValue|That|Derived)\."
                 transformationPlaceholder
 
             // Remove Should...And; this code doesn't change the subject.

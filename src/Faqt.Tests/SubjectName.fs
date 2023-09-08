@@ -311,6 +311,62 @@ Should: Fail
 
 
 [<Fact>]
+let ``Derived, single line, first fails`` () =
+    fun () ->
+        let thisIsAVariableName = "asd"
+        thisIsAVariableName.Should().FailDerived().Derived.Length.Should(()).Pass()
+    |> assertExnMsg
+        """
+Subject: thisIsAVariableName
+Should: FailDerived
+"""
+
+
+[<Fact>]
+let ``Derived, single line, second fails`` () =
+    fun () ->
+        let thisIsAVariableName = "1"
+
+        thisIsAVariableName
+            .Should()
+            .PassDerived()
+            .Derived.Length.GetType()
+            .Should(())
+            .Fail()
+    |> assertExnMsg
+        """
+Subject:
+- thisIsAVariableName
+- Length.GetType()
+Should: Fail
+"""
+
+
+[<Fact>]
+let ``Multiple Derived`` () =
+    fun () ->
+        let thisIsAVariableName = "1"
+
+        thisIsAVariableName
+            .Should()
+            .PassDerived()
+            .Derived.Length.Should(())
+            .PassDerived()
+            .Derived.ToString()
+            .GetType()
+            .Should(())
+            .Fail()
+    |> assertExnMsg
+        """
+Subject:
+- thisIsAVariableName
+- Length
+- ToString().GetType()
+Should: Fail
+"""
+
+
+[<Fact>]
 let ``Whose, same child assertion, first fails`` () =
     fun () ->
         let thisIsAVariableName = ""
