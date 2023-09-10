@@ -34,6 +34,7 @@
     <Compile Include="BasicAssertions.fs" />
     <Compile Include="ComparisonAssertions.fs" />
     <Compile Include="UnionAssertions.fs" />
+    <Compile Include="UnionAssertions2.fs" />
     <Compile Include="BoolAssertions.fs" />
     <Compile Include="NullableAssertions.fs" />
     <Compile Include="StringAssertions.fs" />

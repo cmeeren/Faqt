@@ -21,6 +21,16 @@ module BeOfCase =
 
 
     [<Fact>]
+    let ``Overload resolution for case without data when type is unknown`` () =
+        ignore (fun x -> x.Should().BeOfCase(NoFields))
+
+
+    [<Fact>]
+    let ``Overload resolution for case with data when type is unknown`` () =
+        ignore (fun x -> x.Should().BeOfCase(SingleFieldInt))
+
+
+    [<Fact>]
     let ``NoFields passes and can be chained with And`` () =
         NoFields.Should().BeOfCase(NoFields).Id<And<MyDu>>().And.Be(NoFields)
 
