@@ -21,8 +21,8 @@
 # Writing your own assertions
 
 Writing your own assertions is easy! Custom assertions are implemented exactly like Faqt’s built-in assertions, so you
-can always look at those for inspiration (see all files ending with `Assertions` in [this
-folder](https://github.com/cmeeren/Faqt/tree/main/src/Faqt)).
+can always look at those for inspiration (see all files ending with `Assertions`
+in [this folder](https://github.com/cmeeren/Faqt/tree/main/src/Faqt)).
 
 All the details are further below, but first, we'll get a long way just by looking at some examples.
 
@@ -122,23 +122,22 @@ do not run the same assertions on items in a sequence), and we call `use _ = t.A
 each item.
 
 The most significant thing _not_ demonstrated in the examples above is that if your assertion calls `Should`, make sure
-to
-use the `Should(t)` overload instead of `Should()`.
+to use the `Should(t)` overload instead of `Should()`.
 
 If you want all the details, here they are:
 
-* Implement the assertion as an [extension
-  method](https://learn.microsoft.com/en-us/dotnet/fsharp/language-reference/type-extensions#extension-methods) for
-  `Testable` (the first argument), with whatever constraints you need. The constraints could be implicitly imposed by
-  F#, as with `Be` where it requires `equality` on `'a` due to the use of the inequality operator (`<>`), or they could
-  be explicitly specified, for example by specifying more concrete types (such as `Testable<'a option>` in order to have
-  your extension only work for `option`-wrapped types).
+* Implement the assertion as
+  an [extension method](https://learn.microsoft.com/en-us/dotnet/fsharp/language-reference/type-extensions#extension-methods)
+  for `Testable` (the first argument), with whatever constraints you need. The constraints could be implicitly imposed
+  by F#, as with `Be` where it requires `equality` on `'a` due to the use of the inequality operator (`<>`), or they
+  could be explicitly specified, for example by specifying more concrete types (such as `Testable<'a option>` in order
+  to have your extension only work for `option`-wrapped types).
 
 * Accept whichever arguments you need for your assertion, and end with an optional `?because` parameter.
 
-* First in your method, call `use _ = t.Assert()`. This is needed to track important state necessary for subject
-  names to work. If your assertion is a higher-order assertion (like `Satisfy`) that calls user code that is expected to
-  call other assertions, call `t.Assert(true)` instead. If your assertion calls the same assertions for each item in a
+* First in your method, call `use _ = t.Assert()`. This is needed to track important state necessary for subject names
+  to work. If your assertion is a higher-order assertion (like `Satisfy`) that calls user code that is expected to call
+  other assertions, call `t.Assert(true)` instead. If your assertion calls the same assertions for each item in a
   sequence, call `t.Assert(true, true)` instead, and additionally call `use _ = t.AssertItem()` before the assertion of
   each item.
 
@@ -191,8 +190,8 @@ If you want all the details, here they are:
   But was: false
   ```
 
-  The `Expected: true` line is superfluous given the name of the assertion. Therefore, it's better with a
-  separate assertion message for `BeTrue`:
+  The `Expected: true` line is superfluous given the name of the assertion. Therefore, it's better with a separate
+  assertion message for `BeTrue`:
 
   ```
   Subject: x
