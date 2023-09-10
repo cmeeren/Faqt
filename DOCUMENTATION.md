@@ -95,7 +95,7 @@ type Assertions =
         if isNull (box t.Subject) then
             t.With("But was", t.Subject).Fail(because)
 
-        let exceptions =
+        let failures =
             t.Subject
             |> Seq.indexed
             |> Seq.choose (fun (i, x) ->
@@ -104,15 +104,12 @@ type Assertions =
                     assertion x |> ignore
                     None
                 with :? AssertionFailedException as ex ->
-                    Some(i, ex)
+                    Some { Index = i; Failure = ex.FailureData }
             )
             |> Seq.toArray
 
-        if exceptions.Length > 0 then
-            t
-                .With("Failures", exceptions |> Array.map (fun (i, ex) -> { Index = i; Failure = ex.FailureData }))
-                .With("Subject value", t.Subject)
-                .Fail(because)
+        if failures.Length > 0 then
+            t.With("Failures", failures).With("Subject value", t.Subject).Fail(because)
 
         And(t)
 ```
