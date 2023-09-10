@@ -82,7 +82,7 @@ Subject:
 - customer
 - ContactInfo
 Should: BeSome
-But was: null
+But was: None
 ```
 
 If `LastName` is not `Armstrong`:
