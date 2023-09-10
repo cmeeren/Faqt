@@ -179,7 +179,8 @@ type private FailureDataConverter() =
             writer.WriteEndArray()
 
         match value.Because with
-        | None -> ()
+        | None
+        | Some "" -> ()
         | Some bc ->
             writer.WritePropertyName("Because")
             writer.WriteStringValue(bc)

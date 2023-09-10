@@ -147,6 +147,17 @@ Foo: Bar
 
 
     [<Fact>]
+    let ``Rendering of top-level structure with empty because`` () =
+        fun () -> "a".Should().FailWithBecause("", "Foo", "Bar")
+        |> assertExnMsg
+            """
+Subject: '"a"'
+Should: FailWithBecause
+Foo: Bar
+"""
+
+
+    [<Fact>]
     let ``Rendering of top-level structure with multi-part subject name`` () =
         fun () ->
             (Some "a")
