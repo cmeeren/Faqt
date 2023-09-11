@@ -154,3 +154,8 @@ As expected by the discerning F# developer, Faqt is:
 See [DOCUMENTATION.md](DOCUMENTATION.md) for additional details, such as instructions on writing your own assertions,
 how to use the optional `%` operator (alias for `ignore`), customizing the output format, security considerations, and a
 FAQ with, among other things, a brief comparison with other assertion frameworks.
+
+## Contributing
+
+Contributions are welcome! Please see the [contribution guidelines](CONTRIBUTING.md) before opening an issue or pull
+request.
