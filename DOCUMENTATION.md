@@ -271,7 +271,7 @@ let myFormatter : FailureData -> string =
         .Build()
 
 // Set the default formatter
-Formatter.Set(myFormater)
+Formatter.Set(myFormatter)
 
 // Set the config for a certain scope (until the returned value is disposed)
 use _ = Formatter.With(myConfig)
