@@ -37,24 +37,25 @@ considered a non-breaking change.
 
 ## A motivating example
 
-Here is an example of what you can do with Faqt. Simply use `Should()` to start asserting, whether in a unit test or for
-validating preconditions etc. in domain code (the latter is demonstrated below). For subsequent calls to `Should` in the
-same chain, use `Should(())` (double parentheses - this is required for subject names to work properly). Like
-FluentAssertions, all assertions support an optional "because" parameter that will be used in the output.
+Here is an example of what you can do with Faqt. Simply use `Should()` to start asserting. For subsequent calls
+to `Should` in the same chain, use `Should(())` (double parentheses - this is required for subject names to work
+properly). Like FluentAssertions, all assertions support an optional "because" parameter that will be used in the
+output.
 
 ```f#
+// Example type definition for clarity
 type Customer =
     | Internal of {| ContactInfo: {| Name: {| LastName: string |} |} option |}
     | External of {| Id: int |}
 
-let calculateFreeShipping customer =
-    customer
-        .Should()
-        .BeOfCase(Internal, "This function should only be called with internal customers")
-        .Whose.ContactInfo.Should(())
-        .BeSome()
-        .Whose.Name.LastName.Should(())
-        .Be("Armstrong", "Only customers named Armstrong get free shipping")
+// Assertions in test or domain code
+customer
+    .Should()
+    .BeOfCase(Internal, "This function should only be called with internal customers")
+    .Whose.ContactInfo.Should(())
+    .BeSome()
+    .Whose.Name.LastName.Should(())
+    .Be("Armstrong", "Only customers named Armstrong get free shipping")
 ```
 
 (The example is formatted using [Fantomas](https://fsprojects.github.io/fantomas/), which line-breaks fluent chains at
