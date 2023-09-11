@@ -439,8 +439,8 @@ Unfortunately, I stopped using it because of several issues:
   values. Simply put, not all F# code can be used in a quotation.
 * It can not be used to extract values for further testing or similar (which is supported by Faqt's `BeSome` and similar
   assertions).
-* I need assertions that can work in production code, too, and I assume that evaluating quotations has a significant
-  performance impact (I have admittedly not measured this, since I stopped using it for the reasons above anyway).
+* I need assertions that can work in production code, too. I assume that evaluating quotations has a significant
+  performance impact. (I have admittedly not measured this, since I stopped using it for the reasons above anyway.)
 
 ## Can I use Faqt from C#?
 
