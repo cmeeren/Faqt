@@ -287,7 +287,12 @@ open Faqt
 open Faqt.Configuration
 
 // Create a configuration
-let myConfig = FaqtConfig.Default.Format(myFormatter)
+let myConfig =
+    FaqtConfig.Default
+        // Set the maximum length of rendered HttpContent in assertion failure output
+        .SetHttpContentMaxLength(1024 * 1024)
+        // Disable formatting of HttpContent (such as indenting JSON for readability)
+        .SetFormatHttpContent(false)
 
 // Set the default config
 Config.Set(myConfig)
@@ -295,7 +300,7 @@ Config.Set(myConfig)
 // Set the config for a certain scope (until the returned value is disposed)
 use _ = Config.With(myConfig)
 
-// Use Config.Current if you need to use the config values (e.g. in your own converters/formatters)
+// Config.Current is available globally and can be used in your own converters/formatters.
 myFormatter Config.Current
 ```
 
