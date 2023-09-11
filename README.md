@@ -9,7 +9,7 @@ Faqt improves on the best of [FluentAssertions](https://github.com/fluentasserti
 and [Shouldly](https://github.com/shouldly/shouldly) and serves it steaming hot on a silver platter to the discerning F#
 developer.
 
-**It aims to the best assertion library for F#.**
+**It aims to be the best assertion library for F#.**
 
 If you don't agree, I consider that a bug - please raise an issue. 😉
 
