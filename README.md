@@ -109,23 +109,9 @@ derived state from an assertion, so you can track the transformations on the ori
 ## Installation and requirements
 
 1. Install Faqt [from NuGet](https://www.nuget.org/packages/Faqt). Faqt supports .NET 5.0 and higher.
-2. If you use path mapping (e.g., CI builds with `DeterministicSourcePaths` enabled) or want to execute assertions where
-   source files are not available (e.g. in production), enable the following settings on all projects that call
-   assertions (either in the `.fsproj` files or in `Directory.Build.props`):
-
-   ```xml
-   <DebugType>embedded</DebugType>
-   <EmbedAllSources>true</EmbedAllSources>
-   ```
-
-   Alternatively, enable them by passing the following parameters to your `dotnet build`/`test`/`publish` commands:
-
-   ```
-   -p:DebugType=embedded -p:EmbedAllSources=true
-   ```
-
-   Note that `DebugType=embedded` is automatically set
-   by [DotNet.ReproducibleBuilds](https://github.com/dotnet/reproducible-builds) if you use that.
+2. If you use path mapping, deterministic source paths, or want to execute assertions where source files are not
+   available (e.g. in production), set `DebugType` to `embedded` and `EmbedAllSources` to `true`. For more details, see
+   the [documentation](DOCUMENTATION.md)
 
 ## Faqt in a nutshell
 

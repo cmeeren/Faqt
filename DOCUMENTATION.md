@@ -2,9 +2,11 @@
 
 <!-- TOC -->
 
+* [Installation and requirements](#installation-and-requirements)
 * [Writing your own assertions](#writing-your-own-assertions)
 * [Multiple assertion chains without `|> ignore`](#multiple-assertion-chains-without--ignore)
 * [Customizing the format](#customizing-the-format)
+* [Configuring options](#configuring-options)
 * [Security considerations](#security-considerations)
 * [FAQ](#faq)
   * [Which testing frameworks does Faqt work with?](#which-testing-frameworks-does-faqt-work-with)
@@ -17,6 +19,27 @@
   * [Can I use Faqt from C#?](#can-i-use-faqt-from-c)
 
 <!-- TOC -->
+
+# Installation and requirements
+
+1. Install Faqt [from NuGet](https://www.nuget.org/packages/Faqt). Faqt supports .NET 5.0 and higher.
+2. If you use path mapping (e.g., CI builds with `DeterministicSourcePaths` enabled) or want to execute assertions where
+   source files are not available (e.g. in production), enable the following settings on all projects that call
+   assertions (either in the `.fsproj` files or in `Directory.Build.props`):
+
+   ```xml
+   <DebugType>embedded</DebugType>
+   <EmbedAllSources>true</EmbedAllSources>
+   ```
+
+   Alternatively, enable them by passing the following parameters to your `dotnet build`/`test`/`publish` commands:
+
+   ```
+   -p:DebugType=embedded -p:EmbedAllSources=true
+   ```
+
+   Note that `DebugType=embedded` is automatically set
+   by [DotNet.ReproducibleBuilds](https://github.com/dotnet/reproducible-builds) if you use that.
 
 # Writing your own assertions
 
