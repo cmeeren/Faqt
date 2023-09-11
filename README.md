@@ -32,6 +32,7 @@ considered a non-breaking change.
 * [Installation and requirements](#installation-and-requirements)
 * [Faqt in a nutshell](#faqt-in-a-nutshell)
 * [Documentation](#documentation)
+* [Contributing](#contributing)
 
 <!-- TOC -->
 
