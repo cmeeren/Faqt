@@ -327,8 +327,8 @@ cases where it may produce unexpected results:
 * Multi-line strings literals will be concatenated.
 * Lines starting with `//` in multi-line string literals will be removed.
 * Subject names will be truncated if they are too long (currently 1000 characters, though that may change without
-  notice), since it is then likely that a limitation or a bug is causing Faqt to use too large parts of the source code
-  as the subject name.
+  notice). This is because it is then likely that a limitation or a bug is causing Faqt to use too large parts of the
+  source code as the subject name.
 * The subject name may be incorrect under the following conditions:
   * Assertion chains not starting on a new line or at the start of a lambda (`fun ... ->`)
   * Nested `Satisfy`, `AllSatisfy` or other higher-order assertions
