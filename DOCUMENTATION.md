@@ -397,8 +397,7 @@ extends to `SequenceEqual` and `HaveSameItemsAs`, which will pass if both sequen
 
 ## Why not FluentAssertions?
 
-FluentAssertions is a fantastic library, and very much the inspiration for Faqt. Unfortunately, its API design causes
-trouble for F#. Here are the reasons I decided to make Faqt instead of just using FluentAssertions:
+FluentAssertions is a fantastic library, and very much the inspiration for Faqt. Unfortunately, its API design causes trouble for F#. Here are the reasons I decided to make Faqt instead of just using FluentAssertions:
 
 * The `because` parameter cannot be omitted when used from
   F# ([#2225](https://github.com/fluentassertions/fluentassertions/issues/2225)).
