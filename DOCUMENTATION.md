@@ -137,9 +137,9 @@ type Assertions =
         And(t)
 ```
 
-Note that in this case we use `t.Assert(true, true)` at the top (use `t.Assert(true)` for higher-order assertions that
-do not run the same assertions on items in a sequence), and we call `use _ = t.AssertItem()` before the assertion of
-each item.
+Note that in this case we use `t.Assert(true, true)` at the top. Both parameters are optional. The first `true`
+indicates that this is a higher-order assertion, and the second `true` indicates that the assertions are run for each
+item in a sequence. Note also that we call `use _ = t.AssertItem()` before the assertion of each item.
 
 The most significant thing _not_ demonstrated in the examples above is that if your assertion calls `Should`, make sure
 to use the `Should(t)` overload instead of `Should()`.
@@ -156,10 +156,10 @@ If you want all the details, here they are:
 * Accept whichever arguments you need for your assertion, and end with an optional `?because` parameter.
 
 * First in your method, call `use _ = t.Assert()`. This is needed to track important state necessary for subject names
-  to work. If your assertion is a higher-order assertion (like `Satisfy`) that calls user code that is expected to call
-  other assertions, call `t.Assert(true)` instead. If your assertion calls the same assertions for each item in a
-  sequence, call `t.Assert(true, true)` instead, and additionally call `use _ = t.AssertItem()` before the assertion of
-  each item.
+  to work. The method has two optional boolean parameters. If your assertion is a higher-order assertion that calls user
+  code that is expected to call other assertions (like `Satisfy`), use `t.Assert(true)`. If your assertion additionally
+  calls the same user assertion(s) for each item in a sequence (like `AllSatisfy`), call `t.Assert(true, true)`, and
+  additionally call `use _ = t.AssertItem()` before the assertion of each item.
 
 * If your condition is not met and the assertion should fail, call `t.Fail(because)`, optionally with any number
   of `With(key, value)` or `With(condition, key, value)` before `Fail`:
