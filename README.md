@@ -49,6 +49,8 @@ type Customer =
     | Internal of {| ContactInfo: {| Name: {| LastName: string |} |} option |}
     | External of {| Id: int |}
 
+open Faqt
+
 // Assertions in test or domain code
 customer
     .Should()
