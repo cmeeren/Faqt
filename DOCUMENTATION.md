@@ -317,8 +317,7 @@ anyone access to Faqt assertion failure messages that should not have access to 
 ## Which testing frameworks does Faqt work with?
 
 All of them. XUnit, NUnit, MSTest, NSpec, MSpec, Expecto, you name it. Faqt is agnostic to the test framework (and can
-also be used in non-test production code, as previously described); it simply throws a custom exception when an
-assertion fails.
+also be used in non-test production code); it simply throws a custom exception when an assertion fails.
 
 ## Why is the subject name not correct in my specific example?
 
