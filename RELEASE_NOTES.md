@@ -1,6 +1,10 @@
 Release notes
 ==============
 
+### 1.0.0 (2023-09-12)
+
+* Initial stable release
+
 ### 1.0.0-rc1 (2023-09-12)
 
 * Initial release candidate
