@@ -446,8 +446,8 @@ trouble for F#. Here are the reasons I decided to make Faqt instead of just usin
 * Improving F# usage issues (particularly the point about the `because` parameter)
   was [deemed out of scope](https://github.com/fluentassertions/fluentassertions/issues/2225#issuecomment-1636733116)
   for FluentAssertions.
-* The more free-form assertion messages of FluentAssertions are harder to parse than more structured output, especially
-  for complex objects and collections.
+* The relatively free-form assertion messages of FluentAssertions are harder to parse than more structured output,
+  especially for complex objects and collections.
 * Some assertions run contrary to expectations of F# (or even C#)
   developers ([discussion](https://github.com/fluentassertions/fluentassertions/discussions/2143#discussioncomment-5525582)).
 
