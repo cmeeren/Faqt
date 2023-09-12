@@ -33,7 +33,7 @@ Should: Fail
 
     [<Fact>]
     let ``Realistic example usage`` () =
-        "asd".Should().NotBeNull().And.Subject.Length.Should(()).Be(3)
+        "asd".Should().NotBeNull().And.HaveLength(3)
 
 
 module Subject =
