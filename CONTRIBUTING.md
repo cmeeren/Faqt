@@ -7,6 +7,7 @@
 * [Before you create an issue](#before-you-create-an-issue)
 * [Suggesting new assertions](#suggesting-new-assertions)
 * [Pull requests](#pull-requests)
+  * [Required unit tests for assertions](#required-unit-tests-for-assertions)
   * [Pull request workflow](#pull-request-workflow)
   * [Rebasing when handling updates from `upstream/main`](#rebasing-when-handling-updates-from-upstreammain)
 * [Deployment checklist](#deployment-checklist)
