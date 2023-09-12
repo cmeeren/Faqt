@@ -1,5 +1,7 @@
 # Table of contents
 
+<img src="https://raw.githubusercontent.com/cmeeren/Faqt/main/logo/faqt-logo-docs.png" width="300" align="right" />
+
 <!-- TOC -->
 
 * [Installation and requirements](#installation-and-requirements)
