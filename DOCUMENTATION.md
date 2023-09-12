@@ -248,8 +248,8 @@ If you want all the details, here they are:
 * If your assertion calls `Should` at any point, make sure you use the overload that takes the original `Testable` as an
   argument (`.Should(t)`), since it contains important state relating to the end user’s original assertion call.
 
-* If your assertion calls other assertions, consider how your assertion name will read when used with the assertion
-  message from the called assertion. For example, `Be` has a message like:
+* If your assertion calls other assertions, consider how your assertion method name will read when used with the
+  assertion message from the called assertion. For example, `Be` has a message like:
 
   ```
   Subject: x
