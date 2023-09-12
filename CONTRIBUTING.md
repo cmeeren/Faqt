@@ -1,4 +1,6 @@
-# Table of contents
+# Contribution guidelines
+
+## Table of contents
 
 <img src="https://raw.githubusercontent.com/cmeeren/Faqt/main/logo/faqt-logo-docs.png" width="300" align="right" />
 
@@ -18,7 +20,7 @@ Requests and contributions are welcome! This project is maintained on a voluntar
 maintainers' time by spending time on your issues and pull requests before posting them. Remember that it's up to _you_
 to make a strong case to convince the the maintainers of the merits of a feature or bug.
 
-# Before you create an issue
+## Before you create an issue
 
 - Please search existing issues (both open and closed) before opening a new one.
 - Provide as much relevant info as possible.
@@ -35,7 +37,7 @@ to make a strong case to convince the the maintainers of the merits of a feature
 - Preview and read your issue before posting, and rewrite it if necessary. We all write issues at times without having a
   clear idea up front of what we want to communicate. Just don't _post_ a jumbled mess; rewrite it.
 
-# Suggesting new assertions
+## Suggesting new assertions
 
 Please open an issue to request new assertions. The following are not requirements, but will increase the chances of it
 being accepted:
@@ -53,7 +55,7 @@ being accepted:
     include `BeOdd`, too).
   - The current way of accomplishing this using existing assertions, if there is a way.
 
-# Pull requests
+## Pull requests
 
 To make everyone's experience as enjoyable as possible, please
 read [Don't "Push" Your Pull Requests](https://www.igvita.com/2011/12/19/dont-push-your-pull-requests/) and please keep
@@ -62,7 +64,7 @@ the following things in mind:
 - Unless it's a trivial fix, consider opening an issue first to discuss it with the maintainers.
 - For all pull requests, please follow the workflow described below.
 
-## Required unit tests for assertions
+### Required unit tests for assertions
 
 When writing tests for your proposed assertions, please take inspiration from tests of similar assertions. For
 consistency, the following tests should be used for all assertions:
@@ -79,7 +81,7 @@ consistency, the following tests should be used for all assertions:
 * After tests are written, verify that the tests actually invoke the correct assertion method/overload (easy to miss if
   copy-pasting).
 
-## Pull request workflow
+### Pull request workflow
 
 1. Fork Faqt on GitHub
 2. Clone your fork locally
@@ -93,7 +95,7 @@ consistency, the following tests should be used for all assertions:
 You should **never** work on a clone of `main`, and you should **never** send a pull request from `main` - always from a
 branch. The reasons for this are detailed below.
 
-## Rebasing when handling updates from `upstream/main`
+### Rebasing when handling updates from `upstream/main`
 
 While you're working on your branch, it is possible that Faqt's main branch may be updated. If this happens, you should:
 
@@ -114,7 +116,7 @@ working in, or sending pull requests from, `main`.
 If you have pushed your branch to GitHub and you need to rebase like this (whether or not you have already created a
 pull request), you need to use `git push -f` to force rewrite the remote branch.
 
-# Deployment checklist
+## Deployment checklist
 
 For maintainers.
 
