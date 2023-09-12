@@ -46,7 +46,7 @@ module Subject =
 
     [<Fact>]
     let ``Realistic example usage`` () =
-        let lengthValue =
-            (Some "asd").Should().BeSome().Whose.Length.Should(()).Be(3).Subject
+        let stringValue =
+            (Some "asd").Should().BeSome().WhoseValue.Should().HaveLength(3).Subject
 
-        ignore<int> lengthValue
+        ignore<string> stringValue
