@@ -6,6 +6,7 @@
 
 <!-- TOC -->
 
+* [Security considerations](#security-considerations)
 * [Installation and requirements](#installation-and-requirements)
 * [Avoiding `|> ignore` after assertion chains](#avoiding--ignore-after-assertion-chains)
 * [Writing your own assertions](#writing-your-own-assertions)
@@ -15,7 +16,6 @@
   * [Full guide](#full-guide)
 * [Customizing the format](#customizing-the-format)
 * [Configuring options](#configuring-options)
-* [Security considerations](#security-considerations)
 * [FAQ](#faq)
   * [Which testing frameworks does Faqt work with?](#which-testing-frameworks-does-faqt-work-with)
   * [Why is the subject name not correct in my specific example?](#why-is-the-subject-name-not-correct-in-my-specific-example)
@@ -27,6 +27,14 @@
   * [Can I use Faqt from C#?](#can-i-use-faqt-from-c)
 
 <!-- TOC -->
+
+## Security considerations
+
+**Treat assertion exception messages (and therefore test failure messages) as securely as you treat your source code.**
+
+Faqt derives subject names from your source code. Known existing limitations (see below) as well as bugs can cause Faqt
+to use a lot more of your code in the subject name than intended (up to entire source files). Therefore, do not give
+anyone access to Faqt assertion failure messages that should not have access to your source code.
 
 ## Installation and requirements
 
@@ -339,14 +347,6 @@ use _ = Config.With(myConfig)
 // Config.Current is available globally and can be used in your own converters/formatters.
 myFormatter Config.Current
 ```
-
-## Security considerations
-
-**Treat assertion exception messages (and therefore test failure messages) as securely as you treat your source code.**
-
-Faqt derives subject names from your source code. Known existing limitations (see below) as well as bugs can cause Faqt
-to use a lot more of your code in the subject name than intended (up to entire source files). Therefore, do not give
-anyone access to Faqt assertion failure messages that should not have access to your source code.
 
 ## FAQ
 
