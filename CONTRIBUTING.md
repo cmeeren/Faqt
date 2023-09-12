@@ -1,8 +1,8 @@
+<img src="https://raw.githubusercontent.com/cmeeren/Faqt/main/logo/faqt-logo-docs.png" width="300" align="right" />
+
 # Faqt contribution guidelines
 
 ## Table of contents
-
-<img src="https://raw.githubusercontent.com/cmeeren/Faqt/main/logo/faqt-logo-docs.png" width="300" align="right" />
 
 <!-- TOC -->
 
