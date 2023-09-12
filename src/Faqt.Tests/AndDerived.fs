@@ -1,5 +1,6 @@
 ﻿module AndDerived
 
+open System
 open Faqt
 open Xunit
 
@@ -47,7 +48,12 @@ module Subject =
     [<Fact>]
     let ``Realistic example usage`` () =
         let innerValue =
-            (Some [1]).Should().BeSome().WhoseValue.Should().ContainExactlyOneItem().Subject
+            (Some [ 1 ])
+                .Should()
+                .BeSome()
+                .WhoseValue.Should()
+                .ContainExactlyOneItem()
+                .Subject
 
         ignore<int list> innerValue
 
@@ -75,7 +81,7 @@ module That =
 
     [<Fact>]
     let ``Realistic example usage`` () =
-        (Some "asd").Should().BeSome().That.Should(()).NotBeNull()
+        Nullable(1).Should().HaveValue().That.Should(()).BeGreaterThan(0)
 
 
 module WhoseValue =
