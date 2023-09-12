@@ -50,7 +50,7 @@
   <ItemGroup>
     <PackageReference Update="FSharp.Core" Version="7.0.400" />
     <PackageReference Include="FracturedJson" Version="3.1.0" />
-    <PackageReference Include="FSharp.SystemTextJson" Version="1.2.34" />
+    <PackageReference Include="FSharp.SystemTextJson" Version="1.2.42" />
     <PackageReference Include="YamlDotNet" Version="13.3.1" />
   </ItemGroup>
 
