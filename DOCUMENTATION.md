@@ -268,7 +268,7 @@ If you want all the details, here they are:
   ```
 
   The `Expected: true` line is superfluous given the name of the assertion. Therefore, it's better with a separate
-  assertion message for `BeTrue`:
+  assertion message for `BeTrue` that does not include `Expected`, thereby producing this improved message:
 
   ```
   Subject: x
