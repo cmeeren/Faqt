@@ -278,7 +278,9 @@ If you want all the details, here they are:
 
 ## Customizing the format
 
-Faqt's formatter is implemented as a simple function with signature `FailureData -> string`.
+Faqt's formatter is implemented as a simple function with signature `FailureData -> string`. You can implement your own
+formatter from scratch (the `FailureData` members correspond to the keys in the default assertion messages and are
+hopefully self-explanatory), or easily configure the built-in YAML-based formatter to your liking as shown below:
 
 ```f#
 open Faqt
