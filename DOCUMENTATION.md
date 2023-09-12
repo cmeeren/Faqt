@@ -316,8 +316,7 @@ use _ = Formatter.With(myConfig)
 
 ## Configuring options
 
-Faqt contains some configurable options, such as the maximum length to display when rendering `HttpContent`. Options are
-configured similarly to the formatter:
+Faqt contains some configurable options, which are adjusted similarly to the formatter:
 
 ```f#
 open Faqt
