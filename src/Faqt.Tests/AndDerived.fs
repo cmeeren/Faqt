@@ -46,8 +46,10 @@ module Subject =
 
     [<Fact>]
     let ``Realistic example usage`` () =
-        let subject = "asd".Should().Pass().Subject
-        ignore<string> subject
+        let innerValue =
+            (Some [1]).Should().BeSome().WhoseValue.Should().ContainExactlyOneItem().Subject
+
+        ignore<int list> innerValue
 
 
 module Whose =
