@@ -50,7 +50,7 @@ being accepted:
 - The request includes the following:
   - A motivating use-case, which should be as short as possible while still convincing any current or future maintainer
     that the assertion is worth keeping (as opposed to removing in an upcoming major release).
-  - The desired behavior for all edge cases (null, empty, etc.).
+  - The desired behavior for all edge cases (subject and any parameter null, empty, etc.).
   - Any other related assertions that could be added (for example, if suggesting `BeEven`, it would make sense to
     include `BeOdd`, too).
   - The current way of accomplishing this using existing assertions, if there is a way.
