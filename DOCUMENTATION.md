@@ -96,7 +96,20 @@ type Assertions =
         And(t)
 ```
 
-Simple, right? Now let's look at an assertion that's just as simple, but uses derived state, where you return
+Simple, right? Using the default YAML-based formatter, it will result in this message:
+
+```
+Subject: <expression from user code>
+Because: <as specified by user, skipped if None>
+Should: Be
+Expected: <expected value>
+But was: <subject value>
+```
+
+As you can see, Faqt automatically adds `Subject`, `Because` (if supplied by the user), and `Should` (the name of the
+method where you call `t.Assert()`). After that, any additional key-value pairs you specify are displayed in order.
+
+Now let's look at an assertion that's just as simple, but uses derived state, where you return
 `AndDerived` instead of `And`:
 
 ```f#
