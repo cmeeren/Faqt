@@ -17,7 +17,12 @@ module Subject =
 
     [<Fact>]
     let ``Realistic example usage`` () =
-        "asd".Should().Be("asd").And.Subject.Length.Should(()).Be(3)
+        "AbC"
+            .Should()
+            .NotBeEmpty()
+            .And.Subject.ToUpperInvariant()
+            .Should(())
+            .BeAscending()
 
 
 module Whose =
