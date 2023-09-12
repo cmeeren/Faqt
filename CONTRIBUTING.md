@@ -1,4 +1,4 @@
-# Contribution guidelines
+# Faqt contribution guidelines
 
 ## Table of contents
 
