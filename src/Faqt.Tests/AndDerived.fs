@@ -33,7 +33,7 @@ Should: Fail
 
     [<Fact>]
     let ``Realistic example usage`` () =
-        (Some "asd").Should().BeSome().And.Subject.Value.Should(()).Be("asd")
+        [ 1 ].Should().ContainAtLeastOneItem().And.ContainExactlyOneItemMatching((=) 1)
 
 
 module Subject =
