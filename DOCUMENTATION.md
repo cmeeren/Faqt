@@ -301,8 +301,8 @@ let myFormatter : FailureData -> string =
         .SerializeExactAs(...)
         // Set how values wrapped in TryFormat are formatted when serialization fails
         .TryFormatFallback(fun _ex obj -> obj.ToString())
-        // Set the YamlDotNet visitor (inheriting from YamlVisitorBase) that is used after loading
-        // the serialized JSON into a YAML document
+        // Set the YamlDotNet visitor (inheriting from YamlDotNet.RepresentationModel.YamlVisitorBase)
+        // that is used after loading the serialized JSON into a YAML document
         .SetYamlVisitor(MyYamlVisitor)
         // Build the formatter
         .Build()
