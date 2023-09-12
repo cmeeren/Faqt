@@ -406,10 +406,10 @@ policy, I am open to discussing it. Please raise an issue.
 
 It really boils down to assumptions about Faqt users would expect and find useful. For example, I assume that
 making `HaveLength(0)` pass for `null` values would be a surprise for many users, and therefore be a bad idea. On the
-other hand, allowing null values in assertions makes the assertions more composable, since it is trivial to
+other hand, _allowing_ null values in assertions makes the assertions more composable, since it is trivial to
 add `.NotBeNull()` to the start of your assertion chain if you want to require a non-`null` value for an assertion that
-allows it, and somewhat harder to allow a `null` in an assertion that requires it non-`null` value (you'd have to use
-something like `SatisfyAny`).
+allows it (and somewhat harder to allow a `null` in an assertion that requires a non-`null` value, where you'd have to
+use something like `SatisfyAny`).
 
 That being said, in order to find some guiding principles, the general policy on allowing or disallowing `null` subject
 values is based on the following:
