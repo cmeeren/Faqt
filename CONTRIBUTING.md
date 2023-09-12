@@ -26,7 +26,7 @@ to make a strong case to convince the the maintainers of the merits of a feature
 - Provide as much relevant info as possible.
 - If it's a bug report, provide a minimal repro. See
   StackOverflow's [How to create a Minimal, Reproducible Example](https://stackoverflow.com/help/minimal-reproducible-example).
-  In issue descriptions, make code more readable by placing it in Markdown code blocks with the language `f#`
+- In issue descriptions, make code more readable by placing it in Markdown code blocks with the language `f#`
   or `fsharp` to get syntax highlighting:
   ``````md
   ```f#
