@@ -421,8 +421,8 @@ values is based on the following:
 
 With that in mind, `null` subject values are generally allowed in negative assertions and disallowed in positive
 assertions. For example, `HaveLength(0)` will fail for `null`, because a `null` value does not have any length (zero or
-otherwise). Contrariwise, `NotHaveLength(0)` asserts the lack of having the length `0`, and will pass for `null` values
-since they, indeed, do not possess the property of having that specific length.
+otherwise). Contrariwise, `NotHaveLength(0)` (if it existed) would assert the lack of having the length `0`, and will
+pass for `null` values since they, indeed, do not possess the property of having that specific length.
 
 Another way to look at it is that negative assertions could be thought of conceptually as e.g. `not (HaveLength(0))`,
 i.e., just an inversion of the corresponding positive assertion. In this light, anything that fails the positive
