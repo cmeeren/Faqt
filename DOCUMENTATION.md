@@ -198,6 +198,11 @@ to use the `Should(t)` overload instead of `Should()`.
 
 If you want all the details, here they are:
 
+* Open `Faqt.AssertionHelpers`.
+
+* If needed, open `Faqt.Formatting` to get access to `TryFormat` (described below) and `FailureData` (mostly useful for
+  higher-order assertions).
+
 * Implement the assertion as
   an [extension method](https://learn.microsoft.com/en-us/dotnet/fsharp/language-reference/type-extensions#extension-methods)
   for `Testable` (the first argument), with whatever constraints you need. The constraints could be implicitly imposed
