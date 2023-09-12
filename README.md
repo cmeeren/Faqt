@@ -13,11 +13,6 @@ developer.
 
 If you don't agree, I consider that a bug - please raise an issue. 😉
 
-### Work in progress, 1.0 to be released September 2023
-
-Faqt is currently a work in progress. All "infrastructure" and supporting features are in place; some actual assertions
-remain to be implemented. A feature complete 1.0 version will hopefully be released by the end of September 2023.
-
 ### Versioning and breaking changes
 
 Faqt follows [SemVer v2.0.0](https://semver.org/) and aims to preserve **source and binary** compatibility between
