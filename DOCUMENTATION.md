@@ -132,7 +132,8 @@ type Assertions =
         AndDerived(t, t.Subject.Value)
 ```
 
-This allows users to continue asserting on the derived state (the inner value, in this case).
+This allows users to continue asserting on the derived state (the inner value, in this case), for example like
+this: `nullableInt.Should().HaveValue().That.Should(()).Be(2)`.
 
 Finally, let's look at a more complex assertion - a higher-order assertion that calls user assertions and which also
 asserts for every item in a sequence:
