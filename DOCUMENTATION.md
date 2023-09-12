@@ -9,6 +9,9 @@
 * [Installation and requirements](#installation-and-requirements)
 * [Avoiding `|> ignore` after assertion chains](#avoiding--ignore-after-assertion-chains)
 * [Writing your own assertions](#writing-your-own-assertions)
+  * [A basic example](#a-basic-example)
+  * [Derived state](#derived-state)
+  * [A complex assertion](#a-complex-assertion)
 * [Customizing the format](#customizing-the-format)
 * [Configuring options](#configuring-options)
 * [Security considerations](#security-considerations)
@@ -75,6 +78,8 @@ in [this folder](https://github.com/cmeeren/Faqt/tree/main/src/Faqt)).
 
 All the details are further below, but first, we'll get a long way just by looking at some examples.
 
+### A basic example
+
 Here is Faqt’s simplest assertion, `Be`:
 
 ```f#
@@ -109,6 +114,8 @@ But was: <subject value>
 As you can see, Faqt automatically adds `Subject`, `Because` (if supplied by the user), and `Should` (the name of the
 method where you call `t.Assert()`). After that, any additional key-value pairs you specify are displayed in order.
 
+### Derived state
+
 Now let's look at an assertion that's just as simple, but uses derived state, where you return
 `AndDerived` instead of `And`:
 
@@ -134,6 +141,8 @@ type Assertions =
 
 This allows users to continue asserting on the derived state (the inner value, in this case), for example like
 this: `nullableInt.Should().HaveValue().That.Should(()).Be(2)`.
+
+### A complex assertion
 
 Finally, let's look at a more complex assertion - a higher-order assertion that calls user assertions and which also
 asserts for every item in a sequence:
