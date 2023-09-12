@@ -128,7 +128,7 @@ As expected by the discerning F# developer, Faqt is:
 - **Composable:** As far as possible, assertions are orthogonal (they check one thing only). For example,
   predicate-based collection assertions pass for empty collections, just like F#'s `Seq.forall` and similar. You can
   chain assertions with `And`, `Whose`, `WhoseValue`, `That`, `Derived`, and `Subject`, assert on derived values with
-  assertions like `BeSome()`, and compose assertions with higher-order assertions like `Satisfy` and `SatisfyAll`.
+  assertions like `BeSome`, and compose assertions with higher-order assertions like `Satisfy` and `SatisfyAll`.
 - **Configurable:** You can configure, either globally or for a specific scope (such as a test), how assertion failure
   messages are rendered. You can easily tweak the defaults or completely replace the formatter.
 - **Production-ready:** Faqt is very well tested and is highly unlikely to break your code, whether test or production.
