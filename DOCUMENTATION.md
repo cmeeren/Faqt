@@ -9,9 +9,10 @@
 * [Installation and requirements](#installation-and-requirements)
 * [Avoiding `|> ignore` after assertion chains](#avoiding--ignore-after-assertion-chains)
 * [Writing your own assertions](#writing-your-own-assertions)
-  * [A basic example](#a-basic-example)
+  * [A basic assertion](#a-basic-assertion)
   * [Derived state](#derived-state)
-  * [A complex assertion](#a-complex-assertion)
+  * [Higher-order assertions](#higher-order-assertions)
+  * [Full guide](#full-guide)
 * [Customizing the format](#customizing-the-format)
 * [Configuring options](#configuring-options)
 * [Security considerations](#security-considerations)
@@ -78,7 +79,7 @@ in [this folder](https://github.com/cmeeren/Faqt/tree/main/src/Faqt)).
 
 All the details are further below, but first, we'll get a long way just by looking at some examples.
 
-### A basic example
+### A basic assertion
 
 Here is Faqt’s simplest assertion, `Be`:
 
@@ -142,7 +143,7 @@ type Assertions =
 This allows users to continue asserting on the derived state (the inner value, in this case), for example like
 this: `nullableInt.Should().HaveValue().That.Should(()).Be(2)`.
 
-### A complex assertion
+### Higher-order assertions
 
 Finally, let's look at a more complex assertion - a higher-order assertion that calls user assertions and which also
 asserts for every item in a sequence:
@@ -189,6 +190,8 @@ type Assertions =
 Note that in this case we use `t.Assert(true, true)` at the top. Both parameters are optional. The first `true`
 indicates that this is a higher-order assertion, and the second `true` indicates that the assertions are run for each
 item in a sequence. Note also that we call `use _ = t.AssertItem()` before the assertion of each item.
+
+### Full guide
 
 The most significant thing _not_ demonstrated in the examples above is that if your assertion calls `Should`, make sure
 to use the `Should(t)` overload instead of `Should()`.
