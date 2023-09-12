@@ -3,8 +3,8 @@
 <!-- TOC -->
 
 * [Installation and requirements](#installation-and-requirements)
-* [Writing your own assertions](#writing-your-own-assertions)
 * [Multiple assertion chains without `|> ignore`](#multiple-assertion-chains-without--ignore)
+* [Writing your own assertions](#writing-your-own-assertions)
 * [Customizing the format](#customizing-the-format)
 * [Configuring options](#configuring-options)
 * [Security considerations](#security-considerations)
@@ -40,6 +40,28 @@
 
    Note that `DebugType=embedded` is automatically set
    by [DotNet.ReproducibleBuilds](https://github.com/dotnet/reproducible-builds) if you use that.
+
+# Multiple assertion chains without `|> ignore`
+
+Since assertions return `And` or `AndDerived`, F# will warn you if an assertion chain is not the last line of an
+expression. You have to `|> ignore` all lines (except the last) in order to remove this warning.
+
+For convenience, you can `open Faqt.Operators` and use the `%` prefix operator:
+
+```f#
+%x.Should().Be("a")
+%y.Should().Be("b")
+```
+
+Note that the `%` operator is simply an alias for `ignore` and is defined like this:
+
+```f#
+let inline (~%) x = ignore x
+```
+
+If you want to use another operator, you can define your own just as easily.
+See [this StackOverflow answer](https://stackoverflow.com/a/34188952/2978652) for valid prefix operators. However, your
+custom operator will then be shown in the subject name (whereas `%` is automatically removed).
 
 # Writing your own assertions
 
@@ -219,28 +241,6 @@ If you want all the details, here they are:
   But was: false
   ```
 
-# Multiple assertion chains without `|> ignore`
-
-Since assertions return `And` or `AndDerived`, F# will warn you if an assertion chain is not the last line of an
-expression. You have to `|> ignore` all lines (except the last) in order to remove this warning.
-
-For convenience, you can `open Faqt.Operators` and use the `%` prefix operator:
-
-```f#
-%x.Should().Be("a")
-%y.Should().Be("b")
-```
-
-Note that the `%` operator is simply an alias for `ignore` and is defined like this:
-
-```f#
-let inline (~%) x = ignore x
-```
-
-If you want to use another operator, you can define your own just as easily.
-See [this StackOverflow answer](https://stackoverflow.com/a/34188952/2978652) for valid prefix operators. However, your
-custom operator will then be shown in the subject name (whereas `%` is automatically removed).
-
 # Customizing the format
 
 Faqt's formatter is implemented as a simple function with signature `FailureData -> string`.
@@ -397,7 +397,8 @@ extends to `SequenceEqual` and `HaveSameItemsAs`, which will pass if both sequen
 
 ## Why not FluentAssertions?
 
-FluentAssertions is a fantastic library, and very much the inspiration for Faqt. Unfortunately, its API design causes trouble for F#. Here are the reasons I decided to make Faqt instead of just using FluentAssertions:
+FluentAssertions is a fantastic library, and very much the inspiration for Faqt. Unfortunately, its API design causes
+trouble for F#. Here are the reasons I decided to make Faqt instead of just using FluentAssertions:
 
 * The `because` parameter cannot be omitted when used from
   F# ([#2225](https://github.com/fluentassertions/fluentassertions/issues/2225)).
