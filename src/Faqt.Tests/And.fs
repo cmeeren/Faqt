@@ -46,7 +46,7 @@ module Subject =
 
     [<Fact>]
     let ``Realistic example usage`` () =
-        let stringValue =
+        let innerValue =
             (Some "asd").Should().BeSome().WhoseValue.Should().HaveLength(3).Subject
 
-        ignore<string> stringValue
+        ignore<string> innerValue
