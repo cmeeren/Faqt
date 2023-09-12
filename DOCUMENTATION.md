@@ -7,7 +7,7 @@
 <!-- TOC -->
 
 * [Installation and requirements](#installation-and-requirements)
-* [Multiple assertion chains without `|> ignore`](#multiple-assertion-chains-without--ignore)
+* [Avoiding `|> ignore` after assertion chains](#avoiding--ignore-after-assertion-chains)
 * [Writing your own assertions](#writing-your-own-assertions)
 * [Customizing the format](#customizing-the-format)
 * [Configuring options](#configuring-options)
@@ -45,12 +45,12 @@
    Note that `DebugType=embedded` is automatically set
    by [DotNet.ReproducibleBuilds](https://github.com/dotnet/reproducible-builds) if you use that.
 
-## Multiple assertion chains without `|> ignore`
+## Avoiding `|> ignore` after assertion chains
 
-Since assertions return `And` or `AndDerived`, F# will warn you if an assertion chain is not the last line of an
-expression. You have to `|> ignore` all lines (except the last) in order to remove this warning.
+Since assertions return `And` or `AndDerived`, F# may warn you in some cases if an assertion chain is not ignored
+using `|> ignore`.
 
-For convenience, you can `open Faqt.Operators` and use the `%` prefix operator:
+For convenience, you can `open Faqt.Operators` and use the `%` prefix operator instead:
 
 ```f#
 %x.Should().Be("a")
