@@ -130,7 +130,8 @@ As expected by the discerning F# developer, Faqt is:
   chain assertions with `And`, `Whose`, `WhoseValue`, `That`, `Derived`, and `Subject`, assert on derived values with
   assertions like `BeSome`, and compose assertions with higher-order assertions like `Satisfy` and `SatisfyAll`.
 - **Configurable:** You can configure, either globally or for a specific scope (such as a test), how assertion failure
-  messages are rendered. You can easily tweak the defaults or completely replace the formatter.
+  messages are rendered, as well as other configuration. You can easily tweak the default rendering or completely
+  replace the formatter.
 - **Production-ready:** Faqt is very well tested and is highly unlikely to break your code, whether test or production.
 
 ## Documentation
