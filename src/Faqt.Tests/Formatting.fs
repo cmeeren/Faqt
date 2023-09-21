@@ -1061,6 +1061,39 @@ Value: '999'
 """
 
 
+    [<Fact>]
+    let ``Rendering of byte array`` () =
+        fun () -> ().Should().FailWith("Value", [| 0uy; 1uy; 254uy; 255uy |])
+        |> assertExnMsg
+            """
+Subject: ()
+Should: FailWith
+Value: 0001FEFF
+"""
+
+
+    [<Fact>]
+    let ``Rendering of byte sequence`` () =
+        fun () ->
+            ()
+                .Should()
+                .FailWith(
+                    "Value",
+                    seq {
+                        0uy
+                        1uy
+                        254uy
+                        255uy
+                    }
+                )
+        |> assertExnMsg
+            """
+Subject: ()
+Should: FailWith
+Value: 0001FEFF
+"""
+
+
 module YamlFormatterBuilder =
 
 

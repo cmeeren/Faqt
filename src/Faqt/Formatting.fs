@@ -438,6 +438,8 @@ type YamlFormatterBuilder = private {
                 else
                     $"%i{int c} %s{reasonPhrase}"
             )
+            .SerializeAs(fun (xs: seq<byte>) -> Convert.ToHexString(Seq.toArray xs))
+            .SerializeAs(fun (xs: byte[]) -> Convert.ToHexString(xs))
             .SetYamlVisitor(fun doc -> JsonToYamlConverterVisitor(doc))
 
 
