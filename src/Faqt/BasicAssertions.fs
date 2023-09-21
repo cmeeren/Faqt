@@ -217,3 +217,69 @@ type BasicAssertions =
         match result with
         | true, x -> AndDerived(t, x)
         | false, _ -> t.With("But got", false).With("Subject value", t.Subject).Fail(because)
+
+
+    /// Asserts that the subject can be roundtripped using the specified function (i.e., that the returned value is
+    /// equal to the subject value and that the function does not throw). The roundtrip function would typically be a
+    /// composition, e.g. toX >> fromX.
+    [<Extension>]
+    static member Roundtrip(t: Testable<'a>, roundtrip: 'a -> 'a, ?because) : And<'a> =
+        use _ = t.Assert()
+
+        let roundtripped =
+            try
+                roundtrip t.Subject
+            with ex ->
+                t.With("But threw", ex).With("Subject value", t.Subject).Fail(because)
+
+        if roundtripped <> t.Subject then
+            t
+                .With("But returned", roundtripped)
+                .With("Subject value", t.Subject)
+                .Fail(because)
+
+        And(t)
+
+
+    /// Asserts that the subject can be roundtripped using the specified function (i.e., that the returned value is Some
+    /// and equal to the subject value and that the function does not throw). The roundtrip function would typically be
+    /// a composition, e.g. toX >> fromX.
+    [<Extension>]
+    static member Roundtrip(t: Testable<'a>, roundtrip: 'a -> 'a option, ?because) : And<'a> =
+        use _ = t.Assert()
+
+        let roundtripped =
+            try
+                roundtrip t.Subject
+            with ex ->
+                t.With("But threw", ex).With("Subject value", t.Subject).Fail(because)
+
+        if roundtripped <> Some t.Subject then
+            t
+                .With("But returned", roundtripped)
+                .With("Subject value", t.Subject)
+                .Fail(because)
+
+        And(t)
+
+
+    /// Asserts that the subject can be roundtripped using the specified function (i.e., that the returned value is Ok
+    /// and equal to the subject value and that the function does not throw). The roundtrip function would typically be
+    /// a composition, e.g. toX >> fromX.
+    [<Extension>]
+    static member Roundtrip(t: Testable<'a>, roundtrip: 'a -> Result<'a, 'b>, ?because) : And<'a> =
+        use _ = t.Assert()
+
+        let roundtripped =
+            try
+                roundtrip t.Subject
+            with ex ->
+                t.With("But threw", ex).With("Subject value", t.Subject).Fail(because)
+
+        if roundtripped <> Ok t.Subject then
+            t
+                .With("But returned", roundtripped)
+                .With("Subject value", t.Subject)
+                .Fail(because)
+
+        And(t)
