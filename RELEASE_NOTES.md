@@ -3,6 +3,7 @@ Release notes
 
 ### Unreleased
 
+* Added `Roundtrip` assertions
 * Byte arrays and other byte sequences are now formatted using `Convert.ToHexString`
 
 ### 1.0.0 (2023-09-12)
