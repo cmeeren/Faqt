@@ -3,7 +3,7 @@ Release notes
 
 ### Unreleased
 
-* Added `Roundtrip` assertions
+* Added `Roundtrip` assertions for function subjects (`'a -> 'a`, `'a -> 'a option`, and `'a -> Result<'a, 'b>`)
 * Byte arrays and other byte sequences are now formatted using `Convert.ToHexString`
 
 ### 1.0.0 (2023-09-12)
