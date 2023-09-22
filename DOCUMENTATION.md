@@ -528,7 +528,7 @@ myFormatter Config.Current
 * `Throw`: Polymorphic exception check for top-level exception
 * `ThrowInner`: Polymorphic exception check for top-level or inner exception on any level (including any exception in
   an `AggregateException`)
-* `ThrowExactly`: Exact exception check top-level exception
+* `ThrowExactly`: Exact exception check for top-level exception
 * `NotThrow`
 * `Roundtrip`: Check that a (potentially `Option` or `Result`-returning) function returns the input value. The function
   is typically a composition of parsing and extracting a value, e.g., `(fromX >> toX).Should().Roundtrip(value)`.
