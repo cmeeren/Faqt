@@ -385,3 +385,277 @@ But threw: |-
   System.Exception: foo
      at *
 """
+
+
+module Roundtrip =
+
+
+    [<Fact>]
+    let ``Passes when the function does not throw and can be chained with And`` () =
+        id.Should().Roundtrip("a").Id<And<string -> string>>()
+
+
+    [<Fact>]
+    let ``Fails with expected message when the function throws`` () =
+        fun () ->
+            let f _ = failwith<string> "foo"
+            f.Should().Roundtrip("a")
+        |> assertExnMsgWildcard
+            """
+Subject: f
+Should: Roundtrip
+Value: a
+But threw: |-
+  System.Exception: foo
+     at *
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because when the function throws`` () =
+        fun () ->
+            let f _ = failwith<string> "foo"
+            f.Should().Roundtrip("a", "Some reason")
+        |> assertExnMsgWildcard
+            """
+Subject: f
+Because: Some reason
+Should: Roundtrip
+Value: a
+But threw: |-
+  System.Exception: foo
+     at *
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message when the function returns a different value`` () =
+        fun () ->
+            let f _ = "b"
+            f.Should().Roundtrip("a")
+        |> assertExnMsg
+            """
+Subject: f
+Should: Roundtrip
+Value: a
+But returned: b
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because when the function returns a different value`` () =
+        fun () ->
+            let f _ = "b"
+            f.Should().Roundtrip("a", "Some reason")
+        |> assertExnMsg
+            """
+Subject: f
+Because: Some reason
+Should: Roundtrip
+Value: a
+But returned: b
+"""
+
+
+module ``Roundtrip (option)`` =
+
+
+    [<Fact>]
+    let ``Passes when the function does not throw and can be chained with And`` () =
+        Some.Should().Roundtrip("a").Id<And<string -> string option>>()
+
+
+    [<Fact>]
+    let ``Fails with expected message when the function throws`` () =
+        fun () ->
+            let f _ = failwith<string option> "foo"
+            f.Should().Roundtrip("a")
+        |> assertExnMsgWildcard
+            """
+Subject: f
+Should: Roundtrip
+Value: a
+But threw: |-
+  System.Exception: foo
+     at *
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because when the function throws`` () =
+        fun () ->
+            let f _ = failwith<string option> "foo"
+            f.Should().Roundtrip("a", "Some reason")
+        |> assertExnMsgWildcard
+            """
+Subject: f
+Because: Some reason
+Should: Roundtrip
+Value: a
+But threw: |-
+  System.Exception: foo
+     at *
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message when the function returns None`` () =
+        fun () ->
+            let f _ = None
+            f.Should().Roundtrip("a")
+        |> assertExnMsg
+            """
+Subject: f
+Should: Roundtrip
+Value: a
+But returned: null
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because when the function returns None`` () =
+        fun () ->
+            let f _ = None
+            f.Should().Roundtrip("a", "Some reason")
+        |> assertExnMsg
+            """
+Subject: f
+Because: Some reason
+Should: Roundtrip
+Value: a
+But returned: null
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message when the function returns Some with a different value`` () =
+        fun () ->
+            let f _ = Some "b"
+            f.Should().Roundtrip("a")
+        |> assertExnMsg
+            """
+Subject: f
+Should: Roundtrip
+Value: a
+But returned:
+  Some: b
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because when the function returns Some with a different value`` () =
+        fun () ->
+            let f _ = Some "b"
+            f.Should().Roundtrip("a", "Some reason")
+        |> assertExnMsg
+            """
+Subject: f
+Because: Some reason
+Should: Roundtrip
+Value: a
+But returned:
+  Some: b
+"""
+
+
+module ``Roundtrip (Result)`` =
+
+
+    [<Fact>]
+    let ``Passes when the function does not throw and can be chained with And`` () =
+        Ok.Should().Roundtrip("a").Id<And<string -> Result<string, string>>>()
+
+
+    [<Fact>]
+    let ``Fails with expected message when the function throws`` () =
+        fun () ->
+            let f _ = failwith<Result<string, string>> "foo"
+            f.Should().Roundtrip("a")
+        |> assertExnMsgWildcard
+            """
+Subject: f
+Should: Roundtrip
+Value: a
+But threw: |-
+  System.Exception: foo
+     at *
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because when the function throws`` () =
+        fun () ->
+            let f _ = failwith<Result<string, string>> "foo"
+            f.Should().Roundtrip("a", "Some reason")
+        |> assertExnMsgWildcard
+            """
+Subject: f
+Because: Some reason
+Should: Roundtrip
+Value: a
+But threw: |-
+  System.Exception: foo
+     at *
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message when the function returns Error`` () =
+        fun () ->
+            let f _ = Error "foo"
+            f.Should().Roundtrip("a")
+        |> assertExnMsg
+            """
+Subject: f
+Should: Roundtrip
+Value: a
+But returned:
+  Error: foo
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because when the function returns Error "foo"`` () =
+        fun () ->
+            let f _ = Error "foo"
+            f.Should().Roundtrip("a", "Some reason")
+        |> assertExnMsg
+            """
+Subject: f
+Because: Some reason
+Should: Roundtrip
+Value: a
+But returned:
+  Error: foo
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message when the function returns Ok with a different value`` () =
+        fun () ->
+            let f _ = Ok "b"
+            f.Should().Roundtrip("a")
+        |> assertExnMsg
+            """
+Subject: f
+Should: Roundtrip
+Value: a
+But returned:
+  Ok: b
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because when the function returns Ok with a different value`` () =
+        fun () ->
+            let f _ = Ok "b"
+            f.Should().Roundtrip("a", "Some reason")
+        |> assertExnMsg
+            """
+Subject: f
+Because: Some reason
+Should: Roundtrip
+Value: a
+But returned:
+  Ok: b
+"""

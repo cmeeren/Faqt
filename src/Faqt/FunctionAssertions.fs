@@ -108,3 +108,59 @@ type FunctionAssertions =
             And(t)
         with ex ->
             t.With("But threw", ex).Fail(because)
+
+
+    /// Asserts that the subject returns the original value (i.e., that the returned value is equal to the original
+    /// value and that the subject does not throw). The subject would typically be a composition, e.g. toX >> fromX.
+    [<Extension>]
+    static member Roundtrip(t: Testable<'a -> 'a>, original: 'a, ?because) : And<'a -> 'a> =
+        use _ = t.Assert()
+
+        let roundtripped =
+            try
+                t.Subject original
+            with ex ->
+                t.With("Value", original).With("But threw", ex).Fail(because)
+
+        if roundtripped <> original then
+            t.With("Value", original).With("But returned", roundtripped).Fail(because)
+
+        And(t)
+
+
+    /// Asserts that the subject returns the original value (i.e., that the returned value is Some and equal to the
+    /// original value and that the subject does not throw). The subject would typically be a composition, e.g. toX >>
+    /// fromX.
+    [<Extension>]
+    static member Roundtrip(t: Testable<'a -> 'a option>, original: 'a, ?because) : And<'a -> 'a option> =
+        use _ = t.Assert()
+
+        let roundtripped =
+            try
+                t.Subject original
+            with ex ->
+                t.With("Value", original).With("But threw", ex).Fail(because)
+
+        if roundtripped <> Some original then
+            t.With("Value", original).With("But returned", roundtripped).Fail(because)
+
+        And(t)
+
+
+    /// Asserts that the subject returns the original value (i.e., that the returned value is Ok and equal to the
+    /// original value and that the subject does not throw). The subject would typically be a composition, e.g. toX >>
+    /// fromX.
+    [<Extension>]
+    static member Roundtrip(t: Testable<'a -> Result<'a, 'b>>, original: 'a, ?because) : And<'a -> Result<'a, 'b>> =
+        use _ = t.Assert()
+
+        let roundtripped =
+            try
+                t.Subject original
+            with ex ->
+                t.With("Value", original).With("But threw", ex).Fail(because)
+
+        if roundtripped <> Ok original then
+            t.With("Value", original).With("But returned", roundtripped).Fail(because)
+
+        And(t)
