@@ -16,6 +16,20 @@
   * [Full guide](#full-guide)
 * [Customizing the format](#customizing-the-format)
 * [Configuring options](#configuring-options)
+* [Assertion list](#assertion-list)
+  * [Higher-order assertions](#higher-order-assertions-1)
+  * [Basic assertions](#basic-assertions)
+  * [Comparison assertions](#comparison-assertions)
+  * [Union assertions](#union-assertions)
+  * [`bool` assertions](#bool-assertions)
+  * [`Nullable<_>` assertions](#nullable-assertions)
+  * [`string` assertions](#string-assertions)
+  * [`IDictionary<_, _>` assertions](#idictionary--assertions)
+  * [`seq<_>` assertions](#seq-assertions)
+  * [`Guid` assertions](#guid-assertions)
+  * [`Enum` assertions](#enum-assertions)
+  * [Function assertions](#function-assertions)
+  * [`HttpResponseMessage` assertions](#httpresponsemessage-assertions)
 * [FAQ](#faq)
   * [Which testing frameworks does Faqt work with?](#which-testing-frameworks-does-faqt-work-with)
   * [Why is the subject name not correct in my specific example?](#why-is-the-subject-name-not-correct-in-my-specific-example)
@@ -348,6 +362,193 @@ use _ = Config.With(myConfig)
 // Config.Current is available globally and can be used in your own converters/formatters.
 myFormatter Config.Current
 ```
+
+## Assertion list
+
+### Higher-order assertions
+
+* `Satisfy`
+* `NotSatisfy`
+* `SatisfyAny`
+* `SatisfyAll`
+
+### Basic assertions
+
+* `Be`: Structural or custom equality
+* `NotBe`: Structural or custom equality
+* `BeOneOf`: Structural or custom equality with multiple candidates
+* `NotBeOneOf`: Structural or custom equality with multiple candidates
+* `BeSameAs`: Reference equality
+* `NotBeSameAs`: Reference equality
+* `BeNull`
+* `NotBeNull`
+* `Transform`: Parsing or other transformations that can throw
+* `TryTransform`: Same as `Transform`, but for functions returning `Option`, `Result`, or `bool * 'a` (
+  like `Int32.TryParse`)
+* `BeOfType`: Exact type check
+* `BeAssignableTo`: Polymorphic type check
+
+### Comparison assertions
+
+* `BeCloseTo`: Same as `Be`, but with a tolerance
+* `NotBeCloseTo`: Same as `NotBe`, but with a tolerance
+* `BeGreaterThan`
+* `BeGreaterThanOrEqualTo`
+* `BeLessThan`
+* `BeLessThanOrEqualTo`
+* `BePositive`
+* `BeNegative`
+* `BeNonNegative`
+* `BeNonPositive`
+* `BeInRange`: Inclusive range
+
+### Union assertions
+
+* `BeOfCase`: Assert DU case and continue asserting on the inner value
+* `BeSome`
+* `BeNone`
+* `BeOk`
+* `BeError`
+
+### `bool` assertions
+
+* `BeTrue`
+* `BeFalse`
+* `Imply`: If the subject is true, the specified value must also be true
+* `BeImpliedBy`: If the specified value is true, the subject must also be true
+
+### `Nullable<_>` assertions
+
+* `HaveValue`
+* `NotHaveValue`
+* `BeNull`
+* `NotBeNull`
+
+### `string` assertions
+
+* `BeUpperCase`: Case check with invariant or specified culture
+* `BeLowerCase`: Case check with invariant or specified culture
+* `Be`: Equality with specified comparison type (the normal `Be` uses ordinal comparison)
+* `NotBe`: Equality with specified comparison type (the normal `NotBe` uses ordinal comparison)
+* `Contain`: Substring check with ordinal or specified comparison type
+* `NotContain`: Substring check with ordinal or specified comparison type
+* `StartWith`: Prefix check with ordinal or specified comparison type
+* `NotStartWith`: Prefix check with ordinal or specified comparison type
+* `EndWith`: Suffix check with ordinal or specified comparison type
+* `NotEndWith`: Suffix check with ordinal or specified comparison type
+* `MatchRegex`
+* `NotMatchRegex`
+* `MatchWildcard`: Simplified wildcard check with `*` (zero or more characters) and `?` (one character)
+* `NotMatchWildcard`: Simplified wildcard check with `*` (zero or more characters) and `?` (one character)
+* All `seq<_>` assertions, including:
+  * `HaveLength`
+  * `BeEmpty`
+  * `NotBeEmpty`
+  * `BeNullOrEmpty`
+
+### `IDictionary<_, _>` assertions
+
+* `Contain`: Member check with key and value
+* `NotContain`: Member check with key and value
+* `HaveSameItemsAs`
+* `ContainKey`
+* `NotContainKey`
+* `ContainValue`
+* `NotContainValue`
+* All `seq<_>` assertions, including:
+  * `AllSatisfy`
+  * `SatisfyRespectively`
+  * `HaveLength`
+  * `BeEmpty`
+  * `NotBeEmpty`
+  * `BeNullOrEmpty`
+  * `Contain`: Member check with `KeyValuePair<_, _>`
+  * `NotContain`: Member check with `KeyValuePair<_, _>`
+  * `ContainExactlyOneItem`
+  * `ContainExactlyOneItemMatching`
+  * `ContainAtLeastOneItem`
+  * `ContainAtLeastOneItemMatching`
+  * `ContainItemsMatching`
+  * `BeSupersetOf`
+  * `BeProperSupersetOf`
+  * `BeSubsetOf`
+  * `BeProperSubsetOf`
+  * `IntersectWith`
+  * `NotIntersectWith`
+
+### `seq<_>` assertions
+
+* `AllSatisfy`: Higher-order assertion where all values must satisfy the supplied assertion
+* `SatisfyRespectively`: Higher-order assertion where each value must satisfy the respective supplied assertion
+* `HaveLength`
+* `BeEmpty`
+* `NotBeEmpty`
+* `BeNullOrEmpty`
+* `Contain`: Member check with structural equality
+* `NotContain`: Member check with structural equality
+* `AllBe`: Identical items check with structural equality
+* `SequenceEqual`: Item-wise check with structural equality
+* `HaveSameItemsAs`: Order-ignoring items check with structural equality
+* `ContainExactlyOneItem`
+* `ContainExactlyOneItemMatching`
+* `ContainAtLeastOneItem`
+* `ContainAtLeastOneItemMatching`
+* `ContainItemsMatching`
+* `BeDistinct`
+* `BeDistinctBy`
+* `BeAscending`
+* `BeAscendingBy`
+* `BeDescending`
+* `BeDescendingBy`
+* `BeStrictlyAscending`
+* `BeStrictlyAscendingBy`
+* `BeStrictlyDescending`
+* `BeStrictlyDescendingBy`
+* `BeSupersetOf`
+* `BeProperSupersetOf`
+* `BeSubsetOf`
+* `BeProperSubsetOf`
+* `IntersectWith`
+* `NotIntersectWith`
+
+### `Guid` assertions
+
+* `Be`: Equality check against `string`
+* `NotBe`: Equality check against `string`
+* `BeEmpty`
+* `NotBeEmpty`
+
+### `Enum` assertions
+
+* `HaveFlag`
+* `NotHaveFlag`
+
+### Function assertions
+
+* `Throw`: Polymorphic exception check for top-level exception
+* `ThrowInner`: Polymorphic exception check for top-level or inner exception on any level (including any exception in
+  an `AggregateException`)
+* `ThrowExactly`: Exact exception check top-level exception
+* `NotThrow`
+* `Roundtrip`: Check that a (potentially `Option` or `Result`-returning) function returns the input value. The function
+  is typically a composition of parsing and extracting a value, e.g., `(fromX >> toX).Should().Roundtrip(value)`.
+
+### `HttpResponseMessage` assertions
+
+All assertion failure messages contain the full response and the original request.
+
+* `HaveStatusCode`
+* `Be1XXInformational`
+* `Be2XXSuccessful`
+* `Be3XXRedirection`
+* `Be4XXClientError`
+* `Be5XXServerError`
+* `Be100Continue`
+* `Be101SwitchingProtocols`
+* `Be200Ok`
+* (etc. for other status codes)
+* `HaveHeader`: Check for the existence of a header (and continue asserting on the header value(s))
+* `HaveHeaderValue`: Check for the existence of a header with a specific value
 
 ## FAQ
 
