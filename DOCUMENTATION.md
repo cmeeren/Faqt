@@ -453,6 +453,7 @@ myFormatter Config.Current
 * `HaveSameItemsAs`
 * `ContainKey`
 * `NotContainKey`
+* `ContainKeys`
 * `ContainValue`
 * `NotContainValue`
 * All `seq<_>` assertions, including:

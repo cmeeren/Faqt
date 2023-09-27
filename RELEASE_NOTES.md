@@ -4,6 +4,7 @@ Release notes
 ### Unreleased
 
 * Added `seq<_>` assertions `AllBeMappedTo`, `AllBeEqual`, and `AllBeEqualBy`
+* Added `IDictionary<_, _>` assertion `ContainKeys`
 
 ### 1.1.0 (2023-09-22)
 

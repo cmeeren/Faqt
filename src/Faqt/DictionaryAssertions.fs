@@ -213,6 +213,26 @@ type DictionaryAssertions =
         And(t)
 
 
+    /// Asserts that the subject contains all the specified keys.
+    [<Extension>]
+    static member ContainKeys(t: Testable<#IDictionary<'key, 'value>>, keys: seq<'key>, ?because) : And<_> =
+        use _ = t.Assert()
+
+        if isNull (box t.Subject) then
+            t.With("Keys", keys).With("But was", t.Subject).Fail(because)
+
+        let missingKeys = keys |> Seq.filter (not << t.Subject.ContainsKey)
+
+        if not (Seq.isEmpty missingKeys) then
+            t
+                .With("Keys", keys)
+                .With("But was missing", missingKeys |> Seq.distinct |> Seq.map (box >> TryFormat))
+                .With("Subject value", t.Subject)
+                .Fail(because)
+
+        And(t)
+
+
     /// Asserts that the subject contains the specified key.
     [<Extension>]
     static member ContainValue

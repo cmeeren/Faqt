@@ -1239,6 +1239,112 @@ Subject value:
 """
 
 
+module ContainKeys =
+
+
+    [<Fact>]
+    let ``Can be chained with AndDerived with found KeyValuePair`` () =
+        Map.empty
+            .Add("a", 1)
+            .Should()
+            .ContainKeys([ "a" ])
+            .Id<And<Map<string, int>>>()
+            .And.Be(Map.empty.Add("a", 1))
+
+
+    let passData = [
+        [| box (dict [ "a", "1" ]); [ "a" ] |]
+        [| dict [ "a", "1"; "b", "2" ]; [ "a" ] |]
+        [| dict [ "a", "1"; "b", "2" ]; [ "b" ] |]
+        [| dict [ "a", "1"; "b", "2" ]; [ "a"; "b" ] |]
+        [| dict [ "a", "1"; null, "2" ]; [ (null: string) ] |]
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof passData)>]
+    let ``Passes if dict contains the key`` (subject: IDictionary<string, string>) (keys: string list) =
+        subject.Should().ContainKeys(keys)
+
+
+    let failData = [
+        [| box null; [ "a" ] |]
+        [| dict<string, string> []; [ "a" ] |]
+        [| dict [ "a", "1" ]; [ "b" ] |]
+        [| dict [ "a", "1" ]; [ "a"; "b" ] |]
+        [| dict [ "a", "1" ]; [ (null: string) ] |]
+        [| dict<string, string> [ null, "1" ]; [ "a" ] |]
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof failData)>]
+    let ``Fails if null or not containing the key`` (subject: IDictionary<string, string>) (keys: string list) =
+        assertFails (fun () -> subject.Should().ContainKeys(keys))
+
+
+    [<Fact>]
+    let ``Fails with expected message if null`` () =
+        fun () ->
+            let x: IDictionary<string, int> = null
+            x.Should().ContainKeys([ "a" ])
+        |> assertExnMsg
+            """
+Subject: x
+Should: ContainKeys
+Keys: [a]
+But was: null
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because if null`` () =
+        fun () ->
+            let x: IDictionary<string, int> = null
+            x.Should().ContainKeys([ "a" ], "Some reason")
+        |> assertExnMsg
+            """
+Subject: x
+Because: Some reason
+Should: ContainKeys
+Keys: [a]
+But was: null
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if not containing key`` () =
+        fun () ->
+            let x = dict [ "a", 1 ]
+            x.Should().ContainKeys([ "a"; "b"; "c" ])
+        |> assertExnMsg
+            """
+Subject: x
+Should: ContainKeys
+Keys: [a, b, c]
+But was missing: [b, c]
+Subject value:
+  a: 1
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because if not containing key`` () =
+        fun () ->
+            let x = dict [ "a", 1 ]
+            x.Should().ContainKeys([ "a"; "b"; "c" ], "Some reason")
+        |> assertExnMsg
+            """
+Subject: x
+Because: Some reason
+Should: ContainKeys
+Keys: [a, b, c]
+But was missing: [b, c]
+Subject value:
+  a: 1
+"""
+
+
 module ContainValue =
 
 
