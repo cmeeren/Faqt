@@ -1,6 +1,10 @@
 Release notes
 ==============
 
+### Unreleased
+
+* Added `seq<_>` assertion `AllBeMappedTo`
+
 ### 1.1.0 (2023-09-22)
 
 * Added `Roundtrip` assertions for function subjects (`'a -> 'a`, `'a -> 'a option`, and `'a -> Result<'a, 'b>`)

@@ -729,6 +729,122 @@ Subject value: [1, 3, 2]
 """
 
 
+module ``AllBe with projection`` =
+
+
+    [<Fact>]
+    let ``Can be chained with And`` () =
+        [ "a" ]
+            .Should()
+            .AllBeMappedTo(1, (fun x -> x.Length))
+            .Id<And<string list>>()
+            .And.Be([ "a" ])
+
+
+    let passData = [
+        [| box List<string>.Empty; 1 |]
+        [| [ "a" ]; 1 |]
+        [| [ "a"; "a" ]; 1 |]
+        [| [ "ab"; "cd" ]; 2 |]
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof passData)>]
+    let ``Passes if all items are equal to the specified value when projected`` (subject: seq<string>) (expected: int) =
+        subject.Should().AllBeMappedTo(expected, (fun x -> x.Length))
+
+
+    let failData = [
+        // Comment to force break
+        [| box<seq<string>> null; 1 |]
+        [| [ "a" ]; 2 |]
+        [| [ "a"; "ab" ]; 1 |]
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof failData)>]
+    let ``Fails if null or not all items are equal to the specified value when projected``
+        (subject: seq<string>)
+        (expected: int)
+        =
+        assertFails (fun () -> subject.Should().AllBeMappedTo(expected, (fun x -> x.Length)))
+        |> ignore
+
+
+    [<Fact>]
+    let ``Fails with expected message if subject is null`` () =
+        fun () ->
+            let x: seq<string> = null
+            x.Should().AllBeMappedTo(1, (fun x -> x.Length))
+        |> assertExnMsg
+            """
+Subject: x
+Should: AllBeMappedTo
+Expected: 1
+But was: null
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because if subject is null`` () =
+        fun () ->
+            let x: seq<string> = null
+            x.Should().AllBeMappedTo(1, (fun x -> x.Length), "Some reason")
+        |> assertExnMsg
+            """
+Subject: x
+Because: Some reason
+Should: AllBeMappedTo
+Expected: 1
+But was: null
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if items are not equal when projected`` () =
+        fun () ->
+            let x = [ "a"; "ab"; "abc" ]
+            x.Should().AllBeMappedTo(2, (fun x -> x.Length))
+        |> assertExnMsg
+            """
+Subject: x
+Should: AllBeMappedTo
+Expected: 2
+Failures:
+- Index: 0
+  Projected: 1
+  Value: a
+- Index: 2
+  Projected: 3
+  Value: abc
+Subject value: [a, ab, abc]
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because if items are not equal when projected`` () =
+        fun () ->
+            let x = [ "a"; "ab"; "abc" ]
+            x.Should().AllBeMappedTo(2, (fun x -> x.Length), "Some reason")
+        |> assertExnMsg
+            """
+Subject: x
+Because: Some reason
+Should: AllBeMappedTo
+Expected: 2
+Failures:
+- Index: 0
+  Projected: 1
+  Value: a
+- Index: 2
+  Projected: 3
+  Value: abc
+Subject value: [a, ab, abc]
+"""
+
+
 module SequenceEqual =
 
 
