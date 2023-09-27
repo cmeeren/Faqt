@@ -662,7 +662,7 @@ module AllBe =
 
 
     [<Fact>]
-    let ``Fails with expected message if only subject is null`` () =
+    let ``Fails with expected message if subject is null`` () =
         fun () ->
             let x: seq<int> = null
             x.Should().AllBe(1)
@@ -676,7 +676,7 @@ But was: null
 
 
     [<Fact>]
-    let ``Fails with expected message with because if only subject is null`` () =
+    let ``Fails with expected message with because if subject is null`` () =
         fun () ->
             let x: seq<int> = null
             x.Should().AllBe(1, "Some reason")
