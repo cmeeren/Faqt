@@ -131,7 +131,7 @@ type ComparisonAssertions =
         And(t)
 
 
-    /// Asserts that the subject is the specified inclusive range.
+    /// Asserts that the subject is in the specified inclusive range.
     [<Extension>]
     static member inline BeInRange(t: Testable<'a>, lower: 'a, upper: 'a, ?because) : And<'a> =
         use _ = t.Assert()
