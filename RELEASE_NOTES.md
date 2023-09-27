@@ -3,7 +3,7 @@ Release notes
 
 ### Unreleased
 
-* Added `seq<_>` assertion `AllBeMappedTo`
+* Added `seq<_>` assertions `AllBeMappedTo`, `AllBeEqual`, and `AllBeEqualBy`
 
 ### 1.1.0 (2023-09-22)
 

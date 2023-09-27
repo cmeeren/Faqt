@@ -488,6 +488,8 @@ myFormatter Config.Current
 * `NotContain`: Member check with structural equality
 * `AllBe`: Identical items check with structural equality
 * `AllBeMappedTo`: Identical mapped items check with structural equality
+* `AllBeEqual`
+* `AllBeEqualBy`
 * `SequenceEqual`: Item-wise check with structural equality
 * `HaveSameItemsAs`: Order-ignoring items check with structural equality
 * `ContainExactlyOneItem`

@@ -279,6 +279,63 @@ type SeqAssertions =
         And(t)
 
 
+    /// Asserts that all items in the subject are equal.
+    [<Extension>]
+    static member AllBeEqual(t: Testable<#seq<'a>>, ?because) : And<_> =
+        use _ = t.Assert()
+
+        if isNull (box t.Subject) then
+            t.With("But was", t.Subject).Fail(because)
+        elif not (Seq.stringOptimizedIsEmpty t.Subject) then
+            let first = Seq.head t.Subject
+
+            for i, item in Seq.indexed t.Subject do
+                if item <> first then
+                    t
+                        .With("But found", [ {| Index = 0; Value = first |}; {| Index = i; Value = item |} ])
+                        .With("Subject value", t.Subject)
+                        .Fail(because)
+
+        And(t)
+
+
+    /// Asserts that all items in the subject are equal by the specified projection.
+    [<Extension>]
+    static member AllBeEqualBy(t: Testable<#seq<'a>>, projection: 'a -> 'b, ?because) : And<_> =
+        use _ = t.Assert()
+
+        if isNull (box t.Subject) then
+            t.With("But was", t.Subject).Fail(because)
+        elif not (Seq.stringOptimizedIsEmpty t.Subject) then
+            let first = Seq.head t.Subject
+            let firstProjected = projection first
+
+            for i, item in Seq.indexed t.Subject do
+                let projected = projection item
+
+                if projected <> firstProjected then
+                    t
+                        .With(
+                            "But found",
+                            [
+                                {|
+                                    Index = 0
+                                    Projected = firstProjected
+                                    Value = first
+                                |}
+                                {|
+                                    Index = i
+                                    Projected = projected
+                                    Value = item
+                                |}
+                            ]
+                        )
+                        .With("Subject value", t.Subject)
+                        .Fail(because)
+
+        And(t)
+
+
     /// Asserts that the subject contains the same items in the same order as the specified sequence. Passes if both
     /// sequences are null.
     [<Extension>]

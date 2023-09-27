@@ -845,6 +845,215 @@ Subject value: [a, ab, abc]
 """
 
 
+module AllBeEqual =
+
+
+    [<Fact>]
+    let ``Can be chained with And`` () =
+        [].Should().AllBeEqual().Id<And<int list>>().And.Be([])
+
+
+    let passData = [
+        [| List<string>.Empty |]
+        [| [ "a" ] |]
+        [| [ "a"; "a" ] |]
+        [| [ (null: string) ] |]
+        [| [ (null: string); null ] |]
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof passData)>]
+    let ``Passes if all items are equal`` (subject: seq<string>) = subject.Should().AllBeEqual()
+
+
+    let failData = [
+        // Comment to force break
+        [| box<seq<string>> null |]
+        [| [ "a"; "b" ] |]
+        [| [ "a"; null ] |]
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof failData)>]
+    let ``Fails if null or not all items are equal`` (subject: seq<string>) =
+        assertFails (fun () -> subject.Should().AllBeEqual()) |> ignore
+
+
+    [<Fact>]
+    let ``Fails with expected message if subject is null`` () =
+        fun () ->
+            let x: seq<int> = null
+            x.Should().AllBeEqual()
+        |> assertExnMsg
+            """
+Subject: x
+Should: AllBeEqual
+But was: null
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because if subject is null`` () =
+        fun () ->
+            let x: seq<int> = null
+            x.Should().AllBeEqual("Some reason")
+        |> assertExnMsg
+            """
+Subject: x
+Because: Some reason
+Should: AllBeEqual
+But was: null
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if items are not equal`` () =
+        fun () ->
+            let x = [ 1; 1; 3; 2 ]
+            x.Should().AllBeEqual()
+        |> assertExnMsg
+            """
+Subject: x
+Should: AllBeEqual
+But found:
+- Index: 0
+  Value: 1
+- Index: 2
+  Value: 3
+Subject value: [1, 1, 3, 2]
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because if items are not equal`` () =
+        fun () ->
+            let x = [ 1; 1; 3; 2 ]
+            x.Should().AllBeEqual("Some reason")
+        |> assertExnMsg
+            """
+Subject: x
+Because: Some reason
+Should: AllBeEqual
+But found:
+- Index: 0
+  Value: 1
+- Index: 2
+  Value: 3
+Subject value: [1, 1, 3, 2]
+"""
+
+
+module AllBeEqualBy =
+
+
+    [<Fact>]
+    let ``Can be chained with And`` () =
+        [ "a" ]
+            .Should()
+            .AllBeEqualBy(fun x -> x.Length)
+            .Id<And<string list>>()
+            .And.Be([ "a" ])
+
+
+    let passData = [
+        [| List<string>.Empty |]
+        [| [ "a" ] |]
+        [| [ "a"; "a" ] |]
+        [| [ "a"; "b" ] |]
+        [| [ "ab"; "cd" ] |]
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof passData)>]
+    let ``Passes if all items are equal by the specified projection`` (subject: seq<string>) =
+        subject.Should().AllBeEqualBy(fun x -> x.Length)
+
+
+    let failData = [
+        // Comment to force break
+        [| box<seq<string>> null |]
+        [| [ "a"; "ab" ] |]
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof failData)>]
+    let ``Fails if null or not all items are equal by the specified projection`` (subject: seq<string>) =
+        assertFails (fun () -> subject.Should().AllBeEqualBy(fun x -> x.Length))
+        |> ignore
+
+
+    [<Fact>]
+    let ``Fails with expected message if subject is null`` () =
+        fun () ->
+            let x: seq<string> = null
+            x.Should().AllBeEqualBy(fun x -> x.Length)
+        |> assertExnMsg
+            """
+Subject: x
+Should: AllBeEqualBy
+But was: null
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because if subject is null`` () =
+        fun () ->
+            let x: seq<string> = null
+            x.Should().AllBeEqualBy((fun x -> x.Length), "Some reason")
+        |> assertExnMsg
+            """
+Subject: x
+Because: Some reason
+Should: AllBeEqualBy
+But was: null
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if items are not equal`` () =
+        fun () ->
+            let x = [ "a"; "b"; "abc"; "ab" ]
+            x.Should().AllBeEqualBy(fun x -> x.Length)
+        |> assertExnMsg
+            """
+Subject: x
+Should: AllBeEqualBy
+But found:
+- Index: 0
+  Projected: 1
+  Value: a
+- Index: 2
+  Projected: 3
+  Value: abc
+Subject value: [a, b, abc, ab]
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because if items are not equal`` () =
+        fun () ->
+            let x = [ "a"; "b"; "abc"; "ab" ]
+            x.Should().AllBeEqualBy((fun x -> x.Length), "Some reason")
+        |> assertExnMsg
+            """
+Subject: x
+Because: Some reason
+Should: AllBeEqualBy
+But found:
+- Index: 0
+  Projected: 1
+  Value: a
+- Index: 2
+  Projected: 3
+  Value: abc
+Subject value: [a, b, abc, ab]
+"""
+
+
 module SequenceEqual =
 
 
