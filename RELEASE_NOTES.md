@@ -1,6 +1,10 @@
 Release notes
 ==============
 
+### Unreleased
+
+* Added `seq<_>` assertion `NotContainItemsMatching`
+
 ### 1.2.1 (2023-09-28)
 
 * Made some accidentally public modules `internal`. This is strictly speaking a breaking change, but hopefully no-one

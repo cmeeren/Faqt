@@ -880,6 +880,33 @@ Subject value:
 """
 
 
+module NotContainItemsMatching =
+
+
+    [<Fact>]
+    let ``Can use seq assertion with expected success`` () =
+        let x = dict [ "a", 1 ]
+        x.Should().NotContainItemsMatching(fun kvp -> kvp.Key = "b")
+
+
+    [<Fact>]
+    let ``Can use seq assertion with expected error`` () =
+        fun () ->
+            let x = dict [ "a", 1 ]
+            x.Should().NotContainItemsMatching(fun kvp -> kvp.Key = "a")
+        |> assertExnMsg
+            """
+Subject: x
+Should: NotContainItemsMatching
+But found: 1
+Matching items:
+- Key: a
+  Value: 1
+Subject value:
+  a: 1
+"""
+
+
 module BeSupersetOf =
 
 

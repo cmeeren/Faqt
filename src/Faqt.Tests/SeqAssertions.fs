@@ -1753,6 +1753,63 @@ Subject value: [1, 2, 3]
 """
 
 
+module NotContainItemsMatching =
+
+
+    [<Fact>]
+    let ``Can be chained with AndDerived with matched values`` () =
+        []
+            .Should()
+            .NotContainItemsMatching(fun x -> x > 1)
+            .Id<And<int list>>()
+            .And.Be([])
+
+
+    let passData = [
+        // Comment to force break for readability
+        [| Unchecked.defaultof<List<int>> |]
+        [| [ 1 ] |]
+        [| [ 1; 2 ] |]
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof passData)>]
+    let ``Passes if contains at least one item matching the predicate`` (subject: seq<int>) =
+        subject.Should().NotContainItemsMatching(fun x -> x > 3)
+
+
+    [<Fact>]
+    let ``Fails with expected message any items match the predicate`` () =
+        fun () ->
+            let x = [ 1; 2; 3 ]
+            x.Should().NotContainItemsMatching(fun x -> x > 1)
+        |> assertExnMsg
+            """
+Subject: x
+Should: NotContainItemsMatching
+But found: 2
+Matching items: [2, 3]
+Subject value: [1, 2, 3]
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because if any items match the predicate`` () =
+        fun () ->
+            let x = [ 1; 2; 3 ]
+            x.Should().NotContainItemsMatching((fun x -> x > 1), "Some reason")
+        |> assertExnMsg
+            """
+Subject: x
+Because: Some reason
+Should: NotContainItemsMatching
+But found: 2
+Matching items: [2, 3]
+Subject value: [1, 2, 3]
+"""
+
+
 module BeDistinct =
 
 

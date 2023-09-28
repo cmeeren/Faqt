@@ -537,6 +537,25 @@ type SeqAssertions =
             AndDerived(t, matchingItems)
 
 
+    /// Asserts that the subject does not contains items matching the predicate. Passes if the subject is null.
+    [<Extension>]
+    static member NotContainItemsMatching(t: Testable<#seq<'a>>, predicate: 'a -> bool, ?because) : And<_> =
+        use _ = t.Assert()
+
+        if not (isNull (box t.Subject)) then
+            let matchingItems = t.Subject |> Seq.filter predicate
+            let numMatching = Seq.stringOptimizedLength matchingItems
+
+            if numMatching > 0 then
+                t
+                    .With("But found", numMatching)
+                    .With("Matching items", matchingItems)
+                    .With("Subject value", t.Subject)
+                    .Fail(because)
+
+        And(t)
+
+
     /// Asserts that the subject is distinct.
     [<Extension>]
     static member BeDistinct(t: Testable<#seq<'a>>, ?because) : And<_> =

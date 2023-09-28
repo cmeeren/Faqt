@@ -470,6 +470,7 @@ myFormatter Config.Current
   * `ContainAtLeastOneItem`
   * `ContainAtLeastOneItemMatching`
   * `ContainItemsMatching`
+  * `NotContainItemsMatching`
   * `BeSupersetOf`
   * `BeProperSupersetOf`
   * `BeSubsetOf`
@@ -498,6 +499,7 @@ myFormatter Config.Current
 * `ContainAtLeastOneItem`
 * `ContainAtLeastOneItemMatching`
 * `ContainItemsMatching`
+* `NotContainItemsMatching`
 * `BeDistinct`
 * `BeDistinctBy`
 * `BeAscending`
