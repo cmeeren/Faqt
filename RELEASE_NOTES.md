@@ -1,6 +1,11 @@
 Release notes
 ==============
 
+### Unreleased
+
+* Made some accidentally public modules `internal`. This is strictly speaking a breaking change, but hopefully no-one
+  was using them.
+
 ### 1.2.0 (2023-09-27)
 
 * Added `seq<_>` assertions `AllBeMappedTo`, `AllBeEqual`, and `AllBeEqualBy`

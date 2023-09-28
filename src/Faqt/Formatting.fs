@@ -46,7 +46,7 @@ type FailureData = {
 }
 
 
-module HttpContent =
+module internal HttpContent =
 
 
     let private tryFormatJson (str: string) =
@@ -96,7 +96,7 @@ module HttpContent =
             |> ignore
 
 
-module HttpRequestMessage =
+module internal HttpRequestMessage =
 
 
     let serialize formatContent maxLength (m: HttpRequestMessage) =
@@ -119,7 +119,7 @@ module HttpRequestMessage =
         sb.ToString()
 
 
-module HttpResponseMessage =
+module internal HttpResponseMessage =
 
 
     let serialize formatContent maxLength (m: HttpResponseMessage) =
