@@ -1,7 +1,7 @@
 Release notes
 ==============
 
-### Unreleased
+### 1.3.0 (2023-09-28)
 
 * Added `seq<_>` assertion `NotContainItemsMatching`
 
