@@ -664,7 +664,7 @@ instead of "applicative" behavior).
 
 ### Why not Shouldly?
 
-I will admit I have not used Shouldly myself, but its feature set (ignoring the actual assertions) seem to be a subset
+I will admit I have not used Shouldly myself, but its feature set (ignoring the actual assertions) seems to be a subset
 of that of FluentAssertions. For example, it does not support chaining assertions. However, I like its easy-to-read
 assertion failure messages, and have used those as inspiration for Faqt's assertion messages.
 
