@@ -1,6 +1,11 @@
 Release notes
 ==============
 
+### 1.3.1 (2023-12-14)
+
+* Balanced parentheses are now removed from the subject name. For example, `(Some 1).Should()...` will now give the
+  subject name `Some 1` instead of `(Some 1)`.
+
 ### 1.3.0 (2023-09-28)
 
 * Added `seq<_>` assertion `NotContainItemsMatching`
