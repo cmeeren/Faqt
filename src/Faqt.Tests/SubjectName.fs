@@ -72,7 +72,7 @@ let ``Simple parenthesized expression`` () =
     fun () -> (1 + 2).Should().Fail()
     |> assertExnMsg
         """
-Subject: (1 + 2)
+Subject: 1 + 2
 Should: Fail
 """
 
@@ -732,7 +732,25 @@ let ``Ignore operator is stripped`` () =
     fun () -> %(1).Should().Fail()
     |> assertExnMsg
         """
-Subject: (1)
+Subject: '1'
+Should: Fail
+"""
+
+
+[<Fact>]
+let ``Balanced parentheses are stripped`` () =
+    fun () ->
+        (("1" + "2") |> Some)
+            .Should()
+            .BeSome()
+            .Whose.Replace("a", ("b" + "c"))
+            .Should()
+            .Fail()
+    |> assertExnMsg
+        """
+Subject:
+- ("1" + "2") |> Some
+- Replace("a", ("b" + "c"))
 Should: Fail
 """
 

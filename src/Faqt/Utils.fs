@@ -152,6 +152,15 @@ module String =
             str
 
 
+    // Trims an equal number of '(' from the start of the string and ')' from the end of the string. Does not change the
+    // string if it is only '()'.
+    let rec trimBalancedParens (str: string) =
+        if str <> "()" && str.StartsWith('(') && str.EndsWith(')') then
+            trimBalancedParens (str.Substring(1, str.Length - 2))
+        else
+            str
+
+
 module IDisposable =
 
     let noOp =

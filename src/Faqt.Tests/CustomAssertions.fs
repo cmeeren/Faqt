@@ -54,7 +54,7 @@ let ``DelegatingFailSatisfy gives expected subject name`` () =
     fun () -> (1).Should().DelegatingFailSatisfy()
     |> assertExnMsg
         """
-Subject: (1)
+Subject: '1'
 Should: DelegatingFailSatisfy
 Failure:
   Subject: x

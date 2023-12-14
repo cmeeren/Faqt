@@ -168,7 +168,7 @@ Foo: Bar
         |> assertExnMsg
             """
 Subject:
-- (Some "a")
+- Some "a"
 - Length
 Because: Some reason
 Should: FailWithBecause
@@ -496,7 +496,7 @@ Value: null
         |> assertExnMsg
             """
 Subject:
-- (Some "a")
+- Some "a"
 - Length
 Should: FailWith
 Value:

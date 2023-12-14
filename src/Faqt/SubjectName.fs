@@ -334,4 +334,5 @@ module internal SubjectName =
 
             |> String.split transformationPlaceholder
             |> Array.toList
+            |> List.map String.trimBalancedParens
         with ex -> [ "subject" ]
