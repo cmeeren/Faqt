@@ -1,7 +1,7 @@
 Release notes
 ==============
 
-### Unreleased
+### 1.3.2 (2023-12-20)
 
 * Now gives correct subject names for the new F# 8 shorthand lambda syntax
 
