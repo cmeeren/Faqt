@@ -491,7 +491,6 @@ Failure:
 """
 
 
-
 [<Fact>]
 let ``Names containing _. outside of shorthand lambda syntax`` () =
     fun () ->
@@ -502,7 +501,6 @@ let ``Names containing _. outside of shorthand lambda syntax`` () =
 Subject: myVar123_.Length
 Should: Fail
 """
-
 
 
 [<Fact>]
