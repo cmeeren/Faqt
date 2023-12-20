@@ -1,6 +1,10 @@
 Release notes
 ==============
 
+### Unreleased
+
+* Now gives correct subject names for the new F# 8 shorthand lambda syntax
+
 ### 1.3.1 (2023-12-14)
 
 * Balanced parentheses are now removed from the subject name. For example, `(Some 1).Should()...` will now give the

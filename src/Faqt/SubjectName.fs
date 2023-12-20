@@ -321,6 +321,9 @@ module internal SubjectName =
             // Remove "...fun ... ->" from start of line (e.g. in single-line chains in Satisfy)
             |> String.regexReplace ".*fun .+? -> " ""
 
+            // Remove "...fun ... ->" from start of line (e.g. in single-line chains in Satisfy)
+            |> String.regexReplace ".*(?<!\w)_\." "_."
+
             |> String.trim
 
             // Remove 'ignore' operator
