@@ -1,7 +1,7 @@
 Release notes
 ==============
 
-### Unreleased
+### 1.3.3 (2024-01-29)
 
 * Updated YamlDotNet from 13.3.1 to 15.1.0
 
