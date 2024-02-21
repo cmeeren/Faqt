@@ -574,7 +574,8 @@ cases where it may produce unexpected results:
   notice). This is because it is then likely that a limitation or a bug is causing Faqt to use too large parts of the
   source code as the subject name.
 * The subject name may be incorrect under the following conditions:
-  * Assertion chains not starting on a new line or at the start of a lambda (`fun ... ->`)
+  * Assertion chains not starting on a new line or at the start of a lambda (`fun ... ->` or `_.`)
+  * Assertion chains containing lambdas (`fun ... ->` or `_.`) outside an assertion
   * Nested `Satisfy`, `AllSatisfy` or other higher-order assertions
   * `SatisfyAny` or similar with multiple assertion chains all on the same line containing the same assertion
   * Assertion chains not fully completing on a single thread

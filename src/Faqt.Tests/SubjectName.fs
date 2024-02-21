@@ -1,6 +1,7 @@
 ﻿module ``Subject name``
 
 open System
+open System.Linq
 open Faqt
 open Faqt.Operators
 open Xunit
@@ -983,4 +984,28 @@ Subject value:
 - [11, 12, 13]
 - [21, 22, 23]
 - [31, 32, 33]
+"""
+
+
+[<Fact>]
+let ``Known limitation: Lambdas in subject does not work`` () =
+    fun () ->
+        // Comment to force break
+        [ 1; 2; 3 ].Select(fun x -> x.ToString()).Should().Fail()
+    |> assertExnMsg
+        """
+Subject: x.ToString())
+Should: Fail
+"""
+
+
+[<Fact>]
+let ``Known limitation: Shorthand lambdas in subject does not work`` () =
+    fun () ->
+        // Comment to force break
+        [ 1; 2; 3 ].Select(_.ToString()).Should().Fail()
+    |> assertExnMsg
+        """
+Subject: _.ToString())
+Should: Fail
 """
