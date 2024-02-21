@@ -270,18 +270,12 @@ Should: FailDerived
 let ``WhoseValue, single line, second fails`` () =
     fun () ->
         let thisIsAVariableName = "1"
-
-        thisIsAVariableName
-            .Should()
-            .PassDerived()
-            .WhoseValue.Length.GetType()
-            .Should(())
-            .Fail()
+        thisIsAVariableName.Should().PassDerived().WhoseValue.Length.Should(()).Fail()
     |> assertExnMsg
         """
 Subject:
 - thisIsAVariableName
-- Length.GetType()
+- Length
 Should: Fail
 """
 
