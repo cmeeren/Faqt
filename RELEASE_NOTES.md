@@ -1,7 +1,7 @@
 Release notes
 ==============
 
-### Unreleased
+### 1.3.4 (2024-02-21)
 
 * Fixed incorrect subject name when `.Should` was placed right after `WhoseValue`
 

@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>net5.0;net7.0</TargetFrameworks>
-    <Version>1.3.3</Version>
+    <Version>1.3.4</Version>
     <Authors>Christer van der Meeren</Authors>
     <Description>A fluent assertion library for F#.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
