@@ -318,6 +318,9 @@ module internal SubjectName =
             // Remove remaining calls to Should.
             |> String.regexReplace "\.Should *\((\(\))?\)" ""
 
+            // Remove remaining calls to transformation placeholder + Should).
+            |> String.regexReplace (Regex.Escape transformationPlaceholder + "\Should *\((\(\))?\)") ""
+
             // Remove "...fun ... ->" from start of line (e.g. in single-line chains in Satisfy)
             |> String.regexReplace ".*fun .+? -> " ""
 

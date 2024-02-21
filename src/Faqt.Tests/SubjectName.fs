@@ -281,6 +281,18 @@ Should: Fail
 
 
 [<Fact>]
+let ``WhoseValue.Should(), second fails`` () =
+    fun () ->
+        let thisIsAVariableName = "1"
+        thisIsAVariableName.Should().PassDerived().WhoseValue.Should(()).Fail()
+    |> assertExnMsg
+        """
+Subject: thisIsAVariableName
+Should: Fail
+"""
+
+
+[<Fact>]
 let ``Multiple WhoseValue`` () =
     fun () ->
         let thisIsAVariableName = "1"
