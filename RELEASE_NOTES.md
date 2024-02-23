@@ -1,7 +1,7 @@
 Release notes
 ==============
 
-### Unreleased
+### 1.3.5 (2024-02-23)
 
 * Removed `let`/`use`/`do` from the start of the subject name (e.g. when binding `.Subject` or `.Derived`)
 
