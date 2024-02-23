@@ -788,6 +788,47 @@ Should: Fail
 
 
 [<Fact>]
+let ``Ignores leading let`` () =
+    fun () ->
+        let x = "a".Should().Fail().Subject
+        ignore<string> x
+    |> assertExnMsg
+        """
+Subject: '"a"'
+Should: Fail
+"""
+
+
+[<Fact>]
+let ``Ignores leading use`` () =
+    fun () ->
+        let s =
+            { new IDisposable with
+                member _.Dispose() = ()
+            }
+
+        use x = s.Should().Fail().Subject
+        ignore<IDisposable> x
+    |> assertExnMsg
+        """
+Subject: s
+Should: Fail
+"""
+
+
+[<Fact>]
+let ``Ignores leading do`` () =
+    fun () ->
+        // Comment to force break
+        do %"a".Should().Fail()
+    |> assertExnMsg
+        """
+Subject: '"a"'
+Should: Fail
+"""
+
+
+[<Fact>]
 let ``Known limitation: Lines of multi-line strings that start with // are removed`` () =
     fun () ->
         "this

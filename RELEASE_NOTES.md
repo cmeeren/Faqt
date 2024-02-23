@@ -1,6 +1,10 @@
 Release notes
 ==============
 
+### Unreleased
+
+* Removed `let`/`use`/`do` from the start of the subject name (e.g. when binding `.Subject` or `.Derived`)
+
 ### 1.3.4 (2024-02-21)
 
 * Fixed incorrect subject name when `.Should` was placed right after `WhoseValue`

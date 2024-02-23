@@ -325,7 +325,13 @@ module internal SubjectName =
             |> String.regexReplace ".*fun .+? -> " ""
 
             // Remove "...fun ... ->" from start of line (e.g. in single-line chains in Satisfy)
-            |> String.regexReplace ".*(?<!\w)_\." "_."
+            |> String.regexReplace "^.*(?<!\w)_\." "_."
+
+            // Remove 'let'/'use' bindings from start of line (e.g. when binding a subject or derived value)
+            |> String.regexReplace "^ *(let|use)!? *[^=]+?= *" ""
+
+            // Remove 'do' from start of line (e.g. in a class constructor
+            |> String.regexReplace "^ *do!? *" ""
 
             |> String.trim
 
