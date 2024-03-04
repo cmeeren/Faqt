@@ -156,7 +156,7 @@ module ThrowInner =
 
     [<Theory>]
     [<MemberData(nameof passData)>]
-    let ``Passes if throwing matching exception at top level`` (ex: exn) run = run ((fun () -> raise <| ex).Should())
+    let ``Passes if throwing matching exception at any level`` (ex: exn) run = run ((fun () -> raise <| ex).Should())
 
 
     let failData = [
@@ -172,7 +172,7 @@ module ThrowInner =
 
     [<Theory>]
     [<MemberData(nameof failData)>]
-    let ``Fails if not throwing matching exception at top level`` (ex: exn) run =
+    let ``Fails if not throwing matching exception at any level`` (ex: exn) run =
         assertFails (fun () -> run ((fun () -> if isNull ex then obj () else raise <| ex).Should()))
 
 
