@@ -159,6 +159,18 @@ module ThrowInner =
     let ``Passes if throwing matching exception at any level`` (ex: exn) run = run ((fun () -> raise <| ex).Should())
 
 
+    [<Theory>]
+    [<MemberData(nameof passData)>]
+    let ``Passes if throwing matching exception at any level from synchronously run async code`` (ex: exn) run =
+        run ((fun () -> async { return raise <| ex } |> Async.RunSynchronously).Should())
+
+
+    [<Theory>]
+    [<MemberData(nameof passData)>]
+    let ``Passes if throwing matching exception at any level from synchronously run task code`` (ex: exn) run =
+        run ((fun () -> (task { return raise <| ex }).GetAwaiter().GetResult()).Should())
+
+
     let failData = [
         [| box null; throwInner<Exception> |]
         [| Exception(); throwInner<ArgumentException> |]
