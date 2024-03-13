@@ -1671,6 +1671,166 @@ Subject value: [1, 2, 3]
 """
 
 
+module ContainAtMostOneItem =
+
+
+    [<Fact>]
+    let ``Can be chained with AndDerived with only value`` () =
+        [ 1 ]
+            .Should()
+            .ContainAtMostOneItem()
+            .Id<AndDerived<int list, int option>>()
+            .That.Should(())
+            .Be(Some 1)
+
+
+    [<Fact>]
+    let ``Can be chained with AndDerived with None if empty`` () =
+        List.empty<int>
+            .Should()
+            .ContainAtMostOneItem()
+            .Id<AndDerived<int list, int option>>()
+            .That.Should(())
+            .Be(None)
+
+
+    [<Fact>]
+    let ``Fails with expected message if subject is null`` () =
+        fun () ->
+            let x: seq<int> = null
+            x.Should().ContainAtMostOneItem()
+        |> assertExnMsg
+            """
+Subject: x
+Should: ContainAtMostOneItem
+But was: null
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because if subject is null`` () =
+        fun () ->
+            let x: seq<int> = null
+            x.Should().ContainAtMostOneItem("Some reason")
+        |> assertExnMsg
+            """
+Subject: x
+Because: Some reason
+Should: ContainAtMostOneItem
+But was: null
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if subject contains more than one item`` () =
+        fun () ->
+            let x = [ 1; 2 ]
+            x.Should().ContainAtMostOneItem()
+        |> assertExnMsg
+            """
+Subject: x
+Should: ContainAtMostOneItem
+But length was: 2
+Subject value: [1, 2]
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because if subject contains more than one item`` () =
+        fun () ->
+            let x = [ 1; 2 ]
+            x.Should().ContainAtMostOneItem("Some reason")
+        |> assertExnMsg
+            """
+Subject: x
+Because: Some reason
+Should: ContainAtMostOneItem
+But length was: 2
+Subject value: [1, 2]
+"""
+
+
+module ContainAtMostOneItemMatching =
+
+
+    [<Fact>]
+    let ``Can be chained with AndDerived with only matching value`` () =
+        [ 1; 2; 3 ]
+            .Should()
+            .ContainAtMostOneItemMatching(fun x -> x > 2)
+            .Id<AndDerived<int list, int option>>()
+            .That.Should(())
+            .Be(Some 3)
+
+
+    [<Fact>]
+    let ``Can be chained with AndDerived with None if no matching value`` () =
+        [ 1; 2; 3 ]
+            .Should()
+            .ContainAtMostOneItemMatching(fun x -> x > 3)
+            .Id<AndDerived<int list, int option>>()
+            .That.Should(())
+            .Be(None)
+
+
+    [<Fact>]
+    let ``Fails with expected message if subject is null`` () =
+        fun () ->
+            let x: seq<int> = null
+            x.Should().ContainAtMostOneItemMatching(fun _ -> true)
+        |> assertExnMsg
+            """
+Subject: x
+Should: ContainAtMostOneItemMatching
+But was: null
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because if subject is null`` () =
+        fun () ->
+            let x: seq<int> = null
+            x.Should().ContainAtMostOneItemMatching((fun _ -> true), "Some reason")
+        |> assertExnMsg
+            """
+Subject: x
+Because: Some reason
+Should: ContainAtMostOneItemMatching
+But was: null
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if more than one item matches the predicate`` () =
+        fun () ->
+            let x = [ 1; 2; 3 ]
+            x.Should().ContainAtMostOneItemMatching(fun x -> x > 1)
+        |> assertExnMsg
+            """
+Subject: x
+Should: ContainAtMostOneItemMatching
+But found: 2
+Matching items: [2, 3]
+Subject value: [1, 2, 3]
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because if more than one item matches the predicate`` () =
+        fun () ->
+            let x = [ 1; 2; 3 ]
+            x.Should().ContainAtMostOneItemMatching((fun x -> x > 1), "Some reason")
+        |> assertExnMsg
+            """
+Subject: x
+Because: Some reason
+Should: ContainAtMostOneItemMatching
+But found: 2
+Matching items: [2, 3]
+Subject value: [1, 2, 3]
+"""
+
+
 module ContainItemsMatching =
 
 

@@ -856,6 +856,62 @@ Subject value:
 """
 
 
+module ContainAtMostOneItem =
+
+
+    [<Fact>]
+    let ``Can use seq assertion with expected success`` () =
+        let x = dict [ "a", 1 ]
+        x.Should().ContainAtMostOneItem()
+
+
+    [<Fact>]
+    let ``Can use seq assertion with expected error`` () =
+        fun () ->
+            let x = dict<string, int> [ "a", 1; "b", 2 ]
+            x.Should().ContainAtMostOneItem()
+        |> assertExnMsg
+            """
+Subject: x
+Should: ContainAtMostOneItem
+But length was: 2
+Subject value:
+  a: 1
+  b: 2
+"""
+
+
+module ContainAtMostOneItemMatching =
+
+
+    [<Fact>]
+    let ``Can use seq assertion with expected success`` () =
+        let x = dict [ "a", 1 ]
+        x.Should().ContainAtMostOneItemMatching(fun kvp -> kvp.Key = "a")
+
+
+    [<Fact>]
+    let ``Can use seq assertion with expected error`` () =
+        fun () ->
+            let x = dict [ "a", 1; "b", 1; "c", 3 ]
+            x.Should().ContainAtMostOneItemMatching(fun kvp -> kvp.Value = 1)
+        |> assertExnMsg
+            """
+Subject: x
+Should: ContainAtMostOneItemMatching
+But found: 2
+Matching items:
+- Key: a
+  Value: 1
+- Key: b
+  Value: 1
+Subject value:
+  a: 1
+  b: 1
+  c: 3
+"""
+
+
 module ContainItemsMatching =
 
 

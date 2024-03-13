@@ -1,6 +1,10 @@
 Release notes
 ==============
 
+### Unreleased
+
+* Added `seq<_>` assertions `ContainAtMostOneItem` and `ContainAtMostOneItemMatching`
+
 ### 1.3.5 (2024-02-23)
 
 * Removed `let`/`use`/`do` from the start of the subject name (e.g. when binding `.Subject` or `.Derived`)

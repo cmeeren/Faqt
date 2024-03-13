@@ -469,6 +469,8 @@ myFormatter Config.Current
   * `ContainExactlyOneItemMatching`
   * `ContainAtLeastOneItem`
   * `ContainAtLeastOneItemMatching`
+  * `ContainAtMostOneItem`
+  * `ContainAtMostOneItemMatching`
   * `ContainItemsMatching`
   * `NotContainItemsMatching`
   * `BeSupersetOf`
@@ -498,6 +500,8 @@ myFormatter Config.Current
 * `ContainExactlyOneItemMatching`
 * `ContainAtLeastOneItem`
 * `ContainAtLeastOneItemMatching`
+* `ContainAtMostOneItem`
+* `ContainAtMostOneItemMatching`
 * `ContainItemsMatching`
 * `NotContainItemsMatching`
 * `BeDistinct`

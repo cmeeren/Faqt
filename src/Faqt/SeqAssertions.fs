@@ -514,6 +514,51 @@ type SeqAssertions =
             AndDerived(t, Seq.head matchingItems)
 
 
+    /// Asserts that the subject contains at most one item.
+    [<Extension>]
+    static member ContainAtMostOneItem(t: Testable<#seq<'a>>, ?because) : AndDerived<_, 'a option> =
+        use _ = t.Assert()
+
+        if isNull (box t.Subject) then
+            t.With("But was", t.Subject).Fail(because)
+        else
+            let subjectLength = Seq.stringOptimizedLength t.Subject
+
+            if subjectLength > 1 then
+                t
+                    .With("But length was", subjectLength)
+                    .With("Subject value", t.Subject)
+                    .Fail(because)
+
+        AndDerived(t, Seq.tryHead t.Subject)
+
+
+    /// Asserts that the subject contains at most one item matching the predicate.
+    [<Extension>]
+    static member ContainAtMostOneItemMatching
+        (
+            t: Testable<#seq<'a>>,
+            predicate: 'a -> bool,
+            ?because
+        ) : AndDerived<_, 'a option> =
+        use _ = t.Assert()
+
+        if isNull (box t.Subject) then
+            t.With("But was", t.Subject).Fail(because)
+        else
+            let matchingItems = t.Subject |> Seq.filter predicate
+            let matchingLength = Seq.stringOptimizedLength matchingItems
+
+            if matchingLength > 1 then
+                t
+                    .With("But found", matchingLength)
+                    .With("Matching items", matchingItems)
+                    .With("Subject value", t.Subject)
+                    .Fail(because)
+
+            AndDerived(t, Seq.tryHead matchingItems)
+
+
     /// Asserts that the subject contains at least one item matching the predicate. Similar to
     /// ContainAtLeastOneItemMatching, but allows continuing to assert on all the matching items instead of just the
     /// first.
