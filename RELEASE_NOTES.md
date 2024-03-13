@@ -1,7 +1,7 @@
 Release notes
 ==============
 
-### Unreleased
+### 1.3.6 (2024-03-13)
 
 * Added `seq<_>` assertions `ContainAtMostOneItem` and `ContainAtMostOneItemMatching`
 
