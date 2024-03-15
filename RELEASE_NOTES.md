@@ -1,7 +1,7 @@
 Release notes
 ==============
 
-### Unreleased
+### 1.3.7 (2024-03-15)
 
 * Fixed rare bug relating to race conditions
 * Updated YamlDotNet from 15.1.0 to 15.1.2
