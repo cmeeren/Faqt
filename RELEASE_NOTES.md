@@ -1,6 +1,10 @@
 Release notes
 ==============
 
+### Unreleased
+
+* Fixed rare bug relating to race conditions
+
 ### 1.3.6 (2024-03-13)
 
 * Added `seq<_>` assertions `ContainAtMostOneItem` and `ContainAtMostOneItemMatching`

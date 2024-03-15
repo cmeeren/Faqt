@@ -8,7 +8,6 @@ open System.Reflection.Metadata
 open System.Reflection.PortableExecutable
 open System.Text
 open System.Text.RegularExpressions
-open System.Threading
 open Faqt
 
 
@@ -28,15 +27,15 @@ type private AssertionInfo = {
 
 type internal CallChain() =
 
-    static let activeUserAssertions: AsyncLocal<Dictionary<CallChainOrigin, AssertionInfo list>> =
-        AsyncLocal()
+    [<ThreadStatic; DefaultValue>]
+    static val mutable private activeUserAssertions: Dictionary<CallChainOrigin, AssertionInfo list>
 
-    static let topLevelAssertionHistory: AsyncLocal<Dictionary<CallChainOrigin, AssertionInfo list>> =
-        AsyncLocal()
+    [<ThreadStatic; DefaultValue>]
+    static val mutable private topLevelAssertionHistory: Dictionary<CallChainOrigin, AssertionInfo list>
 
 
     static let getParentAssertionCallsite () =
-        activeUserAssertions.Value
+        CallChain.activeUserAssertions
         |> Seq.filter (fun kvp ->
             match kvp.Value with
             | [] -> false
@@ -49,11 +48,11 @@ type internal CallChain() =
     static let pushAssertion callsite method supportsChildAssertions isSeqAssertion =
 
         let assertions =
-            match activeUserAssertions.Value.TryGetValue callsite with
+            match CallChain.activeUserAssertions.TryGetValue callsite with
             | false, _ -> []
             | true, xs -> xs
 
-        activeUserAssertions.Value[callsite] <-
+        CallChain.activeUserAssertions[callsite] <-
             {
                 Method = method
                 SupportsChildAssertions = supportsChildAssertions
@@ -62,36 +61,36 @@ type internal CallChain() =
             :: assertions
 
     static let tryPopAssertion callsite =
-        match activeUserAssertions.Value.TryGetValue callsite with
+        match CallChain.activeUserAssertions.TryGetValue callsite with
         | false, _ -> ()
         | true, [] -> ()
         | true, hd :: tl ->
-            activeUserAssertions.Value[callsite] <- tl
+            CallChain.activeUserAssertions[callsite] <- tl
 
-            match topLevelAssertionHistory.Value.TryGetValue callsite with
-            | false, _ -> topLevelAssertionHistory.Value[callsite] <- [ hd ]
-            | true, xs -> topLevelAssertionHistory.Value[callsite] <- hd :: xs
+            match CallChain.topLevelAssertionHistory.TryGetValue callsite with
+            | false, _ -> CallChain.topLevelAssertionHistory[callsite] <- [ hd ]
+            | true, xs -> CallChain.topLevelAssertionHistory[callsite] <- hd :: xs
 
             match getParentAssertionCallsite () with
             | None -> ()
             | Some parentCallsite ->
-                match topLevelAssertionHistory.Value.TryGetValue parentCallsite with
-                | false, _ -> topLevelAssertionHistory.Value[parentCallsite] <- [ hd ]
-                | true, xs -> topLevelAssertionHistory.Value[parentCallsite] <- hd :: xs
+                match CallChain.topLevelAssertionHistory.TryGetValue parentCallsite with
+                | false, _ -> CallChain.topLevelAssertionHistory[parentCallsite] <- [ hd ]
+                | true, xs -> CallChain.topLevelAssertionHistory[parentCallsite] <- hd :: xs
 
 
     static let canPushAssertion callsite =
-        match activeUserAssertions.Value.TryGetValue callsite with
+        match CallChain.activeUserAssertions.TryGetValue callsite with
         | false, _ -> true
         | true, [] -> true
         | true, hd :: _ -> hd.SupportsChildAssertions
 
     static member private EnsureInitialized() =
-        if isNull activeUserAssertions.Value then
-            activeUserAssertions.Value <- Dictionary()
+        if isNull CallChain.activeUserAssertions then
+            CallChain.activeUserAssertions <- Dictionary()
 
-        if isNull topLevelAssertionHistory.Value then
-            topLevelAssertionHistory.Value <- Dictionary()
+        if isNull CallChain.topLevelAssertionHistory then
+            CallChain.topLevelAssertionHistory <- Dictionary()
 
 
     static member Assert(callsite, assertionMethod, supportsChildAssertions, isSeqAssertion) =
@@ -110,13 +109,14 @@ type internal CallChain() =
     static member AssertItem(callsite) =
         CallChain.EnsureInitialized()
 
-        match topLevelAssertionHistory.Value.TryGetValue callsite with
+        match CallChain.topLevelAssertionHistory.TryGetValue callsite with
         | false, _ -> ()
-        | true, xs -> topLevelAssertionHistory.Value[callsite] <- xs |> List.skipWhile (fun x -> not x.IsSeqAssertion)
+        | true, xs ->
+            CallChain.topLevelAssertionHistory[callsite] <- xs |> List.skipWhile (fun x -> not x.IsSeqAssertion)
 
-        match activeUserAssertions.Value.TryGetValue callsite with
+        match CallChain.activeUserAssertions.TryGetValue callsite with
         | false, _ -> ()
-        | true, xs -> activeUserAssertions.Value[callsite] <- xs |> List.skipWhile (fun x -> not x.IsSeqAssertion)
+        | true, xs -> CallChain.activeUserAssertions[callsite] <- xs |> List.skipWhile (fun x -> not x.IsSeqAssertion)
 
         // Returning IDisposable and requiring usage with the 'use' keyword gives more flexibility in changing the
         // implementation later, if needed.
@@ -127,12 +127,12 @@ type internal CallChain() =
         CallChain.EnsureInitialized()
 
         let topLevelAssertions =
-            match topLevelAssertionHistory.Value.TryGetValue callsite with
+            match CallChain.topLevelAssertionHistory.TryGetValue callsite with
             | true, xs -> xs |> List.map (fun x -> x.Method) |> List.rev
             | false, _ -> []
 
         let activeAssertions =
-            match activeUserAssertions.Value.TryGetValue callsite with
+            match CallChain.activeUserAssertions.TryGetValue callsite with
             | true, xs -> xs |> List.map (fun x -> x.Method) |> List.rev
             | false, _ -> []
 
@@ -142,8 +142,8 @@ type internal CallChain() =
     static member internal Reset(callsite) =
         CallChain.EnsureInitialized()
 
-        if topLevelAssertionHistory.Value.ContainsKey(callsite) then
-            topLevelAssertionHistory.Value.Remove(callsite) |> ignore
+        if CallChain.topLevelAssertionHistory.ContainsKey(callsite) then
+            CallChain.topLevelAssertionHistory.Remove(callsite) |> ignore
 
 
 module internal EmbeddedSource =
