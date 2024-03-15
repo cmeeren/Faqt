@@ -87,16 +87,18 @@ Value: |-
   lorem ipsum dolor sit amet
 """
 
-        do
-            use _ = Config.With(FaqtConfig.Default.SetHttpContentMaxLength(10))
+        do!
+            async {
+                use _ = Config.With(FaqtConfig.Default.SetHttpContentMaxLength(10))
+                do! Async.SwitchToNewThread()
 
-            fun () ->
-                let x = new HttpRequestMessage(HttpMethod.Get, "/")
-                x.Version <- Version.Parse("0.5")
-                x.Content <- new StringContent("lorem ipsum dolor sit amet")
-                x.Should().FailWith("Value", x)
-            |> assertExnMsg
-                """
+                fun () ->
+                    let x = new HttpRequestMessage(HttpMethod.Get, "/")
+                    x.Version <- Version.Parse("0.5")
+                    x.Content <- new StringContent("lorem ipsum dolor sit amet")
+                    x.Should().FailWith("Value", x)
+                |> assertExnMsg
+                    """
 Subject: x
 Should: FailWith
 Value: |-
@@ -107,6 +109,7 @@ Value: |-
   lorem ipsu…
   [content truncated after 10 characters]
 """
+            }
 
         fun () ->
             let x = new HttpRequestMessage(HttpMethod.Get, "/")
