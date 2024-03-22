@@ -511,6 +511,30 @@ Should: Fail
 
 
 [<Fact>]
+let ``Names containing _ outside of shorthand lambda syntax`` () =
+    fun () ->
+        let myVar_123 = ""
+        myVar_123.Length.Should().Fail()
+    |> assertExnMsg
+        """
+Subject: myVar_123.Length
+Should: Fail
+"""
+
+
+[<Fact>]
+let ``Names ending with _ outside of shorthand lambda syntax`` () =
+    fun () ->
+        let myVar123_ = ""
+        myVar123_.Should().Fail()
+    |> assertExnMsg
+        """
+Subject: myVar123_
+Should: Fail
+"""
+
+
+[<Fact>]
 let ``Multi-line Satisfy`` () =
     fun () ->
         "asd"
