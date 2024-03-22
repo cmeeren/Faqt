@@ -3504,7 +3504,8 @@ module NotIntersectWith =
 
 
     [<Fact>]
-    let ``Passes if null`` = (null: seq<int>).Should().NotIntersectWith([])
+    let ``Passes if null`` () =
+        (null: seq<int>).Should().NotIntersectWith([])
 
 
     let passData = [
