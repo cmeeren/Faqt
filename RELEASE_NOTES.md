@@ -4,6 +4,8 @@ Release notes
 ### Unreleased
 
 * Fixed subject name when using `_.Should()`
+* On .NET 8, `Map<_, _>` now serializes as an object (not array) for non-`string` key types (
+  using `WithMapFormat(MapFormat.Object)` in FSharp.SystemTextJson)
 
 ### 1.3.7 (2024-03-15)
 
