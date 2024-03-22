@@ -499,6 +499,19 @@ Failure:
 
 
 [<Fact>]
+let ``Single-line Satisfy with shorthand lambda syntax without intermediate property`` () =
+    fun () -> "asd".Should().Satisfy(_.Should().Fail())
+    |> assertExnMsg
+        """
+Subject: '"asd"'
+Should: Satisfy
+Failure:
+  Subject: _
+  Should: Fail
+"""
+
+
+[<Fact>]
 let ``Names containing _. outside of shorthand lambda syntax`` () =
     fun () ->
         let myVar123_ = ""

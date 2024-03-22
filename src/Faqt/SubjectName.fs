@@ -325,7 +325,7 @@ module internal SubjectName =
             |> String.regexReplace ".*fun .+? -> " ""
 
             // Remove from start of line until final short-hand lambda (e.g. in single-line chains in Satisfy)
-            |> String.regexReplace ".*(?<!\w)_\." "_."
+            |> String.regexReplace ".*(?<!\w)_" "_"
 
             // Remove 'let'/'use' bindings from start of line (e.g. when binding a subject or derived value)
             |> String.regexReplace "^ *(let|use)!? *[^=]+?= *" ""
