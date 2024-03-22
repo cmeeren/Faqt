@@ -72,11 +72,11 @@ type internal CallChain() =
             | true, xs -> CallChain.topLevelAssertionHistory[callsite] <- hd :: xs
 
             match getParentAssertionCallsite () with
-            | None -> ()
-            | Some parentCallsite ->
+            | Some parentCallsite when parentCallsite <> callsite ->
                 match CallChain.topLevelAssertionHistory.TryGetValue parentCallsite with
                 | false, _ -> CallChain.topLevelAssertionHistory[parentCallsite] <- [ hd ]
                 | true, xs -> CallChain.topLevelAssertionHistory[parentCallsite] <- hd :: xs
+            | _ -> ()
 
 
     static let canPushAssertion callsite =
