@@ -1,7 +1,7 @@
 Release notes
 ==============
 
-### Unreleased
+### 1.3.8 (2024-03-22)
 
 * Fixed subject name when using `_.Should()`
 * On .NET 8, `Map<_, _>` now serializes as an object (not array) for non-`string` key types (
