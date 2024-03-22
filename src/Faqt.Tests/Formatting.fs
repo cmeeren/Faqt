@@ -1095,7 +1095,7 @@ Value: 0001FEFF
 
 
     [<Fact>]
-    let ``Map format with non-string keys`` () =
+    let ``Dictionary format with non-string keys`` () =
         fun () -> ().Should().FailWith("Value", dict [ 1, "a"; 2, "b" ])
         |> assertExnMsg
             """
