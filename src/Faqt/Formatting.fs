@@ -409,7 +409,6 @@ type YamlFormatterBuilder = private {
                     .WithUnionUnwrapSingleFieldCases()
                     .WithUnwrapOption(false)
 #if NET8_0_OR_GREATER
-                    // TODO: Test when upgrading test project to .NET 8
                     .WithMapFormat(MapFormat.Object)
 #endif
             )

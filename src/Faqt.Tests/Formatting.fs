@@ -1107,6 +1107,19 @@ Value:
 """
 
 
+    [<Fact>]
+    let ``Map format with non-string keys`` () =
+        fun () -> ().Should().FailWith("Value", Map.ofList [ 1, "a"; 2, "b" ])
+        |> assertExnMsg
+            """
+Subject: ()
+Should: FailWith
+Value:
+  '1': a
+  '2': b
+"""
+
+
 module YamlFormatterBuilder =
 
 
