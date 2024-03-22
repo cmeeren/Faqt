@@ -321,10 +321,10 @@ module internal SubjectName =
             // Remove remaining calls to transformation placeholder + Should).
             |> String.regexReplace (Regex.Escape transformationPlaceholder + "\Should *\((\(\))?\)") ""
 
-            // Remove "...fun ... ->" from start of line (e.g. in single-line chains in Satisfy)
+            // Remove from start of line until final lambda (e.g. in single-line chains in Satisfy)
             |> String.regexReplace ".*fun .+? -> " ""
 
-            // Remove "...fun ... ->" from start of line (e.g. in single-line chains in Satisfy)
+            // Remove from start of line until final short-hand lambda (e.g. in single-line chains in Satisfy)
             |> String.regexReplace ".*(?<!\w)_\." "_."
 
             // Remove 'let'/'use' bindings from start of line (e.g. when binding a subject or derived value)
