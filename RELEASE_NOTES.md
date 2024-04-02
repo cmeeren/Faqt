@@ -1,6 +1,11 @@
 Release notes
 ==============
 
+### Unreleased
+
+* Added `FaqtConfig.SetMapHttpHeaderValues` to set a function that can map HTTP header values (e.g. for
+  masking `Authorization` headers).
+
 ### 1.3.8 (2024-03-22)
 
 * Fixed subject name when using `_.Should()`

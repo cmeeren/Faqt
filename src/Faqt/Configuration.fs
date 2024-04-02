@@ -7,6 +7,7 @@ open System.Threading
 type FaqtConfig = private {
     httpContentMaxLength: int
     formatHttpContent: bool
+    mapHttpHeaderValues: string -> string -> string
 } with
 
 
@@ -15,6 +16,7 @@ type FaqtConfig = private {
     static member Default = {
         httpContentMaxLength = 1024 * 1024
         formatHttpContent = true
+        mapHttpHeaderValues = fun _ v -> v
     }
 
 
@@ -37,6 +39,19 @@ type FaqtConfig = private {
     member this.SetFormatHttpContent(shouldFormat) = {
         this with
             formatHttpContent = shouldFormat
+    }
+
+
+    /// Gets the function used to format (e.g. mask) HTTP headers. The function accepts the header name and value, and
+    /// returns the new value.
+    member this.MapHttpHeaderValues = this.mapHttpHeaderValues
+
+
+    /// Sets the function used to format (e.g. mask) HTTP headers. The function accepts the header name and value, and
+    /// returns the new value.
+    member this.SetMapHttpHeaderValues(mapHttpHeaderValues) = {
+        this with
+            mapHttpHeaderValues = mapHttpHeaderValues
     }
 
 

@@ -99,7 +99,7 @@ module internal HttpContent =
 module internal HttpRequestMessage =
 
 
-    let serialize formatContent maxLength (m: HttpRequestMessage) =
+    let serialize formatContent maxLength (mapHeaderValues: string -> string -> string) (m: HttpRequestMessage) =
         let sb = StringBuilder()
 
         sb
@@ -112,7 +112,8 @@ module internal HttpRequestMessage =
 
         for h in m.Headers do
             for v in h.Value do
-                sb.AppendLine().Append(h.Key).Append(": ").Append(v) |> ignore
+                sb.AppendLine().Append(h.Key).Append(": ").Append(mapHeaderValues h.Key v)
+                |> ignore
 
         HttpContent.serializeAppend formatContent maxLength sb m.Content
 
@@ -122,7 +123,7 @@ module internal HttpRequestMessage =
 module internal HttpResponseMessage =
 
 
-    let serialize formatContent maxLength (m: HttpResponseMessage) =
+    let serialize formatContent maxLength (mapHeaderValues: string -> string -> string) (m: HttpResponseMessage) =
         let sb = StringBuilder()
 
         sb
@@ -136,7 +137,8 @@ module internal HttpResponseMessage =
 
         for h in m.Headers do
             for v in h.Value do
-                sb.AppendLine().Append(h.Key).Append(": ").Append(v) |> ignore
+                sb.AppendLine().Append(h.Key).Append(": ").Append(mapHeaderValues h.Key v)
+                |> ignore
 
         HttpContent.serializeAppend formatContent maxLength sb m.Content
 
@@ -420,10 +422,18 @@ type YamlFormatterBuilder = private {
             .SerializeAs(fun (t: Type) -> t.AssertionName)
             .SerializeAs(fun (ci: CultureInfo) -> if ci.Name = "" then "invariant" else ci.Name)
             .SerializeAs(fun x ->
-                HttpRequestMessage.serialize Config.Current.FormatHttpContent Config.Current.HttpContentMaxLength x
+                HttpRequestMessage.serialize
+                    Config.Current.FormatHttpContent
+                    Config.Current.HttpContentMaxLength
+                    Config.Current.MapHttpHeaderValues
+                    x
             )
             .SerializeAs(fun x ->
-                HttpResponseMessage.serialize Config.Current.FormatHttpContent Config.Current.HttpContentMaxLength x
+                HttpResponseMessage.serialize
+                    Config.Current.FormatHttpContent
+                    Config.Current.HttpContentMaxLength
+                    Config.Current.MapHttpHeaderValues
+                    x
             )
             .SerializeAs(fun (c: HttpStatusCode) ->
                 let reasonPhrase =

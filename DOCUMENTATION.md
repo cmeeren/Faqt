@@ -352,6 +352,10 @@ let myConfig =
         .SetHttpContentMaxLength(1024 * 1024)
         // Disable formatting of HttpContent (such as indenting JSON for readability)
         .SetFormatHttpContent(false)
+        // Transform HTTP header values
+        .SetMapHttpHeaderValues(fun name value ->
+            if name.Equals("Authorization", StringComparison.OrdinalIgnoreCase) then "***" else value
+        )
 
 // Set the default config
 Config.Set(myConfig)

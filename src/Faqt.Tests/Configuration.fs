@@ -225,3 +225,71 @@ Value: |-
   lorem ipsu…
   [content truncated after 10 characters]
 """
+
+
+[<Fact>]
+let ``HTTP headers are unchanged by default`` () =
+    fun () ->
+        let x = new HttpRequestMessage(HttpMethod.Get, "/")
+        x.Version <- Version.Parse("0.5")
+        x.Headers.Add("Authorization", "foobar")
+        x.Headers.Add("Cookie", "foobar")
+        x.Should().FailWith("Value", x)
+    |> assertExnMsg
+        """
+Subject: x
+Should: FailWith
+Value: |-
+  GET / HTTP/0.5
+  Authorization: foobar
+  Cookie: foobar
+"""
+
+
+[<Fact>]
+let ``HTTP headers can be changed`` () =
+    use _ =
+        Config.With(
+            FaqtConfig.Default.SetMapHttpHeaderValues(fun name value ->
+                match name with
+                | "Authorization"
+                | "Cookie" -> "***"
+                | "Multi"
+                | "Comma"
+                | "CommaSpace"
+                | "Semicolon"
+                | "Accept-Encoding" -> value + "!"
+                | _ -> value
+            )
+        )
+
+    fun () ->
+        let x = new HttpRequestMessage(HttpMethod.Get, "/")
+        x.Version <- Version.Parse("0.5")
+        x.Headers.Add("Authorization", "foobar")
+        x.Headers.Add("Cookie", "foobar")
+        x.Headers.Add("Multi", "A")
+        x.Headers.Add("Multi", "B")
+        x.Headers.Add("Comma", "A,B")
+        x.Headers.Add("CommaSpace", "A, B")
+        x.Headers.Add("Semicolon", "A;B")
+        x.Headers.Add("Accept-Encoding", "gzip, deflate")
+        x.Headers.Add("Other", "test")
+        x.Should().FailWith("Value", x)
+    |> assertExnMsg
+        """
+Subject: x
+Should: FailWith
+Value: |-
+  GET / HTTP/0.5
+  Authorization: ***
+  Cookie: ***
+  Multi: A!
+  Multi: B!
+  Comma: A,B!
+  CommaSpace: A, B!
+  Semicolon: A;B!
+  Accept-Encoding: gzip!
+  Accept-Encoding: deflate!
+  Other: test
+"""
