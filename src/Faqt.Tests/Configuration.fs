@@ -132,5 +132,6 @@ Value: |-
 
 [<Fact>]
 let ``Default config`` () =
-    Assert.Equal(FaqtConfig.Default, Config.Current)
+    Assert.Equal(FaqtConfig.Default.HttpContentMaxLength, Config.Current.HttpContentMaxLength)
+    Assert.Equal(FaqtConfig.Default.FormatHttpContent, Config.Current.FormatHttpContent)
     Assert.Equal(1024 * 1024, Config.Current.HttpContentMaxLength)
