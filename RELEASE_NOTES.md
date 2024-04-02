@@ -1,7 +1,7 @@
 Release notes
 ==============
 
-### Unreleased
+### 1.3.9 (2024-04-02)
 
 * Added `FaqtConfig.SetMapHttpHeaderValues` to set a function that can map HTTP header values (e.g. for
   masking `Authorization` headers).
