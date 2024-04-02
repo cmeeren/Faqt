@@ -7,7 +7,6 @@ open System.Threading
 type FaqtConfig = private {
     httpContentMaxLength: int
     formatHttpContent: bool
-// Note: If adding additional fields, update the "Default config" test in Faqt.Tests/Configuration.fs
 } with
 
 

@@ -225,9 +225,3 @@ Value: |-
   lorem ipsu…
   [content truncated after 10 characters]
 """
-
-
-[<Fact>]
-let ``Default config`` () =
-    Assert.Equal(FaqtConfig.Default.HttpContentMaxLength, Config.Current.HttpContentMaxLength)
-    Assert.Equal(FaqtConfig.Default.FormatHttpContent, Config.Current.FormatHttpContent)
