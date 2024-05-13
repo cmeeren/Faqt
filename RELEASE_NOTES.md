@@ -3,6 +3,7 @@ Release notes
 
 ### Unreleased
 
+* Added `string` assertion `BeJsonEquivalentTo`
 * Added `HttpResponseMessage` assertion `HaveStringContentSatisfying`. Note that this is async and therefore not
   chainable.
 * The `HttpResponseMessage` assertions `HaveHeader` and `HaveHeaderValue` now correctly detects content headers such

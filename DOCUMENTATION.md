@@ -444,6 +444,7 @@ myFormatter Config.Current
 * `NotMatchRegex`
 * `MatchWildcard`: Simplified wildcard check with `*` (zero or more characters) and `?` (one character)
 * `NotMatchWildcard`: Simplified wildcard check with `*` (zero or more characters) and `?` (one character)
+* `BeJsonEquivalentTo`: Checks that two JSON strings are equivalent (ignoring formatting)
 * All `seq<_>` assertions, including:
   * `HaveLength`
   * `BeEmpty`

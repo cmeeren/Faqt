@@ -2150,3 +2150,166 @@ Should: NotMatchWildcard
 Pattern: a*
 But was: asd
 """
+
+
+module BeJsonEquivalentTo =
+
+
+    [<Fact>]
+    let ``Can be chained with And`` () =
+        "\"a\"".Should().BeJsonEquivalentTo("  \"a\"").Id<And<string>>().And.Be("\"a\"")
+
+
+    [<Theory>]
+    [<InlineData("1", "1")>]
+    [<InlineData("\"a\"", "\"a\"")>]
+    [<InlineData("""{}""", """{}""")>]
+    [<InlineData("""{"a":1}""", """{"a": 1}""")>]
+    [<InlineData("""{"a":0,"b":1}""", """{"b":1,"a":0}""")>]
+    [<InlineData("""[1,2,3]""", """[1,   2,     3]""")>]
+    [<InlineData("""
+        {
+          "a": 0,
+          "b": 1
+        }
+        """,
+                 """{"a":0,"b":1}""")>]
+    let ``Passes if equivalent`` (subject: string) (expected: string) =
+        subject.Should().BeJsonEquivalentTo(expected)
+
+
+    [<Theory>]
+    [<InlineData("1", "2")>]
+    [<InlineData("1.0", "1")>]
+    [<InlineData("\"1\"", "1")>]
+    [<InlineData("""{"a":0}""", """{"A":0}""")>]
+    let ``Fails if not equivalent`` (json1: string) (json2: string) =
+        assertFails (fun () -> json1.Should().BeJsonEquivalentTo(json2)) |> ignore
+        assertFails (fun () -> json2.Should().BeJsonEquivalentTo(json1)) |> ignore
+
+
+    [<Fact>]
+    let ``Throws ArgumentNullException if expected is null`` () =
+        Assert.Throws<ArgumentNullException>(fun () -> "".Should().BeJsonEquivalentTo(null) |> ignore)
+
+
+    [<Fact>]
+    let ``Throws ArgumentException if expected is not valid JSON`` () =
+        let invalidJson = "a"
+        Assert.Throws<ArgumentException>(fun () -> "".Should().BeJsonEquivalentTo(invalidJson) |> ignore)
+
+
+    [<Fact>]
+    let ``Fails with expected message if null`` () =
+        fun () -> null.Should().BeJsonEquivalentTo("1")
+        |> assertExnMsg
+            """
+Subject: 'null'
+Should: BeJsonEquivalentTo
+Expected: '1'
+But was: null
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if null with because`` () =
+        fun () -> null.Should().BeJsonEquivalentTo("1", "Some reason")
+        |> assertExnMsg
+            """
+Subject: 'null'
+Because: Some reason
+Should: BeJsonEquivalentTo
+Expected: '1'
+But was: null
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if invalid JSON`` () =
+        fun () -> "a".Should().BeJsonEquivalentTo("1")
+        |> assertExnMsg
+            """
+Subject: '"a"'
+Should: BeJsonEquivalentTo
+Expected: '1'
+But was: a
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if invalid JSON with because`` () =
+        fun () -> "a".Should().BeJsonEquivalentTo("1", "Some reason")
+        |> assertExnMsg
+            """
+Subject: '"a"'
+Because: Some reason
+Should: BeJsonEquivalentTo
+Expected: '1'
+But was: a
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if not equivalent`` () =
+        let json =
+            """{"a": 1, "B": ["a","b","c","d","e","f","g","i","j","k","l","m","n","o","p"], "c": { "d": 123.456 }, "e": "Some long string that causes output to use multiple lines" }"""
+
+        fun () ->
+            json
+                .Should()
+                .BeJsonEquivalentTo(
+                    """{"A": 1, "b": ["a","b","c","d","e","f","g","i","j","k","l","m","n","o","p"], "C": { "d": 123.456 }, "e": "Some long string that causes output to use multiple lines" }"""
+                )
+        |> assertExnMsg
+            """
+Subject: json
+Should: BeJsonEquivalentTo
+Expected: |-
+  {
+      "A": 1,
+      "b": ["a", "b", "c", "d", "e", "f", "g", "i", "j", "k", "l", "m", "n", "o", "p"],
+      "C": {"d": 123.456},
+      "e": "Some long string that causes output to use multiple lines"
+  }
+But was: |-
+  {
+      "a": 1,
+      "B": ["a", "b", "c", "d", "e", "f", "g", "i", "j", "k", "l", "m", "n", "o", "p"],
+      "c": {"d": 123.456},
+      "e": "Some long string that causes output to use multiple lines"
+  }
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if not equivalent with because`` () =
+        let json =
+            """{"a": 1, "B": ["a","b","c","d","e","f","g","i","j","k","l","m","n","o","p"], "c": { "d": 123.456 }, "e": "Some long string that causes output to use multiple lines" }"""
+
+        fun () ->
+            json
+                .Should()
+                .BeJsonEquivalentTo(
+                    """{"A": 1, "b": ["a","b","c","d","e","f","g","i","j","k","l","m","n","o","p"], "C": { "d": 123.456 }, "e": "Some long string that causes output to use multiple lines" }""",
+                    "Some reason"
+                )
+        |> assertExnMsg
+            """
+Subject: json
+Because: Some reason
+Should: BeJsonEquivalentTo
+Expected: |-
+  {
+      "A": 1,
+      "b": ["a", "b", "c", "d", "e", "f", "g", "i", "j", "k", "l", "m", "n", "o", "p"],
+      "C": {"d": 123.456},
+      "e": "Some long string that causes output to use multiple lines"
+  }
+But was: |-
+  {
+      "a": 1,
+      "B": ["a", "b", "c", "d", "e", "f", "g", "i", "j", "k", "l", "m", "n", "o", "p"],
+      "c": {"d": 123.456},
+      "e": "Some long string that causes output to use multiple lines"
+  }
+"""

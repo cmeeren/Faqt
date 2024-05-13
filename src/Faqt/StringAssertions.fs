@@ -6,6 +6,8 @@ open System.Diagnostics.CodeAnalysis
 #endif
 open System.Globalization
 open System.Runtime.CompilerServices
+open System.Text.Encodings.Web
+open System.Text.Json
 open System.Text.RegularExpressions
 open Faqt.AssertionHelpers
 
@@ -428,5 +430,61 @@ type StringAssertions =
 
         if not (isNull t.Subject) && isWildcardMatch t.Subject pattern then
             t.With("Pattern", pattern).With("But was", t.Subject).Fail(because)
+
+        And(t)
+
+
+    /// Asserts that the subject represents a JSON structure equivalent to that represented by the specified string
+    /// (ignoring key order and formatting such as indentation). The comparison is case-sensitive.
+    [<Extension>]
+    static member BeJsonEquivalentTo
+        (
+            t: Testable<string>,
+#if NET7_0_OR_GREATER
+            [<StringSyntax(StringSyntaxAttribute.Json)>]
+#endif
+            expected: string,
+            ?because
+        ) : And<string> =
+        use _ = t.Assert()
+
+        if isNull expected then
+            nullArg (nameof expected)
+
+        if isNull t.Subject then
+            t.With("Expected", expected).With("But was", t.Subject).Fail(because)
+
+        let serializerOptions =
+            JsonSerializerOptions(WriteIndented = true, Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping)
+
+        serializerOptions.Converters.Add(JsonElementSortedKeysConverter())
+
+        let formatter = FracturedJson.Formatter()
+
+        let expectedDoc =
+            try
+                JsonDocument.Parse(expected)
+            with :? JsonException ->
+                invalidArg (nameof expected) "The value must be valid JSON"
+
+        let expectedFormatted =
+            formatter.Serialize(expectedDoc, 0, serializerOptions).Trim()
+            |> fun s -> Regex.Replace(s, "\s+$", "", RegexOptions.Multiline)
+
+        let subjectDoc =
+            try
+                JsonDocument.Parse(t.Subject)
+            with :? JsonException ->
+                t.With("Expected", expectedFormatted).With("But was", t.Subject).Fail(because)
+
+        let subjectFormatted =
+            formatter.Serialize(subjectDoc, 0, serializerOptions).Trim()
+            |> fun s -> Regex.Replace(s, "\s+$", "", RegexOptions.Multiline)
+
+        if subjectFormatted <> expectedFormatted then
+            t
+                .With("Expected", expectedFormatted)
+                .With("But was", subjectFormatted)
+                .Fail(because)
 
         And(t)

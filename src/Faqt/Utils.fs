@@ -7,6 +7,8 @@ open System.Collections.Generic
 #if NET7_0_OR_GREATER
 open System.Diagnostics.CodeAnalysis
 #endif
+open System.Text.Json
+open System.Text.Json.Serialization
 open System.Text.RegularExpressions
 open Microsoft.FSharp.Reflection
 
@@ -182,3 +184,25 @@ module Seq =
         match box xs with
         | :? string as x -> x.Length = 0
         | _ -> Seq.isEmpty xs
+
+
+type internal JsonElementSortedKeysConverter() =
+    inherit JsonConverter<JsonDocument>()
+
+    let rec serializeRecursively (writer: Utf8JsonWriter) (element: JsonElement) (options: JsonSerializerOptions) =
+        match element.ValueKind with
+        | JsonValueKind.Object ->
+            writer.WriteStartObject()
+
+            for prop in element.EnumerateObject() |> Seq.sortBy (_.Name.ToUpperInvariant()) do
+                writer.WritePropertyName(prop.Name)
+                JsonSerializer.Serialize(writer, prop.Value, options)
+
+            writer.WriteEndObject()
+        | _ -> JsonSerializer.Serialize(writer, element, options)
+
+
+    override this.Read(_, _, _) = failwith "Can only write"
+
+    override this.Write(writer, value, options) =
+        serializeRecursively writer value.RootElement options
