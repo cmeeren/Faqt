@@ -1,7 +1,7 @@
 Release notes
 ==============
 
-### Unreleased
+### 1.3.10 (2024-05-13)
 
 * Added `string` assertion `BeJsonEquivalentTo`
 * Added `HttpResponseMessage` assertion `HaveStringContentSatisfying`. Note that this is async and therefore not
