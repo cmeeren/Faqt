@@ -472,11 +472,19 @@ type HttpResponseMessageAssertions =
 
         match t.Subject.Headers.TryGetValues name with
         | false, _ ->
-            t
-                .With("Header", name)
-                .With("Response", t.Subject)
-                .With("Request", t.Subject.RequestMessage)
-                .Fail(because)
+            match
+                t.Subject.Content
+                |> ValueOption.ofObj
+                |> ValueOption.map _.Headers.TryGetValues(name)
+            with
+            | ValueNone
+            | ValueSome(false, _) ->
+                t
+                    .With("Header", name)
+                    .With("Response", t.Subject)
+                    .With("Request", t.Subject.RequestMessage)
+                    .Fail(because)
+            | ValueSome(true, values) -> AndDerived(t, values)
         | true, values -> AndDerived(t, values)
 
 
@@ -514,7 +522,16 @@ type HttpResponseMessageAssertions =
                 .Fail(because)
 
         match t.Subject.Headers.TryGetValues name with
-        | false, _ -> fail ()
+        | false, _ ->
+            match
+                t.Subject.Content
+                |> ValueOption.ofObj
+                |> ValueOption.map _.Headers.TryGetValues(name)
+            with
+            | ValueNone
+            | ValueSome(false, _) -> fail ()
+            | ValueSome(true, values) when not (values |> Seq.contains value) -> fail ()
+            | _ -> ()
         | true, values when not (values |> Seq.contains value) -> fail ()
         | _ -> ()
 

@@ -1,6 +1,11 @@
 Release notes
 ==============
 
+### Unreleased
+
+* The `HttpResponseMessage` assertions `HaveHeader` and `HaveHeaderValue` now correctly detects content headers such
+  as `Content-Type` (which are set on `HttpContent` and not `HttpResponseMessage`).
+
 ### 1.3.9 (2024-04-02)
 
 * Added `FaqtConfig.SetMapHttpHeaderValues` to set a function that can map HTTP header values (e.g. for

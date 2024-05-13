@@ -23,7 +23,11 @@ let respHeader statusCode (headerAndValues: (string * string) list) =
     let response = resp statusCode
 
     for h, v in headerAndValues do
-        response.Headers.Add(h, v)
+        if not (response.Headers.TryAddWithoutValidation(h, v)) then
+            response.Content <- StringContent("ignored")
+
+            if not (response.Content.Headers.TryAddWithoutValidation(h, v)) then
+                failwith $"Unable to add header '%s{h}' with value '%s{v}'"
 
     response
 
@@ -2541,6 +2545,13 @@ module HaveHeader =
 
 
     [<Fact>]
+    let ``Passes for content headers`` () =
+        (respHeader 200 [ "Content-Type", "application/json" ])
+            .Should()
+            .HaveHeader("Content-Type")
+
+
+    [<Fact>]
     let ``Fails with expected message if header is not found`` () =
         fun () ->
             let x = respHeader 200 [ "A", "x" ]
@@ -2608,6 +2619,13 @@ module HaveHeaderValue =
             .Id<And<HttpResponseMessage>>()
             .And.Subject.StatusCode.Should(())
             .Be(HttpStatusCode.OK)
+
+
+    [<Fact>]
+    let ``Passes for content headers`` () =
+        (respHeader 200 [ "Content-Type", "application/json" ])
+            .Should()
+            .HaveHeaderValue("Content-Type", "application/json")
 
 
     [<Fact>]
