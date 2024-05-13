@@ -3,7 +3,6 @@
 open System.Net
 open System.Net.Http
 open System.Runtime.CompilerServices
-open System.Threading.Tasks
 open Faqt.AssertionHelpers
 
 
@@ -576,8 +575,8 @@ type HttpResponseMessageAssertions =
             t: Testable<HttpResponseMessage>,
             assertion: string -> 'ignored,
             ?because
-        ) : Task =
-        task {
+        ) : Async<unit> =
+        async {
             use _ = t.Assert(true)
 
             match t.Subject.Content with
@@ -587,7 +586,8 @@ type HttpResponseMessageAssertions =
                     .With("Request", t.Subject.RequestMessage)
                     .Fail(because)
             | content ->
-                let! str = content.ReadAsStringAsync()
+                let! ct = Async.CancellationToken
+                let! str = content.ReadAsStringAsync(ct) |> Async.AwaitTask
 
                 try
                     assertion str |> ignore
