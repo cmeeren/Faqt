@@ -4,6 +4,7 @@ module TestUtils
 open System
 open System.Globalization
 open System.Runtime.CompilerServices
+open System.Threading.Tasks
 open Faqt
 open Faqt.AssertionHelpers
 open Xunit
@@ -20,6 +21,17 @@ let assertExnMsg (msg: string) (f: unit -> 'a) =
         ("\n\n" + msg.ReplaceLineEndings("\n").Trim() + "\n") :> obj, // Cast to obj to force full output
         ("\n\n" + ex.Message.ReplaceLineEndings("\n").Trim() + "\n")
     )
+
+
+let assertExnMsgAsync (msg: string) (f: unit -> Task) =
+    task {
+        let! ex = Assert.ThrowsAsync<AssertionFailedException>(f)
+
+        Assert.Equal(
+            ("\n\n" + msg.ReplaceLineEndings("\n").Trim() + "\n") :> obj, // Cast to obj to force full output
+            ("\n\n" + ex.Message.ReplaceLineEndings("\n").Trim() + "\n")
+        )
+    }
 
 
 let assertExnMsgWildcard (msg: string) (f: unit -> 'a) =

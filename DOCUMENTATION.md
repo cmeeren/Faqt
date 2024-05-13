@@ -369,7 +369,7 @@ myFormatter Config.Current
 
 ## Assertion list
 
-### Higher-order assertions
+### Generic higher-order assertions
 
 * `Satisfy`
 * `NotSatisfy`
@@ -563,6 +563,7 @@ All assertion failure messages contain the full response and the original reques
 * (etc. for other status codes)
 * `HaveHeader`: Check for the existence of a header (and continue asserting on the header value(s))
 * `HaveHeaderValue`: Check for the existence of a header with a specific value
+* `HaveStringContentSatisfying`: Check for string content satisfying a specified inner assertion
 
 ## FAQ
 

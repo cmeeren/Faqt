@@ -19,6 +19,12 @@ let resp statusCode =
     response
 
 
+let respContent statusCode content =
+    let response = resp statusCode
+    response.Content <- new StringContent(content)
+    response
+
+
 let respHeader statusCode (headerAndValues: (string * string) list) =
     let response = resp statusCode
 
@@ -2713,5 +2719,97 @@ Response: |-
   HTTP/0.5 200 OK
   A: x
   A: y
+Request: GET / HTTP/0.5
+"""
+
+
+module HaveStringContentSatisfying =
+
+
+    [<Fact>]
+    let ``Passes if has content and the inner assertion passes`` () =
+        (respContent 200 "foo")
+            .Should()
+            .HaveStringContentSatisfying(_.Should().Be("foo"))
+
+
+    [<Fact>]
+    let ``Fails with expected message if no content`` () =
+        fun () -> (resp 200).Should().HaveStringContentSatisfying(_.Should().Be("foo"))
+        |> assertExnMsgAsync
+            """
+Subject: resp 200
+Should: HaveStringContentSatisfying
+Failure:
+  Subject: _
+  Should: Be
+  Expected: foo
+  But was: ''
+Response: HTTP/0.5 200 OK
+Request: GET / HTTP/0.5
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if no content with because`` () =
+        fun () ->
+            (resp 200)
+                .Should()
+                .HaveStringContentSatisfying(_.Should().Be("foo"), "Some reason")
+        |> assertExnMsgAsync
+            """
+Subject: resp 200
+Because: Some reason
+Should: HaveStringContentSatisfying
+Failure:
+  Subject: _
+  Should: Be
+  Expected: foo
+  But was: ''
+Response: HTTP/0.5 200 OK
+Request: GET / HTTP/0.5
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if content does not satisfy inner assertion`` () =
+        fun () -> (respContent 200 "foo").Should().HaveStringContentSatisfying(_.Should().Fail())
+        |> assertExnMsgAsync
+            """
+Subject: respContent 200 "foo"
+Should: HaveStringContentSatisfying
+Failure:
+  Subject: _
+  Should: Fail
+Response: |-
+  HTTP/0.5 200 OK
+  Content-Type: text/plain; charset=utf-8
+  Content-Length: 3
+
+  foo
+Request: GET / HTTP/0.5
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if content does not satisfy inner assertion with because`` () =
+        fun () ->
+            (respContent 200 "foo")
+                .Should()
+                .HaveStringContentSatisfying(_.Should().Fail(), "Some reason")
+        |> assertExnMsgAsync
+            """
+Subject: respContent 200 "foo"
+Because: Some reason
+Should: HaveStringContentSatisfying
+Failure:
+  Subject: _
+  Should: Fail
+Response: |-
+  HTTP/0.5 200 OK
+  Content-Type: text/plain; charset=utf-8
+  Content-Length: 3
+
+  foo
 Request: GET / HTTP/0.5
 """

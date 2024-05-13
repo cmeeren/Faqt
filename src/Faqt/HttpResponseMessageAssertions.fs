@@ -3,6 +3,7 @@
 open System.Net
 open System.Net.Http
 open System.Runtime.CompilerServices
+open System.Threading.Tasks
 open Faqt.AssertionHelpers
 
 
@@ -566,3 +567,34 @@ type HttpResponseMessageAssertions =
                     .Fail(because)
 
         And(t)
+
+
+    /// Asserts that the response has content satisfying the specified assertion.
+    [<Extension>]
+    static member HaveStringContentSatisfying
+        (
+            t: Testable<HttpResponseMessage>,
+            assertion: string -> 'ignored,
+            ?because
+        ) : Task =
+        task {
+            use _ = t.Assert(true)
+
+            match t.Subject.Content with
+            | null ->
+                t
+                    .With("Response", t.Subject)
+                    .With("Request", t.Subject.RequestMessage)
+                    .Fail(because)
+            | content ->
+                let! str = content.ReadAsStringAsync()
+
+                try
+                    assertion str |> ignore
+                with :? AssertionFailedException as ex ->
+                    t
+                        .With("Failure", ex.FailureData)
+                        .With("Response", t.Subject)
+                        .With("Request", t.Subject.RequestMessage)
+                        .Fail(because)
+        }
