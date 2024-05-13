@@ -7,7 +7,7 @@ Release notes
 * Added `HttpResponseMessage` assertion `HaveStringContentSatisfying`. Note that this is async and therefore not
   chainable.
 * The `HttpResponseMessage` assertions `HaveHeader` and `HaveHeaderValue` now correctly detects content headers such
-  as `Content-Type` (which are set on `HttpContent` and not `HttpResponseMessage`).
+  as `Content-Type` (which are set on `HttpContent` and not `HttpResponseMessage`)
 
 ### 1.3.9 (2024-04-02)
 
