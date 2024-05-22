@@ -1,6 +1,10 @@
 Release notes
 ==============
 
+### Unreleased
+
+* Updated FracturedJson from 3.1.1 to 4.0.2
+
 ### 1.3.11 (2024-05-13)
 
 * Added `string` assertion `BeJsonEquivalentTo`
