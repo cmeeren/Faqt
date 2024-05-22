@@ -459,7 +459,8 @@ type StringAssertions =
 
         serializerOptions.Converters.Add(JsonElementSortedKeysConverter())
 
-        let formatter = FracturedJson.Formatter()
+        let formatter =
+            FracturedJson.Formatter(Options = FracturedJson.FracturedJsonOptions(OmitTrailingWhitespace = true))
 
         let expectedDoc =
             try
@@ -469,7 +470,6 @@ type StringAssertions =
 
         let expectedFormatted =
             formatter.Serialize(expectedDoc, 0, serializerOptions).Trim()
-            |> fun s -> Regex.Replace(s, "\s+$", "", RegexOptions.Multiline)
 
         let subjectDoc =
             try

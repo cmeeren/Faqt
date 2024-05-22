@@ -54,7 +54,8 @@ module internal HttpContent =
             let serializerOptions =
                 JsonSerializerOptions(WriteIndented = true, Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping)
 
-            let formatter = FracturedJson.Formatter()
+            let formatter =
+                FracturedJson.Formatter(Options = FracturedJson.FracturedJsonOptions(OmitTrailingWhitespace = true))
 
             let doc = JsonDocument.Parse(str)
             formatter.Serialize(doc, 0, serializerOptions).Trim() |> Some
