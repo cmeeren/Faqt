@@ -1,7 +1,7 @@
 Release notes
 ==============
 
-### Unreleased
+### 1.3.12 (2024-05-22)
 
 * Updated FracturedJson from 3.1.1 to 4.0.2
 
