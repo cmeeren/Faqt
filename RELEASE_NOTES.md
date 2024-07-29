@@ -3,6 +3,8 @@ Release notes
 
 ### Unreleased
 
+* **Breaking:** Updated YamlDotNet from 15.1.2 to 16.0.0.
+  See [this page](https://github.com/aaubry/YamlDotNet/releases/tag/v16.0.0) for breaking changes.
 * Updated FSharp.SystemTextJson from 1.2.42 to 1.3.13
 
 ### 1.3.12 (2024-05-22)
