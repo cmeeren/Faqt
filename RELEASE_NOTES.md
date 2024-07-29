@@ -1,7 +1,7 @@
 Release notes
 ==============
 
-### Unreleased
+### 2.0.0 (2024-07-29)
 
 * **Breaking:** Updated YamlDotNet from 15.1.2 to 16.0.0.
   See [this page](https://github.com/aaubry/YamlDotNet/releases/tag/v16.0.0) for breaking changes.
