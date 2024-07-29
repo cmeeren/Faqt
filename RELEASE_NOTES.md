@@ -1,6 +1,10 @@
 Release notes
 ==============
 
+### Unreleased
+
+* Updated FSharp.SystemTextJson from 1.2.42 to 1.3.13
+
 ### 1.3.12 (2024-05-22)
 
 * Updated FracturedJson from 3.1.1 to 4.0.2
