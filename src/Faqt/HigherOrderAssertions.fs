@@ -49,7 +49,8 @@ type HigherOrderAssertions =
         And(t)
 
 
-    /// Asserts that the subject satisfies at least one of the supplied assertions.
+    /// Asserts that the subject satisfies at least one of the supplied assertions. If using this in performance
+    /// critical scenarios, note that in general, assertions are optimized for success, not failure.
     [<Extension>]
     static member SatisfyAny(t: Testable<'a>, assertions: seq<'a -> 'ignored>, ?because) : And<'a> =
         use _ = t.Assert(true)
