@@ -36,7 +36,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Meziantou.Xunit.ParallelTestFramework" Version="2.2.0" />
+    <PackageReference Include="Meziantou.Xunit.ParallelTestFramework" Version="2.3.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.10.0" />
     <PackageReference Include="xunit.assert" Version="2.9.0" />
     <PackageReference Include="xunit.core" Version="2.9.0" />
