@@ -2,6 +2,7 @@
 
 open System
 open System.Globalization
+open System.Text.Json
 open System.Text.RegularExpressions
 open Faqt
 open Xunit
@@ -2327,3 +2328,490 @@ But was: |-
         """
 
         longLineJson.Should().BeJsonEquivalentTo(longLineJson)
+
+
+module ``DeserializeTo non-generic with options`` =
+
+
+    [<Fact>]
+    let ``Can be chained with AndDerived with deserialized value`` () =
+        "1"
+            .Should()
+            .DeserializeTo(typeof<int>, JsonSerializerOptions())
+            .Id<AndDerived<string, obj>>()
+            .WhoseValue.Should(())
+            .BeOfType<int>()
+            .WhoseValue.Should(())
+            .Be(1)
+
+
+    type CustomType = { A: int }
+
+
+    let passData = [
+        [| box<string> "1"; typeof<int>; JsonSerializerOptions() |]
+        [| """{"A":1}"""; typeof<CustomType>; JsonSerializerOptions() |]
+        [|
+            """{"A":1,}"""
+            typeof<CustomType>
+            JsonSerializerOptions(AllowTrailingCommas = true)
+        |]
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof passData)>]
+    let ``Passes if deserializable`` (subject: string) (targetType: Type) (options: JsonSerializerOptions) =
+        subject.Should().DeserializeTo(targetType, options)
+
+
+    let failData = [
+        [| box<string> "1"; typeof<string>; JsonSerializerOptions() |]
+        [| """{"A":1,}"""; typeof<CustomType>; JsonSerializerOptions() |]
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof failData)>]
+    let ``Fails if not deserializable`` (subject: string) (targetType: Type) (options: JsonSerializerOptions) =
+        assertFails (fun () -> subject.Should().DeserializeTo(targetType, options))
+
+
+    [<Fact>]
+    let ``Fails with expected message if null`` () =
+        fun () ->
+            let x: string = null
+            x.Should().DeserializeTo(typeof<string>, JsonSerializerOptions())
+        |> assertExnMsg
+            """
+Subject: x
+Should: DeserializeTo
+Target type: System.String
+But was: null
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if null with because`` () =
+        fun () ->
+            let x: string = null
+            x.Should().DeserializeTo(typeof<string>, JsonSerializerOptions(), "Some reason")
+        |> assertExnMsg
+            """
+Subject: x
+Because: Some reason
+Should: DeserializeTo
+Target type: System.String
+But was: null
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message when deserialization fails with JsonException`` () =
+        fun () ->
+            let x = "1"
+            x.Should().DeserializeTo(typeof<string>, JsonSerializerOptions())
+        |> assertExnMsgWildcard
+            """
+Subject: x
+Should: DeserializeTo
+Target type: System.String
+But threw: |-
+  System.Text.Json.JsonException: The JSON value could not be converted to System.String.*
+Subject value: '1'
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message when deserialization fails with JsonException with because`` () =
+        fun () ->
+            let x = "1"
+            x.Should().DeserializeTo(typeof<string>, JsonSerializerOptions(), "Some reason")
+        |> assertExnMsgWildcard
+            """
+Subject: x
+Because: Some reason
+Should: DeserializeTo
+Target type: System.String
+But threw: |-
+  System.Text.Json.JsonException: The JSON value could not be converted to System.String.*
+Subject value: '1'
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message when deserialization fails with NotSupportedException`` () =
+        fun () ->
+            let x = "1"
+            x.Should().DeserializeTo(typeof<Result<int, string>>, JsonSerializerOptions())
+        |> assertExnMsgWildcard
+            """
+Subject: x
+Should: DeserializeTo
+Target type: Microsoft.FSharp.Core.FSharpResult<System.Int32, System.String>
+But threw: |-
+  System.NotSupportedException: F# discriminated union serialization is not supported.*
+Subject value: '1'
+"""
+
+
+module ``DeserializeTo non-generic`` =
+
+
+    [<Fact>]
+    let ``Can be chained with AndDerived with deserialized value`` () =
+        "1"
+            .Should()
+            .DeserializeTo(typeof<int>, JsonSerializerOptions())
+            .Id<AndDerived<string, obj>>()
+            .WhoseValue.Should(())
+            .BeOfType<int>()
+            .WhoseValue.Should(())
+            .Be(1)
+
+
+    type CustomType = { A: int }
+
+
+    let passData = [ [| box<string> "1"; typeof<int> |]; [| """{"A":1}"""; typeof<CustomType> |] ]
+
+
+    [<Theory>]
+    [<MemberData(nameof passData)>]
+    let ``Passes if deserializable`` (subject: string) (targetType: Type) =
+        subject.Should().DeserializeTo(targetType)
+
+
+    let failData = [
+        [| box<string> "1"; typeof<string> |]
+        [| """{"A":1,}"""; typeof<CustomType> |]
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof failData)>]
+    let ``Fails if not deserializable`` (subject: string) (targetType: Type) =
+        assertFails (fun () -> subject.Should().DeserializeTo(targetType))
+
+
+    [<Fact>]
+    let ``Fails with expected message if null`` () =
+        fun () ->
+            let x: string = null
+            x.Should().DeserializeTo(typeof<string>)
+        |> assertExnMsg
+            """
+Subject: x
+Should: DeserializeTo
+Target type: System.String
+But was: null
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if null with because`` () =
+        fun () ->
+            let x: string = null
+            x.Should().DeserializeTo(typeof<string>, "Some reason")
+        |> assertExnMsg
+            """
+Subject: x
+Because: Some reason
+Should: DeserializeTo
+Target type: System.String
+But was: null
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message when deserialization fails with JsonException`` () =
+        fun () ->
+            let x = "1"
+            x.Should().DeserializeTo(typeof<string>)
+        |> assertExnMsgWildcard
+            """
+Subject: x
+Should: DeserializeTo
+Target type: System.String
+But threw: |-
+  System.Text.Json.JsonException: The JSON value could not be converted to System.String.*
+Subject value: '1'
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message when deserialization fails with JsonException with because`` () =
+        fun () ->
+            let x = "1"
+            x.Should().DeserializeTo(typeof<string>, "Some reason")
+        |> assertExnMsgWildcard
+            """
+Subject: x
+Because: Some reason
+Should: DeserializeTo
+Target type: System.String
+But threw: |-
+  System.Text.Json.JsonException: The JSON value could not be converted to System.String.*
+Subject value: '1'
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message when deserialization fails with NotSupportedException`` () =
+        fun () ->
+            let x = "1"
+            x.Should().DeserializeTo(typeof<Result<int, string>>)
+        |> assertExnMsgWildcard
+            """
+Subject: x
+Should: DeserializeTo
+Target type: Microsoft.FSharp.Core.FSharpResult<System.Int32, System.String>
+But threw: |-
+  System.NotSupportedException: F# discriminated union serialization is not supported.*
+Subject value: '1'
+"""
+
+
+module ``DeserializeTo generic with options`` =
+
+
+    [<Fact>]
+    let ``Can be chained with AndDerived with deserialized value`` () =
+        "1"
+            .Should()
+            .DeserializeTo<int>(JsonSerializerOptions())
+            .Id<AndDerived<string, int>>()
+            .WhoseValue.Should(())
+            .Be(1)
+
+
+    let deserializeTo<'a> (options: JsonSerializerOptions) (t: Testable<string>) =
+        t.DeserializeTo<'a>(options) |> ignore
+
+
+    type CustomType = { A: int }
+
+
+    let passData = [
+        [| box<string> "1"; deserializeTo<int> (JsonSerializerOptions()) |]
+        [| """{"A":1}"""; deserializeTo<CustomType> (JsonSerializerOptions()) |]
+        [|
+            """{"A":1,}"""
+            deserializeTo<CustomType> (JsonSerializerOptions(AllowTrailingCommas = true))
+        |]
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof passData)>]
+    let ``Passes if deserializable`` (subject: string) run = run (subject.Should())
+
+
+    let failData = [
+        [| box<string> "1"; deserializeTo<string> (JsonSerializerOptions()) |]
+        [| """{"A":1,}"""; deserializeTo<CustomType> (JsonSerializerOptions()) |]
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof failData)>]
+    let ``Fails if not deserializable`` (subject: string) run =
+        assertFails (fun () -> run (subject.Should()))
+
+
+    [<Fact>]
+    let ``Fails with expected message if null`` () =
+        fun () ->
+            let x: string = null
+            x.Should().DeserializeTo<string>(JsonSerializerOptions())
+        |> assertExnMsg
+            """
+Subject: x
+Should: DeserializeTo
+Target type: System.String
+But was: null
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if null with because`` () =
+        fun () ->
+            let x: string = null
+            x.Should().DeserializeTo<string>(JsonSerializerOptions(), "Some reason")
+        |> assertExnMsg
+            """
+Subject: x
+Because: Some reason
+Should: DeserializeTo
+Target type: System.String
+But was: null
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message when deserialization fails with JsonException`` () =
+        fun () ->
+            let x = "1"
+            x.Should().DeserializeTo<string>(JsonSerializerOptions())
+        |> assertExnMsgWildcard
+            """
+Subject: x
+Should: DeserializeTo
+Target type: System.String
+But threw: |-
+  System.Text.Json.JsonException: The JSON value could not be converted to System.String.*
+Subject value: '1'
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message when deserialization fails with JsonException with because`` () =
+        fun () ->
+            let x = "1"
+            x.Should().DeserializeTo<string>(JsonSerializerOptions(), "Some reason")
+        |> assertExnMsgWildcard
+            """
+Subject: x
+Because: Some reason
+Should: DeserializeTo
+Target type: System.String
+But threw: |-
+  System.Text.Json.JsonException: The JSON value could not be converted to System.String.*
+Subject value: '1'
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message when deserialization fails with NotSupportedException`` () =
+        fun () ->
+            let x = "1"
+            x.Should().DeserializeTo<Result<int, string>>(JsonSerializerOptions())
+        |> assertExnMsgWildcard
+            """
+Subject: x
+Should: DeserializeTo
+Target type: Microsoft.FSharp.Core.FSharpResult<System.Int32, System.String>
+But threw: |-
+  System.NotSupportedException: F# discriminated union serialization is not supported.*
+Subject value: '1'
+"""
+
+
+module ``DeserializeTo generic`` =
+
+
+    [<Fact>]
+    let ``Can be chained with AndDerived with deserialized value`` () =
+        "1"
+            .Should()
+            .DeserializeTo<int>()
+            .Id<AndDerived<string, int>>()
+            .WhoseValue.Should(())
+            .Be(1)
+
+
+    let deserializeTo<'a> (t: Testable<string>) = t.DeserializeTo<'a>() |> ignore
+
+
+    type CustomType = { A: int }
+
+
+    let passData = [
+        [| box<string> "1"; deserializeTo<int> |]
+        [| """{"A":1}"""; deserializeTo<CustomType> |]
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof passData)>]
+    let ``Passes if deserializable`` (subject: string) run = run (subject.Should())
+
+
+    let failData = [
+        [| box<string> "1"; deserializeTo<string> |]
+        [| """{"A":1,}"""; deserializeTo<CustomType> |]
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof failData)>]
+    let ``Fails if not deserializable`` (subject: string) run =
+        assertFails (fun () -> run (subject.Should()))
+
+
+    [<Fact>]
+    let ``Fails with expected message if null`` () =
+        fun () ->
+            let x: string = null
+            x.Should().DeserializeTo<string>()
+        |> assertExnMsg
+            """
+Subject: x
+Should: DeserializeTo
+Target type: System.String
+But was: null
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if null with because`` () =
+        fun () ->
+            let x: string = null
+            x.Should().DeserializeTo<string>("Some reason")
+        |> assertExnMsg
+            """
+Subject: x
+Because: Some reason
+Should: DeserializeTo
+Target type: System.String
+But was: null
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message when deserialization fails with JsonException`` () =
+        fun () ->
+            let x = "1"
+            x.Should().DeserializeTo<string>()
+        |> assertExnMsgWildcard
+            """
+Subject: x
+Should: DeserializeTo
+Target type: System.String
+But threw: |-
+  System.Text.Json.JsonException: The JSON value could not be converted to System.String.*
+Subject value: '1'
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message when deserialization fails with JsonException with because`` () =
+        fun () ->
+            let x = "1"
+            x.Should().DeserializeTo<string>("Some reason")
+        |> assertExnMsgWildcard
+            """
+Subject: x
+Because: Some reason
+Should: DeserializeTo
+Target type: System.String
+But threw: |-
+  System.Text.Json.JsonException: The JSON value could not be converted to System.String.*
+Subject value: '1'
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message when deserialization fails with NotSupportedException`` () =
+        fun () ->
+            let x = "1"
+            x.Should().DeserializeTo<Result<int, string>>()
+        |> assertExnMsgWildcard
+            """
+Subject: x
+Should: DeserializeTo
+Target type: Microsoft.FSharp.Core.FSharpResult<System.Int32, System.String>
+But threw: |-
+  System.NotSupportedException: F# discriminated union serialization is not supported.*
+Subject value: '1'
+"""

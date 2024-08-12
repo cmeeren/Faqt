@@ -3,6 +3,7 @@ Release notes
 
 ### Unrealeased
 
+* Added `string` assertion `DeserializeTo`
 * Fixed `BeJsonEquivalentTo` erroneously failing for long lines
 
 ### 2.0.0 (2024-07-29)

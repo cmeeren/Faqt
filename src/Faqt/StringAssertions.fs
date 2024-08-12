@@ -486,3 +486,66 @@ type StringAssertions =
                 .Fail(because)
 
         And(t)
+
+
+    /// Asserts that the subject is deserializable to the specified target type using the specified options.
+    [<Extension>]
+    static member DeserializeTo
+        (
+            t: Testable<string>,
+            targetType: Type,
+            options: JsonSerializerOptions,
+            ?because
+        ) : AndDerived<string, obj> =
+        use _ = t.Assert()
+
+        if isNull t.Subject then
+            t.With("Target type", targetType).With("But was", t.Subject).Fail(because)
+
+        try
+            AndDerived(t, JsonSerializer.Deserialize(t.Subject, targetType, options))
+        with ex ->
+            t
+                .With("Target type", targetType)
+                .With("But threw", ex)
+                .With("Subject value", t.Subject)
+                .Fail(because)
+
+
+    /// Asserts that the subject is deserializable to the specified target type.
+    [<Extension>]
+    static member DeserializeTo(t: Testable<string>, targetType: Type, ?because) : AndDerived<string, obj> =
+        use _ = t.Assert()
+        t.DeserializeTo(targetType, null, ?because = because)
+
+
+    /// Asserts that the subject is deserializable to the specified target type using the specified options.
+    [<Extension>]
+    [<RequiresExplicitTypeArguments>]
+    static member DeserializeTo<'a>
+        (
+            t: Testable<string>,
+            options: JsonSerializerOptions,
+            ?because
+        ) : AndDerived<string, 'a> =
+        use _ = t.Assert()
+
+        if isNull t.Subject then
+            t.With("Target type", typeof<'a>).With("But was", t.Subject).Fail(because)
+
+        try
+            AndDerived(t, JsonSerializer.Deserialize<'a>(t.Subject, options))
+        with ex ->
+            t
+                .With("Target type", typeof<'a>)
+                .With("But threw", ex)
+                .With("Subject value", t.Subject)
+                .Fail(because)
+
+
+    /// Asserts that the subject is deserializable to the specified target type using the specified options.
+    [<Extension>]
+    [<RequiresExplicitTypeArguments>]
+    static member DeserializeTo<'a>(t: Testable<string>, ?because) : AndDerived<string, 'a> =
+        use _ = t.Assert()
+        t.DeserializeTo<'a>(null, ?because = because)

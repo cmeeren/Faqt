@@ -445,6 +445,7 @@ myFormatter Config.Current
 * `MatchWildcard`: Simplified wildcard check with `*` (zero or more characters) and `?` (one character)
 * `NotMatchWildcard`: Simplified wildcard check with `*` (zero or more characters) and `?` (one character)
 * `BeJsonEquivalentTo`: Checks that two JSON strings are equivalent (ignoring formatting)
+* `DeserializeTo`: Checks that a string is deserializable to a specified target type
 * All `seq<_>` assertions, including:
   * `HaveLength`
   * `BeEmpty`
