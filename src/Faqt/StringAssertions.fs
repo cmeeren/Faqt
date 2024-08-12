@@ -477,9 +477,7 @@ type StringAssertions =
             with :? JsonException ->
                 t.With("Expected", expectedFormatted).With("But was", t.Subject).Fail(because)
 
-        let subjectFormatted =
-            formatter.Serialize(subjectDoc, 0, serializerOptions).Trim()
-            |> fun s -> Regex.Replace(s, "\s+$", "", RegexOptions.Multiline)
+        let subjectFormatted = formatter.Serialize(subjectDoc, 0, serializerOptions).Trim()
 
         if subjectFormatted <> expectedFormatted then
             t

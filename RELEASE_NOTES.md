@@ -1,6 +1,10 @@
 Release notes
 ==============
 
+### Unrealeased
+
+* Fixed `BeJsonEquivalentTo` erroneously failing for long lines
+
 ### 2.0.0 (2024-07-29)
 
 * **Breaking:** Updated YamlDotNet from 15.1.2 to 16.0.0.

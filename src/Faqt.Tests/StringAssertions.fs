@@ -2313,3 +2313,17 @@ But was: |-
       "e": "Some long string that causes output to use multiple lines"
   }
 """
+
+
+    /// https://github.com/cmeeren/Faqt/issues/6
+    [<Fact>]
+    let ``Issue 6: Works for long JSON strings`` () =
+        let longLineJson =
+            """
+            {
+                "A": "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+                "X": "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY"
+            }
+        """
+
+        longLineJson.Should().BeJsonEquivalentTo(longLineJson)
