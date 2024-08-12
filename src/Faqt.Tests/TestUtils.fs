@@ -22,7 +22,7 @@ let assertExnMsg (msg: string) (f: unit -> 'a) =
     )
 
 
-let assertExnMsgAsync (msg: string) (f: unit -> Async<unit>) =
+let assertExnMsgAsync (msg: string) (f: unit -> Async<'a>) =
     task {
         let! ex = Assert.ThrowsAsync<AssertionFailedException>(f >> Async.StartImmediateAsTask >> (fun t -> upcast t))
 
