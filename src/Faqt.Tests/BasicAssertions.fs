@@ -297,6 +297,75 @@ But was: 1
 """
 
 
+module ``BeOneOf with mapping`` =
+
+
+    [<Fact>]
+    let ``Can be chained with AndDerived with found value`` () =
+        1
+            .Should()
+            .BeOneOf([ (1, "a"); (2, "b") ])
+            .Id<AndDerived<int, string>>()
+            .That.Should(())
+            .Be("a")
+
+
+    let passData = [
+        [| box<string> null; [ (null: string), 0 ] |]
+        [| box "a"; [ "a", 1 ] |]
+        [| box "a"; [ "a", 1; "b", 2 ] |]
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof passData)>]
+    let ``Passes if found`` (subject: string) (mapping: seq<string * int>) = subject.Should().BeOneOf(mapping)
+
+
+    let failData = [
+        [| box<string> null; List<string * int>.Empty |]
+        [| "a"; List<string * int>.Empty |]
+        [| box "a"; List<string * int>.Empty |]
+        [| box "a"; [ "b", 2 ] |]
+        [| box "a"; [ "b", 2; "c", 3 ] |]
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof failData)>]
+    let ``Fails if not found`` (subject: string) (expected: seq<string * int>) =
+        assertFails (fun () -> subject.Should().BeOneOf(expected))
+
+
+    [<Fact>]
+    let ``Fails with expected message`` () =
+        fun () ->
+            let x = 1
+            x.Should().BeOneOf([ 2, "b"; 3, "c" ])
+        |> assertExnMsg
+            """
+Subject: x
+Should: BeOneOf
+Candidates: [2, 3]
+But was: 1
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because`` () =
+        fun () ->
+            let x = 1
+            x.Should().BeOneOf([ 2, "b"; 3, "c" ], "Some reason")
+        |> assertExnMsg
+            """
+Subject: x
+Because: Some reason
+Should: BeOneOf
+Candidates: [2, 3]
+But was: 1
+"""
+
+
 module NotBeOneOf =
 
 

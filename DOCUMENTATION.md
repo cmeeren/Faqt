@@ -380,7 +380,7 @@ myFormatter Config.Current
 
 * `Be`: Structural or custom equality
 * `NotBe`: Structural or custom equality
-* `BeOneOf`: Structural equality with multiple candidates
+* `BeOneOf`: Structural equality with multiple candidates, optionally with a mapping for the derived value
 * `NotBeOneOf`: Structural equality with multiple candidates
 * `BeSameAs`: Reference equality
 * `NotBeSameAs`: Reference equality

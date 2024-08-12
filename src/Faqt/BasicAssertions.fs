@@ -71,6 +71,21 @@ type BasicAssertions =
         | Some x -> AndDerived(t, x)
 
 
+    /// Asserts that the subject is equal to one of the specified first values, and returns the corresponding second
+    /// value as the derived value.
+    [<Extension>]
+    static member BeOneOf(t: Testable<'a>, candidateMapping: seq<'a * 'b>, ?because) : AndDerived<'a, 'b> =
+        use _ = t.Assert()
+
+        match candidateMapping |> Seq.tryFind (fst >> (=) t.Subject) with
+        | None ->
+            t
+                .With("Candidates", candidateMapping |> Seq.map fst)
+                .With("But was", t.Subject)
+                .Fail(because)
+        | Some(_, b) -> AndDerived(t, b)
+
+
     /// Asserts that the subject is not equal to one of the specified values. Passes if the candidate list is empty.
     [<Extension>]
     static member NotBeOneOf(t: Testable<'a>, candidates: seq<'a>, ?because) : And<'a> =

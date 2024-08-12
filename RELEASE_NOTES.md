@@ -1,6 +1,11 @@
 Release notes
 ==============
 
+### Unreleased
+
+* Added a `BeOneOf` overload that instead of `seq<'a>` accepts `seq<'a * 'b>` and returns the associated second item as
+  the derived state.
+
 ### 3.0.0 (2024-08-12)
 
 * **Breaking:** The `HttpResponseMessage` assertion `HaveStringContentSatisfying` now returns the inner `Async<_>` value
