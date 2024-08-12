@@ -573,28 +573,30 @@ type HttpResponseMessageAssertions =
     static member HaveStringContentSatisfying
         (
             t: Testable<HttpResponseMessage>,
-            assertion: string -> 'ignored,
+            assertion: string -> 'a,
             ?because
-        ) : Async<unit> =
+        ) : Async<'a> =
         async {
             use _ = t.Assert(true)
 
             match t.Subject.Content with
             | null ->
-                t
-                    .With("Response", t.Subject)
-                    .With("Request", t.Subject.RequestMessage)
-                    .Fail(because)
+                return
+                    t
+                        .With("Response", t.Subject)
+                        .With("Request", t.Subject.RequestMessage)
+                        .Fail(because)
             | content ->
                 let! ct = Async.CancellationToken
                 let! str = content.ReadAsStringAsync(ct) |> Async.AwaitTask
 
                 try
-                    assertion str |> ignore
+                    return assertion str
                 with :? AssertionFailedException as ex ->
-                    t
-                        .With("Failure", ex.FailureData)
-                        .With("Response", t.Subject)
-                        .With("Request", t.Subject.RequestMessage)
-                        .Fail(because)
+                    return
+                        t
+                            .With("Failure", ex.FailureData)
+                            .With("Response", t.Subject)
+                            .With("Request", t.Subject.RequestMessage)
+                            .Fail(because)
         }

@@ -2727,10 +2727,13 @@ module HaveStringContentSatisfying =
 
 
     [<Fact>]
-    let ``Passes if has content and the inner assertion passes`` () =
+    let ``Passes if has content and the inner assertion passes and returns the inner value`` () =
         (respContent 200 "foo")
             .Should()
-            .HaveStringContentSatisfying(_.Should().Be("foo"))
+            .HaveStringContentSatisfying(_.Should().Be("foo").Subject)
+            .Id<Async<string>>()
+        |> Async.RunSynchronously
+        |> _.Should().Be("foo")
 
 
     [<Fact>]
@@ -2811,5 +2814,47 @@ Response: |-
   Content-Length: 3
 
   foo
+Request: GET / HTTP/0.5
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message for example use-case with returned value`` () =
+        fun () ->
+            let respMsg = respContent 400 """{"error":"Invalid"}"""
+
+            respMsg
+                .Should()
+                .HaveStringContentSatisfying(fun content ->
+                    let error = content.Should().DeserializeTo<{| error: string |}>().Derived.error
+
+                    error
+                        .Should()
+                        .Transform(
+                            function
+                            | null
+                            | "" -> Ok()
+                            | "Known" -> Error "KnownError"
+                            | _ -> failwith "Unknown value"
+                        )
+                )
+            |> Async.RunSynchronously
+        |> assertExnMsgWildcard
+            """
+Subject: respMsg
+Should: HaveStringContentSatisfying
+Failure:
+  Subject: error
+  Should: Transform
+  But threw: |-
+    System.Exception: Unknown value*
+  Subject value: Invalid
+Response: |-
+  HTTP/0.5 400 Bad Request
+  Content-Type: text/plain; charset=utf-8
+  Content-Length: 19
+
+  [content has been formatted]
+  {"error": "Invalid"}
 Request: GET / HTTP/0.5
 """

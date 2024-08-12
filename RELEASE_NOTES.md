@@ -3,6 +3,9 @@ Release notes
 
 ### Unrealeased
 
+* **Breaking:** The `HttpResponseMessage` assertion `HaveStringContentSatisfying` now returns the inner `Async<_>` value
+  instead of `Async<unit>`. This allows using this assertion to return values derived from the HTTP content, while still
+  getting the full request/response formatting for inner assertion failures.
 * Added `string` assertion `DeserializeTo`
 * Fixed `BeJsonEquivalentTo` erroneously failing for long lines
 
