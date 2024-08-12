@@ -1,7 +1,7 @@
 Release notes
 ==============
 
-### Unrealeased
+### 3.0.0 (2024-08-12)
 
 * **Breaking:** The `HttpResponseMessage` assertion `HaveStringContentSatisfying` now returns the inner `Async<_>` value
   instead of `Async<unit>`. This allows using this assertion to return values derived from the HTTP content, while still
