@@ -3,6 +3,15 @@ Release notes
 
 ### Unreleased
 
+* **Breaking:** All higher-order assertions except `NotSatisfy` now fail with `AssertionFailedException` if the
+  assertion if it throws any exception. Previously, these assertions let exceptions other
+  than `AssertionFailedException` bubble up. The following assertions are affected:
+  * `Satisfy`
+  * `SatisfyAny`
+  * `SatisfyAll`
+  * `AllSatisfy`
+  * `SatisfyRespectively`
+  * `HaveStringContentSatisfying`
 * Added a `BeOneOf` overload that instead of `seq<'a>` accepts `seq<'a * 'b>` and returns the associated second item as
   the derived state.
 

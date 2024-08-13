@@ -11,7 +11,11 @@ module private DictionaryAssertionsHelpers =
 
 
     [<Struct>]
-    type SatisfyReportItem<'key> = { Key: 'key; Failure: FailureData }
+    type SatisfyReportFailureItem<'key> = { Key: 'key; Failure: FailureData }
+
+
+    [<Struct>]
+    type SatisfyReportExceptionItem<'key> = { Key: 'key; Exception: TryFormat }
 
 
     [<Struct>]
@@ -42,11 +46,21 @@ type DictionaryAssertions =
                     use _ = t.AssertItem()
                     assertion kvp |> ignore
                     None
-                with :? AssertionFailedException as ex ->
-                    Some {
+                with
+                | :? AssertionFailedException as ex ->
+                    {
                         Key = TryFormat kvp.Key
                         Failure = ex.FailureData
                     }
+                    |> box
+                    |> Some
+                | ex ->
+                    {
+                        Key = TryFormat kvp.Key
+                        Exception = TryFormat(box ex)
+                    }
+                    |> box
+                    |> Some
             )
             |> Seq.toArray
 
@@ -89,11 +103,21 @@ type DictionaryAssertions =
                 try
                     assertion kvp |> ignore
                     None
-                with :? AssertionFailedException as ex ->
-                    Some {
+                with
+                | :? AssertionFailedException as ex ->
+                    {
                         Key = TryFormat kvp.Key
                         Failure = ex.FailureData
                     }
+                    |> box
+                    |> Some
+                | ex ->
+                    {
+                        Key = TryFormat kvp.Key
+                        Exception = TryFormat(box ex)
+                    }
+                    |> box
+                    |> Some
             )
             |> Seq.toArray
 

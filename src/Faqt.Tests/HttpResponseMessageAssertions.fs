@@ -2819,6 +2819,55 @@ Request: GET / HTTP/0.5
 
 
     [<Fact>]
+    let ``Fails with expected message if inner assertion throws`` () =
+        fun () ->
+            (respContent 200 "foo")
+                .Should()
+                .HaveStringContentSatisfying(fun _ -> failwith "foo")
+            |> Async.RunSynchronously
+        |> assertExnMsgWildcard
+            """
+Subject: respContent 200 "foo"
+Should: HaveStringContentSatisfying
+Exception: |-
+  System.Exception: foo
+*
+Response: |-
+  HTTP/0.5 200 OK
+  Content-Type: text/plain; charset=utf-8
+  Content-Length: 3
+
+  foo
+Request: GET / HTTP/0.5
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if inner assertion throws with because`` () =
+        fun () ->
+            (respContent 200 "foo")
+                .Should()
+                .HaveStringContentSatisfying(fun _ -> failwith "foo")
+            |> Async.RunSynchronously
+        |> assertExnMsgWildcard
+            """
+Subject: respContent 200 "foo"
+Because: Some reason
+Should: HaveStringContentSatisfying
+Exception: |-
+  System.Exception: foo
+*
+Response: |-
+  HTTP/0.5 200 OK
+  Content-Type: text/plain; charset=utf-8
+  Content-Length: 3
+
+  foo
+Request: GET / HTTP/0.5
+"""
+
+
+    [<Fact>]
     let ``Fails with expected message for example use-case with returned value`` () =
         fun () ->
             let respMsg = respContent 400 """{"error":"Invalid"}"""

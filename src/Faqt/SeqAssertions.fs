@@ -11,7 +11,11 @@ module private SeqAssertionsHelpers =
 
 
     [<Struct>]
-    type SatisfyReportItem = { Index: int; Failure: FailureData }
+    type SatisfyReportFailureItem = { Index: int; Failure: FailureData }
+
+
+    [<Struct>]
+    type SatisfyReportExceptionItem = { Index: int; Exception: TryFormat }
 
 
     type ExpectedActualReportItem<'a> = { Index: int; Expected: 'a; Actual: 'a }
@@ -83,8 +87,9 @@ type SeqAssertions =
                     use _ = t.AssertItem()
                     assertion x |> ignore
                     None
-                with :? AssertionFailedException as ex ->
-                    Some { Index = i; Failure = ex.FailureData }
+                with
+                | :? AssertionFailedException as ex -> { Index = i; Failure = ex.FailureData } |> box |> Some
+                | ex -> { Index = i; Exception = TryFormat ex } |> box |> Some
             )
             |> Seq.toArray
 
@@ -123,8 +128,9 @@ type SeqAssertions =
                 try
                     assertion x |> ignore
                     None
-                with :? AssertionFailedException as ex ->
-                    Some { Index = i; Failure = ex.FailureData }
+                with
+                | :? AssertionFailedException as ex -> { Index = i; Failure = ex.FailureData } |> box |> Some
+                | ex -> { Index = i; Exception = TryFormat ex } |> box |> Some
             )
             |> Seq.toArray
 

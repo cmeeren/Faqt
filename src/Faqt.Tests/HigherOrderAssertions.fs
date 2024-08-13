@@ -43,6 +43,33 @@ Failure:
 """
 
 
+    [<Fact>]
+    let ``Fails with expected message if the inner assertion throws`` () =
+        fun () -> "asd".Length.Should().Satisfy(fun _ -> failwith "foo")
+        |> assertExnMsgWildcard
+            """
+Subject: '"asd".Length'
+Should: Satisfy
+But threw: |-
+  System.Exception: foo
+*
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if the inner assertion throws with because`` () =
+        fun () -> "asd".Length.Should().Satisfy((fun _ -> failwith "foo"), "Some reason")
+        |> assertExnMsgWildcard
+            """
+Subject: '"asd".Length'
+Because: Some reason
+Should: Satisfy
+But threw: |-
+  System.Exception: foo
+*
+"""
+
+
 module NotSatisfy =
 
 
@@ -100,7 +127,7 @@ module SatisfyAll =
 
 
     [<Fact>]
-    let ``Fails with expected message if at least one of the inner assertions fail`` () =
+    let ``Fails with expected message if at least one of the inner assertions fails or throws`` () =
         fun () ->
             "asd"
                 .Should()
@@ -108,10 +135,10 @@ module SatisfyAll =
                     [
                         (fun s1 -> s1.Length.Should().Fail())
                         (fun s2 -> s2.Length.Should().Pass())
-                        (fun s3 -> s3.Length.Should().Fail())
+                        (fun _ -> failwith "foo")
                     ]
                 )
-        |> assertExnMsg
+        |> assertExnMsgWildcard
             """
 Subject: '"asd"'
 Should: SatisfyAll
@@ -121,9 +148,9 @@ Failures:
     Subject: s1.Length
     Should: Fail
 - Index: 2
-  Failure:
-    Subject: s3.Length
-    Should: Fail
+  Exception: |-
+    System.Exception: foo
+*
 """
 
 
@@ -136,11 +163,11 @@ Failures:
                     [
                         (fun s1 -> s1.Length.Should().Fail())
                         (fun s2 -> s2.Length.Should().Pass())
-                        (fun s3 -> s3.Length.Should().Fail())
+                        (fun _ -> failwith "foo")
                     ],
                     "Some reason"
                 )
-        |> assertExnMsg
+        |> assertExnMsgWildcard
             """
 Subject: '"asd"'
 Because: Some reason
@@ -151,9 +178,9 @@ Failures:
     Subject: s1.Length
     Should: Fail
 - Index: 2
-  Failure:
-    Subject: s3.Length
-    Should: Fail
+  Exception: |-
+    System.Exception: foo
+*
 """
 
 
@@ -187,7 +214,7 @@ module SatisfyAny =
 
 
     [<Fact>]
-    let ``Fails with expected message if all of the inner assertions fail`` () =
+    let ``Fails with expected message if all of the inner assertions fail or throws`` () =
         fun () ->
             "asd"
                 .Should()
@@ -195,16 +222,43 @@ module SatisfyAny =
                     [
                         // Comment to force break
                         (fun s1 -> s1.Length.Should().Fail())
-                        (fun s2 -> s2.Length.Should().Fail())
+                        (fun _ -> failwith "foo")
                     ]
                 )
-        |> assertExnMsg
+        |> assertExnMsgWildcard
             """
 Subject: '"asd"'
 Should: SatisfyAny
 Failures:
 - Subject: s1.Length
   Should: Fail
-- Subject: s2.Length
+- Exception: |-
+    System.Exception: foo
+*
+"""
+
+    [<Fact>]
+    let ``Fails with expected message if all of the inner assertions fail or throws with because`` () =
+        fun () ->
+            "asd"
+                .Should()
+                .SatisfyAny(
+                    [
+                        // Comment to force break
+                        (fun s1 -> s1.Length.Should().Fail())
+                        (fun _ -> failwith "foo")
+                    ],
+                    "Some reason"
+                )
+        |> assertExnMsgWildcard
+            """
+Subject: '"asd"'
+Because: Some reason
+Should: SatisfyAny
+Failures:
+- Subject: s1.Length
   Should: Fail
+- Exception: |-
+    System.Exception: foo
+*
 """

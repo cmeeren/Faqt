@@ -592,10 +592,18 @@ type HttpResponseMessageAssertions =
 
                 try
                     return assertion str
-                with :? AssertionFailedException as ex ->
+                with
+                | :? AssertionFailedException as ex ->
                     return
                         t
                             .With("Failure", ex.FailureData)
+                            .With("Response", t.Subject)
+                            .With("Request", t.Subject.RequestMessage)
+                            .Fail(because)
+                | ex ->
+                    return
+                        t
+                            .With("But threw", ex)
                             .With("Response", t.Subject)
                             .With("Request", t.Subject.RequestMessage)
                             .Fail(because)

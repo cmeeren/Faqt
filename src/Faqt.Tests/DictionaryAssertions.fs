@@ -52,12 +52,20 @@ But was: null
 
 
     [<Fact>]
-    let ``Fails with expected message if at least one of the items fail to satisfy the assertion`` () =
+    let ``Fails with expected message if at least one of the items fails to satisfy the assertion or throws`` () =
         fun () ->
             let x = dict [ "asd", 1; "test", 2; "foobar", 3 ]
-            x.Should().AllSatisfy(fun y -> y.Value.Should().Test(y.Value = 1))
 
-        |> assertExnMsg
+            x
+                .Should()
+                .AllSatisfy(fun y ->
+                    if y.Value = 3 then
+                        failwith "foo"
+                    else
+                        y.Value.Should().Test(y.Value = 1)
+                )
+
+        |> assertExnMsgWildcard
             """
 Subject: x
 Should: AllSatisfy
@@ -67,9 +75,9 @@ Failures:
     Subject: y.Value
     Should: Test
 - Key: foobar
-  Failure:
-    Subject: y.Value
-    Should: Test
+  Exception: |-
+    System.Exception: foo
+*
 Subject value:
   asd: 1
   test: 2
@@ -78,15 +86,25 @@ Subject value:
 
 
     [<Fact>]
-    let ``Fails with expected message with because if at least one of the items fail to satisfy the assertion`` () =
+    let ``Fails with expected message with because if at least one of the items fails to satisfy the assertion or throws``
+        ()
+        =
         fun () ->
             let x = dict [ "asd", 1; "test", 2; "foobar", 3 ]
 
             x
                 .Should()
-                .AllSatisfy((fun y -> y.Value.Should().Test(y.Value = 1)), "Some reason")
+                .AllSatisfy(
+                    (fun y ->
+                        if y.Value = 3 then
+                            failwith "foo"
+                        else
+                            y.Value.Should().Test(y.Value = 1)
+                    ),
+                    "Some reason"
+                )
 
-        |> assertExnMsg
+        |> assertExnMsgWildcard
             """
 Subject: x
 Because: Some reason
@@ -97,9 +115,9 @@ Failures:
     Subject: y.Value
     Should: Test
 - Key: foobar
-  Failure:
-    Subject: y.Value
-    Should: Test
+  Exception: |-
+    System.Exception: foo
+*
 Subject value:
   asd: 1
   test: 2
@@ -204,7 +222,7 @@ Subject value:
 
 
     [<Fact>]
-    let ``Fails with expected message if at least one of the items fail to satisfy the assertion`` () =
+    let ``Fails with expected message if at least one of the items fails to satisfy the assertion or throws`` () =
         fun () ->
             let x = dict [ "asd", 1; "test", 2; "foobar", 3 ]
 
@@ -214,10 +232,10 @@ Subject value:
                     [
                         (fun x1 -> x1.Should().Fail())
                         (fun x2 -> x2.Should().Pass())
-                        (fun x3 -> x3.Should().Fail())
+                        (fun _ -> failwith "foo")
                     ]
                 )
-        |> assertExnMsg
+        |> assertExnMsgWildcard
             """
 Subject: x
 Should: SatisfyRespectively
@@ -227,9 +245,9 @@ Failures:
     Subject: x1
     Should: Fail
 - Key: foobar
-  Failure:
-    Subject: x3
-    Should: Fail
+  Exception: |-
+    System.Exception: foo
+*
 Subject value:
   asd: 1
   test: 2
@@ -238,7 +256,9 @@ Subject value:
 
 
     [<Fact>]
-    let ``Fails with expected message with because if at least one of the items fail to satisfy the assertion`` () =
+    let ``Fails with expected message with because if at least one of the items fails to satisfy the assertion or throws``
+        ()
+        =
         fun () ->
             let x = dict [ "asd", 1; "test", 2; "foobar", 3 ]
 
@@ -248,11 +268,11 @@ Subject value:
                     [
                         (fun x1 -> x1.Should().Fail())
                         (fun x2 -> x2.Should().Pass())
-                        (fun x3 -> x3.Should().Fail())
+                        (fun _ -> failwith "foo")
                     ],
                     "Some reason"
                 )
-        |> assertExnMsg
+        |> assertExnMsgWildcard
             """
 Subject: x
 Because: Some reason
@@ -263,9 +283,9 @@ Failures:
     Subject: x1
     Should: Fail
 - Key: foobar
-  Failure:
-    Subject: x3
-    Should: Fail
+  Exception: |-
+    System.Exception: foo
+*
 Subject value:
   asd: 1
   test: 2

@@ -9,7 +9,10 @@ open Faqt.Formatting
 module private HigherOrderAssertionsHelpers =
 
 
-    type SatisfyAllReportItem = { Index: int; Failure: FailureData }
+    type SatisfyAllReportFailureItem = { Index: int; Failure: FailureData }
+
+
+    type SatisfyAllReportExceptionItem = { Index: int; Exception: TryFormat }
 
 
 [<Extension>]
@@ -26,8 +29,9 @@ type HigherOrderAssertions =
         try
             assertion t.Subject |> ignore
             And(t)
-        with :? AssertionFailedException as ex ->
-            t.With("Failure", ex.FailureData).Fail(because)
+        with
+        | :? AssertionFailedException as ex -> t.With("Failure", ex.FailureData).Fail(because)
+        | ex -> t.With("But threw", ex).Fail(because)
 
 
     /// Asserts that the subject does not satisfy the supplied assertion. If using this in performance critical
@@ -65,8 +69,9 @@ type HigherOrderAssertions =
                     try
                         f t.Subject |> ignore
                         succeeded <- true
-                    with :? AssertionFailedException as ex ->
-                        failures.Add ex.FailureData
+                    with
+                    | :? AssertionFailedException as ex -> failures.Add(box ex.FailureData)
+                    | ex -> failures.Add(box {| Exception = ex |})
 
             if not succeeded then
                 t.With("Failures", failures).Fail(because)
@@ -87,14 +92,22 @@ type HigherOrderAssertions =
                 try
                     f t.Subject |> ignore
                     None
-                with :? AssertionFailedException as ex ->
+                with ex ->
                     Some(i, ex)
             )
             |> Seq.toArray
 
         if exceptions.Length > 0 then
             t
-                .With("Failures", exceptions |> Array.map (fun (i, ex) -> { Index = i; Failure = ex.FailureData }))
+                .With(
+                    "Failures",
+                    exceptions
+                    |> Array.map (fun (i, ex) ->
+                        match ex with
+                        | :? AssertionFailedException as ex -> box { Index = i; Failure = ex.FailureData }
+                        | ex -> box { Index = i; Exception = TryFormat ex }
+                    )
+                )
                 .Fail(because)
 
         And(t)

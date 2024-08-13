@@ -50,11 +50,19 @@ But was: null
 
 
     [<Fact>]
-    let ``Fails with expected message if at least one of the items fail to satisfy the assertion`` () =
+    let ``Fails with expected message if at least one of the items fails to satisfy the assertion or throws`` () =
         fun () ->
             let x = [ "asd"; "test"; "1234" ]
-            x.Should().AllSatisfy(fun y -> y.Length.Should().Test(y.Length = 3))
-        |> assertExnMsg
+
+            x
+                .Should()
+                .AllSatisfy(fun y ->
+                    if y = "1234" then
+                        failwith "foo"
+                    else
+                        y.Length.Should().Test(y.Length = 3)
+                )
+        |> assertExnMsgWildcard
             """
 Subject: x
 Should: AllSatisfy
@@ -64,22 +72,32 @@ Failures:
     Subject: y.Length
     Should: Test
 - Index: 2
-  Failure:
-    Subject: y.Length
-    Should: Test
+  Exception: |-
+    System.Exception: foo
+*
 Subject value: [asd, test, '1234']
 """
 
 
     [<Fact>]
-    let ``Fails with expected message with because if at least one of the items fail to satisfy the assertion`` () =
+    let ``Fails with expected message with because if at least one of the items fails to satisfy the assertion or throws``
+        ()
+        =
         fun () ->
             let x = [ "asd"; "test"; "1234" ]
 
             x
                 .Should()
-                .AllSatisfy((fun y -> y.Length.Should().Test(y.Length = 3)), "Some reason")
-        |> assertExnMsg
+                .AllSatisfy(
+                    (fun y ->
+                        if y = "1234" then
+                            failwith "foo"
+                        else
+                            y.Length.Should().Test(y.Length = 3)
+                    ),
+                    "Some reason"
+                )
+        |> assertExnMsgWildcard
             """
 Subject: x
 Because: Some reason
@@ -90,9 +108,9 @@ Failures:
     Subject: y.Length
     Should: Test
 - Index: 2
-  Failure:
-    Subject: y.Length
-    Should: Test
+  Exception: |-
+    System.Exception: foo
+*
 Subject value: [asd, test, '1234']
 """
 
@@ -184,7 +202,7 @@ Subject value: [asd, test, '1234']
 
 
     [<Fact>]
-    let ``Fails with expected message if at least one of the items fail to satisfy the assertion`` () =
+    let ``Fails with expected message if at least one of the items fails to satisfy the assertion or throws`` () =
         fun () ->
             let x = [ "asd"; "test"; "1234" ]
 
@@ -194,10 +212,10 @@ Subject value: [asd, test, '1234']
                     [
                         (fun x1 -> x1.Should().Fail())
                         (fun x2 -> x2.Should().Pass())
-                        (fun x3 -> x3.Should().Fail())
+                        (fun _ -> failwith "foo")
                     ]
                 )
-        |> assertExnMsg
+        |> assertExnMsgWildcard
             """
 Subject: x
 Should: SatisfyRespectively
@@ -207,15 +225,17 @@ Failures:
     Subject: x1
     Should: Fail
 - Index: 2
-  Failure:
-    Subject: x3
-    Should: Fail
+  Exception: |-
+    System.Exception: foo
+*
 Subject value: [asd, test, '1234']
 """
 
 
     [<Fact>]
-    let ``Fails with expected message with because if at least one of the items fail to satisfy the assertion`` () =
+    let ``Fails with expected message with because if at least one of the items fails to satisfy the assertion or throws``
+        ()
+        =
         fun () ->
             let x = [ "asd"; "test"; "1234" ]
 
@@ -225,11 +245,11 @@ Subject value: [asd, test, '1234']
                     [
                         (fun x1 -> x1.Should().Fail())
                         (fun x2 -> x2.Should().Pass())
-                        (fun x3 -> x3.Should().Fail())
+                        (fun _ -> failwith "foo")
                     ],
                     "Some reason"
                 )
-        |> assertExnMsg
+        |> assertExnMsgWildcard
             """
 Subject: x
 Because: Some reason
@@ -240,9 +260,9 @@ Failures:
     Subject: x1
     Should: Fail
 - Index: 2
-  Failure:
-    Subject: x3
-    Should: Fail
+  Exception: |-
+    System.Exception: foo
+*
 Subject value: [asd, test, '1234']
 """
 
