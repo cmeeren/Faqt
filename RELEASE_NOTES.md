@@ -1,7 +1,7 @@
 Release notes
 ==============
 
-### Unreleased
+### 4.0.0 (2024-08-13)
 
 * **Breaking:** All higher-order assertions except `NotSatisfy` now fail with `AssertionFailedException` if the
   assertion if it throws any exception. Previously, these assertions let exceptions other
