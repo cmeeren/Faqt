@@ -2829,7 +2829,7 @@ Request: GET / HTTP/0.5
             """
 Subject: respContent 200 "foo"
 Should: HaveStringContentSatisfying
-Exception: |-
+But threw: |-
   System.Exception: foo
 *
 Response: |-
@@ -2847,14 +2847,14 @@ Request: GET / HTTP/0.5
         fun () ->
             (respContent 200 "foo")
                 .Should()
-                .HaveStringContentSatisfying(fun _ -> failwith "foo")
+                .HaveStringContentSatisfying((fun _ -> failwith "foo"), "Some reason")
             |> Async.RunSynchronously
         |> assertExnMsgWildcard
             """
 Subject: respContent 200 "foo"
 Because: Some reason
 Should: HaveStringContentSatisfying
-Exception: |-
+But threw: |-
   System.Exception: foo
 *
 Response: |-
