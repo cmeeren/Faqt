@@ -1,11 +1,15 @@
 Release notes
 ==============
 
+### 4.0.1 (2024-08-24)
+
+* Reduced the required FSharp.Core version from 7.0.400 to 5.0.2
+
 ### 4.0.0 (2024-08-13)
 
 * **Breaking:** All higher-order assertions except `NotSatisfy` now fail with `AssertionFailedException` if the
-  assertion if it throws any exception. Previously, these assertions let exceptions other
-  than `AssertionFailedException` bubble up. The following assertions are affected:
+  assertion if it throws any exception. Previously, these assertions let exceptions other than
+  `AssertionFailedException` bubble up. The following assertions are affected:
   * `Satisfy`
   * `SatisfyAny`
   * `SatisfyAll`
@@ -38,13 +42,13 @@ Release notes
 * Added `string` assertion `BeJsonEquivalentTo`
 * Added `HttpResponseMessage` assertion `HaveStringContentSatisfying`. Note that this is async and therefore not
   chainable.
-* The `HttpResponseMessage` assertions `HaveHeader` and `HaveHeaderValue` now correctly detects content headers such
-  as `Content-Type` (which are set on `HttpContent` and not `HttpResponseMessage`)
+* The `HttpResponseMessage` assertions `HaveHeader` and `HaveHeaderValue` now correctly detects content headers such as
+  `Content-Type` (which are set on `HttpContent` and not `HttpResponseMessage`)
 
 ### 1.3.9 (2024-04-02)
 
-* Added `FaqtConfig.SetMapHttpHeaderValues` to set a function that can map HTTP header values (e.g. for
-  masking `Authorization` headers).
+* Added `FaqtConfig.SetMapHttpHeaderValues` to set a function that can map HTTP header values (e.g. for masking
+  `Authorization` headers).
 
 ### 1.3.8 (2024-03-22)
 
