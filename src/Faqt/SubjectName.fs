@@ -265,7 +265,7 @@ module internal SubjectName =
             |> Seq.skip (origin.LineNumber - 1)
             |> Seq.scan
                 (fun (countsLeft: Map<_, _>, _) line ->
-                    if countsLeft.Values |> Seq.forall ((=) 0) then
+                    if countsLeft |> Map.forall (fun _ v -> v = 0) then
                         countsLeft, None
                     else
                         let newCountsLeft =
