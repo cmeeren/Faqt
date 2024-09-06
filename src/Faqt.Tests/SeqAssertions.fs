@@ -2584,6 +2584,276 @@ Subject value: [a, as, foobar, asd, a, bar]
 """
 
 
+module ``BeAscendingBy (StringComparison)`` =
+
+
+    [<Fact>]
+    let ``Can be chained with And`` () =
+        List<int>.Empty
+            .Should()
+            .BeAscendingBy(string<int>, StringComparison.Ordinal)
+            .Id<And<int list>>()
+            .And.Be([])
+
+
+    let passData = [
+        [| box List<string>.Empty; StringComparison.Ordinal |]
+        [| [ "a" ]; StringComparison.Ordinal |]
+        [| [ "a"; "a" ]; StringComparison.Ordinal |]
+        [| [ "a2"; "a1" ]; StringComparison.Ordinal |]
+        [| [ "a"; "b" ]; StringComparison.Ordinal |]
+        [| [ "A"; "b" ]; StringComparison.OrdinalIgnoreCase |]
+        [| [ "a"; "B" ]; StringComparison.OrdinalIgnoreCase |]
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof passData)>]
+    let ``Passes if non-strictly ascending using the specified comparison``
+        (subject: seq<string>)
+        (comparison: StringComparison)
+        =
+        subject.Should().BeAscendingBy(_.Substring(0, 1), comparison)
+
+
+    [<Fact>]
+    let ``Fails with expected message if null`` () =
+        fun () ->
+            let x: seq<string> = null
+            x.Should().BeAscendingBy(_.Substring(0, 1), StringComparison.Ordinal)
+        |> assertExnMsg
+            """
+Subject: x
+Should: BeAscendingBy
+Using StringComparison: Ordinal
+But was: null
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because if null`` () =
+        fun () ->
+            let x: seq<string> = null
+
+            x
+                .Should()
+                .BeAscendingBy(_.Substring(0, 1), StringComparison.Ordinal, "Some reason")
+        |> assertExnMsg
+            """
+Subject: x
+Because: Some reason
+Should: BeAscendingBy
+Using StringComparison: Ordinal
+But was: null
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if not in ascending order`` () =
+        fun () ->
+            let x = [ "1a"; "2b"; "3f"; "4c"; "5a"; "6c" ]
+            x.Should().BeAscendingBy(_.Substring(1, 1), StringComparison.OrdinalIgnoreCase)
+        |> assertExnMsg
+            """
+Subject: x
+Should: BeAscendingBy
+Using StringComparison: OrdinalIgnoreCase
+But found:
+- Index: 2
+  Item: 3f
+  Projected: f
+- Index: 3
+  Item: 4c
+  Projected: c
+Subject value: [1a, 2b, 3f, 4c, 5a, 6c]
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because if not in ascending order`` () =
+        fun () ->
+            let x = [ "1a"; "2b"; "3f"; "4c"; "5a"; "6c" ]
+
+            x
+                .Should()
+                .BeAscendingBy(_.Substring(1, 1), StringComparison.OrdinalIgnoreCase, "Some reason")
+        |> assertExnMsg
+            """
+Subject: x
+Because: Some reason
+Should: BeAscendingBy
+Using StringComparison: OrdinalIgnoreCase
+But found:
+- Index: 2
+  Item: 3f
+  Projected: f
+- Index: 3
+  Item: 4c
+  Projected: c
+Subject value: [1a, 2b, 3f, 4c, 5a, 6c]
+"""
+
+module ``BeAscendingBy (Culture CompareOptions)`` =
+
+
+    [<Fact>]
+    let ``Can be chained with And`` () =
+        List<int>.Empty
+            .Should()
+            .BeAscendingBy(string<int>, CultureInfo.InvariantCulture, CompareOptions.None)
+            .Id<And<int list>>()
+            .And.Be([])
+
+
+    let passData = [
+        [| box List<string>.Empty; CultureInfo.InvariantCulture; CompareOptions.None |]
+        [| [ "a" ]; CultureInfo.InvariantCulture; CompareOptions.None |]
+        [| [ "a"; "a" ]; CultureInfo.InvariantCulture; CompareOptions.None |]
+        [| [ "a2"; "a1" ]; CultureInfo.InvariantCulture; CompareOptions.None |]
+        [| [ "a"; "b" ]; CultureInfo.InvariantCulture; CompareOptions.None |]
+        [| [ "A"; "b" ]; CultureInfo.InvariantCulture; CompareOptions.IgnoreCase |]
+        [| [ "a"; "B" ]; CultureInfo.InvariantCulture; CompareOptions.IgnoreCase |]
+        [| [ "æ"; "ø"; "å" ]; CultureInfo("nb-NO"); CompareOptions.None |]
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof passData)>]
+    let ``Passes if non-strictly ascending using the specified comparison``
+        (subject: seq<string>)
+        (culture: CultureInfo)
+        (compareOptions: CompareOptions)
+        =
+        subject.Should().BeAscendingBy(_.Substring(0, 1), culture, compareOptions)
+
+
+    let failData = [
+        [| box [ "1a"; "2B" ]; CultureInfo.InvariantCulture; CompareOptions.Ordinal |]
+        [|
+            box [ "1b"; "2a" ]
+            CultureInfo.InvariantCulture
+            CompareOptions.IgnoreCase
+        |]
+        [| [ "1æ"; "2ø"; "3å" ]; CultureInfo.InvariantCulture; CompareOptions.None |]
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof failData)>]
+    let ``Fails if not non-strictly ascending using the specified comparison``
+        (subject: seq<string>)
+        (culture: CultureInfo)
+        (compareOptions: CompareOptions)
+        =
+        assertFails (fun () -> subject.Should().BeAscendingBy(_.Substring(1, 1), culture, compareOptions))
+
+
+    [<Fact>]
+    let ``Fails with expected message if null`` () =
+        fun () ->
+            let x: seq<string> = null
+
+            x
+                .Should()
+                .BeAscendingBy(
+                    _.Substring(0, 1),
+                    CultureInfo("nb-NO"),
+                    CompareOptions.IgnoreCase ||| CompareOptions.IgnoreSymbols
+                )
+        |> assertExnMsg
+            """
+Subject: x
+Should: BeAscendingBy
+In culture: nb-NO
+With CompareOptions: IgnoreCase, IgnoreSymbols
+But was: null
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because if null`` () =
+        fun () ->
+            let x: seq<string> = null
+
+            x
+                .Should()
+                .BeAscendingBy(
+                    _.Substring(0, 1),
+                    CultureInfo("nb-NO"),
+                    CompareOptions.IgnoreCase ||| CompareOptions.IgnoreSymbols,
+                    "Some reason"
+                )
+        |> assertExnMsg
+            """
+Subject: x
+Because: Some reason
+Should: BeAscendingBy
+In culture: nb-NO
+With CompareOptions: IgnoreCase, IgnoreSymbols
+But was: null
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if not in ascending order`` () =
+        fun () ->
+            let x = [ "1a"; "2b"; "3f"; "4c"; "4a"; "6c" ]
+
+            x
+                .Should()
+                .BeAscendingBy(
+                    _.Substring(1, 1),
+                    CultureInfo("nb-NO"),
+                    CompareOptions.IgnoreCase ||| CompareOptions.IgnoreSymbols
+                )
+        |> assertExnMsg
+            """
+Subject: x
+Should: BeAscendingBy
+In culture: nb-NO
+With CompareOptions: IgnoreCase, IgnoreSymbols
+But found:
+- Index: 2
+  Item: 3f
+  Projected: f
+- Index: 3
+  Item: 4c
+  Projected: c
+Subject value: [1a, 2b, 3f, 4c, 4a, 6c]
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because if not in ascending order`` () =
+        fun () ->
+            let x = [ "1a"; "2b"; "3f"; "4c"; "4a"; "6c" ]
+
+            x
+                .Should()
+                .BeAscendingBy(
+                    _.Substring(1, 1),
+                    CultureInfo("nb-NO"),
+                    CompareOptions.IgnoreCase ||| CompareOptions.IgnoreSymbols,
+                    "Some reason"
+                )
+        |> assertExnMsg
+            """
+Subject: x
+Because: Some reason
+Should: BeAscendingBy
+In culture: nb-NO
+With CompareOptions: IgnoreCase, IgnoreSymbols
+But found:
+- Index: 2
+  Item: 3f
+  Projected: f
+- Index: 3
+  Item: 4c
+  Projected: c
+Subject value: [1a, 2b, 3f, 4c, 4a, 6c]
+"""
+
+
 module BeDescending =
 
 
@@ -3000,6 +3270,277 @@ But found:
   Item: foobar
   Projected: 6
 Subject value: [bar, as, a, foobar, asd, a]
+"""
+
+
+module ``BeDescendingBy (StringComparison)`` =
+
+
+    [<Fact>]
+    let ``Can be chained with And`` () =
+        List<int>.Empty
+            .Should()
+            .BeDescendingBy(string<int>, StringComparison.Ordinal)
+            .Id<And<int list>>()
+            .And.Be([])
+
+
+    let passData = [
+        [| box List<string>.Empty; StringComparison.Ordinal |]
+        [| [ "a" ]; StringComparison.Ordinal |]
+        [| [ "a"; "a" ]; StringComparison.Ordinal |]
+        [| [ "a1"; "a2" ]; StringComparison.Ordinal |]
+        [| [ "b"; "a" ]; StringComparison.Ordinal |]
+        [| [ "b"; "A" ]; StringComparison.OrdinalIgnoreCase |]
+        [| [ "B"; "a" ]; StringComparison.OrdinalIgnoreCase |]
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof passData)>]
+    let ``Passes if non-strictly descending using the specified comparison``
+        (subject: seq<string>)
+        (comparison: StringComparison)
+        =
+        subject.Should().BeDescendingBy(_.Substring(0, 1), comparison)
+
+
+    [<Fact>]
+    let ``Fails with expected message if null`` () =
+        fun () ->
+            let x: seq<string> = null
+            x.Should().BeDescendingBy(_.Substring(0, 1), StringComparison.Ordinal)
+        |> assertExnMsg
+            """
+Subject: x
+Should: BeDescendingBy
+Using StringComparison: Ordinal
+But was: null
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because if null`` () =
+        fun () ->
+            let x: seq<string> = null
+
+            x
+                .Should()
+                .BeDescendingBy(_.Substring(0, 1), StringComparison.Ordinal, "Some reason")
+        |> assertExnMsg
+            """
+Subject: x
+Because: Some reason
+Should: BeDescendingBy
+Using StringComparison: Ordinal
+But was: null
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if not in descending order`` () =
+        fun () ->
+            let x = [ "6c"; "5a"; "4c"; "3f"; "2b"; "1a" ]
+
+            x.Should().BeDescendingBy(_.Substring(1, 1), StringComparison.OrdinalIgnoreCase)
+        |> assertExnMsg
+            """
+Subject: x
+Should: BeDescendingBy
+Using StringComparison: OrdinalIgnoreCase
+But found:
+- Index: 1
+  Item: 5a
+  Projected: a
+- Index: 2
+  Item: 4c
+  Projected: c
+Subject value: [6c, 5a, 4c, 3f, 2b, 1a]
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because if not in descending order`` () =
+        fun () ->
+            let x = [ "6c"; "5a"; "4c"; "3f"; "2b"; "1a" ]
+
+            x
+                .Should()
+                .BeDescendingBy(_.Substring(1, 1), StringComparison.OrdinalIgnoreCase, "Some reason")
+        |> assertExnMsg
+            """
+Subject: x
+Because: Some reason
+Should: BeDescendingBy
+Using StringComparison: OrdinalIgnoreCase
+But found:
+- Index: 1
+  Item: 5a
+  Projected: a
+- Index: 2
+  Item: 4c
+  Projected: c
+Subject value: [6c, 5a, 4c, 3f, 2b, 1a]
+"""
+
+module ``BeDescendingBy (Culture CompareOptions)`` =
+
+
+    [<Fact>]
+    let ``Can be chained with And`` () =
+        List<int>.Empty
+            .Should()
+            .BeDescendingBy(string<int>, CultureInfo.InvariantCulture, CompareOptions.None)
+            .Id<And<int list>>()
+            .And.Be([])
+
+
+    let passData = [
+        [| box List<string>.Empty; CultureInfo.InvariantCulture; CompareOptions.None |]
+        [| [ "a" ]; CultureInfo.InvariantCulture; CompareOptions.None |]
+        [| [ "a"; "a" ]; CultureInfo.InvariantCulture; CompareOptions.None |]
+        [| [ "a1"; "a2" ]; CultureInfo.InvariantCulture; CompareOptions.None |]
+        [| [ "b"; "a" ]; CultureInfo.InvariantCulture; CompareOptions.None |]
+        [| [ "b"; "A" ]; CultureInfo.InvariantCulture; CompareOptions.IgnoreCase |]
+        [| [ "B"; "a" ]; CultureInfo.InvariantCulture; CompareOptions.IgnoreCase |]
+        [| [ "å"; "ø"; "æ" ]; CultureInfo("nb-NO"); CompareOptions.None |]
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof passData)>]
+    let ``Passes if non-strictly descending using the specified comparison``
+        (subject: seq<string>)
+        (culture: CultureInfo)
+        (compareOptions: CompareOptions)
+        =
+        subject.Should().BeDescendingBy(_.Substring(0, 1), culture, compareOptions)
+
+
+    let failData = [
+        [| box [ "2B"; "1a" ]; CultureInfo.InvariantCulture; CompareOptions.Ordinal |]
+        [|
+            box [ "2a"; "1b" ]
+            CultureInfo.InvariantCulture
+            CompareOptions.IgnoreCase
+        |]
+        [| [ "3å"; "2ø"; "1æ" ]; CultureInfo.InvariantCulture; CompareOptions.None |]
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof failData)>]
+    let ``Fails if not non-strictly descending using the specified comparison``
+        (subject: seq<string>)
+        (culture: CultureInfo)
+        (compareOptions: CompareOptions)
+        =
+        assertFails (fun () -> subject.Should().BeDescendingBy(_.Substring(1, 1), culture, compareOptions))
+
+
+    [<Fact>]
+    let ``Fails with expected message if null`` () =
+        fun () ->
+            let x: seq<string> = null
+
+            x
+                .Should()
+                .BeDescendingBy(
+                    _.Substring(0, 1),
+                    CultureInfo("nb-NO"),
+                    CompareOptions.IgnoreCase ||| CompareOptions.IgnoreSymbols
+                )
+        |> assertExnMsg
+            """
+Subject: x
+Should: BeDescendingBy
+In culture: nb-NO
+With CompareOptions: IgnoreCase, IgnoreSymbols
+But was: null
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because if null`` () =
+        fun () ->
+            let x: seq<string> = null
+
+            x
+                .Should()
+                .BeDescendingBy(
+                    _.Substring(0, 1),
+                    CultureInfo("nb-NO"),
+                    CompareOptions.IgnoreCase ||| CompareOptions.IgnoreSymbols,
+                    "Some reason"
+                )
+        |> assertExnMsg
+            """
+Subject: x
+Because: Some reason
+Should: BeDescendingBy
+In culture: nb-NO
+With CompareOptions: IgnoreCase, IgnoreSymbols
+But was: null
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if not in descending order`` () =
+        fun () ->
+            let x = [ "6c"; "5a"; "4c"; "3f"; "2b"; "1a" ]
+
+            x
+                .Should()
+                .BeDescendingBy(
+                    _.Substring(1, 1),
+                    CultureInfo("nb-NO"),
+                    CompareOptions.IgnoreCase ||| CompareOptions.IgnoreSymbols
+                )
+        |> assertExnMsg
+            """
+Subject: x
+Should: BeDescendingBy
+In culture: nb-NO
+With CompareOptions: IgnoreCase, IgnoreSymbols
+But found:
+- Index: 1
+  Item: 5a
+  Projected: a
+- Index: 2
+  Item: 4c
+  Projected: c
+Subject value: [6c, 5a, 4c, 3f, 2b, 1a]
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message with because if not in descending order`` () =
+        fun () ->
+            let x = [ "6c"; "5a"; "4c"; "3f"; "2b"; "1a" ]
+
+            x
+                .Should()
+                .BeDescendingBy(
+                    _.Substring(1, 1),
+                    CultureInfo("nb-NO"),
+                    CompareOptions.IgnoreCase ||| CompareOptions.IgnoreSymbols,
+                    "Some reason"
+                )
+        |> assertExnMsg
+            """
+Subject: x
+Because: Some reason
+Should: BeDescendingBy
+In culture: nb-NO
+With CompareOptions: IgnoreCase, IgnoreSymbols
+But found:
+- Index: 1
+  Item: 5a
+  Projected: a
+- Index: 2
+  Item: 4c
+  Projected: c
+Subject value: [6c, 5a, 4c, 3f, 2b, 1a]
 """
 
 

@@ -782,6 +782,112 @@ type SeqAssertions =
         And(t)
 
 
+    /// Asserts that the subject is in ascending order by the specified projection using the specified comparison type.
+    [<Extension>]
+    static member BeAscendingBy
+        (
+            t: Testable<#seq<'a>>,
+            projection: 'a -> string,
+            comparisonType: StringComparison,
+            ?because
+        ) : And<_> =
+        use _ = t.Assert()
+
+        if isNull (box t.Subject) then
+            t
+                .With("Using StringComparison", comparisonType)
+                .With(
+                    comparisonType = StringComparison.CurrentCulture
+                    || comparisonType = StringComparison.CurrentCultureIgnoreCase,
+                    "CurrentCulture",
+                    CultureInfo.CurrentCulture
+                )
+                .With("But was", t.Subject)
+                .Fail(because)
+
+        for i, (a, b) in t.Subject |> Seq.pairwise |> Seq.indexed do
+            let a' = projection a
+            let b' = projection b
+
+            if String.Compare(a', b', comparisonType) > 0 then
+                t
+                    .With("Using StringComparison", comparisonType)
+                    .With(
+                        comparisonType = StringComparison.CurrentCulture
+                        || comparisonType = StringComparison.CurrentCultureIgnoreCase,
+                        "CurrentCulture",
+                        CultureInfo.CurrentCulture
+                    )
+                    .With(
+                        "But found",
+                        [
+                            {|
+                                Index = i
+                                Item = TryFormat a
+                                Projected = TryFormat a'
+                            |}
+                            {|
+                                Index = i + 1
+                                Item = TryFormat b
+                                Projected = TryFormat b'
+                            |}
+                        ]
+                    )
+                    .With("Subject value", t.Subject)
+                    .Fail(because)
+
+        And(t)
+
+
+    /// Asserts that the subject is in ascending order by the specified projection using the specified culture and
+    /// compare options.
+    [<Extension>]
+    static member BeAscendingBy
+        (
+            t: Testable<#seq<'a>>,
+            projection: 'a -> string,
+            culture: CultureInfo,
+            compareOptions: CompareOptions,
+            ?because
+        ) : And<_> =
+        use _ = t.Assert()
+
+        if isNull (box t.Subject) then
+            t
+                .With("In culture", culture)
+                .With("With CompareOptions", compareOptions)
+                .With("But was", t.Subject)
+                .Fail(because)
+
+        for i, (a, b) in t.Subject |> Seq.pairwise |> Seq.indexed do
+            let a' = projection a
+            let b' = projection b
+
+            if String.Compare(a', b', culture, compareOptions) > 0 then
+                t
+                    .With("In culture", culture)
+                    .With("With CompareOptions", compareOptions)
+                    .With(
+                        "But found",
+                        [
+                            {|
+                                Index = i
+                                Item = TryFormat a
+                                Projected = TryFormat a'
+                            |}
+                            {|
+                                Index = i + 1
+                                Item = TryFormat b
+                                Projected = TryFormat b'
+                            |}
+                        ]
+                    )
+                    .With("Subject value", t.Subject)
+                    .Fail(because)
+
+        And(t)
+
+
     /// Asserts that the subject is in descending order.
     [<Extension>]
     static member BeDescending(t: Testable<#seq<'a>>, ?because) : And<_> =
@@ -881,6 +987,112 @@ type SeqAssertions =
 
             if a' < b' then
                 t
+                    .With(
+                        "But found",
+                        [
+                            {|
+                                Index = i
+                                Item = TryFormat a
+                                Projected = TryFormat a'
+                            |}
+                            {|
+                                Index = i + 1
+                                Item = TryFormat b
+                                Projected = TryFormat b'
+                            |}
+                        ]
+                    )
+                    .With("Subject value", t.Subject)
+                    .Fail(because)
+
+        And(t)
+
+
+    /// Asserts that the subject is in descending order by the specified projection using the specified comparison type.
+    [<Extension>]
+    static member BeDescendingBy
+        (
+            t: Testable<#seq<'a>>,
+            projection: 'a -> string,
+            comparisonType: StringComparison,
+            ?because
+        ) : And<_> =
+        use _ = t.Assert()
+
+        if isNull (box t.Subject) then
+            t
+                .With("Using StringComparison", comparisonType)
+                .With(
+                    comparisonType = StringComparison.CurrentCulture
+                    || comparisonType = StringComparison.CurrentCultureIgnoreCase,
+                    "CurrentCulture",
+                    CultureInfo.CurrentCulture
+                )
+                .With("But was", t.Subject)
+                .Fail(because)
+
+        for i, (a, b) in t.Subject |> Seq.pairwise |> Seq.indexed do
+            let a' = projection a
+            let b' = projection b
+
+            if String.Compare(a', b', comparisonType) < 0 then
+                t
+                    .With("Using StringComparison", comparisonType)
+                    .With(
+                        comparisonType = StringComparison.CurrentCulture
+                        || comparisonType = StringComparison.CurrentCultureIgnoreCase,
+                        "CurrentCulture",
+                        CultureInfo.CurrentCulture
+                    )
+                    .With(
+                        "But found",
+                        [
+                            {|
+                                Index = i
+                                Item = TryFormat a
+                                Projected = TryFormat a'
+                            |}
+                            {|
+                                Index = i + 1
+                                Item = TryFormat b
+                                Projected = TryFormat b'
+                            |}
+                        ]
+                    )
+                    .With("Subject value", t.Subject)
+                    .Fail(because)
+
+        And(t)
+
+
+    /// Asserts that the subject is in descending order by the specified projection using the specified culture and
+    /// compare options.
+    [<Extension>]
+    static member BeDescendingBy
+        (
+            t: Testable<#seq<'a>>,
+            projection: 'a -> string,
+            culture: CultureInfo,
+            compareOptions: CompareOptions,
+            ?because
+        ) : And<_> =
+        use _ = t.Assert()
+
+        if isNull (box t.Subject) then
+            t
+                .With("In culture", culture)
+                .With("With CompareOptions", compareOptions)
+                .With("But was", t.Subject)
+                .Fail(because)
+
+        for i, (a, b) in t.Subject |> Seq.pairwise |> Seq.indexed do
+            let a' = projection a
+            let b' = projection b
+
+            if String.Compare(a', b', culture, compareOptions) < 0 then
+                t
+                    .With("In culture", culture)
+                    .With("With CompareOptions", compareOptions)
                     .With(
                         "But found",
                         [
