@@ -820,7 +820,7 @@ type SeqAssertions =
 
         for i, (a, b) in t.Subject |> Seq.pairwise |> Seq.indexed do
 
-            if String.Compare(a, b, comparisonType) > 0 then
+            if String.Compare(a, b, comparisonType) < 0 then
                 t
                     .With("Using StringComparison", comparisonType)
                     .With(

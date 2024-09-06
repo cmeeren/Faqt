@@ -2786,10 +2786,10 @@ module ``BeDescending (Culture CompareOptions)`` =
         [| box List<string>.Empty; CultureInfo.InvariantCulture; CompareOptions.None |]
         [| [ "a" ]; CultureInfo.InvariantCulture; CompareOptions.None |]
         [| [ "a"; "a" ]; CultureInfo.InvariantCulture; CompareOptions.None |]
-        [| [ "a"; "b" ]; CultureInfo.InvariantCulture; CompareOptions.None |]
-        [| [ "A"; "b" ]; CultureInfo.InvariantCulture; CompareOptions.IgnoreCase |]
-        [| [ "a"; "B" ]; CultureInfo.InvariantCulture; CompareOptions.IgnoreCase |]
-        [| [ "æ"; "ø"; "å" ]; CultureInfo("nb-NO"); CompareOptions.None |]
+        [| [ "b"; "a" ]; CultureInfo.InvariantCulture; CompareOptions.None |]
+        [| [ "b"; "A" ]; CultureInfo.InvariantCulture; CompareOptions.IgnoreCase |]
+        [| [ "B"; "a" ]; CultureInfo.InvariantCulture; CompareOptions.IgnoreCase |]
+        [| [ "å"; "ø"; "æ" ]; CultureInfo("nb-NO"); CompareOptions.None |]
     ]
 
 
@@ -2804,9 +2804,9 @@ module ``BeDescending (Culture CompareOptions)`` =
 
 
     let failData = [
-        [| box [ "a"; "B" ]; CultureInfo.InvariantCulture; CompareOptions.Ordinal |]
-        [| box [ "b"; "a" ]; CultureInfo.InvariantCulture; CompareOptions.IgnoreCase |]
-        [| [ "æ"; "ø"; "å" ]; CultureInfo.InvariantCulture; CompareOptions.None |]
+        [| box [ "B"; "a" ]; CultureInfo.InvariantCulture; CompareOptions.Ordinal |]
+        [| box [ "a"; "b" ]; CultureInfo.InvariantCulture; CompareOptions.IgnoreCase |]
+        [| [ "å"; "ø"; "æ" ]; CultureInfo.InvariantCulture; CompareOptions.None |]
     ]
 
 
