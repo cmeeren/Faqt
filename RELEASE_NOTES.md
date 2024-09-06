@@ -1,7 +1,7 @@
 Release notes
 ==============
 
-### Unreleased
+### 4.1.0 (2024-09-06)
 
 * Added `seq<string>` assertions `BeAscending` and `BeDescending` with `StringComparison`, `CultureInfo` and
   `CompareOptions` parameters
