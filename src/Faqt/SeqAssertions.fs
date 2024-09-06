@@ -1,6 +1,8 @@
 ﻿namespace Faqt
 
+open System
 open System.Collections.Generic
+open System.Globalization
 open System.Runtime.CompilerServices
 open Faqt.AssertionHelpers
 open Faqt.Formatting
@@ -679,6 +681,72 @@ type SeqAssertions =
         And(t)
 
 
+    /// Asserts that the subject is in ascending order using the specified comparison type.
+    [<Extension>]
+    static member BeAscending(t: Testable<#seq<string>>, comparisonType: StringComparison, ?because) : And<_> =
+        use _ = t.Assert()
+
+        if isNull (box t.Subject) then
+            t
+                .With("Using StringComparison", comparisonType)
+                .With(
+                    comparisonType = StringComparison.CurrentCulture
+                    || comparisonType = StringComparison.CurrentCultureIgnoreCase,
+                    "CurrentCulture",
+                    CultureInfo.CurrentCulture
+                )
+                .With("But was", t.Subject)
+                .Fail(because)
+
+        for i, (a, b) in t.Subject |> Seq.pairwise |> Seq.indexed do
+
+            if String.Compare(a, b, comparisonType) > 0 then
+                t
+                    .With("Using StringComparison", comparisonType)
+                    .With(
+                        comparisonType = StringComparison.CurrentCulture
+                        || comparisonType = StringComparison.CurrentCultureIgnoreCase,
+                        "CurrentCulture",
+                        CultureInfo.CurrentCulture
+                    )
+                    .With("But found", [ {| Index = i; Item = TryFormat a |}; {| Index = i + 1; Item = TryFormat b |} ])
+                    .With("Subject value", t.Subject)
+                    .Fail(because)
+
+        And(t)
+
+
+    /// Asserts that the subject is in ascending order using the specified culture and compare options.
+    [<Extension>]
+    static member BeAscending
+        (
+            t: Testable<#seq<string>>,
+            culture: CultureInfo,
+            compareOptions: CompareOptions,
+            ?because
+        ) : And<_> =
+        use _ = t.Assert()
+
+        if isNull (box t.Subject) then
+            t
+                .With("In culture", culture)
+                .With("With CompareOptions", compareOptions)
+                .With("But was", t.Subject)
+                .Fail(because)
+
+        for i, (a, b) in t.Subject |> Seq.pairwise |> Seq.indexed do
+
+            if String.Compare(a, b, culture, compareOptions) > 0 then
+                t
+                    .With("In culture", culture)
+                    .With("With CompareOptions", compareOptions)
+                    .With("But found", [ {| Index = i; Item = TryFormat a |}; {| Index = i + 1; Item = TryFormat b |} ])
+                    .With("Subject value", t.Subject)
+                    .Fail(because)
+
+        And(t)
+
+
     /// Asserts that the subject is in ascending order by the specified projection.
     [<Extension>]
     static member BeAscendingBy(t: Testable<#seq<'a>>, projection: 'a -> 'b, ?because) : And<_> =
@@ -726,6 +794,72 @@ type SeqAssertions =
 
             if a < b then
                 t
+                    .With("But found", [ {| Index = i; Item = TryFormat a |}; {| Index = i + 1; Item = TryFormat b |} ])
+                    .With("Subject value", t.Subject)
+                    .Fail(because)
+
+        And(t)
+
+
+    /// Asserts that the subject is in descending order using the specified comparison type.
+    [<Extension>]
+    static member BeDescending(t: Testable<#seq<string>>, comparisonType: StringComparison, ?because) : And<_> =
+        use _ = t.Assert()
+
+        if isNull (box t.Subject) then
+            t
+                .With("Using StringComparison", comparisonType)
+                .With(
+                    comparisonType = StringComparison.CurrentCulture
+                    || comparisonType = StringComparison.CurrentCultureIgnoreCase,
+                    "CurrentCulture",
+                    CultureInfo.CurrentCulture
+                )
+                .With("But was", t.Subject)
+                .Fail(because)
+
+        for i, (a, b) in t.Subject |> Seq.pairwise |> Seq.indexed do
+
+            if String.Compare(a, b, comparisonType) > 0 then
+                t
+                    .With("Using StringComparison", comparisonType)
+                    .With(
+                        comparisonType = StringComparison.CurrentCulture
+                        || comparisonType = StringComparison.CurrentCultureIgnoreCase,
+                        "CurrentCulture",
+                        CultureInfo.CurrentCulture
+                    )
+                    .With("But found", [ {| Index = i; Item = TryFormat a |}; {| Index = i + 1; Item = TryFormat b |} ])
+                    .With("Subject value", t.Subject)
+                    .Fail(because)
+
+        And(t)
+
+
+    /// Asserts that the subject is in descending order using the specified culture and compare options.
+    [<Extension>]
+    static member BeDescending
+        (
+            t: Testable<#seq<string>>,
+            culture: CultureInfo,
+            compareOptions: CompareOptions,
+            ?because
+        ) : And<_> =
+        use _ = t.Assert()
+
+        if isNull (box t.Subject) then
+            t
+                .With("In culture", culture)
+                .With("With CompareOptions", compareOptions)
+                .With("But was", t.Subject)
+                .Fail(because)
+
+        for i, (a, b) in t.Subject |> Seq.pairwise |> Seq.indexed do
+
+            if String.Compare(a, b, culture, compareOptions) < 0 then
+                t
+                    .With("In culture", culture)
+                    .With("With CompareOptions", compareOptions)
                     .With("But found", [ {| Index = i; Item = TryFormat a |}; {| Index = i + 1; Item = TryFormat b |} ])
                     .With("Subject value", t.Subject)
                     .Fail(because)

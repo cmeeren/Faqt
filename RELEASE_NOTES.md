@@ -1,6 +1,11 @@
 Release notes
 ==============
 
+### Unreleased
+
+* Added `seq<string>` assertions `BeAscending` and `BeDescending` with `StringComparison`, `CultureInfo` and
+  `CompareOptions` parameters
+
 ### 4.0.1 (2024-08-24)
 
 * Reduced the required FSharp.Core version from 7.0.400 to 5.0.2
