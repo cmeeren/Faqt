@@ -88,7 +88,11 @@ module internal HttpContent =
                     |> String.truncate $"…\n[content truncated after %i{maxLength} characters]" maxLength
 
                 sb.AppendLine().AppendLine().Append(strContent) |> ignore
-        with ex ->
+        with
+        | :? ObjectDisposedException ->
+            sb.AppendLine().AppendLine().Append("[content is disposed and cannot be read]")
+            |> ignore
+        | ex ->
             sb
                 .AppendLine()
                 .AppendLine()

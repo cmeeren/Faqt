@@ -882,7 +882,7 @@ Value: |-
             x.Content <- JsonContent.Create({| a = "foo"; b = null; c = [ 3; 4 ] |})
             x.Dispose()
             x.Should().FailWith("Value", x)
-        |> assertExnMsgWildcard
+        |> assertExnMsg
             """
 Subject: x
 Should: FailWith
@@ -892,10 +892,7 @@ Value: |-
   Foo: Baz
   Foo: Bar
 
-  An exception occured trying to get the content:
-  System.ObjectDisposedException: Cannot access a disposed object.
-  Object name: 'System.Net.Http.Json.JsonContent'.
-     at *
+  [content is disposed and cannot be read]
 """
 
 
@@ -995,7 +992,7 @@ Value: |-
             x.Content <- JsonContent.Create({| a = "foo"; b = null; c = [ 3; 4 ] |})
             x.Dispose()
             x.Should().FailWith("Value", x)
-        |> assertExnMsgWildcard
+        |> assertExnMsg
             """
 Subject: x
 Should: FailWith
@@ -1005,10 +1002,7 @@ Value: |-
   Foo: Baz
   Foo: Bar
 
-  An exception occured trying to get the content:
-  System.ObjectDisposedException: Cannot access a disposed object.
-  Object name: 'System.Net.Http.Json.JsonContent'.
-     at *
+  [content is disposed and cannot be read]
 """
 
 
