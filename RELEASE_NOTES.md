@@ -1,7 +1,7 @@
 Release notes
 ==============
 
-### Unreleased
+### 4.2.1 (2024-10-14)
 
 * Updated FracturedJson from 4.0.2 to 4.0.3
 * Updated YamlDotNet from 16.0.0 to 16.1.3
