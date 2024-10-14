@@ -1,6 +1,11 @@
 Release notes
 ==============
 
+### Unreleased
+
+* Updated FracturedJson from 4.0.2 to 4.0.3
+* Updated YamlDotNet from 16.0.0 to 16.1.3
+
 ### 4.2.0 (2024-09-06)
 
 * Added `seq<string>` assertions `BeAscendingBy` and `BeDescendingBy` with `StringComparison`, `CultureInfo` and
