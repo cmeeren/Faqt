@@ -10,6 +10,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+
       - name: Restore tools
         run: dotnet tool restore
 
@@ -24,6 +27,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+
       - name: Test
         run: dotnet test -c Release -p:DeterministicSourcePaths=false -p:EmbedAllSources=false
 
@@ -34,6 +40,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
 
       - name: Test
         run: dotnet test -c Release -p:DeterministicSourcePaths=true -p:EmbedAllSources=true
@@ -46,6 +55,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+
       - name: Test
         run: dotnet test -c Release -p:DeterministicSourcePaths=false -p:EmbedAllSources=false
 
@@ -56,6 +68,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
 
       - name: Test
         run: dotnet test -c Release -p:DeterministicSourcePaths=true -p:EmbedAllSources=true
@@ -68,6 +83,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+
       - name: Test
         run: dotnet test -c Release -p:DeterministicSourcePaths=false -p:EmbedAllSources=false
 
@@ -78,6 +96,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
 
       - name: Test
         run: dotnet test -c Release -p:DeterministicSourcePaths=true -p:EmbedAllSources=true
@@ -98,6 +119,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
 
       - name: Pack
         run: dotnet pack -c Release src/Faqt/Faqt.fsproj
