@@ -1,7 +1,7 @@
 Release notes
 ==============
 
-### Unreleased
+### 4.3.0 (2024-12-05)
 
 * The higher-order assertions `Satisfy`, `NotSatisfy`, `SatisfyAny`, and `SatisfyAll` now output the entire subject
   value, similar to other higher-order assertions.
