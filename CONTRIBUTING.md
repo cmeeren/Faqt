@@ -122,6 +122,6 @@ For maintainers.
 
 * Make necessary changes to the code.
 * Update the changelog.
-* Update the version and release notes in the fsproj files.
+* Update the version and release notes in the fsproj file.
 * Commit and tag the commit in the format `v/x.y.z` (this is what triggers deployment).
 * Push the changes and the tag to the repo. If the build succeeds, the package is automatically published to NuGet.
