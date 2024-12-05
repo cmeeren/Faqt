@@ -469,6 +469,7 @@ Should: Satisfy
 Failure:
   Subject: [x, Length]
   Should: TestDerived
+Subject value: ''
 """
 
 
@@ -482,6 +483,7 @@ Should: Satisfy
 Failure:
   Subject: x.Length
   Should: Fail
+Subject value: asd
 """
 
 
@@ -495,6 +497,7 @@ Should: Satisfy
 Failure:
   Subject: _.Length
   Should: Fail
+Subject value: asd
 """
 
 
@@ -508,6 +511,7 @@ Should: Satisfy
 Failure:
   Subject: _
   Should: Fail
+Subject value: asd
 """
 
 
@@ -563,6 +567,7 @@ Should: Satisfy
 Failure:
   Subject: x.Length
   Should: Fail
+Subject value: asd
 """
 
 
@@ -586,6 +591,7 @@ Should: Satisfy
 Failure:
   Subject: x2.Length
   Should: Fail
+Subject value: asd
 """
 
 
@@ -611,6 +617,7 @@ Failures:
   Should: Fail
 - Subject: s2
   Should: Fail
+Subject value: asd
 """
 
 
@@ -930,6 +937,8 @@ Failure:
   Failure:
     Subject: ss2
     Should: Fail
+  Subject value: asd
+Subject value: asd
 """
 
 
@@ -973,6 +982,7 @@ Failures:
   Should: Fail
 - Subject: s1
   Should: Fail
+Subject value: asd
 """
 
 

@@ -30,8 +30,9 @@ type HigherOrderAssertions =
             assertion t.Subject |> ignore
             And(t)
         with
-        | :? AssertionFailedException as ex -> t.With("Failure", ex.FailureData).Fail(because)
-        | ex -> t.With("But threw", ex).Fail(because)
+        | :? AssertionFailedException as ex ->
+            t.With("Failure", ex.FailureData).With("Subject value", t.Subject).Fail(because)
+        | ex -> t.With("But threw", ex).With("Subject value", t.Subject).Fail(because)
 
 
     /// Asserts that the subject does not satisfy the supplied assertion. If using this in performance critical
@@ -48,7 +49,7 @@ type HigherOrderAssertions =
                 false
 
         if succeeded then
-            t.Fail(because)
+            t.With("Subject value", t.Subject).Fail(because)
 
         And(t)
 
@@ -74,7 +75,7 @@ type HigherOrderAssertions =
                     | ex -> failures.Add(box {| Exception = ex |})
 
             if not succeeded then
-                t.With("Failures", failures).Fail(because)
+                t.With("Failures", failures).With("Subject value", t.Subject).Fail(because)
 
         And(t)
 
@@ -108,6 +109,7 @@ type HigherOrderAssertions =
                         | ex -> box { Index = i; Exception = TryFormat ex }
                     )
                 )
+                .With("Subject value", t.Subject)
                 .Fail(because)
 
         And(t)

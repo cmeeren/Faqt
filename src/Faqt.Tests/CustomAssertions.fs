@@ -59,6 +59,7 @@ Should: DelegatingFailSatisfy
 Failure:
   Subject: x
   Should: Fail
+Subject value: 1
 """
 
 

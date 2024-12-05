@@ -26,6 +26,7 @@ Should: Satisfy
 Failure:
   Subject: x.ToString().Length
   Should: Fail
+Subject value: 3
 """
 
 
@@ -40,6 +41,7 @@ Should: Satisfy
 Failure:
   Subject: x.Length
   Should: Fail
+Subject value: asd
 """
 
 
@@ -53,6 +55,7 @@ Should: Satisfy
 But threw: |-
   System.Exception: foo
 *
+Subject value: 3
 """
 
 
@@ -67,6 +70,7 @@ Should: Satisfy
 But threw: |-
   System.Exception: foo
 *
+Subject value: 3
 """
 
 
@@ -89,6 +93,7 @@ module NotSatisfy =
             """
 Subject: '"asd"'
 Should: NotSatisfy
+Subject value: asd
 """
 
 
@@ -100,6 +105,7 @@ Should: NotSatisfy
 Subject: '"asd"'
 Because: Some reason
 Should: NotSatisfy
+Subject value: asd
 """
 
 
@@ -151,6 +157,7 @@ Failures:
   Exception: |-
     System.Exception: foo
 *
+Subject value: asd
 """
 
 
@@ -181,6 +188,7 @@ Failures:
   Exception: |-
     System.Exception: foo
 *
+Subject value: asd
 """
 
 
@@ -235,6 +243,7 @@ Failures:
 - Exception: |-
     System.Exception: foo
 *
+Subject value: asd
 """
 
     [<Fact>]
@@ -261,4 +270,5 @@ Failures:
 - Exception: |-
     System.Exception: foo
 *
+Subject value: asd
 """

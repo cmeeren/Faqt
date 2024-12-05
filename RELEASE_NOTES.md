@@ -1,6 +1,11 @@
 Release notes
 ==============
 
+### Unreleased
+
+* The higher-order assertions `Satisfy`, `NotSatisfy`, `SatisfyAny`, and `SatisfyAll` now output the entire subject
+  value, similar to other higher-order assertions.
+
 ### 4.2.1 (2024-10-14)
 
 * Updated FracturedJson from 4.0.2 to 4.0.3
