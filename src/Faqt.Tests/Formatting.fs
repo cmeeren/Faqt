@@ -647,6 +647,17 @@ Value: Microsoft.FSharp.Collections.FSharpMap<System.String, System.Int32>
 
 
     [<Fact>]
+    let ``Rendering of anonymous type`` () =
+        fun () -> "a".Should().FailWith("Value", typeof<{| A: int; B: Map<string, int> |}>)
+        |> assertExnMsg
+            """
+Subject: '"a"'
+Should: FailWith
+Value: '{| A: System.Int32; B: Microsoft.FSharp.Collections.FSharpMap<System.String, System.Int32> |}'
+"""
+
+
+    [<Fact>]
     let ``Rendering of CultureInfo`` () =
         fun () -> "a".Should().FailWith("Value", CultureInfo("nb-NO"))
         |> assertExnMsg

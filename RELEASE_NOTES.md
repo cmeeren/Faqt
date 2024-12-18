@@ -1,6 +1,11 @@
 Release notes
 ==============
 
+### Unreleased
+
+* Improved rendering of anonymous types in assertion messages, from `<>f__AnonymousType508954136<System.Int32>` to
+  `{| A: System.Int32 |}`
+
 ### 4.3.0 (2024-12-05)
 
 * The higher-order assertions `Satisfy`, `NotSatisfy`, `SatisfyAny`, and `SatisfyAll` now output the entire subject

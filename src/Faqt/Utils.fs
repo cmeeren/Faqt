@@ -83,15 +83,23 @@ type Type with
 
 
     member this.AssertionName =
-        if this.IsGenericType then
-            let fullNameWithoutGenerics = this.FullName.Substring(0, this.FullName.IndexOf("`"))
+        match this.FullName with
+        | null -> ""
+        | fullName ->
+            if fullName.StartsWith("<>f__AnonymousType") then
+                this.GetProperties()
+                |> Array.map (fun x -> $"%s{x.Name}: %s{x.PropertyType.AssertionName}")
+                |> String.concat "; "
+                |> fun s -> "{| " + s + " |}"
+            elif this.IsGenericType then
+                let fullNameWithoutGenerics = fullName.Substring(0, fullName.IndexOf("`"))
 
-            this.GenericTypeArguments
-            |> Seq.map (fun t -> t.AssertionName)
-            |> String.concat ", "
-            |> fun s -> fullNameWithoutGenerics + "<" + s + ">"
-        else
-            this.FullName
+                this.GenericTypeArguments
+                |> Array.map _.AssertionName
+                |> String.concat ", "
+                |> fun s -> fullNameWithoutGenerics + "<" + s + ">"
+            else
+                fullName
 
 
 module String =
