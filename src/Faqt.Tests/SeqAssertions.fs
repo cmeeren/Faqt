@@ -11,11 +11,7 @@ module AllSatisfy =
 
     [<Fact>]
     let ``Passes if all of the inner assertions passes and can be chained with And`` () =
-        [ "asd"; "123" ]
-            .Should()
-            .AllSatisfy(fun x -> x.Should().Pass())
-            .Id<And<string list>>()
-            .And.Be([ "asd"; "123" ])
+        [ "asd"; "123" ].Should().AllSatisfy(fun x -> x.Should().Pass()).Id<And<string list>>().And.Be([ "asd"; "123" ])
 
 
     [<Fact>]
@@ -170,9 +166,7 @@ But was: null
         fun () ->
             let x = [ "asd"; "test"; "1234" ]
 
-            x
-                .Should()
-                .SatisfyRespectively([ (fun x -> x.Should().Pass()); fun x -> x.Should().Pass() ])
+            x.Should().SatisfyRespectively([ (fun x -> x.Should().Pass()); fun x -> x.Should().Pass() ])
         |> assertExnMsg
             """
 Subject: x
@@ -188,9 +182,7 @@ Subject value: [asd, test, '1234']
         fun () ->
             let x = [ "asd"; "test"; "1234" ]
 
-            x
-                .Should()
-                .SatisfyRespectively([ (fun x -> x.Should().Pass()); fun x -> x.Should().Pass() ], "Some reason")
+            x.Should().SatisfyRespectively([ (fun x -> x.Should().Pass()); fun x -> x.Should().Pass() ], "Some reason")
         |> assertExnMsg
             """
 Subject: x
@@ -755,11 +747,7 @@ module ``AllBe with projection`` =
 
     [<Fact>]
     let ``Can be chained with And`` () =
-        [ "a" ]
-            .Should()
-            .AllBeMappedTo(1, (fun x -> x.Length))
-            .Id<And<string list>>()
-            .And.Be([ "a" ])
+        [ "a" ].Should().AllBeMappedTo(1, (fun x -> x.Length)).Id<And<string list>>().And.Be([ "a" ])
 
 
     let passData = [
@@ -971,11 +959,7 @@ module AllBeEqualBy =
 
     [<Fact>]
     let ``Can be chained with And`` () =
-        [ "a" ]
-            .Should()
-            .AllBeEqualBy(fun x -> x.Length)
-            .Id<And<string list>>()
-            .And.Be([ "a" ])
+        [ "a" ].Should().AllBeEqualBy(fun x -> x.Length).Id<And<string list>>().And.Be([ "a" ])
 
 
     let passData = [
@@ -1362,12 +1346,7 @@ module ContainExactlyOneItem =
 
     [<Fact>]
     let ``Passes if sequence contains exactly one item and can be chained with AndDerived with inner value`` () =
-        [ 1 ]
-            .Should()
-            .ContainExactlyOneItem()
-            .Id<AndDerived<int list, int>>()
-            .That.Should(())
-            .Be(1)
+        [ 1 ].Should().ContainExactlyOneItem().Id<AndDerived<int list, int>>().That.Should(()).Be(1)
 
 
     let failData = [
@@ -1447,12 +1426,7 @@ module ContainExactlyOneItemMatching =
     let ``Passes if sequence contains exactly one item matching the predicate and can be chained with AndDerived with matched value``
         ()
         =
-        [ 1; 2 ]
-            .Should()
-            .ContainExactlyOneItemMatching((=) 2)
-            .Id<AndDerived<int list, int>>()
-            .That.Should(())
-            .Be(2)
+        [ 1; 2 ].Should().ContainExactlyOneItemMatching((=) 2).Id<AndDerived<int list, int>>().That.Should(()).Be(2)
 
 
     let failData = [
@@ -1533,12 +1507,7 @@ module ContainAtLeastOneItem =
 
     [<Fact>]
     let ``Can be chained with AndDerived with first value`` () =
-        [ 1; 2 ]
-            .Should()
-            .ContainAtLeastOneItem()
-            .Id<AndDerived<int list, int>>()
-            .That.Should(())
-            .Be(1)
+        [ 1; 2 ].Should().ContainAtLeastOneItem().Id<AndDerived<int list, int>>().That.Should(()).Be(1)
 
 
     let passData = [
@@ -1697,22 +1666,12 @@ module ContainAtMostOneItem =
 
     [<Fact>]
     let ``Can be chained with AndDerived with only value`` () =
-        [ 1 ]
-            .Should()
-            .ContainAtMostOneItem()
-            .Id<AndDerived<int list, int option>>()
-            .That.Should(())
-            .Be(Some 1)
+        [ 1 ].Should().ContainAtMostOneItem().Id<AndDerived<int list, int option>>().That.Should(()).Be(Some 1)
 
 
     [<Fact>]
     let ``Can be chained with AndDerived with None if empty`` () =
-        List.empty<int>
-            .Should()
-            .ContainAtMostOneItem()
-            .Id<AndDerived<int list, int option>>()
-            .That.Should(())
-            .Be(None)
+        List.empty<int>.Should().ContainAtMostOneItem().Id<AndDerived<int list, int option>>().That.Should(()).Be(None)
 
 
     [<Fact>]
@@ -1939,11 +1898,7 @@ module NotContainItemsMatching =
 
     [<Fact>]
     let ``Can be chained with AndDerived with matched values`` () =
-        []
-            .Should()
-            .NotContainItemsMatching(fun x -> x > 1)
-            .Id<And<int list>>()
-            .And.Be([])
+        [].Should().NotContainItemsMatching(fun x -> x > 1).Id<And<int list>>().And.Be([])
 
 
     let passData = [
@@ -2258,11 +2213,7 @@ module ``BeAscending (StringComparison)`` =
 
     [<Fact>]
     let ``Can be chained with And`` () =
-        []
-            .Should()
-            .BeAscending(StringComparison.Ordinal)
-            .Id<And<string list>>()
-            .And.Be([])
+        [].Should().BeAscending(StringComparison.Ordinal).Id<And<string list>>().And.Be([])
 
 
     let passData = [
@@ -2356,11 +2307,7 @@ module ``BeAscending (Culture CompareOptions)`` =
 
     [<Fact>]
     let ``Can be chained with And`` () =
-        []
-            .Should()
-            .BeAscending(CultureInfo.InvariantCulture, CompareOptions.None)
-            .Id<And<string list>>()
-            .And.Be([])
+        [].Should().BeAscending(CultureInfo.InvariantCulture, CompareOptions.None).Id<And<string list>>().And.Be([])
 
 
     let passData = [
@@ -2406,9 +2353,7 @@ module ``BeAscending (Culture CompareOptions)`` =
         fun () ->
             let x: seq<string> = null
 
-            x
-                .Should()
-                .BeAscending(CultureInfo("nb-NO"), CompareOptions.IgnoreCase ||| CompareOptions.IgnoreSymbols)
+            x.Should().BeAscending(CultureInfo("nb-NO"), CompareOptions.IgnoreCase ||| CompareOptions.IgnoreSymbols)
         |> assertExnMsg
             """
 Subject: x
@@ -2447,9 +2392,7 @@ But was: null
         fun () ->
             let x = [ "a"; "b"; "f"; "c"; "a"; "c" ]
 
-            x
-                .Should()
-                .BeAscending(CultureInfo("nb-NO"), CompareOptions.IgnoreCase ||| CompareOptions.IgnoreSymbols)
+            x.Should().BeAscending(CultureInfo("nb-NO"), CompareOptions.IgnoreCase ||| CompareOptions.IgnoreSymbols)
         |> assertExnMsg
             """
 Subject: x
@@ -2589,11 +2532,7 @@ module ``BeAscendingBy (StringComparison)`` =
 
     [<Fact>]
     let ``Can be chained with And`` () =
-        List<int>.Empty
-            .Should()
-            .BeAscendingBy(string<int>, StringComparison.Ordinal)
-            .Id<And<int list>>()
-            .And.Be([])
+        List<int>.Empty.Should().BeAscendingBy(string<int>, StringComparison.Ordinal).Id<And<int list>>().And.Be([])
 
 
     let passData = [
@@ -2635,9 +2574,7 @@ But was: null
         fun () ->
             let x: seq<string> = null
 
-            x
-                .Should()
-                .BeAscendingBy(_.Substring(0, 1), StringComparison.Ordinal, "Some reason")
+            x.Should().BeAscendingBy(_.Substring(0, 1), StringComparison.Ordinal, "Some reason")
         |> assertExnMsg
             """
 Subject: x
@@ -2674,9 +2611,7 @@ Subject value: [1a, 2b, 3f, 4c, 5a, 6c]
         fun () ->
             let x = [ "1a"; "2b"; "3f"; "4c"; "5a"; "6c" ]
 
-            x
-                .Should()
-                .BeAscendingBy(_.Substring(1, 1), StringComparison.OrdinalIgnoreCase, "Some reason")
+            x.Should().BeAscendingBy(_.Substring(1, 1), StringComparison.OrdinalIgnoreCase, "Some reason")
         |> assertExnMsg
             """
 Subject: x
@@ -2946,11 +2881,7 @@ module ``BeDescending (StringComparison)`` =
 
     [<Fact>]
     let ``Can be chained with And`` () =
-        []
-            .Should()
-            .BeDescending(StringComparison.Ordinal)
-            .Id<And<string list>>()
-            .And.Be([])
+        [].Should().BeDescending(StringComparison.Ordinal).Id<And<string list>>().And.Be([])
 
 
     let passData = [
@@ -3045,11 +2976,7 @@ module ``BeDescending (Culture CompareOptions)`` =
 
     [<Fact>]
     let ``Can be chained with And`` () =
-        []
-            .Should()
-            .BeDescending(CultureInfo.InvariantCulture, CompareOptions.None)
-            .Id<And<string list>>()
-            .And.Be([])
+        [].Should().BeDescending(CultureInfo.InvariantCulture, CompareOptions.None).Id<And<string list>>().And.Be([])
 
 
     let passData = [
@@ -3095,9 +3022,7 @@ module ``BeDescending (Culture CompareOptions)`` =
         fun () ->
             let x: seq<string> = null
 
-            x
-                .Should()
-                .BeDescending(CultureInfo("nb-NO"), CompareOptions.IgnoreCase ||| CompareOptions.IgnoreSymbols)
+            x.Should().BeDescending(CultureInfo("nb-NO"), CompareOptions.IgnoreCase ||| CompareOptions.IgnoreSymbols)
         |> assertExnMsg
             """
 Subject: x
@@ -3136,9 +3061,7 @@ But was: null
         fun () ->
             let x = [ "c"; "a"; "c"; "f"; "b"; "a" ]
 
-            x
-                .Should()
-                .BeDescending(CultureInfo("nb-NO"), CompareOptions.IgnoreCase ||| CompareOptions.IgnoreSymbols)
+            x.Should().BeDescending(CultureInfo("nb-NO"), CompareOptions.IgnoreCase ||| CompareOptions.IgnoreSymbols)
         |> assertExnMsg
             """
 Subject: x
@@ -3278,11 +3201,7 @@ module ``BeDescendingBy (StringComparison)`` =
 
     [<Fact>]
     let ``Can be chained with And`` () =
-        List<int>.Empty
-            .Should()
-            .BeDescendingBy(string<int>, StringComparison.Ordinal)
-            .Id<And<int list>>()
-            .And.Be([])
+        List<int>.Empty.Should().BeDescendingBy(string<int>, StringComparison.Ordinal).Id<And<int list>>().And.Be([])
 
 
     let passData = [
@@ -3324,9 +3243,7 @@ But was: null
         fun () ->
             let x: seq<string> = null
 
-            x
-                .Should()
-                .BeDescendingBy(_.Substring(0, 1), StringComparison.Ordinal, "Some reason")
+            x.Should().BeDescendingBy(_.Substring(0, 1), StringComparison.Ordinal, "Some reason")
         |> assertExnMsg
             """
 Subject: x
@@ -3364,9 +3281,7 @@ Subject value: [6c, 5a, 4c, 3f, 2b, 1a]
         fun () ->
             let x = [ "6c"; "5a"; "4c"; "3f"; "2b"; "1a" ]
 
-            x
-                .Should()
-                .BeDescendingBy(_.Substring(1, 1), StringComparison.OrdinalIgnoreCase, "Some reason")
+            x.Should().BeDescendingBy(_.Substring(1, 1), StringComparison.OrdinalIgnoreCase, "Some reason")
         |> assertExnMsg
             """
 Subject: x

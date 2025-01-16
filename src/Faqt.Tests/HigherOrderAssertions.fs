@@ -9,11 +9,7 @@ module Satisfy =
 
     [<Fact>]
     let ``Passes if the inner assertion passes and can be chained with And`` () =
-        "asd"
-            .Should()
-            .Satisfy(fun x -> x.Should().Pass())
-            .Id<And<string>>()
-            .And.Be("asd")
+        "asd".Should().Satisfy(fun x -> x.Should().Pass()).Id<And<string>>().And.Be("asd")
 
 
     [<Fact>]
@@ -79,11 +75,7 @@ module NotSatisfy =
 
     [<Fact>]
     let ``Passes if the inner assertion fails and can be chained with And`` () =
-        "asd"
-            .Should()
-            .NotSatisfy(fun x -> x.Should().Fail())
-            .Id<And<string>>()
-            .And.Be("asd")
+        "asd".Should().NotSatisfy(fun x -> x.Should().Fail()).Id<And<string>>().And.Be("asd")
 
 
     [<Fact>]
@@ -202,23 +194,17 @@ module SatisfyAny =
 
     [<Fact>]
     let ``Passes if all of the inner assertions passes`` () =
-        "asd"
-            .Should()
-            .SatisfyAny([ (fun s1 -> s1.Length.Should().Pass()); (fun s2 -> s2.Length.Should().Pass()) ])
+        "asd".Should().SatisfyAny([ (fun s1 -> s1.Length.Should().Pass()); (fun s2 -> s2.Length.Should().Pass()) ])
 
 
     [<Fact>]
     let ``Passes if only one of the inner assertions passes 1`` () =
-        "asd"
-            .Should()
-            .SatisfyAny([ (fun s1 -> s1.Length.Should().Fail()); (fun s2 -> s2.Length.Should().Pass()) ])
+        "asd".Should().SatisfyAny([ (fun s1 -> s1.Length.Should().Fail()); (fun s2 -> s2.Length.Should().Pass()) ])
 
 
     [<Fact>]
     let ``Passes if only one of the inner assertions passes 2`` () =
-        "asd"
-            .Should()
-            .SatisfyAny([ (fun s1 -> s1.Length.Should().Pass()); (fun s2 -> s2.Length.Should().Fail()) ])
+        "asd".Should().SatisfyAny([ (fun s1 -> s1.Length.Should().Pass()); (fun s2 -> s2.Length.Should().Fail()) ])
 
 
     [<Fact>]

@@ -29,11 +29,8 @@ type DictionaryAssertions =
     /// Asserts that all items in the collection satisfy the supplied assertion.
     [<Extension>]
     static member AllSatisfy
-        (
-            t: Testable<#IDictionary<'key, 'value>>,
-            assertion: KeyValuePair<'key, 'value> -> 'ignored,
-            ?because
-        ) : And<_> =
+        (t: Testable<#IDictionary<'key, 'value>>, assertion: KeyValuePair<'key, 'value> -> 'ignored, ?because)
+        : And<_> =
         use _ = t.Assert(true, true)
 
         if isNull (box t.Subject) then
@@ -74,11 +71,8 @@ type DictionaryAssertions =
     /// item satisfies the corresponding assertion in the assertion collection.
     [<Extension>]
     static member SatisfyRespectively
-        (
-            t: Testable<#IDictionary<'key, 'value>>,
-            assertions: seq<KeyValuePair<'key, 'value> -> 'ignored>,
-            ?because
-        ) : And<_> =
+        (t: Testable<#IDictionary<'key, 'value>>, assertions: seq<KeyValuePair<'key, 'value> -> 'ignored>, ?because)
+        : And<_> =
         use _ = t.Assert(true)
 
         if isNull assertions then
@@ -130,12 +124,8 @@ type DictionaryAssertions =
     /// Asserts that the subject contains the specified key-value pair.
     [<Extension>]
     static member Contain
-        (
-            t: Testable<#IDictionary<'key, 'value>>,
-            key: 'key,
-            value: 'value,
-            ?because
-        ) : AndDerived<_, KeyValuePair<'key, 'value>> =
+        (t: Testable<#IDictionary<'key, 'value>>, key: 'key, value: 'value, ?because)
+        : AndDerived<_, KeyValuePair<'key, 'value>> =
         use _ = t.Assert()
         let kvp = KeyValuePair(key, value)
 
@@ -161,11 +151,8 @@ type DictionaryAssertions =
     /// null.
     [<Extension>]
     static member HaveSameItemsAs
-        (
-            t: Testable<#IDictionary<'key, 'value>>,
-            expected: IDictionary<'key, 'value>,
-            ?because
-        ) : And<_> =
+        (t: Testable<#IDictionary<'key, 'value>>, expected: IDictionary<'key, 'value>, ?because)
+        : And<_> =
         use _ = t.Assert()
 
         if isNull (box t.Subject) <> isNull expected then
@@ -207,11 +194,8 @@ type DictionaryAssertions =
     /// Asserts that the subject contains the specified key.
     [<Extension>]
     static member ContainKey
-        (
-            t: Testable<#IDictionary<'key, 'value>>,
-            key: 'key,
-            ?because
-        ) : AndDerived<_, KeyValuePair<'key, 'value>> =
+        (t: Testable<#IDictionary<'key, 'value>>, key: 'key, ?because)
+        : AndDerived<_, KeyValuePair<'key, 'value>> =
         use _ = t.Assert()
 
         if isNull (box t.Subject) then
@@ -228,11 +212,7 @@ type DictionaryAssertions =
         use _ = t.Assert()
 
         if not (isNull (box t.Subject)) && t.Subject.ContainsKey(key) then
-            t
-                .With("Key", key)
-                .With("But found value", t.Subject[key])
-                .With("Subject value", t.Subject)
-                .Fail(because)
+            t.With("Key", key).With("But found value", t.Subject[key]).With("Subject value", t.Subject).Fail(because)
 
         And(t)
 
@@ -260,11 +240,8 @@ type DictionaryAssertions =
     /// Asserts that the subject contains the specified key.
     [<Extension>]
     static member ContainValue
-        (
-            t: Testable<#IDictionary<'key, 'value>>,
-            value: 'value,
-            ?because
-        ) : AndDerived<_, KeyValuePair<'key, 'value>> =
+        (t: Testable<#IDictionary<'key, 'value>>, value: 'value, ?because)
+        : AndDerived<_, KeyValuePair<'key, 'value>> =
         use _ = t.Assert()
 
         if isNull (box t.Subject) then

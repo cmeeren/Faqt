@@ -111,11 +111,7 @@ module ``BeUpperCase with culture`` =
 
     [<Fact>]
     let ``Can be chained with And`` () =
-        "A"
-            .Should()
-            .BeUpperCase(CultureInfo.InvariantCulture)
-            .Id<And<string>>()
-            .And.Be("A")
+        "A".Should().BeUpperCase(CultureInfo.InvariantCulture).Id<And<string>>().And.Be("A")
 
 
     let passData = [
@@ -242,11 +238,7 @@ module ``BeLowerCase with culture`` =
 
     [<Fact>]
     let ``Can be chained with And`` () =
-        "a"
-            .Should()
-            .BeLowerCase(CultureInfo.InvariantCulture)
-            .Id<And<string>>()
-            .And.Be("a")
+        "a".Should().BeLowerCase(CultureInfo.InvariantCulture).Id<And<string>>().And.Be("a")
 
 
     let passData = [
@@ -318,11 +310,7 @@ module ``BeLowerCase without culture`` =
 
     [<Fact>]
     let ``Can be chained with And`` () =
-        "a"
-            .Should()
-            .BeLowerCase(CultureInfo.InvariantCulture)
-            .Id<And<string>>()
-            .And.Be("a")
+        "a".Should().BeLowerCase(CultureInfo.InvariantCulture).Id<And<string>>().And.Be("a")
 
 
     let passData = [ [| box asciiLowercaseLetters |]; [| asciiExceptLetters |]; [| "å" |] ]
@@ -561,11 +549,7 @@ module ``Contain with StringComparison`` =
 
     [<Fact>]
     let ``Can be chained with And`` () =
-        "a"
-            .Should()
-            .Contain("a", StringComparison.Ordinal)
-            .Id<And<string>>()
-            .And.Be("a")
+        "a".Should().Contain("a", StringComparison.Ordinal).Id<And<string>>().And.Be("a")
 
 
     [<Theory>]
@@ -719,11 +703,7 @@ module ``NotContain with StringComparison`` =
 
     [<Fact>]
     let ``Can be chained with And`` () =
-        "a"
-            .Should()
-            .NotContain("b", StringComparison.Ordinal)
-            .Id<And<string>>()
-            .And.Be("a")
+        "a".Should().NotContain("b", StringComparison.Ordinal).Id<And<string>>().And.Be("a")
 
 
     [<Theory>]
@@ -877,11 +857,7 @@ module ``StartWith with StringComparison`` =
 
     [<Fact>]
     let ``Can be chained with And`` () =
-        "a"
-            .Should()
-            .StartWith("a", StringComparison.Ordinal)
-            .Id<And<string>>()
-            .And.Be("a")
+        "a".Should().StartWith("a", StringComparison.Ordinal).Id<And<string>>().And.Be("a")
 
 
     [<Theory>]
@@ -1035,11 +1011,7 @@ module ``NotStartWith with StringComparison`` =
 
     [<Fact>]
     let ``Can be chained with And`` () =
-        "a"
-            .Should()
-            .NotStartWith("b", StringComparison.Ordinal)
-            .Id<And<string>>()
-            .And.Be("a")
+        "a".Should().NotStartWith("b", StringComparison.Ordinal).Id<And<string>>().And.Be("a")
 
 
     [<Theory>]
@@ -1195,11 +1167,7 @@ module ``EndWith with StringComparison`` =
 
     [<Fact>]
     let ``Can be chained with And`` () =
-        "a"
-            .Should()
-            .EndWith("a", StringComparison.Ordinal)
-            .Id<And<string>>()
-            .And.Be("a")
+        "a".Should().EndWith("a", StringComparison.Ordinal).Id<And<string>>().And.Be("a")
 
 
     [<Theory>]
@@ -1353,11 +1321,7 @@ module ``NotEndWith with StringComparison`` =
 
     [<Fact>]
     let ``Can be chained with And`` () =
-        "a"
-            .Should()
-            .NotEndWith("b", StringComparison.Ordinal)
-            .Id<And<string>>()
-            .And.Be("a")
+        "a".Should().NotEndWith("b", StringComparison.Ordinal).Id<And<string>>().And.Be("a")
 
 
     [<Theory>]
@@ -1556,9 +1520,7 @@ But was: asd
         fun () ->
             let x = "asd"
 
-            x
-                .Should()
-                .MatchRegex(Regex("b.*", RegexOptions.IgnoreCase ||| RegexOptions.Multiline))
+            x.Should().MatchRegex(Regex("b.*", RegexOptions.IgnoreCase ||| RegexOptions.Multiline))
         |> assertExnMsg
             """
 Subject: x
@@ -1774,9 +1736,7 @@ But was: asd
         fun () ->
             let x = "asd"
 
-            x
-                .Should()
-                .NotMatchRegex(Regex("a.*", RegexOptions.IgnoreCase ||| RegexOptions.Multiline))
+            x.Should().NotMatchRegex(Regex("a.*", RegexOptions.IgnoreCase ||| RegexOptions.Multiline))
         |> assertExnMsg
             """
 Subject: x
@@ -1807,11 +1767,7 @@ module ``NotMatchRegex with string and options`` =
 
     [<Fact>]
     let ``Can be chained with And`` () =
-        "a"
-            .Should()
-            .NotMatchRegex("b.*", RegexOptions.None)
-            .Id<And<string>>()
-            .And.Be("a")
+        "a".Should().NotMatchRegex("b.*", RegexOptions.None).Id<And<string>>().And.Be("a")
 
 
     [<Theory>]
@@ -1862,9 +1818,7 @@ But was: asd
         fun () ->
             let x = "asd"
 
-            x
-                .Should()
-                .NotMatchRegex("a.*", RegexOptions.IgnoreCase ||| RegexOptions.Multiline)
+            x.Should().NotMatchRegex("a.*", RegexOptions.IgnoreCase ||| RegexOptions.Multiline)
         |> assertExnMsg
             """
 Subject: x
@@ -2702,12 +2656,7 @@ module ``DeserializeTo generic`` =
 
     [<Fact>]
     let ``Can be chained with AndDerived with deserialized value`` () =
-        "1"
-            .Should()
-            .DeserializeTo<int>()
-            .Id<AndDerived<string, int>>()
-            .WhoseValue.Should(())
-            .Be(1)
+        "1".Should().DeserializeTo<int>().Id<AndDerived<string, int>>().WhoseValue.Should(()).Be(1)
 
 
     let deserializeTo<'a> (t: Testable<string>) = t.DeserializeTo<'a>() |> ignore

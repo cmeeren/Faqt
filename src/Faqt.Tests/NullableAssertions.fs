@@ -10,12 +10,7 @@ module HaveValue =
 
     [<Fact>]
     let ``Passes if not null and can be chained with AndDerived with inner value`` () =
-        Nullable(1)
-            .Should()
-            .HaveValue()
-            .Id<AndDerived<Nullable<int>, int>>()
-            .That.Should(())
-            .Be(1)
+        Nullable(1).Should().HaveValue().Id<AndDerived<Nullable<int>, int>>().That.Should(()).Be(1)
 
 
     [<Fact>]
@@ -50,11 +45,7 @@ module NotHaveValue =
 
     [<Fact>]
     let ``Passes if null and can be chained with And`` () =
-        Nullable<int>()
-            .Should()
-            .NotHaveValue()
-            .Id<And<Nullable<int>>>()
-            .And.Be(Nullable())
+        Nullable<int>().Should().NotHaveValue().Id<And<Nullable<int>>>().And.Be(Nullable())
 
 
     [<Fact>]
@@ -124,12 +115,7 @@ module NotBeNull =
 
     [<Fact>]
     let ``Passes if not null and can be chained with AndDerived with inner value`` () =
-        Nullable(1)
-            .Should()
-            .NotBeNull()
-            .Id<AndDerived<Nullable<int>, int>>()
-            .That.Should(())
-            .Be(1)
+        Nullable(1).Should().NotBeNull().Id<AndDerived<Nullable<int>, int>>().That.Should(()).Be(1)
 
 
     [<Fact>]

@@ -2552,9 +2552,7 @@ module HaveHeader =
 
     [<Fact>]
     let ``Passes for content headers`` () =
-        (respHeader 200 [ "Content-Type", "application/json" ])
-            .Should()
-            .HaveHeader("Content-Type")
+        (respHeader 200 [ "Content-Type", "application/json" ]).Should().HaveHeader("Content-Type")
 
 
     [<Fact>]
@@ -2728,10 +2726,7 @@ module HaveStringContentSatisfying =
 
     [<Fact>]
     let ``Passes if has content and the inner assertion passes and returns the inner value`` () =
-        (respContent 200 "foo")
-            .Should()
-            .HaveStringContentSatisfying(_.Should().Be("foo").Subject)
-            .Id<Async<string>>()
+        (respContent 200 "foo").Should().HaveStringContentSatisfying(_.Should().Be("foo").Subject).Id<Async<string>>()
         |> Async.RunSynchronously
         |> _.Should().Be("foo")
 
@@ -2755,10 +2750,7 @@ Request: GET / HTTP/0.5
 
     [<Fact>]
     let ``Fails with expected message if no content with because`` () =
-        fun () ->
-            (resp 200)
-                .Should()
-                .HaveStringContentSatisfying(_.Should().Be("foo"), "Some reason")
+        fun () -> (resp 200).Should().HaveStringContentSatisfying(_.Should().Be("foo"), "Some reason")
         |> assertExnMsgAsync
             """
 Subject: resp 200
@@ -2796,10 +2788,7 @@ Request: GET / HTTP/0.5
 
     [<Fact>]
     let ``Fails with expected message if content does not satisfy inner assertion with because`` () =
-        fun () ->
-            (respContent 200 "foo")
-                .Should()
-                .HaveStringContentSatisfying(_.Should().Fail(), "Some reason")
+        fun () -> (respContent 200 "foo").Should().HaveStringContentSatisfying(_.Should().Fail(), "Some reason")
         |> assertExnMsgAsync
             """
 Subject: respContent 200 "foo"
@@ -2821,9 +2810,7 @@ Request: GET / HTTP/0.5
     [<Fact>]
     let ``Fails with expected message if inner assertion throws`` () =
         fun () ->
-            (respContent 200 "foo")
-                .Should()
-                .HaveStringContentSatisfying(fun _ -> failwith "foo")
+            (respContent 200 "foo").Should().HaveStringContentSatisfying(fun _ -> failwith "foo")
             |> Async.RunSynchronously
         |> assertExnMsgWildcard
             """
@@ -2845,9 +2832,7 @@ Request: GET / HTTP/0.5
     [<Fact>]
     let ``Fails with expected message if inner assertion throws with because`` () =
         fun () ->
-            (respContent 200 "foo")
-                .Should()
-                .HaveStringContentSatisfying((fun _ -> failwith "foo"), "Some reason")
+            (respContent 200 "foo").Should().HaveStringContentSatisfying((fun _ -> failwith "foo"), "Some reason")
             |> Async.RunSynchronously
         |> assertExnMsgWildcard
             """

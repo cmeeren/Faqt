@@ -13,11 +13,8 @@ type HttpResponseMessageAssertions =
     /// Asserts that the response has the specified status code.
     [<Extension>]
     static member HaveStatusCode
-        (
-            t: Testable<HttpResponseMessage>,
-            statusCode: HttpStatusCode,
-            ?because
-        ) : And<HttpResponseMessage> =
+        (t: Testable<HttpResponseMessage>, statusCode: HttpStatusCode, ?because)
+        : And<HttpResponseMessage> =
         use _ = t.Assert()
 
         if isNull t.Subject then
@@ -36,12 +33,8 @@ type HttpResponseMessageAssertions =
 
     [<Extension>]
     static member private BeStatusCode
-        (
-            t: Testable<HttpResponseMessage>,
-            lower: HttpStatusCode,
-            upper: HttpStatusCode,
-            ?because
-        ) : And<HttpResponseMessage> =
+        (t: Testable<HttpResponseMessage>, lower: HttpStatusCode, upper: HttpStatusCode, ?because)
+        : And<HttpResponseMessage> =
         if isNull t.Subject then
             nullArg "subject"
 
@@ -57,11 +50,8 @@ type HttpResponseMessageAssertions =
 
     [<Extension>]
     static member private BeStatusCode
-        (
-            t: Testable<HttpResponseMessage>,
-            statusCode: HttpStatusCode,
-            ?because
-        ) : And<HttpResponseMessage> =
+        (t: Testable<HttpResponseMessage>, statusCode: HttpStatusCode, ?because)
+        : And<HttpResponseMessage> =
         t.BeStatusCode(statusCode, statusCode, ?because = because)
 
 
@@ -138,10 +128,8 @@ type HttpResponseMessageAssertions =
     /// Asserts that the response has status code 203 Non-Authoritative Information.
     [<Extension>]
     static member Be203NonAuthoritativeInformation
-        (
-            t: Testable<HttpResponseMessage>,
-            ?because
-        ) : And<HttpResponseMessage> =
+        (t: Testable<HttpResponseMessage>, ?because)
+        : And<HttpResponseMessage> =
         use _ = t.Assert()
         t.BeStatusCode(HttpStatusCode.NonAuthoritativeInformation, ?because = because)
 
@@ -261,10 +249,8 @@ type HttpResponseMessageAssertions =
     /// Asserts that the response has status code 407 Proxy Authentication Required.
     [<Extension>]
     static member Be407ProxyAuthenticationRequired
-        (
-            t: Testable<HttpResponseMessage>,
-            ?because
-        ) : And<HttpResponseMessage> =
+        (t: Testable<HttpResponseMessage>, ?because)
+        : And<HttpResponseMessage> =
         use _ = t.Assert()
         t.BeStatusCode(HttpStatusCode.ProxyAuthenticationRequired, ?because = because)
 
@@ -370,10 +356,8 @@ type HttpResponseMessageAssertions =
     /// Asserts that the response has status code 431 Request Header Fields Too Large.
     [<Extension>]
     static member Be431RequestHeaderFieldsTooLarge
-        (
-            t: Testable<HttpResponseMessage>,
-            ?because
-        ) : And<HttpResponseMessage> =
+        (t: Testable<HttpResponseMessage>, ?because)
+        : And<HttpResponseMessage> =
         use _ = t.Assert()
         t.BeStatusCode(HttpStatusCode.RequestHeaderFieldsTooLarge, ?because = because)
 
@@ -381,10 +365,8 @@ type HttpResponseMessageAssertions =
     /// Asserts that the response has status code 451 Unavailable For Legal Reasons.
     [<Extension>]
     static member Be451UnavailableForLegalReasons
-        (
-            t: Testable<HttpResponseMessage>,
-            ?because
-        ) : And<HttpResponseMessage> =
+        (t: Testable<HttpResponseMessage>, ?because)
+        : And<HttpResponseMessage> =
         use _ = t.Assert()
         t.BeStatusCode(HttpStatusCode.UnavailableForLegalReasons, ?because = because)
 
@@ -448,10 +430,8 @@ type HttpResponseMessageAssertions =
     /// Asserts that the response has status code 511 Network Authentication Required.
     [<Extension>]
     static member Be511NetworkAuthenticationRequired
-        (
-            t: Testable<HttpResponseMessage>,
-            ?because
-        ) : And<HttpResponseMessage> =
+        (t: Testable<HttpResponseMessage>, ?because)
+        : And<HttpResponseMessage> =
         use _ = t.Assert()
         t.BeStatusCode(HttpStatusCode.NetworkAuthenticationRequired, ?because = because)
 
@@ -460,11 +440,8 @@ type HttpResponseMessageAssertions =
     /// that header.
     [<Extension>]
     static member HaveHeader
-        (
-            t: Testable<HttpResponseMessage>,
-            name: string,
-            ?because
-        ) : AndDerived<HttpResponseMessage, seq<string>> =
+        (t: Testable<HttpResponseMessage>, name: string, ?because)
+        : AndDerived<HttpResponseMessage, seq<string>> =
         use _ = t.Assert()
 
         if isNull t.Subject then
@@ -502,12 +479,8 @@ type HttpResponseMessageAssertions =
     /// A: x,y
     [<Extension>]
     static member HaveHeaderValue
-        (
-            t: Testable<HttpResponseMessage>,
-            name: string,
-            value: string,
-            ?because
-        ) : And<HttpResponseMessage> =
+        (t: Testable<HttpResponseMessage>, name: string, value: string, ?because)
+        : And<HttpResponseMessage> =
         use _ = t.Assert()
 
         if isNull t.Subject then
@@ -571,21 +544,13 @@ type HttpResponseMessageAssertions =
     /// Asserts that the response has content satisfying the specified assertion.
     [<Extension>]
     static member HaveStringContentSatisfying
-        (
-            t: Testable<HttpResponseMessage>,
-            assertion: string -> 'a,
-            ?because
-        ) : Async<'a> =
+        (t: Testable<HttpResponseMessage>, assertion: string -> 'a, ?because)
+        : Async<'a> =
         async {
             use _ = t.Assert(true)
 
             match t.Subject.Content with
-            | null ->
-                return
-                    t
-                        .With("Response", t.Subject)
-                        .With("Request", t.Subject.RequestMessage)
-                        .Fail(because)
+            | null -> return t.With("Response", t.Subject).With("Request", t.Subject.RequestMessage).Fail(because)
             | content ->
                 let! ct = Async.CancellationToken
                 let! str = content.ReadAsStringAsync(ct) |> Async.AwaitTask

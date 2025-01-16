@@ -183,9 +183,7 @@ But was: null
         fun () ->
             let x = dict [ "asd", 1; "test", 2; "foobar", 3 ]
 
-            x
-                .Should()
-                .SatisfyRespectively([ (fun x -> x.Should().Pass()); fun x -> x.Should().Pass() ])
+            x.Should().SatisfyRespectively([ (fun x -> x.Should().Pass()); fun x -> x.Should().Pass() ])
         |> assertExnMsg
             """
 Subject: x
@@ -204,9 +202,7 @@ Subject value:
         fun () ->
             let x = dict [ "asd", 1; "test", 2; "foobar", 3 ]
 
-            x
-                .Should()
-                .SatisfyRespectively([ (fun x -> x.Should().Pass()); fun x -> x.Should().Pass() ], "Some reason")
+            x.Should().SatisfyRespectively([ (fun x -> x.Should().Pass()); fun x -> x.Should().Pass() ], "Some reason")
         |> assertExnMsg
             """
 Subject: x
@@ -531,11 +527,7 @@ module NotContain =
 
     [<Fact>]
     let ``Can be chained with And`` () =
-        Map.empty<string, int>
-            .Should()
-            .NotContain("a", 1)
-            .Id<And<Map<string, int>>>()
-            .And.Be(Map.empty<string, int>)
+        Map.empty<string, int>.Should().NotContain("a", 1).Id<And<Map<string, int>>>().And.Be(Map.empty<string, int>)
 
 
     let passData = [
@@ -1274,11 +1266,7 @@ module NotContainKey =
 
     [<Fact>]
     let ``Can be chained with And`` () =
-        Map.empty<string, int>
-            .Should()
-            .NotContainKey("a")
-            .Id<And<Map<string, int>>>()
-            .And.Be(Map.empty<string, int>)
+        Map.empty<string, int>.Should().NotContainKey("a").Id<And<Map<string, int>>>().And.Be(Map.empty<string, int>)
 
 
     let passData = [
@@ -1347,12 +1335,7 @@ module ContainKeys =
 
     [<Fact>]
     let ``Can be chained with AndDerived with found KeyValuePair`` () =
-        Map.empty
-            .Add("a", 1)
-            .Should()
-            .ContainKeys([ "a" ])
-            .Id<And<Map<string, int>>>()
-            .And.Be(Map.empty.Add("a", 1))
+        Map.empty.Add("a", 1).Should().ContainKeys([ "a" ]).Id<And<Map<string, int>>>().And.Be(Map.empty.Add("a", 1))
 
 
     let passData = [
@@ -1556,11 +1539,7 @@ module NotContainValue =
 
     [<Fact>]
     let ``Can be chained with And`` () =
-        Map.empty<string, int>
-            .Should()
-            .NotContainValue(1)
-            .Id<And<Map<string, int>>>()
-            .And.Be(Map.empty<string, int>)
+        Map.empty<string, int>.Should().NotContainValue(1).Id<And<Map<string, int>>>().And.Be(Map.empty<string, int>)
 
 
     let passData = [

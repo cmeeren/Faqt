@@ -9,12 +9,7 @@ module Contain =
 
     [<Fact>]
     let ``Can be chained with AndDerived with found value`` () =
-        (set [ 1 ])
-            .Should()
-            .Contain(1)
-            .Id<AndDerived<Set<int>, int>>()
-            .That.Should()
-            .Be(1)
+        (set [ 1 ]).Should().Contain(1).Id<AndDerived<Set<int>, int>>().That.Should().Be(1)
 
 
     let passData = [

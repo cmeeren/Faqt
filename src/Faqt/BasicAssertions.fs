@@ -15,11 +15,7 @@ type BasicAssertions =
         use _ = t.Assert()
 
         if not (isEqual t.Subject expected) then
-            t
-                .With("Expected", expected)
-                .With("But was", t.Subject)
-                .With("WithCustomEquality", true)
-                .Fail(because)
+            t.With("Expected", expected).With("But was", t.Subject).With("WithCustomEquality", true).Fail(because)
 
         AndDerived(t, expected)
 
@@ -41,11 +37,7 @@ type BasicAssertions =
         use _ = t.Assert()
 
         if isEqual t.Subject other then
-            t
-                .With("Other", other)
-                .With("But was", t.Subject)
-                .With("WithCustomEquality", true)
-                .Fail(because)
+            t.With("Other", other).With("But was", t.Subject).With("WithCustomEquality", true).Fail(because)
 
         And(t)
 
@@ -78,11 +70,7 @@ type BasicAssertions =
         use _ = t.Assert()
 
         match candidateMapping |> Seq.tryFind (fst >> (=) t.Subject) with
-        | None ->
-            t
-                .With("Candidates", candidateMapping |> Seq.map fst)
-                .With("But was", t.Subject)
-                .Fail(because)
+        | None -> t.With("Candidates", candidateMapping |> Seq.map fst).With("But was", t.Subject).Fail(because)
         | Some(_, b) -> AndDerived(t, b)
 
 
@@ -113,10 +101,7 @@ type BasicAssertions =
                 |}
 
         if not (LanguagePrimitives.PhysicalEquality t.Subject expected) then
-            t
-                .With("Expected", getData expected)
-                .With("But was", getData t.Subject)
-                .Fail(because)
+            t.With("Expected", getData expected).With("But was", getData t.Subject).Fail(because)
 
         And(t)
 

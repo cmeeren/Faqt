@@ -48,12 +48,7 @@ module Subject =
     [<Fact>]
     let ``Realistic example usage`` () =
         let innerValue =
-            (Some [ 1 ])
-                .Should()
-                .BeSome()
-                .WhoseValue.Should()
-                .ContainExactlyOneItem()
-                .Subject
+            (Some [ 1 ]).Should().BeSome().WhoseValue.Should().ContainExactlyOneItem().Subject
 
         ignore<int list> innerValue
 

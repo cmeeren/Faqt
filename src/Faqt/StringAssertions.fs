@@ -123,12 +123,8 @@ type StringAssertions =
     /// Asserts that the subject contains the specified string using the specified string comparison type.
     [<Extension>]
     static member Contain
-        (
-            t: Testable<string>,
-            substring: string,
-            comparisonType: StringComparison,
-            ?because
-        ) : And<string> =
+        (t: Testable<string>, substring: string, comparisonType: StringComparison, ?because)
+        : And<string> =
         use _ = t.Assert()
 
         if isNull substring then
@@ -151,12 +147,8 @@ type StringAssertions =
     // if the subject is null.
     [<Extension>]
     static member NotContain
-        (
-            t: Testable<string>,
-            substring: string,
-            comparisonType: StringComparison,
-            ?because
-        ) : And<string> =
+        (t: Testable<string>, substring: string, comparisonType: StringComparison, ?because)
+        : And<string> =
         use _ = t.Assert()
 
         if isNull substring then
@@ -179,12 +171,8 @@ type StringAssertions =
     /// Asserts that the subject starts with the specified string using the specified string comparison type.
     [<Extension>]
     static member StartWith
-        (
-            t: Testable<string>,
-            substring: string,
-            comparisonType: StringComparison,
-            ?because
-        ) : And<string> =
+        (t: Testable<string>, substring: string, comparisonType: StringComparison, ?because)
+        : And<string> =
         use _ = t.Assert()
 
         if isNull substring then
@@ -207,12 +195,8 @@ type StringAssertions =
     /// Passes if the subject is null.
     [<Extension>]
     static member NotStartWith
-        (
-            t: Testable<string>,
-            substring: string,
-            comparisonType: StringComparison,
-            ?because
-        ) : And<string> =
+        (t: Testable<string>, substring: string, comparisonType: StringComparison, ?because)
+        : And<string> =
         use _ = t.Assert()
 
         if isNull substring then
@@ -235,12 +219,8 @@ type StringAssertions =
     /// Asserts that the subject ends with the specified string using the specified string comparison type.
     [<Extension>]
     static member EndWith
-        (
-            t: Testable<string>,
-            substring: string,
-            comparisonType: StringComparison,
-            ?because
-        ) : And<string> =
+        (t: Testable<string>, substring: string, comparisonType: StringComparison, ?because)
+        : And<string> =
         use _ = t.Assert()
 
         if isNull substring then
@@ -263,12 +243,8 @@ type StringAssertions =
     /// Passes if the subject is null.
     [<Extension>]
     static member NotEndWith
-        (
-            t: Testable<string>,
-            substring: string,
-            comparisonType: StringComparison,
-            ?because
-        ) : And<string> =
+        (t: Testable<string>, substring: string, comparisonType: StringComparison, ?because)
+        : And<string> =
         use _ = t.Assert()
 
         if isNull substring then
@@ -480,10 +456,7 @@ type StringAssertions =
         let subjectFormatted = formatter.Serialize(subjectDoc, 0, serializerOptions).Trim()
 
         if subjectFormatted <> expectedFormatted then
-            t
-                .With("Expected", expectedFormatted)
-                .With("But was", subjectFormatted)
-                .Fail(because)
+            t.With("Expected", expectedFormatted).With("But was", subjectFormatted).Fail(because)
 
         And(t)
 
@@ -491,12 +464,8 @@ type StringAssertions =
     /// Asserts that the subject is deserializable to the specified target type using the specified options.
     [<Extension>]
     static member DeserializeTo
-        (
-            t: Testable<string>,
-            targetType: Type,
-            options: JsonSerializerOptions,
-            ?because
-        ) : AndDerived<string, obj> =
+        (t: Testable<string>, targetType: Type, options: JsonSerializerOptions, ?because)
+        : AndDerived<string, obj> =
         use _ = t.Assert()
 
         if isNull t.Subject then
@@ -505,11 +474,7 @@ type StringAssertions =
         try
             AndDerived(t, JsonSerializer.Deserialize(t.Subject, targetType, options))
         with ex ->
-            t
-                .With("Target type", targetType)
-                .With("But threw", ex)
-                .With("Subject value", t.Subject)
-                .Fail(because)
+            t.With("Target type", targetType).With("But threw", ex).With("Subject value", t.Subject).Fail(because)
 
 
     /// Asserts that the subject is deserializable to the specified target type.
@@ -523,11 +488,8 @@ type StringAssertions =
     [<Extension>]
     [<RequiresExplicitTypeArguments>]
     static member DeserializeTo<'a>
-        (
-            t: Testable<string>,
-            options: JsonSerializerOptions,
-            ?because
-        ) : AndDerived<string, 'a> =
+        (t: Testable<string>, options: JsonSerializerOptions, ?because)
+        : AndDerived<string, 'a> =
         use _ = t.Assert()
 
         if isNull t.Subject then
@@ -536,11 +498,7 @@ type StringAssertions =
         try
             AndDerived(t, JsonSerializer.Deserialize<'a>(t.Subject, options))
         with ex ->
-            t
-                .With("Target type", typeof<'a>)
-                .With("But threw", ex)
-                .With("Subject value", t.Subject)
-                .Fail(because)
+            t.With("Target type", typeof<'a>).With("But threw", ex).With("Subject value", t.Subject).Fail(because)
 
 
     /// Asserts that the subject is deserializable to the specified target type using the specified options.

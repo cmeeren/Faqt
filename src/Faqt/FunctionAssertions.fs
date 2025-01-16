@@ -15,10 +15,8 @@ type FunctionAssertions =
     [<Extension>]
     [<RequiresExplicitTypeArguments>]
     static member Throw<'exn, 'ignored when 'exn :> Exception>
-        (
-            t: Testable<unit -> 'ignored>,
-            ?because
-        ) : AndDerived<unit -> 'ignored, 'exn> =
+        (t: Testable<unit -> 'ignored>, ?because)
+        : AndDerived<unit -> 'ignored, 'exn> =
         use _ = t.Assert()
 
         let retVal =
@@ -42,10 +40,8 @@ type FunctionAssertions =
     [<Extension>]
     [<RequiresExplicitTypeArguments>]
     static member ThrowInner<'exn, 'ignored when 'exn :> Exception>
-        (
-            t: Testable<unit -> 'ignored>,
-            ?because
-        ) : AndDerived<unit -> 'ignored, 'exn> =
+        (t: Testable<unit -> 'ignored>, ?because)
+        : AndDerived<unit -> 'ignored, 'exn> =
         use _ = t.Assert()
 
         let rec getMatchingException (ex: Exception) =
@@ -78,10 +74,8 @@ type FunctionAssertions =
     [<Extension>]
     [<RequiresExplicitTypeArguments>]
     static member ThrowExactly<'exn, 'ignored when 'exn :> Exception>
-        (
-            t: Testable<unit -> 'ignored>,
-            ?because
-        ) : AndDerived<unit -> 'ignored, 'exn> =
+        (t: Testable<unit -> 'ignored>, ?because)
+        : AndDerived<unit -> 'ignored, 'exn> =
         use _ = t.Assert()
 
         let retVal =

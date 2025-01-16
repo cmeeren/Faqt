@@ -15,11 +15,8 @@ type UnionAssertions2 =
     /// data-less cases) is equivalent to Be(MyDuCase) (but with a different error message).
     [<Extension>]
     static member BeOfCase
-        (
-            t: Testable<'a>,
-            [<ReflectedDefinition>] caseConstructor: Quotations.Expr<'a>,
-            ?because
-        ) : And<'a> =
+        (t: Testable<'a>, [<ReflectedDefinition>] caseConstructor: Quotations.Expr<'a>, ?because)
+        : And<'a> =
         use _ = t.Assert()
 
         match caseConstructor with

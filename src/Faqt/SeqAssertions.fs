@@ -450,10 +450,7 @@ type SeqAssertions =
             let subjectLength = Seq.stringOptimizedLength t.Subject
 
             if subjectLength <> 1 then
-                t
-                    .With("But length was", subjectLength)
-                    .With("Subject value", t.Subject)
-                    .Fail(because)
+                t.With("But length was", subjectLength).With("Subject value", t.Subject).Fail(because)
 
         AndDerived(t, Seq.head t.Subject)
 
@@ -461,11 +458,8 @@ type SeqAssertions =
     /// Asserts that the subject contains exactly one item matching the predicate.
     [<Extension>]
     static member ContainExactlyOneItemMatching
-        (
-            t: Testable<#seq<'a>>,
-            predicate: 'a -> bool,
-            ?because
-        ) : AndDerived<_, 'a> =
+        (t: Testable<#seq<'a>>, predicate: 'a -> bool, ?because)
+        : AndDerived<_, 'a> =
         use _ = t.Assert()
 
         if isNull (box t.Subject) then
@@ -500,11 +494,8 @@ type SeqAssertions =
     /// allows continuing to assert on the first matching item instead of all matching items.
     [<Extension>]
     static member ContainAtLeastOneItemMatching
-        (
-            t: Testable<#seq<'a>>,
-            predicate: 'a -> bool,
-            ?because
-        ) : AndDerived<_, 'a> =
+        (t: Testable<#seq<'a>>, predicate: 'a -> bool, ?because)
+        : AndDerived<_, 'a> =
         use _ = t.Assert()
 
         if isNull (box t.Subject) then
@@ -533,10 +524,7 @@ type SeqAssertions =
             let subjectLength = Seq.stringOptimizedLength t.Subject
 
             if subjectLength > 1 then
-                t
-                    .With("But length was", subjectLength)
-                    .With("Subject value", t.Subject)
-                    .Fail(because)
+                t.With("But length was", subjectLength).With("Subject value", t.Subject).Fail(because)
 
         AndDerived(t, Seq.tryHead t.Subject)
 
@@ -544,11 +532,8 @@ type SeqAssertions =
     /// Asserts that the subject contains at most one item matching the predicate.
     [<Extension>]
     static member ContainAtMostOneItemMatching
-        (
-            t: Testable<#seq<'a>>,
-            predicate: 'a -> bool,
-            ?because
-        ) : AndDerived<_, 'a option> =
+        (t: Testable<#seq<'a>>, predicate: 'a -> bool, ?because)
+        : AndDerived<_, 'a option> =
         use _ = t.Assert()
 
         if isNull (box t.Subject) then
@@ -572,11 +557,8 @@ type SeqAssertions =
     /// first.
     [<Extension>]
     static member ContainItemsMatching
-        (
-            t: Testable<#seq<'a>>,
-            predicate: 'a -> bool,
-            ?because
-        ) : AndDerived<_, seq<'a>> =
+        (t: Testable<#seq<'a>>, predicate: 'a -> bool, ?because)
+        : AndDerived<_, seq<'a>> =
         use _ = t.Assert()
 
         if isNull (box t.Subject) then
@@ -719,12 +701,8 @@ type SeqAssertions =
     /// Asserts that the subject is in ascending order using the specified culture and compare options.
     [<Extension>]
     static member BeAscending
-        (
-            t: Testable<#seq<string>>,
-            culture: CultureInfo,
-            compareOptions: CompareOptions,
-            ?because
-        ) : And<_> =
+        (t: Testable<#seq<string>>, culture: CultureInfo, compareOptions: CompareOptions, ?because)
+        : And<_> =
         use _ = t.Assert()
 
         if isNull (box t.Subject) then
@@ -785,12 +763,8 @@ type SeqAssertions =
     /// Asserts that the subject is in ascending order by the specified projection using the specified comparison type.
     [<Extension>]
     static member BeAscendingBy
-        (
-            t: Testable<#seq<'a>>,
-            projection: 'a -> string,
-            comparisonType: StringComparison,
-            ?because
-        ) : And<_> =
+        (t: Testable<#seq<'a>>, projection: 'a -> string, comparisonType: StringComparison, ?because)
+        : And<_> =
         use _ = t.Assert()
 
         if isNull (box t.Subject) then
@@ -843,13 +817,10 @@ type SeqAssertions =
     /// compare options.
     [<Extension>]
     static member BeAscendingBy
-        (
-            t: Testable<#seq<'a>>,
-            projection: 'a -> string,
-            culture: CultureInfo,
-            compareOptions: CompareOptions,
-            ?because
-        ) : And<_> =
+        (t: Testable<#seq<'a>>, projection: 'a -> string, culture: CultureInfo, compareOptions: CompareOptions, ?because) : And<
+                                                                                                                                _
+                                                                                                                             >
+        =
         use _ = t.Assert()
 
         if isNull (box t.Subject) then
@@ -945,12 +916,8 @@ type SeqAssertions =
     /// Asserts that the subject is in descending order using the specified culture and compare options.
     [<Extension>]
     static member BeDescending
-        (
-            t: Testable<#seq<string>>,
-            culture: CultureInfo,
-            compareOptions: CompareOptions,
-            ?because
-        ) : And<_> =
+        (t: Testable<#seq<string>>, culture: CultureInfo, compareOptions: CompareOptions, ?because)
+        : And<_> =
         use _ = t.Assert()
 
         if isNull (box t.Subject) then
@@ -1011,12 +978,8 @@ type SeqAssertions =
     /// Asserts that the subject is in descending order by the specified projection using the specified comparison type.
     [<Extension>]
     static member BeDescendingBy
-        (
-            t: Testable<#seq<'a>>,
-            projection: 'a -> string,
-            comparisonType: StringComparison,
-            ?because
-        ) : And<_> =
+        (t: Testable<#seq<'a>>, projection: 'a -> string, comparisonType: StringComparison, ?because)
+        : And<_> =
         use _ = t.Assert()
 
         if isNull (box t.Subject) then
@@ -1069,13 +1032,10 @@ type SeqAssertions =
     /// compare options.
     [<Extension>]
     static member BeDescendingBy
-        (
-            t: Testable<#seq<'a>>,
-            projection: 'a -> string,
-            culture: CultureInfo,
-            compareOptions: CompareOptions,
-            ?because
-        ) : And<_> =
+        (t: Testable<#seq<'a>>, projection: 'a -> string, culture: CultureInfo, compareOptions: CompareOptions, ?because) : And<
+                                                                                                                                _
+                                                                                                                             >
+        =
         use _ = t.Assert()
 
         if isNull (box t.Subject) then
@@ -1321,11 +1281,7 @@ type SeqAssertions =
         let set = HashSet(t.Subject :> seq<'a>)
 
         if not (other |> Seq.exists set.Contains) then
-            t
-                .With("Other", other)
-                .With("But had no common items", [])
-                .With("Subject value", t.Subject)
-                .Fail(because)
+            t.With("Other", other).With("But had no common items", []).With("Subject value", t.Subject).Fail(because)
 
         And(t)
 

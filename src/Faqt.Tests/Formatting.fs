@@ -26,10 +26,7 @@ type private Assertions =
     static member FailWithUnserializableAtTopAndNested(t: Testable<'a>) : And<'a> =
         use _ = t.Assert()
 
-        t
-            .With("A", TestUnserializableType())
-            .With("B", [ TryFormat(TestUnserializableType()) ])
-            .Fail(None)
+        t.With("A", TestUnserializableType()).With("B", [ TryFormat(TestUnserializableType()) ]).Fail(None)
 
 
 [<Fact>]
@@ -159,12 +156,7 @@ Foo: Bar
 
     [<Fact>]
     let ``Rendering of top-level structure with multi-part subject name`` () =
-        fun () ->
-            (Some "a")
-                .Should()
-                .BeSome()
-                .Whose.Length.Should(())
-                .FailWithBecause("Some reason", "Foo", "Bar")
+        fun () -> (Some "a").Should().BeSome().Whose.Length.Should(()).FailWithBecause("Some reason", "Foo", "Bar")
         |> assertExnMsg
             """
 Subject:
@@ -487,12 +479,7 @@ Value: null
 
     [<Fact>]
     let ``Subject name uses block style, but other Subject string sequences uses flow style`` () =
-        fun () ->
-            (Some "a")
-                .Should()
-                .BeSome()
-                .Whose.Length.Should(())
-                .FailWith("Value", {| Subject = [ "a"; "b" ] |})
+        fun () -> (Some "a").Should().BeSome().Whose.Length.Should(()).FailWith("Value", {| Subject = [ "a"; "b" ] |})
         |> assertExnMsg
             """
 Subject:
@@ -714,10 +701,7 @@ Value: 2000-01-02T03:04:05.006
 
     [<Fact>]
     let ``Rendering of DateTimeOffset with zero offset`` () =
-        fun () ->
-            "a"
-                .Should()
-                .FailWith("Value", DateTimeOffset(2000, 1, 2, 3, 4, 5, 6, TimeSpan.Zero))
+        fun () -> "a".Should().FailWith("Value", DateTimeOffset(2000, 1, 2, 3, 4, 5, 6, TimeSpan.Zero))
         |> assertExnMsg
             """
 Subject: '"a"'
@@ -728,10 +712,7 @@ Value: 2000-01-02T03:04:05.006+00:00
 
     [<Fact>]
     let ``Rendering of DateTimeOffset with non-zero offset`` () =
-        fun () ->
-            "a"
-                .Should()
-                .FailWith("Value", DateTimeOffset(2000, 1, 2, 3, 4, 5, 6, TimeSpan.FromHours(7)))
+        fun () -> "a".Should().FailWith("Value", DateTimeOffset(2000, 1, 2, 3, 4, 5, 6, TimeSpan.FromHours(7)))
         |> assertExnMsg
             """
 Subject: '"a"'
@@ -1262,9 +1243,7 @@ Value: FOO
     [<Fact>]
     let ``SerializeAs also applies to interfaces`` () =
         let format =
-            YamlFormatterBuilder.Default
-                .SerializeAs(fun (_: TestInterface) -> "FOO")
-                .Build()
+            YamlFormatterBuilder.Default.SerializeAs(fun (_: TestInterface) -> "FOO").Build()
 
         use _ = Formatter.With(format)
 
@@ -1310,9 +1289,7 @@ Value: SOME(B)
     [<Fact>]
     let ``SerializeExactAs does not apply to subtypes`` () =
         let format =
-            YamlFormatterBuilder.Default
-                .SerializeExactAs(fun (_: TestBaseType) -> "FOO")
-                .Build()
+            YamlFormatterBuilder.Default.SerializeExactAs(fun (_: TestBaseType) -> "FOO").Build()
 
         use _ = Formatter.With(format)
 
@@ -1349,9 +1326,7 @@ Value: asd
     [<Fact>]
     let ``SerializeExactAs does not apply to interfaces`` () =
         let format =
-            YamlFormatterBuilder.Default
-                .SerializeExactAs(fun (_: TestInterface) -> "FOO")
-                .Build()
+            YamlFormatterBuilder.Default.SerializeExactAs(fun (_: TestInterface) -> "FOO").Build()
 
         use _ = Formatter.With(format)
 
@@ -1410,9 +1385,7 @@ B:
     [<Fact>]
     let ``If TryFormatFallback function fails, exception bubbles up`` () =
         let format =
-            YamlFormatterBuilder.Default
-                .TryFormatFallback(fun _ _ -> invalidOp "foo")
-                .Build()
+            YamlFormatterBuilder.Default.TryFormatFallback(fun _ _ -> invalidOp "foo").Build()
 
         use _ = Formatter.With(format)
 

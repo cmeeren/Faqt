@@ -253,9 +253,7 @@ module internal SubjectName =
                 try
                     getFileLines origin.SourceFilePath
                 with _ ->
-                    (EmbeddedSource.get origin.AssemblyPath origin.SourceFilePath)
-                        .Replace("\r\n", "\n")
-                        .Split("\n")
+                    (EmbeddedSource.get origin.AssemblyPath origin.SourceFilePath).Replace("\r\n", "\n").Split("\n")
 
             let assertionCounts = assertions |> List.countBy id |> Map.ofList
             let lastAssertion = assertions[assertions.Length - 1]

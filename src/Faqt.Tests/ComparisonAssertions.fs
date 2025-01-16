@@ -71,9 +71,7 @@ module BeCloseTo =
     [<Fact>]
     let ``Fails if null`` () =
         assertFails (fun () ->
-            Unchecked.defaultof<NumberWithoutOps>
-                .Should()
-                .BeCloseTo(NumberWithSubtraction 1, Comparison 0)
+            Unchecked.defaultof<NumberWithoutOps>.Should().BeCloseTo(NumberWithSubtraction 1, Comparison 0)
         )
 
 
@@ -115,14 +113,10 @@ module NotBeCloseTo =
     let ``Can be called with any set of 3 types where subject or target can be subtracted both ways and tolerance has comparison``
         ()
         =
-        (NumberWithoutOps 0)
-            .Should()
-            .NotBeCloseTo(NumberWithSubtraction 1, Comparison 0)
+        (NumberWithoutOps 0).Should().NotBeCloseTo(NumberWithSubtraction 1, Comparison 0)
         |> ignore
 
-        (NumberWithSubtraction 0)
-            .Should()
-            .NotBeCloseTo(NumberWithoutOps 1, Comparison 0)
+        (NumberWithSubtraction 0).Should().NotBeCloseTo(NumberWithoutOps 1, Comparison 0)
         |> ignore
 
 
@@ -160,9 +154,7 @@ module NotBeCloseTo =
 
     [<Fact>]
     let ``Passes if null`` () =
-        Unchecked.defaultof<NumberWithoutOps>
-            .Should()
-            .NotBeCloseTo(NumberWithSubtraction 1, Comparison 0)
+        Unchecked.defaultof<NumberWithoutOps>.Should().NotBeCloseTo(NumberWithSubtraction 1, Comparison 0)
 
 
     [<Fact>]

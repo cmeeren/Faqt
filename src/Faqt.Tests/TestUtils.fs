@@ -46,14 +46,10 @@ let assertExnMsgWildcard (msg: string) (f: unit -> 'a) =
     | _ -> failwith "Expected msg to contain a single *"
 
 
-type TestInterface =
-    interface
-    end
+type TestInterface = interface end
 
 
-type TestBaseType() =
-    class
-    end
+type TestBaseType() = class end
 
 
 type TestSubType() =
@@ -61,14 +57,10 @@ type TestSubType() =
     interface TestInterface
 
 
-type TestInterface<'a, 'b> =
-    interface
-    end
+type TestInterface<'a, 'b> = interface end
 
 
-type TestBaseType<'a, 'b>() =
-    class
-    end
+type TestBaseType<'a, 'b>() = class end
 
 
 type TestSubType<'a, 'b>() =

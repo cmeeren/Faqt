@@ -15,11 +15,8 @@ type UnionAssertions =
     /// Note that it is not necessary to use explicit quotations; call it as `.BeOfCase(MyDuCase)`.
     [<Extension>]
     static member BeOfCase
-        (
-            t: Testable<'a>,
-            [<ReflectedDefinition>] caseConstructor: Quotations.Expr<'b -> 'a>,
-            ?because
-        ) : AndDerived<'a, 'b> =
+        (t: Testable<'a>, [<ReflectedDefinition>] caseConstructor: Quotations.Expr<'b -> 'a>, ?because)
+        : AndDerived<'a, 'b> =
         use _ = t.Assert()
 
         let rec inner (expr: Expr) =

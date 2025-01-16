@@ -334,12 +334,7 @@ let ``Derived, single line, second fails`` () =
     fun () ->
         let thisIsAVariableName = "1"
 
-        thisIsAVariableName
-            .Should()
-            .PassDerived()
-            .Derived.Length.GetType()
-            .Should(())
-            .Fail()
+        thisIsAVariableName.Should().PassDerived().Derived.Length.GetType().Should(()).Fail()
     |> assertExnMsg
         """
 Subject:
@@ -672,11 +667,7 @@ Subject value: [1, 2]
 [<Fact>]
 let ``AllSatisfy single and then chain with same assertion`` () =
     fun () ->
-        [ 1 ]
-            .Should()
-            .AllSatisfy(fun s -> s.ToString().Should().Test(true))
-            .And.Subject.Length.Should(())
-            .Test(false)
+        [ 1 ].Should().AllSatisfy(fun s -> s.ToString().Should().Test(true)).And.Subject.Length.Should(()).Test(false)
     |> assertExnMsg
         """
 Subject: '[ 1 ].Length'
@@ -701,12 +692,7 @@ Should: Test
 
 [<Fact>]
 let ``Assertions chained after higher-order assertions using the same assertion`` () =
-    fun () ->
-        "asd"
-            .Should()
-            .Satisfy(fun s1 -> s1.Should().Test(true))
-            .And.Subject.Length.Should(())
-            .Test(false)
+    fun () -> "asd".Should().Satisfy(fun s1 -> s1.Should().Test(true)).And.Subject.Length.Should(()).Test(false)
     |> assertExnMsg
         """
 Subject: '"asd".Length'
@@ -815,13 +801,7 @@ Should: Fail
 
 [<Fact>]
 let ``Balanced parentheses are stripped`` () =
-    fun () ->
-        (("1" + "2") |> Some)
-            .Should()
-            .BeSome()
-            .Whose.Replace("a", ("b" + "c"))
-            .Should()
-            .Fail()
+    fun () -> (("1" + "2") |> Some).Should().BeSome().Whose.Replace("a", ("b" + "c")).Should().Fail()
     |> assertExnMsg
         """
 Subject:
@@ -969,10 +949,7 @@ Should: Fail
 
 [<Fact>]
 let ``Known limitation: Single-line SatisfyAny, same assertion does not work correctly`` () =
-    fun () ->
-        "asd"
-            .Should()
-            .SatisfyAny([ (fun s1 -> s1.Should().Fail()); (fun s2 -> s2.Should().Fail()) ])
+    fun () -> "asd".Should().SatisfyAny([ (fun s1 -> s1.Should().Fail()); (fun s2 -> s2.Should().Fail()) ])
     |> assertExnMsg
         """
 Subject: '"asd"'
@@ -1006,9 +983,7 @@ let ``Known limitation: Nested AllSatisfy does not work correctly`` () =
     fun () ->
         let x = [ [ 11; 12; 13 ]; [ 21; 22; 23 ]; [ 31; 32; 33 ] ]
 
-        x
-            .Should()
-            .AllSatisfy(fun x1 -> x1.Should().AllSatisfy(fun x2 -> x2.Should().Fail()))
+        x.Should().AllSatisfy(fun x1 -> x1.Should().AllSatisfy(fun x2 -> x2.Should().Fail()))
     |> assertExnMsg
         """
 Subject: subject

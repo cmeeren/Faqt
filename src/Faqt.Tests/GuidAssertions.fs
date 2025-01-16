@@ -67,11 +67,7 @@ module NotBe =
     let ``Can be chained with And`` () =
         let guid = Guid.Parse("65006ace-504c-4ddb-8e4f-567c834d8125")
 
-        guid
-            .Should()
-            .NotBe("de949ab3-d592-4af9-bb7f-a8eaef986e17")
-            .Id<And<Guid>>()
-            .And.Be(guid)
+        guid.Should().NotBe("de949ab3-d592-4af9-bb7f-a8eaef986e17").Id<And<Guid>>().And.Be(guid)
 
 
     [<Theory>]

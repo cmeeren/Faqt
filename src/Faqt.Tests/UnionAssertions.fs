@@ -37,12 +37,7 @@ module BeOfCase =
 
     [<Fact>]
     let ``SingleFieldInt passes and can be chained with AndDerived with inner value`` () =
-        (SingleFieldInt 1)
-            .Should()
-            .BeOfCase(SingleFieldInt)
-            .Id<AndDerived<MyDu, int>>()
-            .WhoseValue.Should(())
-            .Be(1)
+        (SingleFieldInt 1).Should().BeOfCase(SingleFieldInt).Id<AndDerived<MyDu, int>>().WhoseValue.Should(()).Be(1)
 
 
     [<Fact>]
@@ -141,12 +136,7 @@ module BeSome =
 
     [<Fact>]
     let ``Passes for Some and can be chained with AndDerived with inner value`` () =
-        (Some 1)
-            .Should()
-            .BeSome()
-            .Id<AndDerived<int option, int>>()
-            .WhoseValue.Should(())
-            .Be(1)
+        (Some 1).Should().BeSome().Id<AndDerived<int option, int>>().WhoseValue.Should(()).Be(1)
 
 
     [<Fact>]
@@ -218,12 +208,7 @@ module BeOk =
 
     [<Fact>]
     let ``Passes for Ok and can be chained with AndDerived with inner value`` () =
-        (Ok 1)
-            .Should()
-            .BeOk()
-            .Id<AndDerived<Result<int, _>, int>>()
-            .WhoseValue.Should(())
-            .Be(1)
+        (Ok 1).Should().BeOk().Id<AndDerived<Result<int, _>, int>>().WhoseValue.Should(()).Be(1)
 
 
     [<Fact>]
@@ -260,12 +245,7 @@ module BeError =
 
     [<Fact>]
     let ``Passes for Error and can be chained with AndDerived with inner value`` () =
-        (Error 1)
-            .Should()
-            .BeError()
-            .Id<AndDerived<Result<_, int>, int>>()
-            .WhoseValue.Should(())
-            .Be(1)
+        (Error 1).Should().BeError().Id<AndDerived<Result<_, int>, int>>().WhoseValue.Should(()).Be(1)
 
 
     [<Fact>]

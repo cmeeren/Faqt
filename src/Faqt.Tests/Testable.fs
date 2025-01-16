@@ -17,12 +17,7 @@ module Subject =
 
     [<Fact>]
     let ``Realistic example usage`` () =
-        "AbC"
-            .Should()
-            .NotBeEmpty()
-            .And.Subject.ToUpperInvariant()
-            .Should(())
-            .BeAscending()
+        "AbC".Should().NotBeEmpty().And.Subject.ToUpperInvariant().Should(()).BeAscending()
 
 
 module Whose =
@@ -35,13 +30,7 @@ module Whose =
 
     [<Fact>]
     let ``Realistic example usage`` () =
-        (Some "asd")
-            .Should()
-            .BeSome()
-            .That.Should(())
-            .NotBe("a")
-            .And.Whose.Length.Should(())
-            .Be(3)
+        (Some "asd").Should().BeSome().That.Should(()).NotBe("a").And.Whose.Length.Should(()).Be(3)
 
 
 module ``With and Fail`` =
@@ -217,10 +206,7 @@ B: 2
 
     [<Fact>]
     let ``With + With(true) + Fail throws expected exception with because`` () =
-        fun () ->
-            "a"
-                .Should()
-                .Do(fun t -> t.With("A", 1).With(true, "B", 2).Fail(Some "Some reason"))
+        fun () -> "a".Should().Do(fun t -> t.With("A", 1).With(true, "B", 2).Fail(Some "Some reason"))
         |> assertExnMsg
             """
 Subject: '"a"'
@@ -244,10 +230,7 @@ A: 1
 
     [<Fact>]
     let ``With + With(false) + Fail throws expected exception with because`` () =
-        fun () ->
-            "a"
-                .Should()
-                .Do(fun t -> t.With("A", 1).With(false, "B", 2).Fail(Some "Some reason"))
+        fun () -> "a".Should().Do(fun t -> t.With("A", 1).With(false, "B", 2).Fail(Some "Some reason"))
         |> assertExnMsg
             """
 Subject: '"a"'

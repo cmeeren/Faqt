@@ -21,11 +21,7 @@ type ComparisonAssertions =
             || t.Subject - target > tolerance
             || target - t.Subject > tolerance
         then
-            t
-                .With("Target", target)
-                .With("With tolerance", tolerance)
-                .With("But was", t.Subject)
-                .Fail(because)
+            t.With("Target", target).With("With tolerance", tolerance).With("But was", t.Subject).Fail(because)
 
         And(t)
 
@@ -42,11 +38,7 @@ type ComparisonAssertions =
             not (isNull (box t.Subject))
             && not (t.Subject - target > tolerance || target - t.Subject > tolerance)
         then
-            t
-                .With("Target", target)
-                .With("With tolerance", tolerance)
-                .With("But was", t.Subject)
-                .Fail(because)
+            t.With("Target", target).With("With tolerance", tolerance).With("But was", t.Subject).Fail(because)
 
         And(t)
 
@@ -137,10 +129,6 @@ type ComparisonAssertions =
         use _ = t.Assert()
 
         if isNull (box t.Subject) || t.Subject < lower || t.Subject > upper then
-            t
-                .With("Lower", lower)
-                .With("Upper", upper)
-                .With("But was", t.Subject)
-                .Fail(because)
+            t.With("Lower", lower).With("Upper", upper).With("But was", t.Subject).Fail(because)
 
         And(t)
