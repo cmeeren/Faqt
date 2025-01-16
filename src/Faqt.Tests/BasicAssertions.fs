@@ -169,11 +169,7 @@ module ``NotBe with custom comparer`` =
 
     [<Fact>]
     let ``Can be called with different types and chained with And`` () =
-        (1)
-            .Should()
-            .NotBe("asd", (fun (_: int) (_: string) -> false))
-            .Id<And<int>>()
-            .And.Be(1)
+        (1).Should().NotBe("asd", (fun (_: int) (_: string) -> false)).Id<And<int>>().And.Be(1)
 
 
     [<Theory>]
@@ -233,12 +229,7 @@ module BeOneOf =
         let x = (1, 2)
         let y = (1, 2)
 
-        x
-            .Should()
-            .BeOneOf([ y ])
-            .Id<AndDerived<int * int, int * int>>()
-            .That.Should(())
-            .BeSameAs(y)
+        x.Should().BeOneOf([ y ]).Id<AndDerived<int * int, int * int>>().That.Should(()).BeSameAs(y)
 
 
     let passData = [
@@ -302,12 +293,7 @@ module ``BeOneOf with mapping`` =
 
     [<Fact>]
     let ``Can be chained with AndDerived with found value`` () =
-        1
-            .Should()
-            .BeOneOf([ (1, "a"); (2, "b") ])
-            .Id<AndDerived<int, string>>()
-            .That.Should(())
-            .Be("a")
+        (1).Should().BeOneOf([ (1, "a"); (2, "b") ]).Id<AndDerived<int, string>>().That.Should(()).Be("a")
 
 
     let passData = [
@@ -1105,12 +1091,7 @@ module Transform =
 
     [<Fact>]
     let ``Passes when the function does not throw and can be chained with AndDerived with transformed value`` () =
-        "a"
-            .Should()
-            .Transform(fun s -> s.Length)
-            .Id<AndDerived<string, int>>()
-            .WhoseValue.Should(())
-            .Be(1)
+        "a".Should().Transform(fun s -> s.Length).Id<AndDerived<string, int>>().WhoseValue.Should(()).Be(1)
 
 
     [<Fact>]
@@ -1147,12 +1128,7 @@ module ``TryTransform option`` =
 
     [<Fact>]
     let ``Passes when function returns Some and can be chained with AndDerived with transformed value`` () =
-        "a"
-            .Should()
-            .TryTransform(fun s -> Some s.Length)
-            .Id<AndDerived<string, int>>()
-            .WhoseValue.Should(())
-            .Be(1)
+        "a".Should().TryTransform(fun s -> Some s.Length).Id<AndDerived<string, int>>().WhoseValue.Should(()).Be(1)
 
 
     [<Fact>]
@@ -1196,10 +1172,7 @@ Subject value: a
 
     [<Fact>]
     let ``Fails with expected message with because when function throws`` () =
-        fun () ->
-            "a"
-                .Should()
-                .TryTransform((fun _ -> failwith<string option> "foo"), "Some reason")
+        fun () -> "a".Should().TryTransform((fun _ -> failwith<string option> "foo"), "Some reason")
         |> assertExnMsgWildcard
             """
 Subject: '"a"'
@@ -1217,12 +1190,7 @@ module ``TryTransform voption`` =
 
     [<Fact>]
     let ``Passes when function returns ValueSome and can be chained with AndDerived with transformed value`` () =
-        "a"
-            .Should()
-            .TryTransform(fun s -> ValueSome s.Length)
-            .Id<AndDerived<string, int>>()
-            .WhoseValue.Should(())
-            .Be(1)
+        "a".Should().TryTransform(fun s -> ValueSome s.Length).Id<AndDerived<string, int>>().WhoseValue.Should(()).Be(1)
 
 
     [<Fact>]
@@ -1239,10 +1207,7 @@ Subject value: a
 
     [<Fact>]
     let ``Fails with expected message with because when function returns None`` () =
-        fun () ->
-            "a"
-                .Should()
-                .TryTransform((fun _ -> ValueOption<string>.ValueNone), "Some reason")
+        fun () -> "a".Should().TryTransform((fun _ -> ValueOption<string>.ValueNone), "Some reason")
         |> assertExnMsg
             """
 Subject: '"a"'
@@ -1269,10 +1234,7 @@ Subject value: a
 
     [<Fact>]
     let ``Fails with expected message with because when function throws`` () =
-        fun () ->
-            "a"
-                .Should()
-                .TryTransform((fun _ -> failwith<string voption> "foo"), "Some reason")
+        fun () -> "a".Should().TryTransform((fun _ -> failwith<string voption> "foo"), "Some reason")
         |> assertExnMsgWildcard
             """
 Subject: '"a"'
@@ -1290,12 +1252,7 @@ module ``TryTransform Result`` =
 
     [<Fact>]
     let ``Passes when function returns Ok and can be chained with AndDerived with transformed value`` () =
-        "a"
-            .Should()
-            .TryTransform(fun s -> Ok s.Length)
-            .Id<AndDerived<string, int>>()
-            .WhoseValue.Should(())
-            .Be(1)
+        "a".Should().TryTransform(fun s -> Ok s.Length).Id<AndDerived<string, int>>().WhoseValue.Should(()).Be(1)
 
 
     [<Fact>]
@@ -1313,10 +1270,7 @@ Subject value: a
 
     [<Fact>]
     let ``Fails with expected message with because when function returns Error`` () =
-        fun () ->
-            "a"
-                .Should()
-                .TryTransform((fun _ -> Result<string, _>.Error "foo"), "Some reason")
+        fun () -> "a".Should().TryTransform((fun _ -> Result<string, _>.Error "foo"), "Some reason")
         |> assertExnMsg
             """
 Subject: '"a"'
@@ -1344,10 +1298,7 @@ Subject value: a
 
     [<Fact>]
     let ``Fails with expected message with because when function throws`` () =
-        fun () ->
-            "a"
-                .Should()
-                .TryTransform((fun _ -> failwith<Result<string, string>> "foo"), "Some reason")
+        fun () -> "a".Should().TryTransform((fun _ -> failwith<Result<string, string>> "foo"), "Some reason")
         |> assertExnMsgWildcard
             """
 Subject: '"a"'
@@ -1370,12 +1321,7 @@ module ``TryTransform parse`` =
 
     [<Fact>]
     let ``Passes when function returns true and can be chained with AndDerived with transformed value`` () =
-        "a"
-            .Should()
-            .TryTransform(fun s -> true, s.Length)
-            .Id<AndDerived<string, int>>()
-            .WhoseValue.Should(())
-            .Be(1)
+        "a".Should().TryTransform(fun s -> true, s.Length).Id<AndDerived<string, int>>().WhoseValue.Should(()).Be(1)
 
 
     [<Fact>]
