@@ -983,7 +983,9 @@ let ``Known limitation: Nested AllSatisfy does not work correctly`` () =
     fun () ->
         let x = [ [ 11; 12; 13 ]; [ 21; 22; 23 ]; [ 31; 32; 33 ] ]
 
-        x.Should().AllSatisfy(fun x1 -> x1.Should().AllSatisfy(fun x2 -> x2.Should().Fail()))
+        x //
+            .Should()
+            .AllSatisfy(fun x1 -> x1.Should().AllSatisfy(fun x2 -> x2.Should().Fail()))
     |> assertExnMsg
         """
 Subject: subject
