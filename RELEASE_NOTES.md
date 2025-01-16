@@ -4,6 +4,7 @@ Release notes
 ### Unreleased
 
 * Removed static `null` constraint from `BeNullOrEmpty`
+* Added `| null` annotation to `TryFormat` to allow nulls
 
 ### 4.4.0 (2024-12-18)
 

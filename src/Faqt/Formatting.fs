@@ -26,7 +26,7 @@ type TryFormat =
     /// Wrap values in TryFormat to catch serialization exceptions and use a safe fallback serialization format for the
     /// wrapped value. Not needed for top-level values added in With(...). Useful e.g. when wrapping values in records
     /// or when serializing individual items in a sequence.
-    | TryFormat of obj
+    | TryFormat of (obj | null)
 
 
 /// Contains the data used to render an assertion failure.
