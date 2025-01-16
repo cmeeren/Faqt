@@ -193,7 +193,7 @@ type SeqAssertions =
     static member BeNullOrEmpty(t: Testable<#seq<'a>>, ?because) : And<_> =
         use _ = t.Assert()
 
-        if not (isNull t.Subject || Seq.stringOptimizedIsEmpty t.Subject) then
+        if not (isNull (box t.Subject) || Seq.stringOptimizedIsEmpty t.Subject) then
             t.With("But was", t.Subject).Fail(because)
 
         And(t)
