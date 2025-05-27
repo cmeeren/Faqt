@@ -85,7 +85,7 @@ type BasicAssertions =
         And(t)
 
 
-    /// Asserts that the subject is reference equal to the specified value (which must not be null).
+    /// Asserts that the subject is reference equal to the specified value. Passes if both values are null.
     [<Extension>]
     static member BeSameAs(t: Testable<'a>, expected: 'a, ?because) : And<'a> =
         use _ = t.Assert()
@@ -106,7 +106,7 @@ type BasicAssertions =
         And(t)
 
 
-    /// Asserts that the subject is not reference equal to the specified value (which must not be null).
+    /// Asserts that the subject is not reference equal to the specified value. Fails if both values are null.
     [<Extension>]
     static member NotBeSameAs(t: Testable<'a>, other: 'a, ?because) : And<'a> =
         use _ = t.Assert()
