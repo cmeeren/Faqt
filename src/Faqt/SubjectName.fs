@@ -164,8 +164,7 @@ module internal EmbeddedSource =
     /// Encoding priority is inspired by Roslyn:
     /// https://github.com/dotnet/roslyn/blob/2fb8ad0ce8c49872aa781072037cf921efa3a5fd/src/Compilers/Core/Portable/EncodedStringText.cs#L27
     let readSource (stream: Stream) =
-        if not (isNull CodePagesEncodingProvider.Instance) then
-            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance)
+        Encoding.RegisterProvider(CodePagesEncodingProvider.Instance)
 
         // TODO: Not sure if this is a correct way to decode. Will StreamReader.ReadToEnd throw if the encoding is incorrect?
 
