@@ -13,6 +13,12 @@ type ComparisonAssertions =
     static member inline BeCloseTo(t: Testable<'a>, target: 'b, tolerance: 'c, ?because) : And<'a> =
         use _ = t.Assert()
 
+        if isNull (box target) then
+            nullArg (nameof target)
+
+        if isNull (box tolerance) then
+            nullArg (nameof tolerance)
+
         // This implementation requires comparison as well as op_Subtraction both ways. Changing this may break clients.
         // Alternative implementations could require op_Subtraction only one way, but additionally require Abs or ~-
         // (negation).
@@ -31,6 +37,12 @@ type ComparisonAssertions =
     static member inline NotBeCloseTo(t: Testable<'a>, target: 'b, tolerance: 'c, ?because) : And<'a> =
         use _ = t.Assert()
 
+        if isNull (box target) then
+            nullArg (nameof target)
+
+        if isNull (box tolerance) then
+            nullArg (nameof tolerance)
+
         // This implementation requires comparison as well as op_Subtraction both ways. Changing this may break clients.
         // Alternative implementations could require op_Subtraction only one way, but additionally require Abs or ~-
         // (negation).
@@ -45,6 +57,9 @@ type ComparisonAssertions =
 
     [<Extension>]
     static member inline private Compare(t: Testable<'a>, op, other, because) =
+        if isNull (box other) then
+            nullArg (nameof other)
+
         if isNull (box t.Subject) || not (op t.Subject other) then
             t.With("Other", other).With("But was", t.Subject).Fail(because)
 
