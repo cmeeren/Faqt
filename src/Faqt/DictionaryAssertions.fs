@@ -155,7 +155,7 @@ type DictionaryAssertions =
         : And<_> =
         use _ = t.Assert()
 
-        if isNull (box t.Subject) <> isNull expected then
+        if isNull (box t.Subject) <> isNull (box expected) then
             t.With("Expected", expected).With("But was", t.Subject).Fail(because)
         elif not (isNull (box t.Subject)) then
             let differentValues = Dictionary()

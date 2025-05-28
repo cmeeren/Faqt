@@ -269,7 +269,7 @@ type StringAssertions =
     static member MatchRegex(t: Testable<string>, regex: Regex, ?because) : And<string> =
         use _ = t.Assert()
 
-        if isNull regex then
+        if isNull (box regex) then
             nullArg (nameof regex)
 
         if isNull t.Subject || not (regex.IsMatch(t.Subject)) then
