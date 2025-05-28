@@ -20,7 +20,7 @@ type SeqLength() =
     [<DefaultValue; Params(SeqImpl.CharArray, SeqImpl.String)>]
     val mutable Impl: SeqImpl
 
-    let mutable xs: seq<char> = null
+    let mutable xs: seq<char> = Seq.empty
 
     [<GlobalSetup>]
     member this.Setup() =
@@ -44,7 +44,7 @@ type SeqIsEmpty() =
     [<DefaultValue; Params(SeqImpl.CharArray, SeqImpl.String)>]
     val mutable Impl: SeqImpl
 
-    let mutable xs: seq<char> = null
+    let mutable xs: seq<char> = Seq.empty
 
     [<GlobalSetup>]
     member this.Setup() =
