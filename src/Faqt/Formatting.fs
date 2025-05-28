@@ -110,7 +110,12 @@ module internal HttpRequestMessage =
         sb
             .Append(m.Method.ToString())
             .Append(" ")
-            .Append(m.RequestUri.ToString())
+            .Append(
+                m.RequestUri
+                |> Option.ofObj
+                |> Option.map string
+                |> Option.defaultValue "[HttpRequestMessage.RequestUri not initialized]"
+            )
             .Append(" HTTP/")
             .Append(m.Version.ToString())
         |> ignore
