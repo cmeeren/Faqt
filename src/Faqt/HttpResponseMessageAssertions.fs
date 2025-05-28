@@ -549,27 +549,24 @@ type HttpResponseMessageAssertions =
         async {
             use _ = t.Assert(true)
 
-            match t.Subject.Content with
-            | null -> return t.With("Response", t.Subject).With("Request", t.Subject.RequestMessage).Fail(because)
-            | content ->
-                let! ct = Async.CancellationToken
-                let! str = content.ReadAsStringAsync(ct) |> Async.AwaitTask
+            let! ct = Async.CancellationToken
+            let! str = t.Subject.Content.ReadAsStringAsync(ct) |> Async.AwaitTask
 
-                try
-                    return assertion str
-                with
-                | :? AssertionFailedException as ex ->
-                    return
-                        t
-                            .With("Failure", ex.FailureData)
-                            .With("Response", t.Subject)
-                            .With("Request", t.Subject.RequestMessage)
-                            .Fail(because)
-                | ex ->
-                    return
-                        t
-                            .With("But threw", ex)
-                            .With("Response", t.Subject)
-                            .With("Request", t.Subject.RequestMessage)
-                            .Fail(because)
+            try
+                return assertion str
+            with
+            | :? AssertionFailedException as ex ->
+                return
+                    t
+                        .With("Failure", ex.FailureData)
+                        .With("Response", t.Subject)
+                        .With("Request", t.Subject.RequestMessage)
+                        .Fail(because)
+            | ex ->
+                return
+                    t
+                        .With("But threw", ex)
+                        .With("Response", t.Subject)
+                        .With("Request", t.Subject.RequestMessage)
+                        .Fail(because)
         }
