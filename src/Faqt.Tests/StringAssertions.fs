@@ -2416,7 +2416,7 @@ module ``DeserializeTo non-generic`` =
     let ``Can be chained with AndDerived with deserialized value`` () =
         "1"
             .Should()
-            .DeserializeTo(typeof<int>, JsonSerializerOptions())
+            .DeserializeTo(typeof<int>)
             .Id<AndDerived<string, obj>>()
             .WhoseValue.Should(())
             .BeOfType<int>()
