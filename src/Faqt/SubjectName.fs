@@ -166,8 +166,6 @@ module internal EmbeddedSource =
     let readSource (stream: Stream) =
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance)
 
-        // TODO: Not sure if this is a correct way to decode. Will StreamReader.ReadToEnd throw if the encoding is incorrect?
-
         let encodingsToTry = [
             UTF8Encoding(false, true) :> Encoding
             yield! tryGetEncoding 0 |> ValueOption.toList
