@@ -72,7 +72,7 @@ module internal HttpContent =
 
     let serializeAppend formatContent maxLength (sb: StringBuilder) (c: HttpContent) =
         try
-            if not (isNull c) && c.Headers.ContentLength <> Nullable(0L) then
+            if c.Headers.ContentLength <> Nullable(0L) then
                 for h in c.Headers do
                     for v in h.Value do
                         sb.AppendLine().Append(h.Key).Append(": ").Append(v) |> ignore
@@ -120,7 +120,9 @@ module internal HttpRequestMessage =
                 sb.AppendLine().Append(h.Key).Append(": ").Append(mapHeaderValues h.Key v)
                 |> ignore
 
-        HttpContent.serializeAppend formatContent maxLength sb m.Content
+        m.Content
+        |> Option.ofObj
+        |> Option.iter (HttpContent.serializeAppend formatContent maxLength sb)
 
         sb.ToString()
 
@@ -145,7 +147,9 @@ module internal HttpResponseMessage =
                 sb.AppendLine().Append(h.Key).Append(": ").Append(mapHeaderValues h.Key v)
                 |> ignore
 
-        HttpContent.serializeAppend formatContent maxLength sb m.Content
+        m.Content
+        |> Option.ofObj
+        |> Option.iter (HttpContent.serializeAppend formatContent maxLength sb)
 
         sb.ToString()
 
