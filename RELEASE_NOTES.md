@@ -1,6 +1,10 @@
 Release notes
 ==============
 
+### Unreleased
+
+* `NotBeNull` now allows chaining the non-`null` value.
+
 ### 4.5.0 (2025-01-16)
 
 * Removed static `null` constraint from `BeNullOrEmpty`

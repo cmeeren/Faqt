@@ -658,6 +658,12 @@ module NotBeNull =
 
 
     [<Fact>]
+    let ``Works with nullable reference types`` () =
+        let (x: string | null) = "a"
+        x.Should().NotBeNull().Id<And<string>>()
+
+
+    [<Fact>]
     let ``Fails with expected message if null`` () =
         fun () ->
             let x: obj = null

@@ -130,13 +130,12 @@ type BasicAssertions =
 
     /// Asserts that the subject is not null.
     [<Extension>]
-    static member NotBeNull(t: Testable<'a>, ?because) : And<'a> =
+    static member NotBeNull(t: Testable<'a | null>, ?because) : And<'a> =
         use _ = t.Assert()
 
-        if isNull t.Subject then
-            t.With("But was", t.Subject).Fail(because)
-
-        And(t)
+        match t.Subject with
+        | null -> t.With("But was", null).Fail(because)
+        | s -> And(Testable(s, t.CallChainOrigin))
 
 
     /// Asserts that the subject can be transformed using the specified function (i.e., that the function does not
