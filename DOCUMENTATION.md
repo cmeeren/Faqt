@@ -33,7 +33,8 @@
 * [FAQ](#faq)
   * [Which testing frameworks does Faqt work with?](#which-testing-frameworks-does-faqt-work-with)
   * [Why is the subject name not correct in my specific example?](#why-is-the-subject-name-not-correct-in-my-specific-example)
-  * [Why do I have to use `Should(())` inside an assertion chain?](#why-do-i-have-to-use-should-inside-an-assertion-chain)
+  * [Why do I have to use
+    `Should(())` inside an assertion chain?](#why-do-i-have-to-use-should-inside-an-assertion-chain)
   * [Why does this assertion pass/fail for null?](#why-does-this-assertion-passfail-for-null)
   * [Why not FluentAssertions?](#why-not-fluentassertions)
   * [Why not Shouldly?](#why-not-shouldly)
@@ -74,8 +75,8 @@ code.
 
 ## Avoiding `|> ignore` after assertion chains
 
-Since assertions return `And` or `AndDerived`, F# may warn you in some cases if an assertion chain is not ignored
-using `|> ignore`.
+Since assertions return `And` or `AndDerived`, F# may warn you in some cases if an assertion chain is not ignored using
+`|> ignore`.
 
 For convenience, you can `open Faqt.Operators` and use the `%` prefix operator instead:
 
@@ -163,8 +164,8 @@ type Assertions =
         AndDerived(t, t.Subject.Value)
 ```
 
-This allows users to continue asserting on the derived state (the inner value, in this case), for example like
-this: `nullableInt.Should().HaveValue().That.Should(()).Be(2)`.
+This allows users to continue asserting on the derived state (the inner value, in this case), for example like this:
+`nullableInt.Should().HaveValue().That.Should(()).Be(2)`.
 
 ### Higher-order assertions
 
@@ -241,8 +242,8 @@ If you want all the details, here they are:
   calls the same user assertion(s) for each item in a sequence (like `AllSatisfy`), call `t.Assert(true, true)`, and
   additionally call `use _ = t.AssertItem()` before the assertion of each item.
 
-* If your condition is not met and the assertion should fail, call `t.Fail(because)`, optionally with any number
-  of `With(key, value)` or `With(condition, key, value)` before `Fail`:
+* If your condition is not met and the assertion should fail, call `t.Fail(because)`, optionally with any number of
+  `With(key, value)` or `With(condition, key, value)` before `Fail`:
 
    ```f#
    t.With("Key 1", value1).With("Key 2", value2).Fail(because)
@@ -264,9 +265,9 @@ If you want all the details, here they are:
   If you use anonymous type values in your assertion, note that anonymous type members seems to appear in alphabetical
   order, not declaration order. If this is not desired, use a normal record.
 
-* If your assertion extracts derived state that can be used for further assertions,
-  return `AndDerived(t, derivedState)`. Otherwise return `And(t)`. Prefer `AndDerived` over `And` if at all relevant,
-  since it strictly expands what the user can do.
+* If your assertion extracts derived state that can be used for further assertions, return
+  `AndDerived(t, derivedState)`. Otherwise return `And(t)`. Prefer `AndDerived` over `And` if at all relevant, since it
+  strictly expands what the user can do.
 
 * If your assertion calls `Should` at any point, make sure you use the overload that takes the original `Testable` as an
   argument (`.Should(t)`), since it contains important state relating to the end user’s original assertion call.
@@ -542,8 +543,8 @@ myFormatter Config.Current
 ### Function assertions
 
 * `Throw`: Polymorphic exception check for top-level exception
-* `ThrowInner`: Polymorphic exception check for top-level or inner exception on any level (including any exception in
-  an `AggregateException`)
+* `ThrowInner`: Polymorphic exception check for top-level or inner exception on any level (including any exception in an
+  `AggregateException`)
 * `ThrowExactly`: Exact exception check for top-level exception
 * `NotThrow`
 * `Roundtrip`: Check that a (potentially `Option` or `Result`-returning) function returns the input value. The function
@@ -617,39 +618,6 @@ chains in some method call, or wrapping them in a `use` statement in order to re
 entirely), or make the subject name incorrect in many more cases (e.g. by removing the tracking of the encountered
 assertion history altogether, thereby only giving correct subject names up to the first assertion of any given name in a
 chain).
-
-### Why does this assertion pass/fail for null?
-
-Note: I recognize that the below is not the only way to look at the issue. If you fundamentally disagree with this
-policy, I am open to discussing it. Please raise an issue.
-
-It really boils down to assumptions about Faqt users would expect and find useful. For example, I assume that
-making `HaveLength(0)` pass for `null` values would be a surprise for many users, and therefore be a bad idea. On the
-other hand, _allowing_ null values in assertions makes the assertions more composable, since it is trivial to
-add `.NotBeNull()` to the start of your assertion chain if you want to require a non-`null` value for an assertion that
-allows it (and somewhat harder to allow a `null` in an assertion that requires a non-`null` value, where you'd have to
-use something like `SatisfyAny`).
-
-That being said, in order to find some guiding principles, the general policy on allowing or disallowing `null` subject
-values is based on the following:
-
-* `null` is separate from "empty". Values that are `null` do not have properties like "length" and "contents", whereas
-  empty values do.
-* Negative assertions (like `NotBeEmpty` or `NotContain`) essentially assert the _lack_ of a property, e.g., the lack of
-  a specific length.
-
-With that in mind, `null` subject values are generally allowed in negative assertions and disallowed in positive
-assertions. For example, `HaveLength(0)` will fail for `null`, because a `null` value does not have any length (zero or
-otherwise). Contrariwise, `NotHaveLength(0)` (if it existed) would assert the lack of having the length `0`, and will
-pass for `null` values since they, indeed, do not possess the property of having that specific length.
-
-Another way to look at it is that negative assertions could be thought of conceptually as e.g. `not (HaveLength(0))`,
-i.e., just an inversion of the corresponding positive assertion. In this light, anything that fails the positive
-assertion (including `null`) should pass the negative assertion.
-
-The only exceptions are for assertions that check equality, such as `Be` or `BeSameAs`. Here, `null` is considered equal
-to `null` (which is consistent with the default F# implementations of structural and reference equality). This also
-extends to `SequenceEqual` and `HaveSameItemsAs`, which will pass if both sequences are `null`.
 
 ### Why not FluentAssertions?
 

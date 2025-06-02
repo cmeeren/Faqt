@@ -62,14 +62,13 @@ type Config private () =
     static let mutable globalConfig: FaqtConfig = FaqtConfig.Default
 
 
-    static let localConfig: AsyncLocal<FaqtConfig> = AsyncLocal()
+    static let localConfig: AsyncLocal<FaqtConfig | null> = AsyncLocal()
 
 
     static member Current =
-        if isNull (box localConfig.Value) then
-            globalConfig
-        else
-            localConfig.Value
+        match localConfig.Value with
+        | null -> globalConfig
+        | config -> config
 
 
     /// Sets the specified config as the default global config.

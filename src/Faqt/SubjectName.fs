@@ -28,10 +28,10 @@ type private AssertionInfo = {
 type internal CallChain() =
 
     [<ThreadStatic; DefaultValue>]
-    static val mutable private activeUserAssertions: Dictionary<CallChainOrigin, AssertionInfo list>
+    static val mutable private activeUserAssertions: Dictionary<CallChainOrigin, AssertionInfo list> | null
 
     [<ThreadStatic; DefaultValue>]
-    static val mutable private topLevelAssertionHistory: Dictionary<CallChainOrigin, AssertionInfo list>
+    static val mutable private topLevelAssertionHistory: Dictionary<CallChainOrigin, AssertionInfo list> | null
 
 
     static let getParentAssertionCallsite () =
@@ -48,11 +48,11 @@ type internal CallChain() =
     static let pushAssertion callsite method supportsChildAssertions isSeqAssertion =
 
         let assertions =
-            match CallChain.activeUserAssertions.TryGetValue callsite with
+            match CallChain.activeUserAssertions.NonNull().TryGetValue callsite with
             | false, _ -> []
             | true, xs -> xs
 
-        CallChain.activeUserAssertions[callsite] <-
+        CallChain.activeUserAssertions.NonNull()[callsite] <-
             {
                 Method = method
                 SupportsChildAssertions = supportsChildAssertions
@@ -61,26 +61,26 @@ type internal CallChain() =
             :: assertions
 
     static let tryPopAssertion callsite =
-        match CallChain.activeUserAssertions.TryGetValue callsite with
+        match CallChain.activeUserAssertions.NonNull().TryGetValue callsite with
         | false, _ -> ()
         | true, [] -> ()
         | true, hd :: tl ->
-            CallChain.activeUserAssertions[callsite] <- tl
+            CallChain.activeUserAssertions.NonNull()[callsite] <- tl
 
-            match CallChain.topLevelAssertionHistory.TryGetValue callsite with
-            | false, _ -> CallChain.topLevelAssertionHistory[callsite] <- [ hd ]
-            | true, xs -> CallChain.topLevelAssertionHistory[callsite] <- hd :: xs
+            match CallChain.topLevelAssertionHistory.NonNull().TryGetValue callsite with
+            | false, _ -> CallChain.topLevelAssertionHistory.NonNull()[callsite] <- [ hd ]
+            | true, xs -> CallChain.topLevelAssertionHistory.NonNull()[callsite] <- hd :: xs
 
             match getParentAssertionCallsite () with
             | Some parentCallsite when parentCallsite <> callsite ->
-                match CallChain.topLevelAssertionHistory.TryGetValue parentCallsite with
-                | false, _ -> CallChain.topLevelAssertionHistory[parentCallsite] <- [ hd ]
-                | true, xs -> CallChain.topLevelAssertionHistory[parentCallsite] <- hd :: xs
+                match CallChain.topLevelAssertionHistory.NonNull().TryGetValue parentCallsite with
+                | false, _ -> CallChain.topLevelAssertionHistory.NonNull()[parentCallsite] <- [ hd ]
+                | true, xs -> CallChain.topLevelAssertionHistory.NonNull()[parentCallsite] <- hd :: xs
             | _ -> ()
 
 
     static let canPushAssertion callsite =
-        match CallChain.activeUserAssertions.TryGetValue callsite with
+        match CallChain.activeUserAssertions.NonNull().TryGetValue callsite with
         | false, _ -> true
         | true, [] -> true
         | true, hd :: _ -> hd.SupportsChildAssertions
@@ -109,14 +109,16 @@ type internal CallChain() =
     static member AssertItem(callsite) =
         CallChain.EnsureInitialized()
 
-        match CallChain.topLevelAssertionHistory.TryGetValue callsite with
+        match CallChain.topLevelAssertionHistory.NonNull().TryGetValue callsite with
         | false, _ -> ()
         | true, xs ->
-            CallChain.topLevelAssertionHistory[callsite] <- xs |> List.skipWhile (fun x -> not x.IsSeqAssertion)
+            CallChain.topLevelAssertionHistory.NonNull()[callsite] <-
+                xs |> List.skipWhile (fun x -> not x.IsSeqAssertion)
 
-        match CallChain.activeUserAssertions.TryGetValue callsite with
+        match CallChain.activeUserAssertions.NonNull().TryGetValue callsite with
         | false, _ -> ()
-        | true, xs -> CallChain.activeUserAssertions[callsite] <- xs |> List.skipWhile (fun x -> not x.IsSeqAssertion)
+        | true, xs ->
+            CallChain.activeUserAssertions.NonNull()[callsite] <- xs |> List.skipWhile (fun x -> not x.IsSeqAssertion)
 
         // Returning IDisposable and requiring usage with the 'use' keyword gives more flexibility in changing the
         // implementation later, if needed.
@@ -127,12 +129,12 @@ type internal CallChain() =
         CallChain.EnsureInitialized()
 
         let topLevelAssertions =
-            match CallChain.topLevelAssertionHistory.TryGetValue callsite with
+            match CallChain.topLevelAssertionHistory.NonNull().TryGetValue callsite with
             | true, xs -> xs |> List.map (fun x -> x.Method) |> List.rev
             | false, _ -> []
 
         let activeAssertions =
-            match CallChain.activeUserAssertions.TryGetValue callsite with
+            match CallChain.activeUserAssertions.NonNull().TryGetValue callsite with
             | true, xs -> xs |> List.map (fun x -> x.Method) |> List.rev
             | false, _ -> []
 
@@ -142,8 +144,8 @@ type internal CallChain() =
     static member internal Reset(callsite) =
         CallChain.EnsureInitialized()
 
-        if CallChain.topLevelAssertionHistory.ContainsKey(callsite) then
-            CallChain.topLevelAssertionHistory.Remove(callsite) |> ignore
+        if CallChain.topLevelAssertionHistory.NonNull().ContainsKey(callsite) then
+            CallChain.topLevelAssertionHistory.NonNull().Remove(callsite) |> ignore
 
 
 module internal EmbeddedSource =

@@ -16,14 +16,14 @@ module Be =
     [<Theory>]
     [<InlineData("a", "a")>]
     [<InlineData(null, null)>]
-    let ``Passes if equal`` (a: string, b: string) = a.Should().Be(b)
+    let ``Passes if equal`` (a: string | null, b: string | null) = a.Should().Be(b)
 
 
     [<Theory>]
     [<InlineData("a", "b")>]
     [<InlineData("a", null)>]
     [<InlineData(null, "a")>]
-    let ``Fails if not equal`` (a: string, b: string) =
+    let ``Fails if not equal`` (a: string | null, b: string | null) =
         assertFails (fun () -> a.Should().Be(b))
 
 
@@ -75,7 +75,7 @@ module ``Be with custom comparer`` =
     [<InlineData("a", "b")>]
     [<InlineData("a", null)>]
     [<InlineData(null, "a")>]
-    let ``Passes if and only if comparer returns true`` (a: string, b: string) =
+    let ``Passes if and only if comparer returns true`` (a: string | null, b: string | null) =
         // Pass
         a.Should().Be(b, (fun _ _ -> true)) |> ignore
 
@@ -125,13 +125,13 @@ module NotBe =
     [<InlineData("a", "b")>]
     [<InlineData("a", null)>]
     [<InlineData(null, "a")>]
-    let ``Passes if not equal`` (a: string, b: string) = a.Should().NotBe(b)
+    let ``Passes if not equal`` (a: string | null, b: string | null) = a.Should().NotBe(b)
 
 
     [<Theory>]
     [<InlineData("a", "a")>]
     [<InlineData(null, null)>]
-    let ``Fails if equal`` (a: string, b: string) =
+    let ``Fails if equal`` (a: string | null, b: string | null) =
         assertFails (fun () -> a.Should().NotBe(b))
 
 
@@ -178,7 +178,7 @@ module ``NotBe with custom comparer`` =
     [<InlineData("a", "b")>]
     [<InlineData("a", null)>]
     [<InlineData(null, "a")>]
-    let ``Passes if and only if comparer returns false`` (a: string, b: string) =
+    let ``Passes if and only if comparer returns false`` (a: string | null, b: string | null) =
         // Pass
         a.Should().NotBe(b, (fun _ _ -> false)) |> ignore
 
@@ -233,7 +233,7 @@ module BeOneOf =
 
 
     let passData = [
-        [| box<string> null; [ (null: string) ] |]
+        [| box nul<string>; [ nul<string> ] |]
         [| box "a"; [ "a" ] |]
         [| box "a"; [ "a"; "b" ] |]
     ]
@@ -241,11 +241,11 @@ module BeOneOf =
 
     [<Theory>]
     [<MemberData(nameof passData)>]
-    let ``Passes if found`` (subject: string) (expected: seq<string>) = subject.Should().BeOneOf(expected)
+    let ``Passes if found`` (subject: string | null) (expected: seq<string | null>) = subject.Should().BeOneOf(expected)
 
 
     let failData = [
-        [| box<string> null; List<string>.Empty |]
+        [| box nul<string>; List<string>.Empty |]
         [| "a"; List<string>.Empty |]
         [| box "a"; List<string>.Empty |]
         [| box "a"; [ "b" ] |]
@@ -255,7 +255,7 @@ module BeOneOf =
 
     [<Theory>]
     [<MemberData(nameof failData)>]
-    let ``Fails if not found`` (subject: string) (expected: seq<string>) =
+    let ``Fails if not found`` (subject: string | null) (expected: seq<string | null>) =
         assertFails (fun () -> subject.Should().BeOneOf(expected))
 
 
@@ -297,7 +297,7 @@ module ``BeOneOf with mapping`` =
 
 
     let passData = [
-        [| box<string> null; [ (null: string), 0 ] |]
+        [| box nul<string>; [ nul<string>, 0 ] |]
         [| box "a"; [ "a", 1 ] |]
         [| box "a"; [ "a", 1; "b", 2 ] |]
     ]
@@ -305,11 +305,12 @@ module ``BeOneOf with mapping`` =
 
     [<Theory>]
     [<MemberData(nameof passData)>]
-    let ``Passes if found`` (subject: string) (mapping: seq<string * int>) = subject.Should().BeOneOf(mapping)
+    let ``Passes if found`` (subject: string | null) (mapping: seq<string | null * int>) =
+        subject.Should().BeOneOf(mapping)
 
 
     let failData = [
-        [| box<string> null; List<string * int>.Empty |]
+        [| box nul<string>; List<string * int>.Empty |]
         [| "a"; List<string * int>.Empty |]
         [| box "a"; List<string * int>.Empty |]
         [| box "a"; [ "b", 2 ] |]
@@ -319,7 +320,7 @@ module ``BeOneOf with mapping`` =
 
     [<Theory>]
     [<MemberData(nameof failData)>]
-    let ``Fails if not found`` (subject: string) (expected: seq<string * int>) =
+    let ``Fails if not found`` (subject: string | null) (expected: seq<string | null * int>) =
         assertFails (fun () -> subject.Should().BeOneOf(expected))
 
 
@@ -361,7 +362,7 @@ module NotBeOneOf =
 
 
     let passData = [
-        [| box<string> null; List<string>.Empty |]
+        [| box nul<string>; List<string>.Empty |]
         [| "a"; List<string>.Empty |]
         [| box "a"; List<string>.Empty |]
         [| box "a"; [ "b" ] |]
@@ -371,11 +372,12 @@ module NotBeOneOf =
 
     [<Theory>]
     [<MemberData(nameof passData)>]
-    let ``Passes if not found`` (subject: string) (expected: seq<string>) = subject.Should().NotBeOneOf(expected)
+    let ``Passes if not found`` (subject: string | null) (expected: seq<string | null>) =
+        subject.Should().NotBeOneOf(expected)
 
 
     let failData = [
-        [| box<string> null; [ (null: string) ] |]
+        [| box nul<string>; [ nul<string> ] |]
         [| box "a"; [ "a" ] |]
         [| box "a"; [ "a"; "b" ] |]
     ]
@@ -383,7 +385,7 @@ module NotBeOneOf =
 
     [<Theory>]
     [<MemberData(nameof failData)>]
-    let ``Fails if found`` (subject: string) (expected: seq<string>) =
+    let ``Fails if found`` (subject: string | null) (expected: seq<string | null>) =
         assertFails (fun () -> subject.Should().NotBeOneOf(expected))
 
 
@@ -435,7 +437,7 @@ module BeSameAs =
 
     [<Theory>]
     [<MemberData(nameof passData)>]
-    let ``Passes if reference equal`` (subject: obj) (expected: obj) = subject.Should().BeSameAs(expected)
+    let ``Passes if reference equal`` (subject: obj | null) (expected: obj | null) = subject.Should().BeSameAs(expected)
 
 
     let failData = [
@@ -450,13 +452,13 @@ module BeSameAs =
 
     [<Theory>]
     [<MemberData(nameof failData)>]
-    let ``Fails if not reference equal`` (subject: obj) (expected: obj) =
+    let ``Fails if not reference equal`` (subject: obj | null) (expected: obj | null) =
         assertFails (fun () -> subject.Should().BeSameAs(expected))
 
 
     [<Fact>]
     let ``Fails with expected message if only subject is null`` () =
-        let x: string = null
+        let x = nul<string>
         let y = "asd"
 
         fun () -> x.Should().BeSameAs(y)
@@ -475,7 +477,7 @@ But was: null
     [<Fact>]
     let ``Fails with expected message if only expected is null`` () =
         let x = "a"
-        let y: string = null
+        let y = Unchecked.defaultof<string>
 
         fun () -> x.Should().BeSameAs(y)
         |> assertExnMsg
@@ -553,7 +555,8 @@ module NotBeSameAs =
 
     [<Theory>]
     [<MemberData(nameof passData)>]
-    let ``Passes if not reference equal`` (subject: obj) (expected: obj) = subject.Should().NotBeSameAs(expected)
+    let ``Passes if not reference equal`` (subject: obj | null) (expected: obj | null) =
+        subject.Should().NotBeSameAs(expected)
 
 
     let failData = [
@@ -567,14 +570,14 @@ module NotBeSameAs =
 
     [<Theory>]
     [<MemberData(nameof failData)>]
-    let ``Fails if reference equal`` (subject: obj) (expected: obj) =
+    let ``Fails if reference equal`` (subject: obj | null) (expected: obj | null) =
         assertFails (fun () -> subject.Should().NotBeSameAs(expected))
 
 
     [<Fact>]
     let ``Fails with expected message if both are null`` () =
-        let x: obj = null
-        let y: obj = null
+        let x: obj | null = null
+        let y: obj | null = null
 
         fun () -> x.Should().NotBeSameAs(y)
         |> assertExnMsg
@@ -619,13 +622,13 @@ module BeNull =
 
     [<Fact>]
     let ``Passes if null and can be chained with And`` () =
-        (null: string).Should().BeNull().Id<And<string>>().And.BeNull()
+        nul<string>.Should().BeNull().Id<And<string | null>>().And.BeNull()
 
 
     [<Fact>]
     let ``Fails with expected message if not null`` () =
         fun () ->
-            let x = "asd"
+            let x = asNull "asd"
             x.Should().BeNull()
         |> assertExnMsg
             """
@@ -638,7 +641,7 @@ But was: asd
     [<Fact>]
     let ``Fails with expected message with because if not null`` () =
         fun () ->
-            let x = "asd"
+            let x = asNull "asd"
             x.Should().BeNull("Some reason")
         |> assertExnMsg
             """
@@ -666,7 +669,7 @@ module NotBeNull =
     [<Fact>]
     let ``Fails with expected message if null`` () =
         fun () ->
-            let x: obj = null
+            let x: obj | null = null
             x.Should().NotBeNull()
         |> assertExnMsg
             """
@@ -679,7 +682,7 @@ But was: null
     [<Fact>]
     let ``Fails with expected message with because if null`` () =
         fun () ->
-            let x: obj = null
+            let x: obj | null = null
             x.Should().NotBeNull("Some reason")
         |> assertExnMsg
             """
@@ -712,7 +715,7 @@ module ``BeOfType non-generic`` =
 
 
     let failData = [
-        [| box (null: string); typeof<string> |]
+        [| box nul<string>; typeof<string> |]
         [| 1; typeof<string> |]
         // Cast as sanity check to avoid false negatives
         [| TestSubType() :> TestBaseType :> obj; typeof<TestBaseType> |]
@@ -722,14 +725,14 @@ module ``BeOfType non-generic`` =
 
     [<Theory>]
     [<MemberData(nameof failData)>]
-    let ``Fails for null or instances of other types than the specified type`` (subject: obj) (expected: Type) =
+    let ``Fails for instances of other types than the specified type`` (subject: obj | null) (expected: Type) =
         assertFails (fun () -> subject.Should().BeOfType(expected))
 
 
     [<Fact>]
     let ``Fails with expected message if null`` () =
         fun () ->
-            let (x: string) = null
+            let x = nul<string>
             x.Should().BeOfType(typeof<string>)
         |> assertExnMsg
             """
@@ -743,7 +746,7 @@ But was: null
     [<Fact>]
     let ``Fails with expected message with because if null`` () =
         fun () ->
-            let (x: string) = null
+            let x = nul<string>
             x.Should().BeOfType(typeof<string>, "Some reason")
         |> assertExnMsg
             """
@@ -817,7 +820,7 @@ module ``BeOfType generic`` =
 
 
     let failData = [
-        [| box (null: string); beOfType<string> |]
+        [| box nul<string>; beOfType<string> |]
         [| 1; beOfType<string> |]
         // Cast as sanity check to avoid false negatives
         [| TestSubType() :> TestBaseType :> obj; beOfType<TestBaseType> |]
@@ -827,14 +830,14 @@ module ``BeOfType generic`` =
 
     [<Theory>]
     [<MemberData(nameof failData)>]
-    let ``Fails for null or instances of other types than the specified type`` (subject: obj) run =
+    let ``Fails for null or instances of other types than the specified type`` (subject: obj | null) run =
         assertFails (fun () -> run (subject.Should()))
 
 
     [<Fact>]
     let ``Fails with expected message if null`` () =
         fun () ->
-            let (x: string) = null
+            let x = nul<string>
             x.Should().BeOfType<string>()
         |> assertExnMsg
             """
@@ -848,7 +851,7 @@ But was: null
     [<Fact>]
     let ``Fails with expected message with because if null`` () =
         fun () ->
-            let (x: string) = null
+            let x = nul<string>
             x.Should().BeOfType<string>("Some reason")
         |> assertExnMsg
             """
@@ -915,7 +918,7 @@ module ``BeAssignableTo non-generic`` =
 
 
     let failData = [
-        [| box (null: string); typeof<string> |]
+        [| box nul<string>; typeof<string> |]
         [| 1; typeof<string> |]
         [| TestBaseType(); typeof<TestSubType> |]
     ]
@@ -923,14 +926,14 @@ module ``BeAssignableTo non-generic`` =
 
     [<Theory>]
     [<MemberData(nameof failData)>]
-    let ``Fails for null or instances of incompatible types`` (subject: obj) (expected: Type) =
+    let ``Fails for null or instances of incompatible types`` (subject: obj | null) (expected: Type) =
         assertFails (fun () -> subject.Should().BeAssignableTo(expected))
 
 
     [<Fact>]
     let ``Fails with expected message if null`` () =
         fun () ->
-            let (x: string) = null
+            let x = nul<string>
             x.Should().BeAssignableTo(typeof<string>)
         |> assertExnMsg
             """
@@ -944,7 +947,7 @@ But was: null
     [<Fact>]
     let ``Fails with expected message with because if null`` () =
         fun () ->
-            let (x: string) = null
+            let x = nul<string>
             x.Should().BeAssignableTo(typeof<string>, "Some reason")
         |> assertExnMsg
             """
@@ -1020,7 +1023,7 @@ module ``BeAssignableTo generic`` =
 
 
     let failData = [
-        [| box (null: string); beAssignableTo<string> |]
+        [| box nul<string>; beAssignableTo<string> |]
         [| 1; beAssignableTo<string> |]
         [| TestBaseType(); beAssignableTo<TestSubType> |]
     ]
@@ -1028,14 +1031,14 @@ module ``BeAssignableTo generic`` =
 
     [<Theory>]
     [<MemberData(nameof failData)>]
-    let ``Fails for null or instances of incompatible types`` (subject: obj) run =
+    let ``Fails for null or instances of incompatible types`` (subject: obj | null) run =
         assertFails (fun () -> run (subject.Should()))
 
 
     [<Fact>]
     let ``Fails with expected message if null`` () =
         fun () ->
-            let (x: string) = null
+            let x = nul<string>
             x.Should().BeAssignableTo<string>()
         |> assertExnMsg
             """
@@ -1049,7 +1052,7 @@ But was: null
     [<Fact>]
     let ``Fails with expected message with because if null`` () =
         fun () ->
-            let (x: string) = null
+            let x = nul<string>
             x.Should().BeAssignableTo<string>("Some reason")
         |> assertExnMsg
             """

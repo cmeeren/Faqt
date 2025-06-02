@@ -69,13 +69,6 @@ module BeCloseTo =
 
 
     [<Fact>]
-    let ``Fails if null`` () =
-        assertFails (fun () ->
-            Unchecked.defaultof<NumberWithoutOps>.Should().BeCloseTo(NumberWithSubtraction 1, Comparison 0)
-        )
-
-
-    [<Fact>]
     let ``Fails with expected message`` () =
         fun () ->
             let x = 1.09
@@ -150,11 +143,6 @@ module NotBeCloseTo =
     [<InlineData(1.5, 1., 0.5)>] // At upper bound
     let ``Fails if within tolerance`` (subject: float) (target: float) (tolerance: float) =
         assertFails (fun () -> subject.Should().NotBeCloseTo(target, tolerance))
-
-
-    [<Fact>]
-    let ``Passes if null`` () =
-        Unchecked.defaultof<NumberWithoutOps>.Should().NotBeCloseTo(NumberWithSubtraction 1, Comparison 0)
 
 
     [<Fact>]
@@ -317,11 +305,6 @@ module BeLessThan =
 
 
     [<Fact>]
-    let ``Fails if null`` () =
-        assertFails (fun () -> Unchecked.defaultof<Comparison>.Should().BeLessThan(Comparison 0))
-
-
-    [<Fact>]
     let ``Fails with expected message`` () =
         fun () ->
             let x = 0
@@ -368,11 +351,6 @@ module BeLessThanOrEqualTo =
     [<InlineData(0, 0)>] // subject = other
     let ``Passes if subject <= other`` (subject: int) (other: int) =
         subject.Should().BeLessThanOrEqualTo(other)
-
-
-    [<Fact>]
-    let ``Fails if null`` () =
-        assertFails (fun () -> Unchecked.defaultof<Comparison>.Should().BeLessThanOrEqualTo(Comparison 0))
 
 
     [<Fact>]
@@ -477,11 +455,6 @@ module BeNegative =
 
 
     [<Fact>]
-    let ``Fails if null`` () =
-        assertFails (fun () -> Unchecked.defaultof<ComparisonZero>.Should().BeNegative())
-
-
-    [<Fact>]
     let ``Fails with expected message`` () =
         fun () ->
             let x = 0
@@ -576,11 +549,6 @@ module BeNonPositive =
     [<InlineData(0)>]
     [<InlineData(-1)>]
     let ``Passes if subject is zero or negative`` (subject: int) = subject.Should().BeNonPositive()
-
-
-    [<Fact>]
-    let ``Fails if null`` () =
-        assertFails (fun () -> Unchecked.defaultof<ComparisonZero>.Should().BeNonPositive())
 
 
     [<Fact>]

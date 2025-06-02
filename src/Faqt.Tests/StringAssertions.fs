@@ -132,8 +132,7 @@ module ``BeUpperCase with culture`` =
 
 
     let failData = [
-        [| box null; CultureInfo.InvariantCulture |]
-        [| "a"; CultureInfo.InvariantCulture |]
+        [| box "a"; CultureInfo.InvariantCulture |]
         [| "Aa"; CultureInfo.InvariantCulture |]
         [| "å"; CultureInfo.InvariantCulture |]
         [| "ı"; CultureInfo("tr-TR") |] // No casing in invariant culture, lower in Turkish
@@ -142,11 +141,16 @@ module ``BeUpperCase with culture`` =
 
     [<Theory>]
     [<MemberData(nameof failData)>]
-    let ``Fails if null or containing lower-case characters in the specified culture``
+    let ``Fails if containing lower-case characters in the specified culture``
         (subject: string)
         (culture: CultureInfo)
         =
         assertFails (fun () -> subject.Should().BeUpperCase(culture))
+
+
+    [<Fact>]
+    let ``Throws if null`` () =
+        assertThrows (fun () -> Unchecked.defaultof<string>.Should().BeUpperCase(CultureInfo.InvariantCulture))
 
 
     [<Fact>]
@@ -195,13 +199,18 @@ module ``BeUpperCase without culture`` =
         subject.Should().BeUpperCase()
 
 
-    let failData = [ [| null |]; [| "a" |]; [| "Aa" |]; [| "å" |] ]
+    let failData = [ [| "a" |]; [| "Aa" |]; [| "å" |] ]
 
 
     [<Theory>]
     [<MemberData(nameof failData)>]
-    let ``Fails if null or containing lower-case characters in the specified culture`` (subject: string) =
+    let ``Fails if containing lower-case characters in the specified culture`` (subject: string) =
         assertFails (fun () -> subject.Should().BeUpperCase())
+
+
+    [<Fact>]
+    let ``Throws if null`` () =
+        assertThrows (fun () -> Unchecked.defaultof<string>.Should().BeUpperCase())
 
 
     [<Fact>]
@@ -260,8 +269,7 @@ module ``BeLowerCase with culture`` =
 
 
     let failData = [
-        [| box null; CultureInfo.InvariantCulture |]
-        [| "A"; CultureInfo.InvariantCulture |]
+        [| box "A"; CultureInfo.InvariantCulture |]
         [| "Aa"; CultureInfo.InvariantCulture |]
         [| "Å"; CultureInfo.InvariantCulture |]
     ]
@@ -269,11 +277,16 @@ module ``BeLowerCase with culture`` =
 
     [<Theory>]
     [<MemberData(nameof failData)>]
-    let ``Fails if null or containing lower-case characters in the specified culture``
+    let ``Fails if containing lower-case characters in the specified culture``
         (subject: string)
         (culture: CultureInfo)
         =
         assertFails (fun () -> subject.Should().BeLowerCase(culture))
+
+
+    [<Fact>]
+    let ``Throws if null`` () =
+        assertThrows (fun () -> Unchecked.defaultof<string>.Should().BeLowerCase(CultureInfo.InvariantCulture))
 
 
     [<Fact>]
@@ -322,13 +335,18 @@ module ``BeLowerCase without culture`` =
         subject.Should().BeLowerCase()
 
 
-    let failData = [ [| null |]; [| "A" |]; [| "Aa" |]; [| "Å" |] ]
+    let failData = [ [| "A" |]; [| "Aa" |]; [| "Å" |] ]
 
 
     [<Theory>]
     [<MemberData(nameof failData)>]
-    let ``Fails if null or containing lower-case characters in the specified culture`` (subject: string) =
+    let ``Fails if containing upper-case characters in the specified culture`` (subject: string) =
         assertFails (fun () -> subject.Should().BeLowerCase())
+
+
+    [<Fact>]
+    let ``Throws if null`` () =
+        assertThrows (fun () -> Unchecked.defaultof<string>.Should().BeLowerCase())
 
 
     [<Fact>]
@@ -369,7 +387,6 @@ module ``Be with StringComparison`` =
 
 
     [<Theory>]
-    [<InlineData(null, null, StringComparison.Ordinal, "")>]
     [<InlineData("", "", StringComparison.Ordinal, "")>]
     [<InlineData("a", "a", StringComparison.Ordinal, "")>]
     [<InlineData("asd", "asd", StringComparison.Ordinal, "")>]
@@ -385,9 +402,12 @@ module ``Be with StringComparison`` =
         subject.Should().Be(substring, comparison)
 
 
+    [<Fact>]
+    let ``Passes if both are null`` () =
+        Unchecked.defaultof<string>.Should().Be(Unchecked.defaultof<string>, StringComparison.Ordinal)
+
+
     [<Theory>]
-    [<InlineData(null, "", StringComparison.Ordinal, "")>]
-    [<InlineData("", null, StringComparison.Ordinal, "")>]
     [<InlineData("", "a", StringComparison.Ordinal, "")>]
     [<InlineData("a", "", StringComparison.Ordinal, "")>]
     [<InlineData("a", "b", StringComparison.Ordinal, "")>]
@@ -461,8 +481,6 @@ module ``NotBe with StringComparison`` =
 
 
     [<Theory>]
-    [<InlineData(null, "", StringComparison.Ordinal, "")>]
-    [<InlineData("", null, StringComparison.Ordinal, "")>]
     [<InlineData("", "a", StringComparison.Ordinal, "")>]
     [<InlineData("a", "", StringComparison.Ordinal, "")>]
     [<InlineData("a", "b", StringComparison.Ordinal, "")>]
@@ -478,8 +496,17 @@ module ``NotBe with StringComparison`` =
         subject.Should().NotBe(substring, comparison)
 
 
+    [<Fact>]
+    let ``Passes if only subject is null`` () =
+        Unchecked.defaultof<string>.Should().NotBe("", StringComparison.Ordinal)
+
+
+    [<Fact>]
+    let ``Passes if only other is null`` () =
+        "".Should().NotBe(Unchecked.defaultof<string>, StringComparison.Ordinal)
+
+
     [<Theory>]
-    [<InlineData(null, null, StringComparison.Ordinal, "")>]
     [<InlineData("", "", StringComparison.Ordinal, "")>]
     [<InlineData("a", "a", StringComparison.Ordinal, "")>]
     [<InlineData("asd", "asd", StringComparison.Ordinal, "")>]
@@ -570,11 +597,10 @@ module ``Contain with StringComparison`` =
 
 
     [<Theory>]
-    [<InlineData(null, "", StringComparison.Ordinal, "")>]
     [<InlineData("a", "A", StringComparison.Ordinal, "")>]
     [<InlineData("asd", "f", StringComparison.Ordinal, "")>]
     [<InlineData("i", "İ", StringComparison.InvariantCultureIgnoreCase, "")>] // Different casings of same letter in Turkish, but not invariant
-    let ``Fails if null or not containing substring using the specified StringComparison``
+    let ``Fails if not containing substring using the specified StringComparison``
         (subject: string)
         (substring: string)
         (comparison: StringComparison)
@@ -585,8 +611,13 @@ module ``Contain with StringComparison`` =
 
 
     [<Fact>]
-    let ``Throws ArgumentNullException if substring is null`` () =
-        Assert.Throws<ArgumentNullException>(fun () -> "".Should().Contain(null, StringComparison.Ordinal) |> ignore)
+    let ``Throws if null`` () =
+        assertThrows (fun () -> Unchecked.defaultof<string>.Should().Contain("", StringComparison.Ordinal))
+
+
+    [<Fact>]
+    let ``Throws if substring is null`` () =
+        assertThrows (fun () -> "".Should().Contain(Unchecked.defaultof<string>, StringComparison.Ordinal))
 
 
     [<Fact>]
@@ -655,16 +686,20 @@ module ``Contain without StringComparison`` =
 
 
     [<Theory>]
-    [<InlineData(null, "")>]
     [<InlineData("a", "A")>]
     [<InlineData("asd", "f")>]
-    let ``Fails if null or not containing substring`` (subject: string) (substring: string) =
+    let ``Fails if not containing substring`` (subject: string) (substring: string) =
         assertFails (fun () -> subject.Should().Contain(substring))
 
 
     [<Fact>]
-    let ``Throws ArgumentNullException if substring is null`` () =
-        Assert.Throws<ArgumentNullException>(fun () -> "".Should().Contain(null) |> ignore)
+    let ``Throws if null`` () =
+        assertThrows (fun () -> Unchecked.defaultof<string>.Should().Contain(""))
+
+
+    [<Fact>]
+    let ``Throws if substring is null`` () =
+        assertThrows (fun () -> "".Should().Contain(Unchecked.defaultof<string>))
 
 
     [<Fact>]
@@ -707,11 +742,10 @@ module ``NotContain with StringComparison`` =
 
 
     [<Theory>]
-    [<InlineData(null, "", StringComparison.Ordinal, "")>]
     [<InlineData("a", "A", StringComparison.Ordinal, "")>]
     [<InlineData("asd", "f", StringComparison.Ordinal, "")>]
     [<InlineData("i", "İ", StringComparison.InvariantCultureIgnoreCase, "")>] // Different casings of same letter in Turkish, but not invariant
-    let ``Passes if null or not containing substring using the specified StringComparison``
+    let ``Passes if not containing substring using the specified StringComparison``
         (subject: string)
         (substring: string)
         (comparison: StringComparison)
@@ -739,8 +773,13 @@ module ``NotContain with StringComparison`` =
 
 
     [<Fact>]
-    let ``Throws ArgumentNullException if substring is null`` () =
-        Assert.Throws<ArgumentNullException>(fun () -> "".Should().NotContain(null, StringComparison.Ordinal) |> ignore)
+    let ``Throws if null`` () =
+        assertThrows (fun () -> Unchecked.defaultof<string>.Should().NotContain("", StringComparison.Ordinal))
+
+
+    [<Fact>]
+    let ``Throws if substring is null`` () =
+        assertThrows (fun () -> "".Should().NotContain(Unchecked.defaultof<string>, StringComparison.Ordinal))
 
 
     [<Fact>]
@@ -801,10 +840,9 @@ module ``NotContain without StringComparison`` =
 
 
     [<Theory>]
-    [<InlineData(null, "")>]
     [<InlineData("a", "A")>]
     [<InlineData("asd", "f")>]
-    let ``Passes if null or not containing substring`` (subject: string) (substring: string) =
+    let ``Passes if not containing substring`` (subject: string) (substring: string) =
         subject.Should().NotContain(substring)
 
 
@@ -817,8 +855,13 @@ module ``NotContain without StringComparison`` =
 
 
     [<Fact>]
-    let ``Throws ArgumentNullException if substring is null`` () =
-        Assert.Throws<ArgumentNullException>(fun () -> "".Should().NotContain(null) |> ignore)
+    let ``Throws if null`` () =
+        assertThrows (fun () -> Unchecked.defaultof<string>.Should().NotContain(""))
+
+
+    [<Fact>]
+    let ``Throws if substring is null`` () =
+        assertThrows (fun () -> "".Should().NotContain(Unchecked.defaultof<string>))
 
 
     [<Fact>]
@@ -878,11 +921,10 @@ module ``StartWith with StringComparison`` =
 
 
     [<Theory>]
-    [<InlineData(null, "", StringComparison.Ordinal, "")>]
     [<InlineData("a", "A", StringComparison.Ordinal, "")>]
     [<InlineData("asd", "s", StringComparison.Ordinal, "")>]
     [<InlineData("i", "İ", StringComparison.InvariantCultureIgnoreCase, "")>] // Different casings of same letter in Turkish, but not invariant
-    let ``Fails if null or not starting with substring using the specified StringComparison``
+    let ``Fails if not starting with substring using the specified StringComparison``
         (subject: string)
         (substring: string)
         (comparison: StringComparison)
@@ -893,8 +935,13 @@ module ``StartWith with StringComparison`` =
 
 
     [<Fact>]
-    let ``Throws ArgumentNullException if substring is null`` () =
-        Assert.Throws<ArgumentNullException>(fun () -> "".Should().StartWith(null, StringComparison.Ordinal) |> ignore)
+    let ``Throws if null`` () =
+        assertThrows (fun () -> Unchecked.defaultof<string>.Should().StartWith("", StringComparison.Ordinal))
+
+
+    [<Fact>]
+    let ``Throws if substring is null`` () =
+        assertThrows (fun () -> "".Should().StartWith(Unchecked.defaultof<string>, StringComparison.Ordinal))
 
 
     [<Fact>]
@@ -963,16 +1010,20 @@ module ``StartWith without StringComparison`` =
 
 
     [<Theory>]
-    [<InlineData(null, "")>]
     [<InlineData("a", "A")>]
     [<InlineData("asd", "s")>]
-    let ``Fails if null or not starting with substring`` (subject: string) (substring: string) =
+    let ``Fails if not starting with substring`` (subject: string) (substring: string) =
         assertFails (fun () -> subject.Should().StartWith(substring))
 
 
     [<Fact>]
-    let ``Throws ArgumentNullException if substring is null`` () =
-        Assert.Throws<ArgumentNullException>(fun () -> "".Should().StartWith(null) |> ignore)
+    let ``Throws if null`` () =
+        assertThrows (fun () -> Unchecked.defaultof<string>.Should().StartWith(""))
+
+
+    [<Fact>]
+    let ``Throws if substring is null`` () =
+        assertThrows (fun () -> "".Should().StartWith(Unchecked.defaultof<string>))
 
 
     [<Fact>]
@@ -1015,11 +1066,10 @@ module ``NotStartWith with StringComparison`` =
 
 
     [<Theory>]
-    [<InlineData(null, "", StringComparison.Ordinal, "")>]
     [<InlineData("a", "A", StringComparison.Ordinal, "")>]
     [<InlineData("asd", "s", StringComparison.Ordinal, "")>]
     [<InlineData("i", "İ", StringComparison.InvariantCultureIgnoreCase, "")>] // Different casings of same letter in Turkish, but not invariant
-    let ``Passes if null or not starting with substring using the specified StringComparison``
+    let ``Passes if not starting with substring using the specified StringComparison``
         (subject: string)
         (substring: string)
         (comparison: StringComparison)
@@ -1047,9 +1097,15 @@ module ``NotStartWith with StringComparison`` =
 
 
     [<Fact>]
-    let ``Throws ArgumentNullException if substring is null`` () =
-        Assert.Throws<ArgumentNullException>(fun () ->
-            "".Should().NotStartWith(null, StringComparison.Ordinal) |> ignore
+    let ``Throws if null`` () =
+        assertThrows (fun () -> Unchecked.defaultof<string>.Should().NotStartWith("", StringComparison.Ordinal))
+
+
+    [<Fact>]
+    let ``Throws if substring is null`` () =
+        assertThrows (fun () ->
+            "".Should().NotStartWith(Unchecked.defaultof<string>, StringComparison.Ordinal)
+            |> ignore
         )
 
 
@@ -1111,10 +1167,9 @@ module ``NotStartWith without StringComparison`` =
 
 
     [<Theory>]
-    [<InlineData(null, "")>]
     [<InlineData("a", "A")>]
     [<InlineData("asd", "s")>]
-    let ``Passes if null or not starting with substring`` (subject: string) (substring: string) =
+    let ``Passes if not starting with substring`` (subject: string) (substring: string) =
         subject.Should().NotStartWith(substring)
 
 
@@ -1127,8 +1182,13 @@ module ``NotStartWith without StringComparison`` =
 
 
     [<Fact>]
-    let ``Throws ArgumentNullException if substring is null`` () =
-        Assert.Throws<ArgumentNullException>(fun () -> "".Should().NotStartWith(null) |> ignore)
+    let ``Throws if null`` () =
+        assertThrows (fun () -> Unchecked.defaultof<string>.Should().NotStartWith(""))
+
+
+    [<Fact>]
+    let ``Throws if substring is null`` () =
+        assertThrows (fun () -> "".Should().NotStartWith(Unchecked.defaultof<string>))
 
 
     [<Fact>]
@@ -1188,11 +1248,10 @@ module ``EndWith with StringComparison`` =
 
 
     [<Theory>]
-    [<InlineData(null, "", StringComparison.Ordinal, "")>]
     [<InlineData("a", "A", StringComparison.Ordinal, "")>]
     [<InlineData("asd", "s", StringComparison.Ordinal, "")>]
     [<InlineData("i", "İ", StringComparison.InvariantCultureIgnoreCase, "")>] // Different casings of same letter in Turkish, but not invariant
-    let ``Fails if null or not ending with substring using the specified StringComparison``
+    let ``Fails if not ending with substring using the specified StringComparison``
         (subject: string)
         (substring: string)
         (comparison: StringComparison)
@@ -1203,8 +1262,13 @@ module ``EndWith with StringComparison`` =
 
 
     [<Fact>]
-    let ``Throws ArgumentNullException if substring is null`` () =
-        Assert.Throws<ArgumentNullException>(fun () -> "".Should().EndWith(null, StringComparison.Ordinal) |> ignore)
+    let ``Throws if null`` () =
+        assertThrows (fun () -> Unchecked.defaultof<string>.Should().EndWith("", StringComparison.Ordinal))
+
+
+    [<Fact>]
+    let ``Throws if substring is null`` () =
+        assertThrows (fun () -> "".Should().EndWith(Unchecked.defaultof<string>, StringComparison.Ordinal))
 
 
     [<Fact>]
@@ -1273,16 +1337,20 @@ module ``EndWith without StringComparison`` =
 
 
     [<Theory>]
-    [<InlineData(null, "")>]
     [<InlineData("a", "A")>]
     [<InlineData("asd", "s")>]
-    let ``Fails if null or not ending with substring`` (subject: string) (substring: string) =
+    let ``Fails if not ending with substring`` (subject: string) (substring: string) =
         assertFails (fun () -> subject.Should().EndWith(substring))
 
 
     [<Fact>]
-    let ``Throws ArgumentNullException if substring is null`` () =
-        Assert.Throws<ArgumentNullException>(fun () -> "".Should().EndWith(null) |> ignore)
+    let ``Throws if null`` () =
+        assertThrows (fun () -> Unchecked.defaultof<string>.Should().EndWith(""))
+
+
+    [<Fact>]
+    let ``Throws if substring is null`` () =
+        assertThrows (fun () -> "".Should().EndWith(Unchecked.defaultof<string>))
 
 
     [<Fact>]
@@ -1325,11 +1393,10 @@ module ``NotEndWith with StringComparison`` =
 
 
     [<Theory>]
-    [<InlineData(null, "", StringComparison.Ordinal, "")>]
     [<InlineData("a", "A", StringComparison.Ordinal, "")>]
     [<InlineData("asd", "s", StringComparison.Ordinal, "")>]
     [<InlineData("i", "İ", StringComparison.InvariantCultureIgnoreCase, "")>] // Different casings of same letter in Turkish, but not invariant
-    let ``Passes if null or not ending with substring using the specified StringComparison``
+    let ``Passes if not ending with substring using the specified StringComparison``
         (subject: string)
         (substring: string)
         (comparison: StringComparison)
@@ -1357,8 +1424,13 @@ module ``NotEndWith with StringComparison`` =
 
 
     [<Fact>]
-    let ``Throws ArgumentNullException if substring is null`` () =
-        Assert.Throws<ArgumentNullException>(fun () -> "".Should().NotEndWith(null, StringComparison.Ordinal) |> ignore)
+    let ``Throws if null`` () =
+        assertThrows (fun () -> Unchecked.defaultof<string>.Should().NotEndWith("", StringComparison.Ordinal))
+
+
+    [<Fact>]
+    let ``Throws if substring is null`` () =
+        assertThrows (fun () -> "".Should().NotEndWith(Unchecked.defaultof<string>, StringComparison.Ordinal))
 
 
     [<Fact>]
@@ -1419,10 +1491,9 @@ module ``NotEndWith without StringComparison`` =
 
 
     [<Theory>]
-    [<InlineData(null, "")>]
     [<InlineData("a", "A")>]
     [<InlineData("asd", "s")>]
-    let ``Passes if null or not ending with substring`` (subject: string) (substring: string) =
+    let ``Passes if not ending with substring`` (subject: string) (substring: string) =
         subject.Should().NotEndWith(substring)
 
 
@@ -1435,8 +1506,13 @@ module ``NotEndWith without StringComparison`` =
 
 
     [<Fact>]
-    let ``Throws ArgumentNullException if substring is null`` () =
-        Assert.Throws<ArgumentNullException>(fun () -> "".Should().NotEndWith(null) |> ignore)
+    let ``Throws if null`` () =
+        assertThrows (fun () -> Unchecked.defaultof<string>.Should().NotEndWith(""))
+
+
+    [<Fact>]
+    let ``Throws if substring is null`` () =
+        assertThrows (fun () -> "".Should().NotEndWith(Unchecked.defaultof<string>))
 
 
     [<Fact>]
@@ -1488,17 +1564,21 @@ module ``MatchRegex with Regex`` =
 
 
     [<Theory>]
-    [<InlineData(null, ".*", RegexOptions.None)>]
     [<InlineData("", ".+", RegexOptions.None)>]
     [<InlineData("asd", "^as$", RegexOptions.None)>]
     [<InlineData("asd", "^ASD$", RegexOptions.None)>]
-    let ``Fails if null or not matching regex`` (subject: string) (pattern: string) (options: RegexOptions) =
+    let ``Fails if not matching regex`` (subject: string) (pattern: string) (options: RegexOptions) =
         assertFails (fun () -> subject.Should().MatchRegex(Regex(pattern, options)))
 
 
     [<Fact>]
-    let ``Throws ArgumentNullException if regex is null`` () =
-        Assert.Throws<ArgumentNullException>(fun () -> "".Should().MatchRegex(null: Regex) |> ignore)
+    let ``Throws if null`` () =
+        assertThrows (fun () -> Unchecked.defaultof<string>.Should().MatchRegex(Regex(".*")))
+
+
+    [<Fact>]
+    let ``Throws if regex is null`` () =
+        assertThrows (fun () -> "".Should().MatchRegex(Unchecked.defaultof<Regex>))
 
 
     [<Fact>]
@@ -1564,23 +1644,21 @@ module ``MatchRegex with string and options`` =
 
 
     [<Theory>]
-    [<InlineData(null, ".*", RegexOptions.None)>]
     [<InlineData("", ".+", RegexOptions.None)>]
     [<InlineData("asd", "^as$", RegexOptions.None)>]
     [<InlineData("asd", "^ASD$", RegexOptions.None)>]
-    let ``Fails if null or not matching pattern with options``
-        (subject: string)
-        (pattern: string)
-        (options: RegexOptions)
-        =
+    let ``Fails if not matching pattern with options`` (subject: string) (pattern: string) (options: RegexOptions) =
         assertFails (fun () -> subject.Should().MatchRegex(pattern, options))
 
 
     [<Fact>]
-    let ``Throws ArgumentNullException if pattern is null`` () =
-        Assert.Throws<ArgumentNullException>(fun () ->
-            "".Should().MatchRegex((null: string), RegexOptions.None) |> ignore
-        )
+    let ``Throws if null`` () =
+        assertThrows (fun () -> Unchecked.defaultof<string>.Should().MatchRegex(".*", RegexOptions.None))
+
+
+    [<Fact>]
+    let ``Throws if pattern is null`` () =
+        assertThrows (fun () -> "".Should().MatchRegex(Unchecked.defaultof<string>, RegexOptions.None))
 
 
     [<Fact>]
@@ -1644,17 +1722,21 @@ module ``MatchRegex with string`` =
 
 
     [<Theory>]
-    [<InlineData(null, ".*")>]
     [<InlineData("", ".+")>]
     [<InlineData("asd", "^as$")>]
     [<InlineData("asd", "^ASD$")>]
-    let ``Fails if null or not matching pattern with options`` (subject: string) (pattern: string) =
+    let ``Fails if not matching pattern with options`` (subject: string) (pattern: string) =
         assertFails (fun () -> subject.Should().MatchRegex(pattern))
 
 
     [<Fact>]
-    let ``Throws ArgumentNullException if pattern is null`` () =
-        Assert.Throws<ArgumentNullException>(fun () -> "".Should().MatchRegex(null: string) |> ignore)
+    let ``Throws if null`` () =
+        assertThrows (fun () -> Unchecked.defaultof<string>.Should().MatchRegex(".*"))
+
+
+    [<Fact>]
+    let ``Throws if pattern is null`` () =
+        assertThrows (fun () -> "".Should().MatchRegex(Unchecked.defaultof<string>))
 
 
     [<Fact>]
@@ -1695,11 +1777,10 @@ module ``NotMatchRegex with Regex`` =
 
 
     [<Theory>]
-    [<InlineData(null, ".*", RegexOptions.None)>]
     [<InlineData("", ".+", RegexOptions.None)>]
     [<InlineData("asd", "^as$", RegexOptions.None)>]
     [<InlineData("asd", "^ASD$", RegexOptions.None)>]
-    let ``Passes if null or not matching regex`` (subject: string) (pattern: string) (options: RegexOptions) =
+    let ``Passes if not matching regex`` (subject: string) (pattern: string) (options: RegexOptions) =
         subject.Should().NotMatchRegex(Regex(pattern, options))
 
 
@@ -1713,8 +1794,13 @@ module ``NotMatchRegex with Regex`` =
 
 
     [<Fact>]
-    let ``Throws ArgumentNullException if regex is null`` () =
-        Assert.Throws<ArgumentNullException>(fun () -> "".Should().NotMatchRegex(null: Regex) |> ignore)
+    let ``Throws if null`` () =
+        assertThrows (fun () -> Unchecked.defaultof<string>.Should().NotMatchRegex(Regex(".*")))
+
+
+    [<Fact>]
+    let ``Throws if regex is null`` () =
+        assertThrows (fun () -> "".Should().NotMatchRegex(Unchecked.defaultof<Regex>))
 
 
     [<Fact>]
@@ -1771,15 +1857,10 @@ module ``NotMatchRegex with string and options`` =
 
 
     [<Theory>]
-    [<InlineData(null, ".*", RegexOptions.None)>]
     [<InlineData("", ".+", RegexOptions.None)>]
     [<InlineData("asd", "^as$", RegexOptions.None)>]
     [<InlineData("asd", "^ASD$", RegexOptions.None)>]
-    let ``Passes if null or not matching pattern with options``
-        (subject: string)
-        (pattern: string)
-        (options: RegexOptions)
-        =
+    let ``Passes if not matching pattern with options`` (subject: string) (pattern: string) (options: RegexOptions) =
         subject.Should().NotMatchRegex(pattern, options)
 
 
@@ -1793,10 +1874,13 @@ module ``NotMatchRegex with string and options`` =
 
 
     [<Fact>]
-    let ``Throws ArgumentNullException if pattern is null`` () =
-        Assert.Throws<ArgumentNullException>(fun () ->
-            "".Should().NotMatchRegex((null: string), RegexOptions.None) |> ignore
-        )
+    let ``Throws if null`` () =
+        assertThrows (fun () -> Unchecked.defaultof<string>.Should().NotMatchRegex(".*", RegexOptions.None))
+
+
+    [<Fact>]
+    let ``Throws if pattern is null`` () =
+        assertThrows (fun () -> "".Should().NotMatchRegex(Unchecked.defaultof<string>, RegexOptions.None))
 
 
     [<Fact>]
@@ -1853,12 +1937,10 @@ module ``NotMatchRegex with string`` =
 
 
     [<Theory>]
-    [<InlineData(null, ".*")>]
     [<InlineData("", ".+")>]
     [<InlineData("asd", "^as$")>]
     [<InlineData("asd", "^ASD$")>]
-    let ``Passes if null or not matching pattern`` (subject: string) (pattern: string) =
-        subject.Should().NotMatchRegex(pattern)
+    let ``Passes if not matching pattern`` (subject: string) (pattern: string) = subject.Should().NotMatchRegex(pattern)
 
 
     [<Theory>]
@@ -1870,8 +1952,13 @@ module ``NotMatchRegex with string`` =
 
 
     [<Fact>]
-    let ``Throws ArgumentNullException if pattern is null`` () =
-        Assert.Throws<ArgumentNullException>(fun () -> "".Should().NotMatchRegex(null: string) |> ignore)
+    let ``Throws if null`` () =
+        assertThrows (fun () -> Unchecked.defaultof<string>.Should().NotMatchRegex(".*"))
+
+
+    [<Fact>]
+    let ``Throws if pattern is null`` () =
+        assertThrows (fun () -> "".Should().NotMatchRegex(Unchecked.defaultof<string>))
 
 
     [<Fact>]
@@ -1952,9 +2039,6 @@ module MatchWildcard =
 
 
     [<Theory>]
-    [<InlineData(null, "")>]
-    [<InlineData(null, "*")>]
-    [<InlineData(null, "?")>]
     [<InlineData("", "a")>]
     [<InlineData("", "?")>]
     [<InlineData("", "*?")>]
@@ -1967,13 +2051,18 @@ module MatchWildcard =
     [<InlineData("asd", "^ASD$")>]
     [<InlineData("abc\r\ndef", "abc??def")>]
     // Note: If adding more data, also add to the pass test for NotMatchWildcard
-    let ``Fails if null or not matching pattern`` (subject: string) (pattern: string) =
+    let ``Fails if not matching pattern`` (subject: string) (pattern: string) =
         assertFails (fun () -> subject.Should().MatchWildcard(pattern))
 
 
     [<Fact>]
-    let ``Throws ArgumentNullException if pattern is null`` () =
-        Assert.Throws<ArgumentNullException>(fun () -> "".Should().MatchWildcard(null) |> ignore)
+    let ``Throws if null`` () =
+        assertThrows (fun () -> Unchecked.defaultof<string>.Should().MatchWildcard("*"))
+
+
+    [<Fact>]
+    let ``Throws if pattern is null`` () =
+        assertThrows (fun () -> "".Should().MatchWildcard(Unchecked.defaultof<string>))
 
 
     [<Fact>]
@@ -2014,9 +2103,6 @@ module NotMatchWildcard =
 
 
     [<Theory>]
-    [<InlineData(null, "")>]
-    [<InlineData(null, "*")>]
-    [<InlineData(null, "?")>]
     [<InlineData("", "a")>]
     [<InlineData("", "?")>]
     [<InlineData("", "*?")>]
@@ -2029,7 +2115,7 @@ module NotMatchWildcard =
     [<InlineData("asd", "^ASD$")>]
     [<InlineData("abc\r\ndef", "abc??def")>]
     // Note: If adding more data, also add to the failure test for MatchWildcard
-    let ``Passes if null or not matching pattern`` (subject: string) (pattern: string) =
+    let ``Passes if not matching pattern`` (subject: string) (pattern: string) =
         subject.Should().NotMatchWildcard(pattern)
 
 
@@ -2074,8 +2160,13 @@ module NotMatchWildcard =
 
 
     [<Fact>]
-    let ``Throws ArgumentNullException if pattern is null`` () =
-        Assert.Throws<ArgumentNullException>(fun () -> "".Should().NotMatchWildcard(null) |> ignore)
+    let ``Throws if null`` () =
+        assertThrows (fun () -> Unchecked.defaultof<string>.Should().NotMatchWildcard("*"))
+
+
+    [<Fact>]
+    let ``Throws if pattern is null`` () =
+        assertThrows (fun () -> "".Should().NotMatchWildcard(Unchecked.defaultof<string>))
 
 
     [<Fact>]
@@ -2144,39 +2235,19 @@ module BeJsonEquivalentTo =
 
 
     [<Fact>]
-    let ``Throws ArgumentNullException if expected is null`` () =
-        Assert.Throws<ArgumentNullException>(fun () -> "".Should().BeJsonEquivalentTo(null) |> ignore)
+    let ``Throws if null`` () =
+        assertThrows (fun () -> Unchecked.defaultof<string>.Should().BeJsonEquivalentTo("0"))
+
+
+    [<Fact>]
+    let ``Throws if expected is null`` () =
+        assertThrows (fun () -> "".Should().BeJsonEquivalentTo(Unchecked.defaultof<string>))
 
 
     [<Fact>]
     let ``Throws ArgumentException if expected is not valid JSON`` () =
         let invalidJson = "a"
-        Assert.Throws<ArgumentException>(fun () -> "".Should().BeJsonEquivalentTo(invalidJson) |> ignore)
-
-
-    [<Fact>]
-    let ``Fails with expected message if null`` () =
-        fun () -> null.Should().BeJsonEquivalentTo("1")
-        |> assertExnMsg
-            """
-Subject: 'null'
-Should: BeJsonEquivalentTo
-Expected: '1'
-But was: null
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message if null with because`` () =
-        fun () -> null.Should().BeJsonEquivalentTo("1", "Some reason")
-        |> assertExnMsg
-            """
-Subject: 'null'
-Because: Some reason
-Should: BeJsonEquivalentTo
-Expected: '1'
-But was: null
-"""
+        assertThrows (fun () -> "".Should().BeJsonEquivalentTo(invalidJson))
 
 
     [<Fact>]
@@ -2332,23 +2403,31 @@ module ``DeserializeTo non-generic with options`` =
 
 
     [<Fact>]
-    let ``Fails with expected message if null`` () =
+    let ``Throws if null`` () =
+        assertThrows (fun () ->
+            Unchecked.defaultof<string>.Should().DeserializeTo(typeof<string>, JsonSerializerOptions())
+        )
+
+
+    [<Fact>]
+    let ``Fails with expected message when deserializing to null`` () =
         fun () ->
-            let x: string = null
+            let x = "null"
             x.Should().DeserializeTo(typeof<string>, JsonSerializerOptions())
         |> assertExnMsg
             """
 Subject: x
 Should: DeserializeTo
 Target type: System.String
-But was: null
+But deserialized to: null
+Subject value: 'null'
 """
 
 
     [<Fact>]
-    let ``Fails with expected message if null with because`` () =
+    let ``Fails with expected message when deserializing to null with because`` () =
         fun () ->
-            let x: string = null
+            let x = "null"
             x.Should().DeserializeTo(typeof<string>, JsonSerializerOptions(), "Some reason")
         |> assertExnMsg
             """
@@ -2356,7 +2435,8 @@ Subject: x
 Because: Some reason
 Should: DeserializeTo
 Target type: System.String
-But was: null
+But deserialized to: null
+Subject value: 'null'
 """
 
 
@@ -2449,23 +2529,29 @@ module ``DeserializeTo non-generic`` =
 
 
     [<Fact>]
-    let ``Fails with expected message if null`` () =
+    let ``Throws if null`` () =
+        assertThrows (fun () -> Unchecked.defaultof<string>.Should().DeserializeTo(typeof<string>))
+
+
+    [<Fact>]
+    let ``Fails with expected message when deserializing to null`` () =
         fun () ->
-            let x: string = null
+            let x = "null"
             x.Should().DeserializeTo(typeof<string>)
         |> assertExnMsg
             """
 Subject: x
 Should: DeserializeTo
 Target type: System.String
-But was: null
+But deserialized to: null
+Subject value: 'null'
 """
 
 
     [<Fact>]
-    let ``Fails with expected message if null with because`` () =
+    let ``Fails with expected message when deserializing to null with because`` () =
         fun () ->
-            let x: string = null
+            let x = "null"
             x.Should().DeserializeTo(typeof<string>, "Some reason")
         |> assertExnMsg
             """
@@ -2473,7 +2559,8 @@ Subject: x
 Because: Some reason
 Should: DeserializeTo
 Target type: System.String
-But was: null
+But deserialized to: null
+Subject value: 'null'
 """
 
 
@@ -2539,7 +2626,47 @@ module ``DeserializeTo generic with options`` =
             .Be(1)
 
 
-    let deserializeTo<'a> (options: JsonSerializerOptions) (t: Testable<string>) =
+    [<Fact>]
+    let ``Can deserialize option-wrapped values - Some`` () =
+        "1"
+            .Should()
+            .DeserializeTo<int option>(JsonSerializerOptions())
+            .Id<AndDerived<string, int option>>()
+            .WhoseValue.Should(())
+            .Be(Some 1)
+
+
+    [<Fact>]
+    let ``Can deserialize option-wrapped values - None`` () =
+        "null"
+            .Should()
+            .DeserializeTo<int option>(JsonSerializerOptions())
+            .Id<AndDerived<string, int option>>()
+            .WhoseValue.Should(())
+            .Be(None)
+
+
+    [<Fact>]
+    let ``Can deserialize ValueOption-wrapped values - ValueSome`` () =
+        "1"
+            .Should()
+            .DeserializeTo<int voption>(JsonSerializerOptions())
+            .Id<AndDerived<string, int voption>>()
+            .WhoseValue.Should(())
+            .Be(ValueSome 1)
+
+
+    [<Fact>]
+    let ``Can deserialize ValueOption-wrapped values - ValueNone`` () =
+        "null"
+            .Should()
+            .DeserializeTo<int voption>(JsonSerializerOptions())
+            .Id<AndDerived<string, int voption>>()
+            .WhoseValue.Should(())
+            .Be(ValueNone)
+
+
+    let deserializeTo<'a when 'a: not null> (options: JsonSerializerOptions) (t: Testable<string>) =
         t.DeserializeTo<'a>(options) |> ignore
 
 
@@ -2574,23 +2701,29 @@ module ``DeserializeTo generic with options`` =
 
 
     [<Fact>]
-    let ``Fails with expected message if null`` () =
+    let ``Throws if null`` () =
+        assertFails (fun () -> Unchecked.defaultof<string>.Should().DeserializeTo<string>(JsonSerializerOptions()))
+
+
+    [<Fact>]
+    let ``Fails with expected message when deserializing to null`` () =
         fun () ->
-            let x: string = null
+            let x = "null"
             x.Should().DeserializeTo<string>(JsonSerializerOptions())
         |> assertExnMsg
             """
 Subject: x
 Should: DeserializeTo
 Target type: System.String
-But was: null
+But deserialized to: null
+Subject value: 'null'
 """
 
 
     [<Fact>]
-    let ``Fails with expected message if null with because`` () =
+    let ``Fails with expected message when deserializing to null with because`` () =
         fun () ->
-            let x: string = null
+            let x = "null"
             x.Should().DeserializeTo<string>(JsonSerializerOptions(), "Some reason")
         |> assertExnMsg
             """
@@ -2598,7 +2731,8 @@ Subject: x
 Because: Some reason
 Should: DeserializeTo
 Target type: System.String
-But was: null
+But deserialized to: null
+Subject value: 'null'
 """
 
 
@@ -2659,7 +2793,37 @@ module ``DeserializeTo generic`` =
         "1".Should().DeserializeTo<int>().Id<AndDerived<string, int>>().WhoseValue.Should(()).Be(1)
 
 
-    let deserializeTo<'a> (t: Testable<string>) = t.DeserializeTo<'a>() |> ignore
+    [<Fact>]
+    let ``Can deserialize option-wrapped values - Some`` () =
+        "1".Should().DeserializeTo<int option>().Id<AndDerived<string, int option>>().WhoseValue.Should(()).Be(Some 1)
+
+
+    [<Fact>]
+    let ``Can deserialize option-wrapped values - None`` () =
+        "null".Should().DeserializeTo<int option>().Id<AndDerived<string, int option>>().WhoseValue.Should(()).Be(None)
+
+
+    [<Fact>]
+    let ``Can deserialize ValueOption-wrapped values - ValueSome`` () =
+        "1"
+            .Should()
+            .DeserializeTo<int voption>()
+            .Id<AndDerived<string, int voption>>()
+            .WhoseValue.Should(())
+            .Be(ValueSome 1)
+
+
+    [<Fact>]
+    let ``Can deserialize ValueOption-wrapped values - ValueNone`` () =
+        "null"
+            .Should()
+            .DeserializeTo<int voption>()
+            .Id<AndDerived<string, int voption>>()
+            .WhoseValue.Should(())
+            .Be(ValueNone)
+
+
+    let deserializeTo<'a when 'a: not null> (t: Testable<string>) = t.DeserializeTo<'a>() |> ignore
 
 
     type CustomType = { A: int }
@@ -2689,23 +2853,29 @@ module ``DeserializeTo generic`` =
 
 
     [<Fact>]
-    let ``Fails with expected message if null`` () =
+    let ``Throws if null`` () =
+        assertThrows (fun () -> Unchecked.defaultof<string>.Should().DeserializeTo<string>())
+
+
+    [<Fact>]
+    let ``Fails with expected message when deserializing to null`` () =
         fun () ->
-            let x: string = null
+            let x = "null"
             x.Should().DeserializeTo<string>()
         |> assertExnMsg
             """
 Subject: x
 Should: DeserializeTo
 Target type: System.String
-But was: null
+But deserialized to: null
+Subject value: 'null'
 """
 
 
     [<Fact>]
-    let ``Fails with expected message if null with because`` () =
+    let ``Fails with expected message when deserializing to null with because`` () =
         fun () ->
-            let x: string = null
+            let x = "null"
             x.Should().DeserializeTo<string>("Some reason")
         |> assertExnMsg
             """
@@ -2713,7 +2883,8 @@ Subject: x
 Because: Some reason
 Should: DeserializeTo
 Target type: System.String
-But was: null
+But deserialized to: null
+Subject value: 'null'
 """
 
 
@@ -2760,6 +2931,437 @@ Subject value: '1'
 Subject: x
 Should: DeserializeTo
 Target type: Microsoft.FSharp.Core.FSharpResult<System.Int32, System.String>
+But threw: |-
+  System.NotSupportedException: F# discriminated union serialization is not supported.*
+Subject value: '1'
+"""
+
+
+module ``DeserializeToNullable non-generic with options`` =
+
+
+    [<Fact>]
+    let ``Can be chained with AndDerived with deserialized value`` () =
+        "\"a\""
+            .Should()
+            .DeserializeToNullable(typeof<string>, JsonSerializerOptions())
+            .Id<AndDerived<string, obj | null>>()
+            .WhoseValue.Should(())
+            .BeOfType<string>()
+            .WhoseValue.Should(())
+            .Be("a")
+
+
+    type CustomType = { A: int }
+
+
+    let passData = [
+        [| box<string> "1"; typeof<int>; JsonSerializerOptions() |]
+        [| """{"A":1}"""; typeof<CustomType>; JsonSerializerOptions() |]
+        [|
+            """{"A":1,}"""
+            typeof<CustomType>
+            JsonSerializerOptions(AllowTrailingCommas = true)
+        |]
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof passData)>]
+    let ``Passes if deserializable`` (subject: string) (targetType: Type) (options: JsonSerializerOptions) =
+        subject.Should().DeserializeToNullable(targetType, options)
+
+
+    [<Fact>]
+    let ``Can deserialize to null`` () =
+        "null".Should().DeserializeToNullable(typeof<string>, JsonSerializerOptions()).WhoseValue.Should(()).BeNull()
+
+
+    let failData = [
+        [| box<string> "1"; typeof<string>; JsonSerializerOptions() |]
+        [| """{"A":1,}"""; typeof<CustomType>; JsonSerializerOptions() |]
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof failData)>]
+    let ``Fails if not deserializable`` (subject: string) (targetType: Type) (options: JsonSerializerOptions) =
+        assertFails (fun () -> subject.Should().DeserializeToNullable(targetType, options))
+
+
+    [<Fact>]
+    let ``Throws if null`` () =
+        assertThrows (fun () ->
+            Unchecked.defaultof<string>.Should().DeserializeToNullable(typeof<string>, JsonSerializerOptions())
+        )
+
+
+    [<Fact>]
+    let ``Fails with expected message when deserialization fails with JsonException`` () =
+        fun () ->
+            let x = "1"
+            x.Should().DeserializeToNullable(typeof<string>, JsonSerializerOptions())
+        |> assertExnMsgWildcard
+            """
+Subject: x
+Should: DeserializeToNullable
+Target type: System.String
+But threw: |-
+  System.Text.Json.JsonException: The JSON value could not be converted to System.String.*
+Subject value: '1'
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message when deserialization fails with JsonException with because`` () =
+        fun () ->
+            let x = "1"
+            x.Should().DeserializeToNullable(typeof<string>, JsonSerializerOptions(), "Some reason")
+        |> assertExnMsgWildcard
+            """
+Subject: x
+Because: Some reason
+Should: DeserializeToNullable
+Target type: System.String
+But threw: |-
+  System.Text.Json.JsonException: The JSON value could not be converted to System.String.*
+Subject value: '1'
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message when deserialization fails with NotSupportedException`` () =
+        fun () ->
+            let x = "1"
+            x.Should().DeserializeToNullable(typeof<Result<int, string>>, JsonSerializerOptions())
+        |> assertExnMsgWildcard
+            """
+Subject: x
+Should: DeserializeToNullable
+Target type: Microsoft.FSharp.Core.FSharpResult<System.Int32, System.String>
+But threw: |-
+  System.NotSupportedException: F# discriminated union serialization is not supported.*
+Subject value: '1'
+"""
+
+
+module ``DeserializeToNullable non-generic`` =
+
+
+    [<Fact>]
+    let ``Can be chained with AndDerived with deserialized value`` () =
+        "\"a\""
+            .Should()
+            .DeserializeToNullable(typeof<string>)
+            .Id<AndDerived<string, obj | null>>()
+            .WhoseValue.Should(())
+            .BeOfType<string>()
+            .WhoseValue.Should(())
+            .Be("a")
+
+
+    type CustomType = { A: int }
+
+
+    let passData = [ [| box<string> "1"; typeof<int> |]; [| """{"A":1}"""; typeof<CustomType> |] ]
+
+
+    [<Theory>]
+    [<MemberData(nameof passData)>]
+    let ``Passes if deserializable`` (subject: string) (targetType: Type) =
+        subject.Should().DeserializeToNullable(targetType)
+
+
+    [<Fact>]
+    let ``Can deserialize to null`` () =
+        "null".Should().DeserializeToNullable(typeof<string>).WhoseValue.Should(()).BeNull()
+
+
+    let failData = [
+        [| box<string> "1"; typeof<string> |]
+        [| """{"A":1,}"""; typeof<CustomType> |]
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof failData)>]
+    let ``Fails if not deserializable`` (subject: string) (targetType: Type) =
+        assertFails (fun () -> subject.Should().DeserializeToNullable(targetType))
+
+
+    [<Fact>]
+    let ``Throws if null`` () =
+        assertThrows (fun () -> Unchecked.defaultof<string>.Should().DeserializeToNullable(typeof<string>))
+
+
+    [<Fact>]
+    let ``Fails with expected message when deserialization fails with JsonException`` () =
+        fun () ->
+            let x = "1"
+            x.Should().DeserializeToNullable(typeof<string>)
+        |> assertExnMsgWildcard
+            """
+Subject: x
+Should: DeserializeToNullable
+Target type: System.String
+But threw: |-
+  System.Text.Json.JsonException: The JSON value could not be converted to System.String.*
+Subject value: '1'
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message when deserialization fails with JsonException with because`` () =
+        fun () ->
+            let x = "1"
+            x.Should().DeserializeToNullable(typeof<string>, "Some reason")
+        |> assertExnMsgWildcard
+            """
+Subject: x
+Because: Some reason
+Should: DeserializeToNullable
+Target type: System.String
+But threw: |-
+  System.Text.Json.JsonException: The JSON value could not be converted to System.String.*
+Subject value: '1'
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message when deserialization fails with NotSupportedException`` () =
+        fun () ->
+            let x = "1"
+            x.Should().DeserializeToNullable(typeof<Result<int, string>>)
+        |> assertExnMsgWildcard
+            """
+Subject: x
+Should: DeserializeToNullable
+Target type: Microsoft.FSharp.Core.FSharpResult<System.Int32, System.String>
+But threw: |-
+  System.NotSupportedException: F# discriminated union serialization is not supported.*
+Subject value: '1'
+"""
+
+
+module ``DeserializeToNullable generic with options`` =
+
+
+    [<Fact>]
+    let ``Can be chained with AndDerived with deserialized value`` () =
+        "\"a\""
+            .Should()
+            .DeserializeToNullable<string>(JsonSerializerOptions())
+            .Id<AndDerived<string, string | null>>()
+            .WhoseValue.Should(())
+            .Be("a")
+
+
+    let deserializeToNullable<'a when 'a: not null and 'a: not struct>
+        (options: JsonSerializerOptions)
+        (t: Testable<string>)
+        =
+        t.DeserializeToNullable<'a>(options) |> ignore
+
+
+    type CustomType = { A: int }
+
+
+    let passData = [
+        [|
+            box<string> "\"a\""
+            deserializeToNullable<string> (JsonSerializerOptions())
+        |]
+        [| """{"A":1}"""; deserializeToNullable<CustomType> (JsonSerializerOptions()) |]
+        [|
+            """{"A":1,}"""
+            deserializeToNullable<CustomType> (JsonSerializerOptions(AllowTrailingCommas = true))
+        |]
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof passData)>]
+    let ``Passes if deserializable`` (subject: string) run = run (subject.Should())
+
+
+    let failData = [
+        [| box<string> "1"; deserializeToNullable<string> (JsonSerializerOptions()) |]
+        [|
+            """{"A":1,}"""
+            deserializeToNullable<CustomType> (JsonSerializerOptions())
+        |]
+    ]
+
+
+    [<Fact>]
+    let ``Can deserialize to null`` () =
+        "null".Should().DeserializeToNullable<string>(JsonSerializerOptions()).WhoseValue.Should(()).BeNull()
+
+
+    [<Theory>]
+    [<MemberData(nameof failData)>]
+    let ``Fails if not deserializable`` (subject: string) run =
+        assertFails (fun () -> run (subject.Should()))
+
+
+    [<Fact>]
+    let ``Throws if null`` () =
+        assertFails (fun () ->
+            Unchecked.defaultof<string>.Should().DeserializeToNullable<string>(JsonSerializerOptions())
+        )
+
+
+    [<Fact>]
+    let ``Fails with expected message when deserialization fails with JsonException`` () =
+        fun () ->
+            let x = "1"
+            x.Should().DeserializeToNullable<string>(JsonSerializerOptions())
+        |> assertExnMsgWildcard
+            """
+Subject: x
+Should: DeserializeToNullable
+Target type: System.String
+But threw: |-
+  System.Text.Json.JsonException: The JSON value could not be converted to System.String.*
+Subject value: '1'
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message when deserialization fails with JsonException with because`` () =
+        fun () ->
+            let x = "1"
+            x.Should().DeserializeToNullable<string>(JsonSerializerOptions(), "Some reason")
+        |> assertExnMsgWildcard
+            """
+Subject: x
+Because: Some reason
+Should: DeserializeToNullable
+Target type: System.String
+But threw: |-
+  System.Text.Json.JsonException: The JSON value could not be converted to System.String.*
+Subject value: '1'
+"""
+
+
+    type SomeDu = | SomeDu
+
+
+    [<Fact>]
+    let ``Fails with expected message when deserialization fails with NotSupportedException`` () =
+        fun () ->
+            let x = "1"
+            x.Should().DeserializeToNullable<SomeDu>(JsonSerializerOptions())
+        |> assertExnMsgWildcard
+            """
+Subject: x
+Should: DeserializeToNullable
+Target type: StringAssertions+DeserializeToNullable generic with options+SomeDu
+But threw: |-
+  System.NotSupportedException: F# discriminated union serialization is not supported.*
+Subject value: '1'
+"""
+
+
+module ``DeserializeToNullable generic`` =
+
+
+    [<Fact>]
+    let ``Can be chained with AndDerived with deserialized value`` () =
+        "\"a\""
+            .Should()
+            .DeserializeToNullable<string>()
+            .Id<AndDerived<string, string | null>>()
+            .WhoseValue.Should(())
+            .Be("a")
+
+
+    let deserializeToNullable<'a when 'a: not null and 'a: not struct> (t: Testable<string>) =
+        t.DeserializeToNullable<'a>() |> ignore
+
+
+    type CustomType = { A: int }
+
+
+    let passData = [
+        [| box<string> "\"a\""; deserializeToNullable<string> |]
+        [| """{"A":1}"""; deserializeToNullable<CustomType> |]
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof passData)>]
+    let ``Passes if deserializable`` (subject: string) run = run (subject.Should())
+
+
+    [<Fact>]
+    let ``Can deserialize to null`` () =
+        "null".Should().DeserializeToNullable<string>().WhoseValue.Should(()).BeNull()
+
+
+    let failData = [
+        [| box<string> "1"; deserializeToNullable<string> |]
+        [| """{"A":1,}"""; deserializeToNullable<CustomType> |]
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof failData)>]
+    let ``Fails if not deserializable`` (subject: string) run =
+        assertFails (fun () -> run (subject.Should()))
+
+
+    [<Fact>]
+    let ``Throws if null`` () =
+        assertThrows (fun () -> Unchecked.defaultof<string>.Should().DeserializeToNullable<string>())
+
+
+    [<Fact>]
+    let ``Fails with expected message when deserialization fails with JsonException`` () =
+        fun () ->
+            let x = "1"
+            x.Should().DeserializeToNullable<string>()
+        |> assertExnMsgWildcard
+            """
+Subject: x
+Should: DeserializeToNullable
+Target type: System.String
+But threw: |-
+  System.Text.Json.JsonException: The JSON value could not be converted to System.String.*
+Subject value: '1'
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message when deserialization fails with JsonException with because`` () =
+        fun () ->
+            let x = "1"
+            x.Should().DeserializeToNullable<string>("Some reason")
+        |> assertExnMsgWildcard
+            """
+Subject: x
+Because: Some reason
+Should: DeserializeToNullable
+Target type: System.String
+But threw: |-
+  System.Text.Json.JsonException: The JSON value could not be converted to System.String.*
+Subject value: '1'
+"""
+
+
+    type SomeDu = | SomeDu
+
+
+    [<Fact>]
+    let ``Fails with expected message when deserialization fails with NotSupportedException`` () =
+        fun () ->
+            let x = "1"
+            x.Should().DeserializeToNullable<SomeDu>()
+        |> assertExnMsgWildcard
+            """
+Subject: x
+Should: DeserializeToNullable
+Target type: StringAssertions+DeserializeToNullable generic+SomeDu
 But threw: |-
   System.NotSupportedException: F# discriminated union serialization is not supported.*
 Subject value: '1'

@@ -17,9 +17,6 @@ type HttpResponseMessageAssertions =
         : And<HttpResponseMessage> =
         use _ = t.Assert()
 
-        if isNull (box t.Subject) then
-            nullArg "subject"
-
         if t.Subject.StatusCode <> statusCode then
             t
                 .With("Expected", statusCode)
@@ -35,9 +32,6 @@ type HttpResponseMessageAssertions =
     static member private BeStatusCode
         (t: Testable<HttpResponseMessage>, lower: HttpStatusCode, upper: HttpStatusCode, ?because)
         : And<HttpResponseMessage> =
-        if isNull (box t.Subject) then
-            nullArg "subject"
-
         if t.Subject.StatusCode < lower || t.Subject.StatusCode > upper then
             t
                 .With("But was", t.Subject.StatusCode)
@@ -444,9 +438,6 @@ type HttpResponseMessageAssertions =
         : AndDerived<HttpResponseMessage, seq<string>> =
         use _ = t.Assert()
 
-        if isNull (box t.Subject) then
-            nullArg "subject"
-
         match t.Subject.Headers.TryGetValues name with
         | false, _ ->
             match
@@ -483,9 +474,6 @@ type HttpResponseMessageAssertions =
         : And<HttpResponseMessage> =
         use _ = t.Assert()
 
-        if isNull (box t.Subject) then
-            nullArg "subject"
-
         let fail () =
             t
                 .With("Header", name)
@@ -515,9 +503,6 @@ type HttpResponseMessageAssertions =
     [<Extension>]
     static member NotHaveHeader(t: Testable<HttpResponseMessage>, name: string, ?because) : And<HttpResponseMessage> =
         use _ = t.Assert()
-
-        if isNull (box t.Subject) then
-            nullArg "subject"
 
         match t.Subject.Headers.TryGetValues name with
         | false, _ -> ()

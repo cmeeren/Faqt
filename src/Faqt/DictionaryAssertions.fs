@@ -33,9 +33,6 @@ type DictionaryAssertions =
         : And<_> =
         use _ = t.Assert(true, true)
 
-        if isNull (box t.Subject) then
-            t.With("But was", t.Subject).Fail(because)
-
         let failures =
             t.Subject
             |> Seq.choose (fun kvp ->
@@ -74,12 +71,6 @@ type DictionaryAssertions =
         (t: Testable<#IDictionary<'key, 'value>>, assertions: seq<KeyValuePair<'key, 'value> -> 'ignored>, ?because)
         : And<_> =
         use _ = t.Assert(true)
-
-        if isNull assertions then
-            nullArg (nameof assertions)
-
-        if isNull (box t.Subject) then
-            t.With("But was", t.Subject).Fail(because)
 
         let subjectCount = t.Subject.Count
         let assertionsCount = Seq.length assertions
@@ -129,64 +120,60 @@ type DictionaryAssertions =
         use _ = t.Assert()
         let kvp = KeyValuePair(key, value)
 
-        if isNull (box t.Subject) || not (t.Subject.Contains(kvp)) then
+        if not (t.Subject.Contains(kvp)) then
             t.With("Item", kvp).With("But was", t.Subject).Fail(because)
 
         AndDerived(t, kvp)
 
 
-    /// Asserts that the subject does not contain the specified key-value pair. Passes if the subject is null.
+    /// Asserts that the subject does not contain the specified key-value pair.
     [<Extension>]
     static member NotContain(t: Testable<#IDictionary<'key, 'value>>, key: 'key, value: 'value, ?because) : And<_> =
         use _ = t.Assert()
         let kvp = KeyValuePair(key, value)
 
-        if not (isNull (box t.Subject)) && t.Subject.Contains(kvp) then
+        if t.Subject.Contains(kvp) then
             t.With("Item", kvp).With("But was", t.Subject).Fail(because)
 
         And(t)
 
 
-    /// Asserts that the subject contains the same items as the specified dictionary. Passes if both dictionaries are
-    /// null.
+    /// Asserts that the subject contains the same items as the specified dictionary.
     [<Extension>]
     static member HaveSameItemsAs
         (t: Testable<#IDictionary<'key, 'value>>, expected: IDictionary<'key, 'value>, ?because)
         : And<_> =
         use _ = t.Assert()
 
-        if isNull (box t.Subject) <> isNull (box expected) then
-            t.With("Expected", expected).With("But was", t.Subject).Fail(because)
-        elif not (isNull (box t.Subject)) then
-            let differentValues = Dictionary()
-            let extraKeys = ResizeArray()
-            let missingKeys = ResizeArray()
+        let differentValues = Dictionary()
+        let extraKeys = ResizeArray()
+        let missingKeys = ResizeArray()
 
-            for kvp in t.Subject do
-                match expected.TryGetValue kvp.Key with
-                | true, expectedItem when expectedItem = kvp.Value -> ()
-                | true, expectedItem ->
-                    differentValues.Add(
-                        TryFormat(Key kvp.Key),
-                        {
-                            Expected = TryFormat expectedItem
-                            Actual = TryFormat kvp.Value
-                        }
-                    )
-                | false, _ -> extraKeys.Add(TryFormat kvp.Key)
+        for kvp in t.Subject do
+            match expected.TryGetValue kvp.Key with
+            | true, expectedItem when expectedItem = kvp.Value -> ()
+            | true, expectedItem ->
+                differentValues.Add(
+                    TryFormat(Key kvp.Key),
+                    {
+                        Expected = TryFormat expectedItem
+                        Actual = TryFormat kvp.Value
+                    }
+                )
+            | false, _ -> extraKeys.Add(TryFormat kvp.Key)
 
-            for kvp in expected do
-                if not (t.Subject.ContainsKey kvp.Key) then
-                    missingKeys.Add(TryFormat kvp.Key)
+        for kvp in expected do
+            if not (t.Subject.ContainsKey kvp.Key) then
+                missingKeys.Add(TryFormat kvp.Key)
 
-            if differentValues.Count > 0 || extraKeys.Count > 0 || missingKeys.Count > 0 then
-                t
-                    .With("Missing keys", missingKeys)
-                    .With("Additional keys", extraKeys)
-                    .With("Different values", differentValues)
-                    .With("Expected", expected)
-                    .With("Actual", t.Subject)
-                    .Fail(because)
+        if differentValues.Count > 0 || extraKeys.Count > 0 || missingKeys.Count > 0 then
+            t
+                .With("Missing keys", missingKeys)
+                .With("Additional keys", extraKeys)
+                .With("Different values", differentValues)
+                .With("Expected", expected)
+                .With("Actual", t.Subject)
+                .Fail(because)
 
         And(t)
 
@@ -198,20 +185,17 @@ type DictionaryAssertions =
         : AndDerived<_, KeyValuePair<'key, 'value>> =
         use _ = t.Assert()
 
-        if isNull (box t.Subject) then
-            t.With("Key", key).With("But was", t.Subject).Fail(because)
-
         match t.Subject.TryGetValue key with
         | false, _ -> t.With("Key", key).With("But was", t.Subject).Fail(because)
         | true, value -> AndDerived(t, KeyValuePair(key, value))
 
 
-    /// Asserts that the subject does not contain the specified key. Passes if the subject is null.
+    /// Asserts that the subject does not contain the specified key.
     [<Extension>]
     static member NotContainKey(t: Testable<#IDictionary<'key, 'value>>, key: 'key, ?because) : And<_> =
         use _ = t.Assert()
 
-        if not (isNull (box t.Subject)) && t.Subject.ContainsKey(key) then
+        if t.Subject.ContainsKey(key) then
             t.With("Key", key).With("But found value", t.Subject[key]).With("Subject value", t.Subject).Fail(because)
 
         And(t)
@@ -223,7 +207,7 @@ type DictionaryAssertions =
         use _ = t.Assert()
 
         if isNull (box t.Subject) then
-            t.With("Keys", keys).With("But was", t.Subject).Fail(because)
+            nullArg "subject"
 
         let missingKeys = keys |> Seq.filter (not << t.Subject.ContainsKey)
 
@@ -244,27 +228,23 @@ type DictionaryAssertions =
         : AndDerived<_, KeyValuePair<'key, 'value>> =
         use _ = t.Assert()
 
-        if isNull (box t.Subject) then
-            t.With("Value", value).With("But was", t.Subject).Fail(because)
-
         match t.Subject |> Seq.tryFind (fun kvp -> kvp.Value = value) with
         | None -> t.With("Value", value).With("But was", t.Subject).Fail(because)
         | Some kvp -> AndDerived(t, kvp)
 
 
-    /// Asserts that the subject does not contain the specified key. Passes if the subject is null.
+    /// Asserts that the subject does not contain the specified value.
     [<Extension>]
     static member NotContainValue(t: Testable<#IDictionary<'key, 'value>>, value: 'value, ?because) : And<_> =
         use _ = t.Assert()
 
-        if not (isNull (box t.Subject)) then
-            let xs = t.Subject |> Seq.filter (fun kvp -> kvp.Value = value)
+        let xs = t.Subject |> Seq.filter (fun kvp -> kvp.Value = value)
 
-            if not (Seq.isEmpty xs) then
-                t
-                    .With("Value", value)
-                    .With("But found value for keys", xs |> Seq.map (fun kvp -> kvp.Key))
-                    .With("Subject value", t.Subject)
-                    .Fail(because)
+        if not (Seq.isEmpty xs) then
+            t
+                .With("Value", value)
+                .With("But found value for keys", xs |> Seq.map (fun kvp -> kvp.Key))
+                .With("Subject value", t.Subject)
+                .Fail(because)
 
         And(t)

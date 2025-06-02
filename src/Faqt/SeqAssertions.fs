@@ -78,9 +78,6 @@ type SeqAssertions =
     static member AllSatisfy(t: Testable<#seq<'a>>, assertion: 'a -> 'ignored, ?because) : And<_> =
         use _ = t.Assert(true, true)
 
-        if isNull (box t.Subject) then
-            t.With("But was", t.Subject).Fail(because)
-
         let failures =
             t.Subject
             |> Seq.indexed
@@ -106,12 +103,6 @@ type SeqAssertions =
     [<Extension>]
     static member SatisfyRespectively(t: Testable<#seq<'a>>, assertions: seq<'a -> 'ignored>, ?because) : And<_> =
         use _ = t.Assert(true)
-
-        if isNull assertions then
-            nullArg (nameof assertions)
-
-        if isNull (box t.Subject) then
-            t.With("But was", t.Subject).Fail(because)
 
         let subjectLength = Seq.stringOptimizedLength t.Subject
         let assertionsLength = Seq.length assertions
@@ -150,17 +141,10 @@ type SeqAssertions =
         if expected < 0 then
             invalidArg (nameof expected) "The expected length must be non-negative"
 
-        if isNull (box t.Subject) then
-            t.With("Expected", expected).With("But was", t.Subject).Fail(because)
-        else
-            let subjectLength = Seq.stringOptimizedLength t.Subject
+        let subjectLength = Seq.stringOptimizedLength t.Subject
 
-            if subjectLength <> expected then
-                t
-                    .With("Expected", expected)
-                    .With("But was", subjectLength)
-                    .With("Subject value", t.Subject)
-                    .Fail(because)
+        if subjectLength <> expected then
+            t.With("Expected", expected).With("But was", subjectLength).With("Subject value", t.Subject).Fail(because)
 
         And(t)
 
@@ -171,7 +155,7 @@ type SeqAssertions =
     static member BeEmpty(t: Testable<#seq<'a>>, ?because) : And<_> =
         use _ = t.Assert()
 
-        if isNull (box t.Subject) || not (Seq.stringOptimizedIsEmpty t.Subject) then
+        if not (Seq.stringOptimizedIsEmpty t.Subject) then
             t.With("But was", t.Subject).Fail(because)
 
         And(t)
@@ -182,7 +166,7 @@ type SeqAssertions =
     static member NotBeEmpty(t: Testable<#seq<'a>>, ?because) : And<_> =
         use _ = t.Assert()
 
-        if isNull (box t.Subject) || Seq.stringOptimizedIsEmpty t.Subject then
+        if Seq.stringOptimizedIsEmpty t.Subject then
             t.With("But was", t.Subject).Fail(because)
 
         And(t)
@@ -190,11 +174,13 @@ type SeqAssertions =
 
     /// Asserts that the subject is null or empty.
     [<Extension>]
-    static member BeNullOrEmpty(t: Testable<#seq<'a>>, ?because) : And<_> =
+    static member BeNullOrEmpty(t: Testable<#seq<'a> | null>, ?because) : And<_> =
         use _ = t.Assert()
 
-        if not (isNull (box t.Subject) || Seq.stringOptimizedIsEmpty t.Subject) then
-            t.With("But was", t.Subject).Fail(because)
+        match t.Subject with
+        | null -> ()
+        | sub when Seq.stringOptimizedIsEmpty sub -> ()
+        | sub -> t.With("But was", sub).Fail(because)
 
         And(t)
 
@@ -204,18 +190,18 @@ type SeqAssertions =
     static member Contain(t: Testable<#seq<'a>>, item: 'a, ?because) : AndDerived<_, 'a> =
         use _ = t.Assert()
 
-        if isNull (box t.Subject) || not (Seq.contains item t.Subject) then
+        if not (Seq.contains item t.Subject) then
             t.With("Item", item).With("But was", t.Subject).Fail(because)
 
         AndDerived(t, item)
 
 
-    /// Asserts that the subject does not contain the specified item. Passes if the subject is null.
+    /// Asserts that the subject does not contain the specified item.
     [<Extension>]
     static member NotContain(t: Testable<#seq<'a>>, item: 'a, ?because) : And<_> =
         use _ = t.Assert()
 
-        if not (isNull (box t.Subject)) && Seq.contains item t.Subject then
+        if Seq.contains item t.Subject then
             t.With("Item", item).With("But was", t.Subject).Fail(because)
 
         And(t)
@@ -226,28 +212,21 @@ type SeqAssertions =
     static member AllBe(t: Testable<#seq<'a>>, expected: 'a, ?because) : And<_> =
         use _ = t.Assert()
 
-        if isNull (box t.Subject) then
-            t.With("Expected", expected).With("But was", t.Subject).Fail(because)
-        else
-            let differentItems =
-                t.Subject
-                |> Seq.indexed
-                |> Seq.choose (fun (i, actualItem) ->
-                    if actualItem <> expected then
-                        Some {|
-                            Index = i
-                            Value = TryFormat actualItem
-                        |}
-                    else
-                        None
-                )
+        let differentItems =
+            t.Subject
+            |> Seq.indexed
+            |> Seq.choose (fun (i, actualItem) ->
+                if actualItem <> expected then
+                    Some {|
+                        Index = i
+                        Value = TryFormat actualItem
+                    |}
+                else
+                    None
+            )
 
-            if not (Seq.isEmpty differentItems) then
-                t
-                    .With("Expected", expected)
-                    .With("Failures", differentItems)
-                    .With("Subject value", t.Subject)
-                    .Fail(because)
+        if not (Seq.isEmpty differentItems) then
+            t.With("Expected", expected).With("Failures", differentItems).With("Subject value", t.Subject).Fail(because)
 
         And(t)
 
@@ -258,31 +237,24 @@ type SeqAssertions =
     static member AllBeMappedTo(t: Testable<#seq<'a>>, expected: 'b, projection: 'a -> 'b, ?because) : And<_> =
         use _ = t.Assert()
 
-        if isNull (box t.Subject) then
-            t.With("Expected", expected).With("But was", t.Subject).Fail(because)
-        else
-            let differentItems =
-                t.Subject
-                |> Seq.indexed
-                |> Seq.choose (fun (i, actualItem) ->
-                    let projected = projection actualItem
+        let differentItems =
+            t.Subject
+            |> Seq.indexed
+            |> Seq.choose (fun (i, actualItem) ->
+                let projected = projection actualItem
 
-                    if projected <> expected then
-                        Some {|
-                            Index = i
-                            Projected = TryFormat projected
-                            Value = TryFormat actualItem
-                        |}
-                    else
-                        None
-                )
+                if projected <> expected then
+                    Some {|
+                        Index = i
+                        Projected = TryFormat projected
+                        Value = TryFormat actualItem
+                    |}
+                else
+                    None
+            )
 
-            if not (Seq.isEmpty differentItems) then
-                t
-                    .With("Expected", expected)
-                    .With("Failures", differentItems)
-                    .With("Subject value", t.Subject)
-                    .Fail(because)
+        if not (Seq.isEmpty differentItems) then
+            t.With("Expected", expected).With("Failures", differentItems).With("Subject value", t.Subject).Fail(because)
 
         And(t)
 
@@ -292,9 +264,7 @@ type SeqAssertions =
     static member AllBeEqual(t: Testable<#seq<'a>>, ?because) : And<_> =
         use _ = t.Assert()
 
-        if isNull (box t.Subject) then
-            t.With("But was", t.Subject).Fail(because)
-        elif not (Seq.stringOptimizedIsEmpty t.Subject) then
+        if not (Seq.stringOptimizedIsEmpty t.Subject) then
             let first = Seq.head t.Subject
 
             for i, item in Seq.indexed t.Subject do
@@ -312,9 +282,7 @@ type SeqAssertions =
     static member AllBeEqualBy(t: Testable<#seq<'a>>, projection: 'a -> 'b, ?because) : And<_> =
         use _ = t.Assert()
 
-        if isNull (box t.Subject) then
-            t.With("But was", t.Subject).Fail(because)
-        elif not (Seq.stringOptimizedIsEmpty t.Subject) then
+        if not (Seq.stringOptimizedIsEmpty t.Subject) then
             let first = Seq.head t.Subject
             let firstProjected = projection first
 
@@ -344,97 +312,85 @@ type SeqAssertions =
         And(t)
 
 
-    /// Asserts that the subject contains the same items in the same order as the specified sequence. Passes if both
-    /// sequences are null.
+    /// Asserts that the subject contains the same items in the same order as the specified sequence.
     [<Extension>]
     static member SequenceEqual(t: Testable<#seq<'a>>, expected: seq<'a>, ?because) : And<_> =
         use _ = t.Assert()
 
-        if isNull (box t.Subject) <> isNull expected then
-            t.With("Expected", expected).With("But was", t.Subject).Fail(because)
-        elif not (isNull (box t.Subject)) then
-            let subjectLength = Seq.stringOptimizedLength t.Subject
-            let expectedLength = Seq.stringOptimizedLength expected
+        let subjectLength = Seq.stringOptimizedLength t.Subject
+        let expectedLength = Seq.stringOptimizedLength expected
 
-            if subjectLength <> expectedLength then
-                t
-                    .With("Expected length", expectedLength)
-                    .With("Actual length", subjectLength)
-                    .With("Expected", expected)
-                    .With("Actual", t.Subject)
-                    .Fail(because)
-            else
-                let differentItems =
-                    Seq.zip t.Subject expected
-                    |> Seq.indexed
-                    |> Seq.choose (fun (i, (actualItem, expectedItem)) ->
-                        if actualItem <> expectedItem then
-                            Some {
-                                Index = i
-                                Expected = TryFormat expectedItem
-                                Actual = TryFormat actualItem
-                            }
-                        else
-                            None
-                    )
+        if subjectLength <> expectedLength then
+            t
+                .With("Expected length", expectedLength)
+                .With("Actual length", subjectLength)
+                .With("Expected", expected)
+                .With("Actual", t.Subject)
+                .Fail(because)
+        else
+            let differentItems =
+                Seq.zip t.Subject expected
+                |> Seq.indexed
+                |> Seq.choose (fun (i, (actualItem, expectedItem)) ->
+                    if actualItem <> expectedItem then
+                        Some {
+                            Index = i
+                            Expected = TryFormat expectedItem
+                            Actual = TryFormat actualItem
+                        }
+                    else
+                        None
+                )
 
-                if not (Seq.isEmpty differentItems) then
-                    t
-                        .With("Failures", differentItems)
-                        .With("Expected", expected)
-                        .With("Actual", t.Subject)
-                        .Fail(because)
+            if not (Seq.isEmpty differentItems) then
+                t.With("Failures", differentItems).With("Expected", expected).With("Actual", t.Subject).Fail(because)
 
         And(t)
 
 
-    /// Asserts that the subject contains the same items (ignoring order) as the specified sequence. Passes if both
-    /// sequences are null.
+    /// Asserts that the subject contains the same items (ignoring order) as the specified sequence.
     [<Extension>]
     static member HaveSameItemsAs(t: Testable<#seq<'a>>, expected: seq<'a>, ?because) : And<_> =
         use _ = t.Assert()
 
-        if isNull (box t.Subject) <> isNull expected then
-            t.With("Expected", expected).With("But was", t.Subject).Fail(because)
-        elif not (isNull (box t.Subject)) then
-            let freqMap = Dictionary()
-            let additionalSubjectItems = ResizeArray<_>()
-            let missingSubjectItems = ResizeArray<_>()
+        let freqMap = Dictionary()
+        let additionalSubjectItems = ResizeArray<_>()
+        let missingSubjectItems = ResizeArray<_>()
 
-            for x in t.Subject do
-                let key = Key x
+        for x in t.Subject do
+            let key = Key x
 
-                match freqMap.TryGetValue(key) with
-                | true, count -> freqMap[key] <- count + 1
-                | false, _ -> freqMap[key] <- 1
+            match freqMap.TryGetValue(key) with
+            | true, count -> freqMap[key] <- count + 1
+            | false, _ -> freqMap[key] <- 1
 
-            for x in expected do
-                let key = Key x
+        for x in expected do
+            let key = Key x
 
-                match freqMap.TryGetValue(key) with
-                | true, 1 -> freqMap.Remove(key) |> ignore
-                | true, count -> freqMap[key] <- count - 1
-                | false, _ -> missingSubjectItems.Add(x)
+            match freqMap.TryGetValue(key) with
+            | true, 1 -> freqMap.Remove(key) |> ignore
+            | true, count -> freqMap[key] <- count - 1
+            | false, _ -> missingSubjectItems.Add(x)
 
-            for x in t.Subject do
-                let key = Key x
+        for x in t.Subject do
+            let key = Key x
 
-                match freqMap.TryGetValue(key) with
-                | true, 1 ->
-                    additionalSubjectItems.Add(x)
-                    freqMap.Remove(key) |> ignore
-                | true, count ->
-                    additionalSubjectItems.Add(x)
-                    freqMap[key] <- count - 1
-                | false, _ -> ()
+            match freqMap.TryGetValue(key) with
+            | true, 1 ->
+                additionalSubjectItems.Add(x)
+                freqMap.Remove(key) |> ignore
+            | true, count ->
+                additionalSubjectItems.Add(x)
+                freqMap[key] <- count - 1
+            | false, _ -> ()
 
-            if missingSubjectItems.Count > 0 || additionalSubjectItems.Count > 0 then
-                t
-                    .With("Missing items", missingSubjectItems)
-                    .With("Additional items", additionalSubjectItems)
-                    .With("Expected", expected)
-                    .With("Actual", t.Subject)
-                    .Fail(because)
+        if missingSubjectItems.Count > 0 || additionalSubjectItems.Count > 0 then
+            t
+                .With("Missing items", missingSubjectItems)
+                .With("Additional items", additionalSubjectItems)
+                .With("Expected", expected)
+                .With("Actual", t.Subject)
+                .Fail(because)
 
         And(t)
 
@@ -444,13 +400,10 @@ type SeqAssertions =
     static member ContainExactlyOneItem(t: Testable<#seq<'a>>, ?because) : AndDerived<_, 'a> =
         use _ = t.Assert()
 
-        if isNull (box t.Subject) then
-            t.With("But was", t.Subject).Fail(because)
-        else
-            let subjectLength = Seq.stringOptimizedLength t.Subject
+        let subjectLength = Seq.stringOptimizedLength t.Subject
 
-            if subjectLength <> 1 then
-                t.With("But length was", subjectLength).With("Subject value", t.Subject).Fail(because)
+        if subjectLength <> 1 then
+            t.With("But length was", subjectLength).With("Subject value", t.Subject).Fail(because)
 
         AndDerived(t, Seq.head t.Subject)
 
@@ -462,20 +415,17 @@ type SeqAssertions =
         : AndDerived<_, 'a> =
         use _ = t.Assert()
 
-        if isNull (box t.Subject) then
-            t.With("But was", t.Subject).Fail(because)
-        else
-            let matchingItems = t.Subject |> Seq.filter predicate
-            let matchingLength = Seq.stringOptimizedLength matchingItems
+        let matchingItems = t.Subject |> Seq.filter predicate
+        let matchingLength = Seq.stringOptimizedLength matchingItems
 
-            if matchingLength <> 1 then
-                t
-                    .With("But found", matchingLength)
-                    .With("Matching items", matchingItems)
-                    .With("Subject value", t.Subject)
-                    .Fail(because)
+        if matchingLength <> 1 then
+            t
+                .With("But found", matchingLength)
+                .With("Matching items", matchingItems)
+                .With("Subject value", t.Subject)
+                .Fail(because)
 
-            AndDerived(t, Seq.head matchingItems)
+        AndDerived(t, Seq.head matchingItems)
 
 
     /// Asserts that the subject contains at least one item. Equivalent to NotBeEmpty, but with a different error
@@ -484,7 +434,7 @@ type SeqAssertions =
     static member ContainAtLeastOneItem(t: Testable<#seq<'a>>, ?because) : AndDerived<_, 'a> =
         use _ = t.Assert()
 
-        if isNull (box t.Subject) || Seq.stringOptimizedIsEmpty t.Subject then
+        if Seq.stringOptimizedIsEmpty t.Subject then
             t.With("But was", t.Subject).Fail(because)
 
         AndDerived(t, Seq.head t.Subject)
@@ -498,19 +448,12 @@ type SeqAssertions =
         : AndDerived<_, 'a> =
         use _ = t.Assert()
 
-        if isNull (box t.Subject) then
-            t.With("But was", t.Subject).Fail(because)
-        else
-            let matchingItems = t.Subject |> Seq.filter predicate
+        let matchingItems = t.Subject |> Seq.filter predicate
 
-            if Seq.stringOptimizedIsEmpty matchingItems then
-                t
-                    .With("But found", 0)
-                    .With("Matching items", matchingItems)
-                    .With("Subject value", t.Subject)
-                    .Fail(because)
+        if Seq.stringOptimizedIsEmpty matchingItems then
+            t.With("But found", 0).With("Matching items", matchingItems).With("Subject value", t.Subject).Fail(because)
 
-            AndDerived(t, Seq.head matchingItems)
+        AndDerived(t, Seq.head matchingItems)
 
 
     /// Asserts that the subject contains at most one item.
@@ -518,13 +461,10 @@ type SeqAssertions =
     static member ContainAtMostOneItem(t: Testable<#seq<'a>>, ?because) : AndDerived<_, 'a option> =
         use _ = t.Assert()
 
-        if isNull (box t.Subject) then
-            t.With("But was", t.Subject).Fail(because)
-        else
-            let subjectLength = Seq.stringOptimizedLength t.Subject
+        let subjectLength = Seq.stringOptimizedLength t.Subject
 
-            if subjectLength > 1 then
-                t.With("But length was", subjectLength).With("Subject value", t.Subject).Fail(because)
+        if subjectLength > 1 then
+            t.With("But length was", subjectLength).With("Subject value", t.Subject).Fail(because)
 
         AndDerived(t, Seq.tryHead t.Subject)
 
@@ -536,20 +476,17 @@ type SeqAssertions =
         : AndDerived<_, 'a option> =
         use _ = t.Assert()
 
-        if isNull (box t.Subject) then
-            t.With("But was", t.Subject).Fail(because)
-        else
-            let matchingItems = t.Subject |> Seq.filter predicate
-            let matchingLength = Seq.stringOptimizedLength matchingItems
+        let matchingItems = t.Subject |> Seq.filter predicate
+        let matchingLength = Seq.stringOptimizedLength matchingItems
 
-            if matchingLength > 1 then
-                t
-                    .With("But found", matchingLength)
-                    .With("Matching items", matchingItems)
-                    .With("Subject value", t.Subject)
-                    .Fail(because)
+        if matchingLength > 1 then
+            t
+                .With("But found", matchingLength)
+                .With("Matching items", matchingItems)
+                .With("Subject value", t.Subject)
+                .Fail(because)
 
-            AndDerived(t, Seq.tryHead matchingItems)
+        AndDerived(t, Seq.tryHead matchingItems)
 
 
     /// Asserts that the subject contains at least one item matching the predicate. Similar to
@@ -561,32 +498,28 @@ type SeqAssertions =
         : AndDerived<_, seq<'a>> =
         use _ = t.Assert()
 
-        if isNull (box t.Subject) then
-            t.With("But was", t.Subject).Fail(because)
-        else
-            let matchingItems = t.Subject |> Seq.filter predicate
+        let matchingItems = t.Subject |> Seq.filter predicate
 
-            if Seq.stringOptimizedIsEmpty matchingItems then
-                t.With("But found", 0).With("Subject value", t.Subject).Fail(because)
+        if Seq.stringOptimizedIsEmpty matchingItems then
+            t.With("But found", 0).With("Subject value", t.Subject).Fail(because)
 
-            AndDerived(t, matchingItems)
+        AndDerived(t, matchingItems)
 
 
-    /// Asserts that the subject does not contains items matching the predicate. Passes if the subject is null.
+    /// Asserts that the subject does not contain items matching the predicate.
     [<Extension>]
     static member NotContainItemsMatching(t: Testable<#seq<'a>>, predicate: 'a -> bool, ?because) : And<_> =
         use _ = t.Assert()
 
-        if not (isNull (box t.Subject)) then
-            let matchingItems = t.Subject |> Seq.filter predicate
-            let numMatching = Seq.stringOptimizedLength matchingItems
+        let matchingItems = t.Subject |> Seq.filter predicate
+        let numMatching = Seq.stringOptimizedLength matchingItems
 
-            if numMatching > 0 then
-                t
-                    .With("But found", numMatching)
-                    .With("Matching items", matchingItems)
-                    .With("Subject value", t.Subject)
-                    .Fail(because)
+        if numMatching > 0 then
+            t
+                .With("But found", numMatching)
+                .With("Matching items", matchingItems)
+                .With("Subject value", t.Subject)
+                .Fail(because)
 
         And(t)
 
@@ -595,9 +528,6 @@ type SeqAssertions =
     [<Extension>]
     static member BeDistinct(t: Testable<#seq<'a>>, ?because) : And<_> =
         use _ = t.Assert()
-
-        if isNull (box t.Subject) then
-            t.With("But was", t.Subject).Fail(because)
 
         let nonDistinctItemsWithCounts =
             t.Subject |> Seq.countBy id |> Seq.filter (fun (_, c) -> c > 1)
@@ -617,9 +547,6 @@ type SeqAssertions =
     [<Extension>]
     static member BeDistinctBy(t: Testable<#seq<'a>>, projection: 'a -> 'b, ?because) : And<_> =
         use _ = t.Assert()
-
-        if isNull (box t.Subject) then
-            t.With("But was", t.Subject).Fail(because)
 
         let duplicates =
             t.Subject
@@ -649,9 +576,6 @@ type SeqAssertions =
     static member BeAscending(t: Testable<#seq<'a>>, ?because) : And<_> =
         use _ = t.Assert()
 
-        if isNull (box t.Subject) then
-            t.With("But was", t.Subject).Fail(because)
-
         for i, (a, b) in t.Subject |> Seq.pairwise |> Seq.indexed do
 
             if a > b then
@@ -667,18 +591,6 @@ type SeqAssertions =
     [<Extension>]
     static member BeAscending(t: Testable<#seq<string>>, comparisonType: StringComparison, ?because) : And<_> =
         use _ = t.Assert()
-
-        if isNull (box t.Subject) then
-            t
-                .With("Using StringComparison", comparisonType)
-                .With(
-                    comparisonType = StringComparison.CurrentCulture
-                    || comparisonType = StringComparison.CurrentCultureIgnoreCase,
-                    "CurrentCulture",
-                    CultureInfo.CurrentCulture
-                )
-                .With("But was", t.Subject)
-                .Fail(because)
 
         for i, (a, b) in t.Subject |> Seq.pairwise |> Seq.indexed do
 
@@ -705,13 +617,6 @@ type SeqAssertions =
         : And<_> =
         use _ = t.Assert()
 
-        if isNull (box t.Subject) then
-            t
-                .With("In culture", culture)
-                .With("With CompareOptions", compareOptions)
-                .With("But was", t.Subject)
-                .Fail(because)
-
         for i, (a, b) in t.Subject |> Seq.pairwise |> Seq.indexed do
 
             if String.Compare(a, b, culture, compareOptions) > 0 then
@@ -729,9 +634,6 @@ type SeqAssertions =
     [<Extension>]
     static member BeAscendingBy(t: Testable<#seq<'a>>, projection: 'a -> 'b, ?because) : And<_> =
         use _ = t.Assert()
-
-        if isNull (box t.Subject) then
-            t.With("But was", t.Subject).Fail(because)
 
         for i, (a, b) in t.Subject |> Seq.pairwise |> Seq.indexed do
             let a' = projection a
@@ -766,18 +668,6 @@ type SeqAssertions =
         (t: Testable<#seq<'a>>, projection: 'a -> string, comparisonType: StringComparison, ?because)
         : And<_> =
         use _ = t.Assert()
-
-        if isNull (box t.Subject) then
-            t
-                .With("Using StringComparison", comparisonType)
-                .With(
-                    comparisonType = StringComparison.CurrentCulture
-                    || comparisonType = StringComparison.CurrentCultureIgnoreCase,
-                    "CurrentCulture",
-                    CultureInfo.CurrentCulture
-                )
-                .With("But was", t.Subject)
-                .Fail(because)
 
         for i, (a, b) in t.Subject |> Seq.pairwise |> Seq.indexed do
             let a' = projection a
@@ -823,13 +713,6 @@ type SeqAssertions =
         =
         use _ = t.Assert()
 
-        if isNull (box t.Subject) then
-            t
-                .With("In culture", culture)
-                .With("With CompareOptions", compareOptions)
-                .With("But was", t.Subject)
-                .Fail(because)
-
         for i, (a, b) in t.Subject |> Seq.pairwise |> Seq.indexed do
             let a' = projection a
             let b' = projection b
@@ -864,9 +747,6 @@ type SeqAssertions =
     static member BeDescending(t: Testable<#seq<'a>>, ?because) : And<_> =
         use _ = t.Assert()
 
-        if isNull (box t.Subject) then
-            t.With("But was", t.Subject).Fail(because)
-
         for i, (a, b) in t.Subject |> Seq.pairwise |> Seq.indexed do
 
             if a < b then
@@ -882,18 +762,6 @@ type SeqAssertions =
     [<Extension>]
     static member BeDescending(t: Testable<#seq<string>>, comparisonType: StringComparison, ?because) : And<_> =
         use _ = t.Assert()
-
-        if isNull (box t.Subject) then
-            t
-                .With("Using StringComparison", comparisonType)
-                .With(
-                    comparisonType = StringComparison.CurrentCulture
-                    || comparisonType = StringComparison.CurrentCultureIgnoreCase,
-                    "CurrentCulture",
-                    CultureInfo.CurrentCulture
-                )
-                .With("But was", t.Subject)
-                .Fail(because)
 
         for i, (a, b) in t.Subject |> Seq.pairwise |> Seq.indexed do
 
@@ -920,13 +788,6 @@ type SeqAssertions =
         : And<_> =
         use _ = t.Assert()
 
-        if isNull (box t.Subject) then
-            t
-                .With("In culture", culture)
-                .With("With CompareOptions", compareOptions)
-                .With("But was", t.Subject)
-                .Fail(because)
-
         for i, (a, b) in t.Subject |> Seq.pairwise |> Seq.indexed do
 
             if String.Compare(a, b, culture, compareOptions) < 0 then
@@ -944,9 +805,6 @@ type SeqAssertions =
     [<Extension>]
     static member BeDescendingBy(t: Testable<#seq<'a>>, projection: 'a -> 'b, ?because) : And<_> =
         use _ = t.Assert()
-
-        if isNull (box t.Subject) then
-            t.With("But was", t.Subject).Fail(because)
 
         for i, (a, b) in t.Subject |> Seq.pairwise |> Seq.indexed do
             let a' = projection a
@@ -981,18 +839,6 @@ type SeqAssertions =
         (t: Testable<#seq<'a>>, projection: 'a -> string, comparisonType: StringComparison, ?because)
         : And<_> =
         use _ = t.Assert()
-
-        if isNull (box t.Subject) then
-            t
-                .With("Using StringComparison", comparisonType)
-                .With(
-                    comparisonType = StringComparison.CurrentCulture
-                    || comparisonType = StringComparison.CurrentCultureIgnoreCase,
-                    "CurrentCulture",
-                    CultureInfo.CurrentCulture
-                )
-                .With("But was", t.Subject)
-                .Fail(because)
 
         for i, (a, b) in t.Subject |> Seq.pairwise |> Seq.indexed do
             let a' = projection a
@@ -1038,13 +884,6 @@ type SeqAssertions =
         =
         use _ = t.Assert()
 
-        if isNull (box t.Subject) then
-            t
-                .With("In culture", culture)
-                .With("With CompareOptions", compareOptions)
-                .With("But was", t.Subject)
-                .Fail(because)
-
         for i, (a, b) in t.Subject |> Seq.pairwise |> Seq.indexed do
             let a' = projection a
             let b' = projection b
@@ -1079,9 +918,6 @@ type SeqAssertions =
     static member BeStrictlyAscending(t: Testable<#seq<'a>>, ?because) : And<_> =
         use _ = t.Assert()
 
-        if isNull (box t.Subject) then
-            t.With("But was", t.Subject).Fail(because)
-
         for i, (a, b) in t.Subject |> Seq.pairwise |> Seq.indexed do
 
             if a >= b then
@@ -1097,9 +933,6 @@ type SeqAssertions =
     [<Extension>]
     static member BeStrictlyAscendingBy(t: Testable<#seq<'a>>, projection: 'a -> 'b, ?because) : And<_> =
         use _ = t.Assert()
-
-        if isNull (box t.Subject) then
-            t.With("But was", t.Subject).Fail(because)
 
         for i, (a, b) in t.Subject |> Seq.pairwise |> Seq.indexed do
             let a' = projection a
@@ -1133,9 +966,6 @@ type SeqAssertions =
     static member BeStrictlyDescending(t: Testable<#seq<'a>>, ?because) : And<_> =
         use _ = t.Assert()
 
-        if isNull (box t.Subject) then
-            t.With("But was", t.Subject).Fail(because)
-
         for i, (a, b) in t.Subject |> Seq.pairwise |> Seq.indexed do
 
             if a <= b then
@@ -1151,9 +981,6 @@ type SeqAssertions =
     [<Extension>]
     static member BeStrictlyDescendingBy(t: Testable<#seq<'a>>, projection: 'a -> 'b, ?because) : And<_> =
         use _ = t.Assert()
-
-        if isNull (box t.Subject) then
-            t.With("But was", t.Subject).Fail(because)
 
         for i, (a, b) in t.Subject |> Seq.pairwise |> Seq.indexed do
             let a' = projection a
@@ -1184,12 +1011,6 @@ type SeqAssertions =
 
     [<Extension>]
     static member private BeSupersetOf'(t: Testable<#seq<'a>>, subset: seq<'a>, proper: bool, ?because) : And<_> =
-        if isNull subset then
-            nullArg (nameof subset)
-
-        if isNull (box t.Subject) then
-            t.With("Subset", subset).With("But was", t.Subject).Fail(because)
-
         let extraItemsInSubset, containedItemNotInSubset =
             getMissingFromSupersetAndIsProperSuperset t.Subject subset
 
@@ -1209,15 +1030,15 @@ type SeqAssertions =
         And(t)
 
 
-    /// Asserts that the subject contains all items in the specified non-null sequence (including any duplicates).
+    /// Asserts that the subject contains all items in the specified sequence (including any duplicates).
     [<Extension>]
     static member BeSupersetOf(t: Testable<#seq<'a>>, subset: seq<'a>, ?because) : And<_> =
         use _ = t.Assert()
         t.BeSupersetOf'(subset, false, ?because = because)
 
 
-    /// Asserts that the subject contains all items in the specified non-null sequence (including any duplicates) and at
-    /// least one additional item.
+    /// Asserts that the subject contains all items in the specified sequence (including any duplicates) and at least
+    /// one additional item.
     [<Extension>]
     static member BeProperSupersetOf(t: Testable<#seq<'a>>, subset: seq<'a>, ?because) : And<_> =
         use _ = t.Assert()
@@ -1226,12 +1047,6 @@ type SeqAssertions =
 
     [<Extension>]
     static member private BeSubsetOf'(t: Testable<#seq<'a>>, superset: seq<'a>, proper: bool, ?because) : And<_> =
-        if isNull superset then
-            nullArg (nameof superset)
-
-        if isNull (box t.Subject) then
-            t.With("Superset", superset).With("But was", t.Subject).Fail(because)
-
         let extraItemsInSubject, containedItemNotInSubset =
             getMissingFromSupersetAndIsProperSuperset superset t.Subject
 
@@ -1251,32 +1066,25 @@ type SeqAssertions =
         And(t)
 
 
-    /// Asserts that the specified non-null sequence contains all items in the subject (including any duplicates).
+    /// Asserts that the specified sequence contains all items in the subject (including any duplicates).
     [<Extension>]
     static member BeSubsetOf(t: Testable<#seq<'a>>, superset: seq<'a>, ?because) : And<_> =
         use _ = t.Assert()
         t.BeSubsetOf'(superset, false, ?because = because)
 
 
-    /// Asserts that the specified non-null sequence contains all items in the subject (including any duplicates) and at
-    /// least one additional item.
+    /// Asserts that the specified sequence contains all items in the subject (including any duplicates) and at least
+    /// one additional item.
     [<Extension>]
     static member BeProperSubsetOf(t: Testable<#seq<'a>>, superset: seq<'a>, ?because) : And<_> =
         use _ = t.Assert()
         t.BeSubsetOf'(superset, true, ?because = because)
 
 
-    /// Asserts that the subject has at least one item in common with the other non-null sequence. Fails if one or both
-    /// sequences are empty.
+    /// Asserts that the subject has at least one item in common with the other. Fails if either sequence is empty.
     [<Extension>]
     static member IntersectWith(t: Testable<#seq<'a>>, other: seq<'a>, ?because) : And<_> =
         use _ = t.Assert()
-
-        if isNull other then
-            nullArg (nameof other)
-
-        if isNull (box t.Subject) then
-            t.With("Other", other).With("But was", t.Subject).Fail(because)
 
         let set = HashSet(t.Subject :> seq<'a>)
 
@@ -1286,24 +1094,15 @@ type SeqAssertions =
         And(t)
 
 
-    /// Asserts that the subject has no items in common with the other non-null sequence. Passes if the subject is null
-    /// or if either sequence is empty.
+    /// Asserts that the subject has no items in common with the other sequence. Passes if either sequence is empty.
     [<Extension>]
     static member NotIntersectWith(t: Testable<#seq<'a>>, other: seq<'a>, ?because) : And<_> =
         use _ = t.Assert()
 
-        if isNull other then
-            nullArg (nameof other)
+        let set = HashSet(t.Subject :> seq<'a>)
+        set.IntersectWith(other)
 
-        if not (isNull (box t.Subject)) then
-            let set = HashSet(t.Subject :> seq<'a>)
-            set.IntersectWith(other)
-
-            if set.Count > 0 then
-                t
-                    .With("Other", other)
-                    .With("But found common items", set)
-                    .With("Subject value", t.Subject)
-                    .Fail(because)
+        if set.Count > 0 then
+            t.With("Other", other).With("But found common items", set).With("Subject value", t.Subject).Fail(because)
 
         And(t)

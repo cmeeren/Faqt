@@ -13,43 +13,25 @@ type ComparisonAssertions =
     static member inline BeCloseTo(t: Testable<'a>, target: 'b, tolerance: 'c, ?because) : And<'a> =
         use _ = t.Assert()
 
-        if isNull (box target) then
-            nullArg (nameof target)
-
-        if isNull (box tolerance) then
-            nullArg (nameof tolerance)
-
         // This implementation requires comparison as well as op_Subtraction both ways. Changing this may break clients.
         // Alternative implementations could require op_Subtraction only one way, but additionally require Abs or ~-
         // (negation).
-        if
-            isNull (box t.Subject)
-            || t.Subject - target > tolerance
-            || target - t.Subject > tolerance
-        then
+        if t.Subject - target > tolerance || target - t.Subject > tolerance then
             t.With("Target", target).With("With tolerance", tolerance).With("But was", t.Subject).Fail(because)
 
         And(t)
 
 
-    /// Asserts that the subject is more than the specified tolerance greater or smaller than the specified value.
+    /// Asserts that the subject is not within the specified tolerance greater or smaller than the specified value.
+    /// Passes if the subject is null.
     [<Extension>]
     static member inline NotBeCloseTo(t: Testable<'a>, target: 'b, tolerance: 'c, ?because) : And<'a> =
         use _ = t.Assert()
 
-        if isNull (box target) then
-            nullArg (nameof target)
-
-        if isNull (box tolerance) then
-            nullArg (nameof tolerance)
-
         // This implementation requires comparison as well as op_Subtraction both ways. Changing this may break clients.
         // Alternative implementations could require op_Subtraction only one way, but additionally require Abs or ~-
         // (negation).
-        if
-            not (isNull (box t.Subject))
-            && not (t.Subject - target > tolerance || target - t.Subject > tolerance)
-        then
+        if not (t.Subject - target > tolerance || target - t.Subject > tolerance) then
             t.With("Target", target).With("With tolerance", tolerance).With("But was", t.Subject).Fail(because)
 
         And(t)
@@ -57,10 +39,7 @@ type ComparisonAssertions =
 
     [<Extension>]
     static member inline private Compare(t: Testable<'a>, op, other, because) =
-        if isNull (box other) then
-            nullArg (nameof other)
-
-        if isNull (box t.Subject) || not (op t.Subject other) then
+        if not (op t.Subject other) then
             t.With("Other", other).With("But was", t.Subject).Fail(because)
 
         And(t)
@@ -99,7 +78,7 @@ type ComparisonAssertions =
     static member inline BePositive(t: Testable<'a>, ?because) : And<'a> =
         use _ = t.Assert()
 
-        if isNull (box t.Subject) || t.Subject <= LanguagePrimitives.GenericZero then
+        if t.Subject <= LanguagePrimitives.GenericZero then
             t.With("But was", t.Subject).Fail(because)
 
         And(t)
@@ -110,7 +89,7 @@ type ComparisonAssertions =
     static member inline BeNegative(t: Testable<'a>, ?because) : And<'a> =
         use _ = t.Assert()
 
-        if isNull (box t.Subject) || t.Subject >= LanguagePrimitives.GenericZero then
+        if t.Subject >= LanguagePrimitives.GenericZero then
             t.With("But was", t.Subject).Fail(because)
 
         And(t)
@@ -121,7 +100,7 @@ type ComparisonAssertions =
     static member inline BeNonNegative(t: Testable<'a>, ?because) : And<'a> =
         use _ = t.Assert()
 
-        if isNull (box t.Subject) || t.Subject < LanguagePrimitives.GenericZero then
+        if t.Subject < LanguagePrimitives.GenericZero then
             t.With("But was", t.Subject).Fail(because)
 
         And(t)
@@ -132,7 +111,7 @@ type ComparisonAssertions =
     static member inline BeNonPositive(t: Testable<'a>, ?because) : And<'a> =
         use _ = t.Assert()
 
-        if isNull (box t.Subject) || t.Subject > LanguagePrimitives.GenericZero then
+        if t.Subject > LanguagePrimitives.GenericZero then
             t.With("But was", t.Subject).Fail(because)
 
         And(t)
@@ -143,7 +122,7 @@ type ComparisonAssertions =
     static member inline BeInRange(t: Testable<'a>, lower: 'a, upper: 'a, ?because) : And<'a> =
         use _ = t.Assert()
 
-        if isNull (box t.Subject) || t.Subject < lower || t.Subject > upper then
+        if t.Subject < lower || t.Subject > upper then
             t.With("Lower", lower).With("Upper", upper).With("But was", t.Subject).Fail(because)
 
         And(t)

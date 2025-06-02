@@ -48,8 +48,17 @@ module Throw =
 
     [<Theory>]
     [<MemberData(nameof failData)>]
-    let ``Fails if not throwing matching exception at top level`` (ex: exn) run =
-        assertFails (fun () -> run ((fun () -> if isNull ex then obj () else raise <| ex).Should()))
+    let ``Fails if not throwing matching exception at top level`` (ex: exn | null) run =
+        assertFails (fun () ->
+            run (
+                (fun () ->
+                    match ex with
+                    | null -> obj ()
+                    | ex -> raise ex
+                )
+                    .Should()
+            )
+        )
 
 
     [<Fact>]
@@ -184,8 +193,17 @@ module ThrowInner =
 
     [<Theory>]
     [<MemberData(nameof failData)>]
-    let ``Fails if not throwing matching exception at any level`` (ex: exn) run =
-        assertFails (fun () -> run ((fun () -> if isNull ex then obj () else raise <| ex).Should()))
+    let ``Fails if not throwing matching exception at any level`` (ex: exn | null) run =
+        assertFails (fun () ->
+            run (
+                (fun () ->
+                    match ex with
+                    | null -> obj ()
+                    | ex -> raise ex
+                )
+                    .Should()
+            )
+        )
 
 
     [<Fact>]
@@ -294,8 +312,17 @@ module ThrowExactly =
 
     [<Theory>]
     [<MemberData(nameof failData)>]
-    let ``Fails if not throwing specified exception at top level`` (ex: exn) run =
-        assertFails (fun () -> run ((fun () -> if isNull ex then obj () else raise <| ex).Should()))
+    let ``Fails if not throwing specified exception at top level`` (ex: exn | null) run =
+        assertFails (fun () ->
+            run (
+                (fun () ->
+                    match ex with
+                    | null -> obj ()
+                    | ex -> raise ex
+                )
+                    .Should()
+            )
+        )
 
 
     [<Fact>]

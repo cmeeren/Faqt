@@ -9,8 +9,19 @@ open Faqt.AssertionHelpers
 open Xunit
 
 
+let asNull (value: 'a) : 'a | null = value
+
+
+[<RequiresExplicitTypeArguments>]
+let inline nul<'a when 'a: not null and 'a: not struct> : 'a | null = null
+
+
 let assertFails f =
     Assert.Throws<AssertionFailedException>(f >> ignore)
+
+
+let assertThrows f =
+    Assert.ThrowsAny<Exception>(f >> ignore)
 
 
 let assertExnMsg (msg: string) (f: unit -> 'a) =

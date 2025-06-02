@@ -1,6 +1,5 @@
 ﻿module DictionaryAssertions
 
-open System
 open System.Collections.Generic
 open Faqt
 open Xunit
@@ -25,30 +24,8 @@ module AllSatisfy =
 
 
     [<Fact>]
-    let ``Fails with expected message if subject is null`` () =
-        fun () ->
-            let x: IDictionary<string, int> = null
-            x.Should().AllSatisfy(fun _ -> failwith "unreachable")
-        |> assertExnMsg
-            """
-Subject: x
-Should: AllSatisfy
-But was: null
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message with because if subject is null`` () =
-        fun () ->
-            let x: IDictionary<string, int> = null
-            x.Should().AllSatisfy((fun _ -> failwith "unreachable"), "Some reason")
-        |> assertExnMsg
-            """
-Subject: x
-Because: Some reason
-Should: AllSatisfy
-But was: null
-"""
+    let ``Throws if null`` () =
+        assertThrows (fun () -> Unchecked.defaultof<IDictionary<string, int>>.Should().AllSatisfy(_.Should().Pass()))
 
 
     [<Fact>]
@@ -145,37 +122,8 @@ module SatisfyRespectively =
 
 
     [<Fact>]
-    let ``Throws ArgumentNullException if assertions is null`` () =
-        Assert.Throws<ArgumentNullException>(fun () ->
-            Map.empty<string, int>.Should().SatisfyRespectively(null) |> ignore
-        )
-
-
-    [<Fact>]
-    let ``Fails with expected message if subject is null`` () =
-        fun () ->
-            let x: IDictionary<string, int> = null
-            x.Should().SatisfyRespectively([ (fun x -> x.Should().Pass()) ])
-        |> assertExnMsg
-            """
-Subject: x
-Should: SatisfyRespectively
-But was: null
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message with because if subject is null`` () =
-        fun () ->
-            let x: IDictionary<string, int> = null
-            x.Should().SatisfyRespectively([ (fun x -> x.Should().Pass()) ], "Some reason")
-        |> assertExnMsg
-            """
-Subject: x
-Because: Some reason
-Should: SatisfyRespectively
-But was: null
-"""
+    let ``Throws if assertions is null`` () =
+        assertThrows (fun () -> Map.empty<string, int>.Should().SatisfyRespectively(Unchecked.defaultof<_>))
 
 
     [<Fact>]
@@ -424,25 +372,24 @@ module ``Contain key and value`` =
     let passData = [
         [| box (dict [ "a", "1" ]); "a"; "1" |]
         [| dict [ "a", "1"; "b", "2" ]; "b"; "2" |]
-        [| dict [ "a", "1"; null, null ]; null; null |]
-        [| dict [ "a", "1"; null, "2" ]; null; "2" |]
-        [| dict [ "a", "1"; "b", null ]; "b"; null |]
+        [| dict [ asNull "a", asNull "1"; null, null ]; null; null |]
+        [| dict [ asNull "a", "1"; null, "2" ]; null; "2" |]
+        [| dict [ asNull "a", asNull "1"; "b", null ]; "b"; null |]
     ]
 
 
     [<Theory>]
     [<MemberData(nameof passData)>]
     let ``Passes if dict contains the specified key/value``
-        (subject: IDictionary<string, string>)
-        (key: string)
-        (value: string)
+        (subject: IDictionary<string | null, string | null>)
+        (key: string | null)
+        (value: string | null)
         =
         subject.Should().Contain(key, value)
 
 
     let failData = [
-        [| box null; "a"; "1" |]
-        [| dict<string, string> []; "a"; "1" |]
+        [| box (dict<string | null, string | null> []); "a"; "1" |]
         [| dict [ "a", "2" ]; "a"; "1" |]
         [| dict [ "b", "1" ]; "a"; "1" |]
         [| dict [ "a", "1" ]; "b"; "2" |]
@@ -451,12 +398,17 @@ module ``Contain key and value`` =
 
     [<Theory>]
     [<MemberData(nameof failData)>]
-    let ``Fails if dict is null or does not contain the specified key/value``
-        (subject: IDictionary<string, string>)
-        (key: string)
-        (value: string)
+    let ``Fails if dict does not contain the specified key/value``
+        (subject: IDictionary<string | null, string | null>)
+        (key: string | null)
+        (value: string | null)
         =
         assertFails (fun () -> subject.Should().Contain(key, value))
+
+
+    [<Fact>]
+    let ``Throws if null`` () =
+        assertThrows (fun () -> Unchecked.defaultof<IDictionary<string, int>>.Should().Contain("", 1))
 
 
     [<Fact>]
@@ -531,39 +483,45 @@ module NotContain =
 
 
     let passData = [
-        [| box null; "a"; "1" |]
-        [| dict<string, string> []; "a"; "1" |]
+        [| box (dict<string | null, string | null> []); "a"; "1" |]
         [| dict [ "a", "2" ]; "a"; "1" |]
         [| dict [ "b", "1" ]; "a"; "1" |]
         [| dict [ "a", "1" ]; "b"; "2" |]
+        [| dict [ "a", "1" ]; nul<string>; "1" |]
+        [| dict [ "a", "1" ]; "a"; nul<string> |]
     ]
 
 
     [<Theory>]
     [<MemberData(nameof passData)>]
-    let ``Passes if dict is null or does not contain specified key/value``
-        (subject: IDictionary<string, string>)
-        (key: string)
-        (value: string)
+    let ``Passes if dict does not contain specified key/value``
+        (subject: IDictionary<string | null, string | null>)
+        (key: string | null)
+        (value: string | null)
         =
         subject.Should().NotContain(key, value)
+
+
+    [<Fact>]
+    let ``Throws if null`` () =
+        assertThrows (fun () -> Unchecked.defaultof<IDictionary<string, int>>.Should().NotContain("", 1))
 
 
     let failData = [
         [| box (dict [ "a", "1" ]); "a"; "1" |]
         [| dict [ "a", "1"; "b", "2" ]; "b"; "2" |]
-        [| dict [ "a", "1"; null, null ]; null; null |]
-        [| dict [ "a", "1"; null, "2" ]; null; "2" |]
-        [| dict [ "a", "1"; "b", null ]; "b"; null |]
+        [| dict [ asNull "a", asNull "1"; null, null ]; null; null |]
+        [| dict [ asNull "a", "1"; null, "2" ]; null; "2" |]
+        [| dict [ "a", asNull "1"; "b", null ]; "b"; null |]
     ]
 
 
     [<Theory>]
     [<MemberData(nameof failData)>]
     let ``Fails if dict contains the specified key/value``
-        (subject: IDictionary<string, string>)
-        (key: string)
-        (value: string)
+        (subject: IDictionary<string | null, string | null>)
+        (key: string | null)
+        (value: string | null)
         =
         assertFails (fun () -> subject.Should().NotContain(key, value))
 
@@ -617,9 +575,8 @@ module HaveSameItemsAs =
             .And.Be(Map.empty<string, int>)
 
 
-    let passData = [
-        [| box null; null |]
-        [| dict<string, string> []; dict<string, string> [] |]
+    let passData: IDictionary<string | null, string | null> array list = [
+        [| dict []; dict [] |]
         [| dict [ "a", "1" ]; dict [ "a", "1" ] |]
         [| dict [ "a", "1"; "b", "2" ]; dict [ "b", "2"; "a", "1" ] |]
         [| dict [ "a", "1"; null, null ]; dict [ null, null; "a", "1" ] |]
@@ -630,16 +587,15 @@ module HaveSameItemsAs =
 
     [<Theory>]
     [<MemberData(nameof passData)>]
-    let ``Passes if both are null or contain the same key-value pairs``
-        (subject: IDictionary<string, string>)
-        (expected: IDictionary<string, string>)
+    let ``Passes if both contain the same key-value pairs``
+        (subject: IDictionary<string | null, string | null>)
+        (expected: IDictionary<string | null, string | null>)
         =
         subject.Should().HaveSameItemsAs(expected)
 
 
-    let failData = [
-        [| box null; dict<string, string> [] |]
-        [| dict<string, string> []; dict [ "a", "1" ] |]
+    let failData: IDictionary<string | null, string | null> array list = [
+        [| dict []; dict [ "a", "1" ] |]
         [| dict [ "a", "1" ]; dict [ "a", "1"; "b", "2" ] |]
         [| dict [ "a", "1" ]; dict [ "b", "2" ] |]
         [| dict [ "a", "1"; null, null ]; dict [ "a", "1" ] |]
@@ -650,55 +606,22 @@ module HaveSameItemsAs =
 
     [<Theory>]
     [<MemberData(nameof failData)>]
-    let ``Fails if only one is null or they do not contain the same key-value pairs``
-        (a: IDictionary<string, string>)
-        (b: IDictionary<string, string>)
+    let ``Fails if they do not contain the same key-value pairs``
+        (a: IDictionary<string | null, string | null>)
+        (b: IDictionary<string | null, string | null>)
         =
         assertFails (fun () -> a.Should().HaveSameItemsAs(b)) |> ignore
         assertFails (fun () -> b.Should().HaveSameItemsAs(a))
 
 
     [<Fact>]
-    let ``Fails with expected message if only subject is null`` () =
-        fun () ->
-            let x: IDictionary<string, int> = null
-            x.Should().HaveSameItemsAs(dict [])
-        |> assertExnMsg
-            """
-Subject: x
-Should: HaveSameItemsAs
-Expected: {}
-But was: null
-"""
+    let ``Throws if null`` () =
+        assertThrows (fun () -> Unchecked.defaultof<IDictionary<string, string>>.Should().HaveSameItemsAs(dict []))
 
 
     [<Fact>]
-    let ``Fails with expected message if only expected is null`` () =
-        fun () ->
-            let x = dict<string, int> []
-            x.Should().HaveSameItemsAs(null)
-        |> assertExnMsg
-            """
-Subject: x
-Should: HaveSameItemsAs
-Expected: null
-But was: {}
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message with because if only subject is null`` () =
-        fun () ->
-            let x: IDictionary<string, int> = null
-            x.Should().HaveSameItemsAs(dict [], "Some reason")
-        |> assertExnMsg
-            """
-Subject: x
-Because: Some reason
-Should: HaveSameItemsAs
-Expected: {}
-But was: null
-"""
+    let ``Throws if expected is null`` () =
+        assertThrows (fun () -> (dict []).Should().HaveSameItemsAs(Unchecked.defaultof<IDictionary<string, string>>))
 
 
     [<Fact>]
@@ -1176,58 +1099,33 @@ module ContainKey =
     let passData = [
         [| box (dict [ "a", "1" ]); "a" |]
         [| dict [ "a", "1"; "b", "2" ]; "b" |]
-        [| dict [ "a", "1"; null, "2" ]; null |]
+        [| dict [ asNull "a", "1"; null, "2" ]; null |]
     ]
 
 
     [<Theory>]
     [<MemberData(nameof passData)>]
-    let ``Passes if dict contains the key`` (subject: IDictionary<string, string>) (key: string) =
+    let ``Passes if dict contains the key`` (subject: IDictionary<string | null, string | null>) (key: string | null) =
         subject.Should().ContainKey(key)
 
 
     let failData = [
-        [| box null; "a" |]
-        [| dict<string, string> []; "a" |]
+        [| box (dict<string | null, string | null> []); "a" |]
         [| dict [ "a", "1" ]; "b" |]
         [| dict [ "a", "1" ]; null |]
-        [| dict<string, string> [ null, "1" ]; "a" |]
+        [| dict [ nul<string>, "1" ]; "a" |]
     ]
 
 
     [<Theory>]
     [<MemberData(nameof failData)>]
-    let ``Fails if null or not containing the key`` (subject: IDictionary<string, string>) (key: string) =
+    let ``Fails if not containing the key`` (subject: IDictionary<string | null, string | null>) (key: string | null) =
         assertFails (fun () -> subject.Should().ContainKey(key))
 
 
     [<Fact>]
-    let ``Fails with expected message if null`` () =
-        fun () ->
-            let x: IDictionary<string, int> = null
-            x.Should().ContainKey("a")
-        |> assertExnMsg
-            """
-Subject: x
-Should: ContainKey
-Key: a
-But was: null
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message with because if null`` () =
-        fun () ->
-            let x: IDictionary<string, int> = null
-            x.Should().ContainKey("a", "Some reason")
-        |> assertExnMsg
-            """
-Subject: x
-Because: Some reason
-Should: ContainKey
-Key: a
-But was: null
-"""
+    let ``Throws if null`` () =
+        assertThrows (fun () -> Unchecked.defaultof<IDictionary<string, int>>.Should().ContainKey(""))
 
 
     [<Fact>]
@@ -1270,31 +1168,35 @@ module NotContainKey =
 
 
     let passData = [
-        [| box null; "a" |]
-        [| dict<string, string> []; "a" |]
+        [| box (dict<string | null, string | null> []); "a" |]
         [| dict [ "a", "1" ]; "b" |]
         [| dict [ "a", "1" ]; null |]
-        [| dict<string, string> [ null, "1" ]; "a" |]
+        [| dict [ nul<string>, "1" ]; "a" |]
     ]
 
 
     [<Theory>]
     [<MemberData(nameof passData)>]
-    let ``Passes if null or not containing the key`` (subject: IDictionary<string, string>) (key: string) =
+    let ``Passes not containing the key`` (subject: IDictionary<string | null, string | null>) (key: string | null) =
         subject.Should().NotContainKey(key)
 
 
     let failData = [
         [| box (dict [ "a", "1" ]); "a" |]
         [| dict [ "a", "1"; "b", "2" ]; "b" |]
-        [| dict [ "a", "1"; null, "2" ]; null |]
+        [| dict [ asNull "a", "1"; null, "2" ]; null |]
     ]
 
 
     [<Theory>]
     [<MemberData(nameof failData)>]
-    let ``Fails if dict contains the key`` (subject: IDictionary<string, string>) (key: string) =
+    let ``Fails if dict contains the key`` (subject: IDictionary<string | null, string | null>) (key: string | null) =
         assertFails (fun () -> subject.Should().NotContainKey(key))
+
+
+    [<Fact>]
+    let ``Throws if null`` () =
+        assertThrows (fun () -> Unchecked.defaultof<IDictionary<string, int>>.Should().NotContainKey(""))
 
 
     [<Fact>]
@@ -1343,59 +1245,40 @@ module ContainKeys =
         [| dict [ "a", "1"; "b", "2" ]; [ "a" ] |]
         [| dict [ "a", "1"; "b", "2" ]; [ "b" ] |]
         [| dict [ "a", "1"; "b", "2" ]; [ "a"; "b" ] |]
-        [| dict [ "a", "1"; null, "2" ]; [ (null: string) ] |]
+        [| dict [ asNull "a", "1"; null, "2" ]; [ nul<string> ] |]
     ]
 
 
     [<Theory>]
     [<MemberData(nameof passData)>]
-    let ``Passes if dict contains the key`` (subject: IDictionary<string, string>) (keys: string list) =
+    let ``Passes if dict contains the key``
+        (subject: IDictionary<string | null, string | null>)
+        (keys: (string | null) list)
+        =
         subject.Should().ContainKeys(keys)
 
 
     let failData = [
-        [| box null; [ "a" ] |]
-        [| dict<string, string> []; [ "a" ] |]
+        [| box (dict<string | null, string | null> []); [ "a" ] |]
         [| dict [ "a", "1" ]; [ "b" ] |]
         [| dict [ "a", "1" ]; [ "a"; "b" ] |]
-        [| dict [ "a", "1" ]; [ (null: string) ] |]
-        [| dict<string, string> [ null, "1" ]; [ "a" ] |]
+        [| dict [ "a", "1" ]; [ nul<string> ] |]
+        [| dict [ nul<string>, "1" ]; [ "a" ] |]
     ]
 
 
     [<Theory>]
     [<MemberData(nameof failData)>]
-    let ``Fails if null or not containing the key`` (subject: IDictionary<string, string>) (keys: string list) =
+    let ``Fails if not containing the key``
+        (subject: IDictionary<string | null, string | null>)
+        (keys: (string | null) list)
+        =
         assertFails (fun () -> subject.Should().ContainKeys(keys))
 
 
     [<Fact>]
-    let ``Fails with expected message if null`` () =
-        fun () ->
-            let x: IDictionary<string, int> = null
-            x.Should().ContainKeys([ "a" ])
-        |> assertExnMsg
-            """
-Subject: x
-Should: ContainKeys
-Keys: [a]
-But was: null
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message with because if null`` () =
-        fun () ->
-            let x: IDictionary<string, int> = null
-            x.Should().ContainKeys([ "a" ], "Some reason")
-        |> assertExnMsg
-            """
-Subject: x
-Because: Some reason
-Should: ContainKeys
-Keys: [a]
-But was: null
-"""
+    let ``Throws if null`` () =
+        assertThrows (fun () -> Unchecked.defaultof<IDictionary<string, int>>.Should().ContainKeys([]))
 
 
     [<Fact>]
@@ -1449,58 +1332,39 @@ module ContainValue =
         [| box (dict [ "a", "1" ]); "1" |]
         [| dict [ "a", "1"; "b", "2" ]; "2" |]
         [| dict [ "a", "2"; "b", "2" ]; "2" |]
-        [| dict<string, string> [ "a", null ]; null |]
+        [| dict [ "a", nul<string> ]; nul<string> |]
     ]
 
 
     [<Theory>]
     [<MemberData(nameof passData)>]
-    let ``Passes if dict contains the value`` (subject: IDictionary<string, string>) (key: string) =
+    let ``Passes if dict contains the value``
+        (subject: IDictionary<string | null, string | null>)
+        (key: string | null)
+        =
         subject.Should().ContainValue(key)
 
 
     let failData = [
-        [| box null; "a" |]
-        [| dict<string, string> []; "a" |]
+        [| box (dict<string, string> []); "a" |]
         [| dict [ "a", "1" ]; "2" |]
-        [| dict [ "a", "1" ]; null |]
-        [| dict<string, string> [ "a", null ]; "a" |]
+        [| dict [ "a", "1" ]; nul<string> |]
+        [| dict [ "a", nul<string> ]; "a" |]
     ]
 
 
     [<Theory>]
     [<MemberData(nameof failData)>]
-    let ``Fails if null or not containing the value`` (subject: IDictionary<string, string>) (key: string) =
+    let ``Fails if not containing the value``
+        (subject: IDictionary<string | null, string | null>)
+        (key: string | null)
+        =
         assertFails (fun () -> subject.Should().ContainValue(key))
 
 
     [<Fact>]
-    let ``Fails with expected message if null`` () =
-        fun () ->
-            let x: IDictionary<string, int> = null
-            x.Should().ContainValue(1)
-        |> assertExnMsg
-            """
-Subject: x
-Should: ContainValue
-Value: 1
-But was: null
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message with because if null`` () =
-        fun () ->
-            let x: IDictionary<string, int> = null
-            x.Should().ContainValue(1, "Some reason")
-        |> assertExnMsg
-            """
-Subject: x
-Because: Some reason
-Should: ContainValue
-Value: 1
-But was: null
-"""
+    let ``Throws if null`` () =
+        assertThrows (fun () -> Unchecked.defaultof<IDictionary<string, int>>.Should().ContainValue(0))
 
 
     [<Fact>]
@@ -1543,17 +1407,19 @@ module NotContainValue =
 
 
     let passData = [
-        [| box null; "a" |]
-        [| dict<string, string> []; "a" |]
+        [| box (dict<string, string> []); "a" |]
         [| dict [ "a", "1" ]; "2" |]
-        [| dict [ "a", "1" ]; null |]
-        [| dict<string, string> [ "a", null ]; "a" |]
+        [| dict [ "a", "1" ]; nul<string> |]
+        [| dict [ "a", nul<string> ]; "a" |]
     ]
 
 
     [<Theory>]
     [<MemberData(nameof passData)>]
-    let ``Passes if  null or not containing the value`` (subject: IDictionary<string, string>) (key: string) =
+    let ``Passes if not containing the value``
+        (subject: IDictionary<string | null, string | null>)
+        (key: string | null)
+        =
         subject.Should().NotContainValue(key)
 
 
@@ -1561,13 +1427,13 @@ module NotContainValue =
         [| box (dict [ "a", "1" ]); "1" |]
         [| dict [ "a", "1"; "b", "2" ]; "2" |]
         [| dict [ "a", "2"; "b", "2" ]; "2" |]
-        [| dict<string, string> [ "a", null ]; null |]
+        [| dict [ "a", nul<string> ]; nul<string> |]
     ]
 
 
     [<Theory>]
     [<MemberData(nameof failData)>]
-    let ``Fails if dict contains the value`` (subject: IDictionary<string, string>) (key: string) =
+    let ``Fails if dict contains the value`` (subject: IDictionary<string | null, string | null>) (key: string | null) =
         assertFails (fun () -> subject.Should().NotContainValue(key))
 
 

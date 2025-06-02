@@ -20,30 +20,8 @@ module AllSatisfy =
 
 
     [<Fact>]
-    let ``Fails with expected message if subject is null`` () =
-        fun () ->
-            let x: seq<string> = null
-            x.Should().AllSatisfy(fun _ -> failwith "unreachable")
-        |> assertExnMsg
-            """
-Subject: x
-Should: AllSatisfy
-But was: null
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message with because if subject is null`` () =
-        fun () ->
-            let x: seq<string> = null
-            x.Should().AllSatisfy((fun _ -> failwith "unreachable"), "Some reason")
-        |> assertExnMsg
-            """
-Subject: x
-Because: Some reason
-Should: AllSatisfy
-But was: null
-"""
+    let ``Throws if null`` () =
+        assertThrows (fun () -> Unchecked.defaultof<seq<string>>.Should().AllSatisfy(_.Should().Pass()))
 
 
     [<Fact>]
@@ -130,35 +108,13 @@ module SatisfyRespectively =
 
 
     [<Fact>]
-    let ``Throws ArgumentNullException if assertions is null`` () =
-        Assert.Throws<ArgumentNullException>(fun () -> List<int>.Empty.Should().SatisfyRespectively(null) |> ignore)
+    let ``Throws if null`` () =
+        assertThrows (fun () -> Unchecked.defaultof<seq<string>>.Should().SatisfyRespectively([]))
 
 
     [<Fact>]
-    let ``Fails with expected message if subject is null`` () =
-        fun () ->
-            let x: seq<string> = null
-            x.Should().SatisfyRespectively([ (fun x -> x.Should().Pass()) ])
-        |> assertExnMsg
-            """
-Subject: x
-Should: SatisfyRespectively
-But was: null
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message with because if subject is null`` () =
-        fun () ->
-            let x: seq<string> = null
-            x.Should().SatisfyRespectively([ (fun x -> x.Should().Pass()) ], "Some reason")
-        |> assertExnMsg
-            """
-Subject: x
-Because: Some reason
-Should: SatisfyRespectively
-But was: null
-"""
+    let ``Throws if assertions is null`` () =
+        assertThrows (fun () -> List<int>.Empty.Should().SatisfyRespectively(Unchecked.defaultof<_>))
 
 
     [<Fact>]
@@ -301,32 +257,8 @@ module HaveLength =
 
 
     [<Fact>]
-    let ``Fails with expected message if null`` () =
-        fun () ->
-            let x: seq<int> = null
-            x.Should().HaveLength(0)
-        |> assertExnMsg
-            """
-Subject: x
-Should: HaveLength
-Expected: 0
-But was: null
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message with because if null`` () =
-        fun () ->
-            let x: seq<int> = null
-            x.Should().HaveLength(0, "Some reason")
-        |> assertExnMsg
-            """
-Subject: x
-Because: Some reason
-Should: HaveLength
-Expected: 0
-But was: null
-"""
+    let ``Throws if null`` () =
+        assertThrows (fun () -> Unchecked.defaultof<seq<string>>.Should().HaveLength(0))
 
 
     [<Fact>]
@@ -373,30 +305,8 @@ module BeEmpty =
 
 
     [<Fact>]
-    let ``Fails with expected message if null`` () =
-        fun () ->
-            let x: seq<int> = null
-            x.Should().BeEmpty()
-        |> assertExnMsg
-            """
-Subject: x
-Should: BeEmpty
-But was: null
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message with because if null`` () =
-        fun () ->
-            let x: seq<int> = null
-            x.Should().BeEmpty("Some reason")
-        |> assertExnMsg
-            """
-Subject: x
-Because: Some reason
-Should: BeEmpty
-But was: null
-"""
+    let ``Throws if null`` () =
+        assertThrows (fun () -> Unchecked.defaultof<seq<string>>.Should().BeEmpty())
 
 
     [<Fact>]
@@ -470,12 +380,12 @@ module BeNullOrEmpty =
 
     [<Fact>]
     let ``Can be chained with And`` () =
-        Seq.empty<int>.Should().BeNullOrEmpty().Id<And<seq<int>>>().And.Be(Seq.empty)
+        Seq.empty<int>.Should().BeNullOrEmpty().Id<And<seq<int> | null>>().And.Be(Seq.empty)
 
 
     [<Fact>]
     let ``Passes if subject is null`` () =
-        (null: seq<int>).Should().BeNullOrEmpty()
+        Unchecked.defaultof<seq<int>>.Should().BeNullOrEmpty()
 
 
     [<Fact>]
@@ -520,28 +430,33 @@ module Contain =
     let passData = [
         [| box [ "a" ]; "a" |]
         [| [ "a"; "b" ]; "a" |]
-        [| [ (null: string) ]; (null: string) |]
+        [| [ nul<string> ]; nul<string> |]
     ]
 
 
     [<Theory>]
     [<MemberData(nameof passData)>]
-    let ``Passes if sequence contains value`` (subject: seq<string>) (value: string) = subject.Should().Contain(value)
+    let ``Passes if sequence contains value`` (subject: seq<string | null>) (value: string | null) =
+        subject.Should().Contain(value)
 
 
     let failData = [
-        [| box<seq<string>> null; "a" |]
-        [| List<string>.Empty; "a" |]
+        [| box List<string>.Empty; "a" |]
         [| [ "a" ]; "b" |]
-        [| [ (null: string) ]; "a" |]
-        [| [ "a" ]; (null: string) |]
+        [| [ nul<string> ]; "a" |]
+        [| [ "a" ]; nul<string> |]
     ]
 
 
     [<Theory>]
     [<MemberData(nameof failData)>]
-    let ``Fails if null or not containing value`` (subject: seq<string>) (value: string) =
+    let ``Fails if not containing value`` (subject: seq<string | null>) (value: string | null) =
         assertFails (fun () -> subject.Should().Contain(value))
+
+
+    [<Fact>]
+    let ``Throws if null`` () =
+        assertThrows (fun () -> Unchecked.defaultof<seq<int>>.Should().Contain(0))
 
 
     [<Fact>]
@@ -582,31 +497,35 @@ module NotContain =
 
 
     let passData = [
-        [| box<seq<string>> null; "a" |]
-        [| List<string>.Empty; "a" |]
+        [| box List<string>.Empty; "a" |]
         [| [ "a" ]; "b" |]
-        [| [ (null: string) ]; "a" |]
-        [| [ "a" ]; (null: string) |]
+        [| [ nul<string> ]; "a" |]
+        [| [ "a" ]; nul<string> |]
     ]
 
 
     [<Theory>]
     [<MemberData(nameof passData)>]
-    let ``Passes if null or not containing value`` (subject: seq<string>) (value: string) =
+    let ``Passes if not containing value`` (subject: seq<string | null>) (value: string | null) =
         subject.Should().NotContain(value)
 
 
     let failData = [
         [| box [ "a" ]; "a" |]
         [| [ "a"; "b" ]; "a" |]
-        [| [ (null: string) ]; (null: string) |]
+        [| [ nul<string> ]; nul<string> |]
     ]
 
 
     [<Theory>]
     [<MemberData(nameof failData)>]
-    let ``Fails if sequence contains value`` (subject: seq<string>) (value: string) =
+    let ``Fails if sequence contains value`` (subject: seq<string | null>) (value: string | null) =
         assertFails (fun () -> subject.Should().NotContain(value))
+
+
+    [<Fact>]
+    let ``Throws if null`` () =
+        assertThrows (fun () -> Unchecked.defaultof<seq<string>>.Should().NotContain("value"))
 
 
     [<Fact>]
@@ -650,57 +569,38 @@ module AllBe =
         [| box List<string>.Empty; "a" |]
         [| [ "a" ]; "a" |]
         [| [ "a"; "a" ]; "a" |]
-        [| [ (null: string) ]; (null: string) |]
+        [| [ nul<string> ]; nul<string> |]
     ]
 
 
     [<Theory>]
     [<MemberData(nameof passData)>]
-    let ``Passes if all items are equal to the specified value`` (subject: seq<string>) (expected: string) =
+    let ``Passes if all items are equal to the specified value``
+        (subject: seq<string | null>)
+        (expected: string | null)
+        =
         subject.Should().AllBe(expected)
 
 
     let failData = [
-        [| box<seq<string>> null; "a" |]
-        [| [ "a" ]; "b" |]
+        [| box [ "a" ]; "b" |]
         [| [ "a"; "b" ]; "a" |]
-        [| [ "a"; null ]; (null: string) |]
+        [| [ asNull "a"; null ]; nul<string> |]
     ]
 
 
     [<Theory>]
     [<MemberData(nameof failData)>]
-    let ``Fails if null or not all items are equal to the specified value`` (subject: seq<string>) (expected: string) =
+    let ``Fails if not all items are equal to the specified value``
+        (subject: seq<string | null>)
+        (expected: string | null)
+        =
         assertFails (fun () -> subject.Should().AllBe(expected)) |> ignore
 
 
     [<Fact>]
-    let ``Fails with expected message if subject is null`` () =
-        fun () ->
-            let x: seq<int> = null
-            x.Should().AllBe(1)
-        |> assertExnMsg
-            """
-Subject: x
-Should: AllBe
-Expected: 1
-But was: null
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message with because if subject is null`` () =
-        fun () ->
-            let x: seq<int> = null
-            x.Should().AllBe(1, "Some reason")
-        |> assertExnMsg
-            """
-Subject: x
-Because: Some reason
-Should: AllBe
-Expected: 1
-But was: null
-"""
+    let ``Throws if null`` () =
+        assertThrows (fun () -> Unchecked.defaultof<seq<string>>.Should().AllBe(""))
 
 
     [<Fact>]
@@ -760,22 +660,24 @@ module ``AllBe with projection`` =
 
     [<Theory>]
     [<MemberData(nameof passData)>]
-    let ``Passes if all items are equal to the specified value when projected`` (subject: seq<string>) (expected: int) =
+    let ``Passes if all items are equal to the specified value when projected``
+        (subject: seq<string | null>)
+        (expected: int)
+        =
         subject.Should().AllBeMappedTo(expected, (fun x -> x.Length))
 
 
     let failData = [
         // Comment to force break
-        [| box<seq<string>> null; 1 |]
-        [| [ "a" ]; 2 |]
+        [| box [ "a" ]; 2 |]
         [| [ "a"; "ab" ]; 1 |]
     ]
 
 
     [<Theory>]
     [<MemberData(nameof failData)>]
-    let ``Fails if null or not all items are equal to the specified value when projected``
-        (subject: seq<string>)
+    let ``Fails if not all items are equal to the specified value when projected``
+        (subject: seq<string | null>)
         (expected: int)
         =
         assertFails (fun () -> subject.Should().AllBeMappedTo(expected, (fun x -> x.Length)))
@@ -783,32 +685,8 @@ module ``AllBe with projection`` =
 
 
     [<Fact>]
-    let ``Fails with expected message if subject is null`` () =
-        fun () ->
-            let x: seq<string> = null
-            x.Should().AllBeMappedTo(1, (fun x -> x.Length))
-        |> assertExnMsg
-            """
-Subject: x
-Should: AllBeMappedTo
-Expected: 1
-But was: null
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message with because if subject is null`` () =
-        fun () ->
-            let x: seq<string> = null
-            x.Should().AllBeMappedTo(1, (fun x -> x.Length), "Some reason")
-        |> assertExnMsg
-            """
-Subject: x
-Because: Some reason
-Should: AllBeMappedTo
-Expected: 1
-But was: null
-"""
+    let ``Throws if null`` () =
+        assertThrows (fun () -> Unchecked.defaultof<seq<string>>.Should().AllBeMappedTo(0, _.Length))
 
 
     [<Fact>]
@@ -863,58 +741,35 @@ module AllBeEqual =
 
 
     let passData = [
-        [| List<string>.Empty |]
+        [| List<string | null>.Empty |]
         [| [ "a" ] |]
         [| [ "a"; "a" ] |]
-        [| [ (null: string) ] |]
-        [| [ (null: string); null ] |]
+        [| [ nul<string> ] |]
+        [| [ nul<string>; null ] |]
     ]
 
 
     [<Theory>]
     [<MemberData(nameof passData)>]
-    let ``Passes if all items are equal`` (subject: seq<string>) = subject.Should().AllBeEqual()
+    let ``Passes if all items are equal`` (subject: seq<string | null>) = subject.Should().AllBeEqual()
 
 
     let failData = [
         // Comment to force break
-        [| box<seq<string>> null |]
-        [| [ "a"; "b" ] |]
+        [| [ asNull "a"; "b" ] |]
         [| [ "a"; null ] |]
     ]
 
 
     [<Theory>]
     [<MemberData(nameof failData)>]
-    let ``Fails if null or not all items are equal`` (subject: seq<string>) =
+    let ``Fails if not all items are equal`` (subject: seq<string | null>) =
         assertFails (fun () -> subject.Should().AllBeEqual()) |> ignore
 
 
     [<Fact>]
-    let ``Fails with expected message if subject is null`` () =
-        fun () ->
-            let x: seq<int> = null
-            x.Should().AllBeEqual()
-        |> assertExnMsg
-            """
-Subject: x
-Should: AllBeEqual
-But was: null
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message with because if subject is null`` () =
-        fun () ->
-            let x: seq<int> = null
-            x.Should().AllBeEqual("Some reason")
-        |> assertExnMsg
-            """
-Subject: x
-Because: Some reason
-Should: AllBeEqual
-But was: null
-"""
+    let ``Throws if null`` () =
+        assertThrows (fun () -> Unchecked.defaultof<seq<string>>.Should().AllBeEqual())
 
 
     [<Fact>]
@@ -973,49 +828,23 @@ module AllBeEqualBy =
 
     [<Theory>]
     [<MemberData(nameof passData)>]
-    let ``Passes if all items are equal by the specified projection`` (subject: seq<string>) =
+    let ``Passes if all items are equal by the specified projection`` (subject: seq<string | null>) =
         subject.Should().AllBeEqualBy(fun x -> x.Length)
 
 
-    let failData = [
-        // Comment to force break
-        [| box<seq<string>> null |]
-        [| [ "a"; "ab" ] |]
-    ]
+    let failData = [ [| [ "a"; "ab" ] |] ]
 
 
     [<Theory>]
     [<MemberData(nameof failData)>]
-    let ``Fails if null or not all items are equal by the specified projection`` (subject: seq<string>) =
+    let ``Fails if not all items are equal by the specified projection`` (subject: seq<string | null>) =
         assertFails (fun () -> subject.Should().AllBeEqualBy(fun x -> x.Length))
         |> ignore
 
 
     [<Fact>]
-    let ``Fails with expected message if subject is null`` () =
-        fun () ->
-            let x: seq<string> = null
-            x.Should().AllBeEqualBy(fun x -> x.Length)
-        |> assertExnMsg
-            """
-Subject: x
-Should: AllBeEqualBy
-But was: null
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message with because if subject is null`` () =
-        fun () ->
-            let x: seq<string> = null
-            x.Should().AllBeEqualBy((fun x -> x.Length), "Some reason")
-        |> assertExnMsg
-            """
-Subject: x
-Because: Some reason
-Should: AllBeEqualBy
-But was: null
-"""
+    let ``Throws if null`` () =
+        assertThrows (fun () -> Unchecked.defaultof<seq<string>>.Should().AllBeEqualBy(_.Length))
 
 
     [<Fact>]
@@ -1068,8 +897,7 @@ module SequenceEqual =
 
 
     let passData = [
-        [| box null; null |]
-        [| List<string>.Empty; List<string>.Empty |]
+        [| List<string | null>.Empty; List<string | null>.Empty |]
         [| [ "a" ]; [ "a" ] |]
         [| [ "a"; null ]; [ "a"; null ] |]
         [| [ "a"; "b" ]; [ "a"; "b" ] |]
@@ -1078,17 +906,16 @@ module SequenceEqual =
 
     [<Theory>]
     [<MemberData(nameof passData)>]
-    let ``Passes if both are null or have the same items in the same order``
-        (subject: seq<string>)
-        (expected: seq<string>)
+    let ``Passes if both have the same items in the same order``
+        (subject: seq<string | null>)
+        (expected: seq<string | null>)
         =
         subject.Should().SequenceEqual(expected)
 
 
     let failData = [
-        [| box null; List<string>.Empty |]
-        [| List<string>.Empty; [ "a" ] |]
-        [| [ "a" ]; [ "a"; null ] |]
+        [| box List<string | null>.Empty; [ asNull "a" ] |]
+        [| [ "a" ]; [ asNull "a"; null ] |]
         [| [ "a" ]; [ "b" ] |]
         [| [ "a"; "b" ]; [ "b"; "a" ] |]
     ]
@@ -1096,52 +923,14 @@ module SequenceEqual =
 
     [<Theory>]
     [<MemberData(nameof failData)>]
-    let ``Fails if not containing the same items in the same order`` (a: seq<string>) (b: seq<string>) =
+    let ``Fails if not containing the same items in the same order`` (a: seq<string | null>) (b: seq<string | null>) =
         assertFails (fun () -> a.Should().SequenceEqual(b)) |> ignore
         assertFails (fun () -> b.Should().SequenceEqual(a)) |> ignore
 
 
     [<Fact>]
-    let ``Fails with expected message if only subject is null`` () =
-        fun () ->
-            let x: seq<int> = null
-            x.Should().SequenceEqual([])
-        |> assertExnMsg
-            """
-Subject: x
-Should: SequenceEqual
-Expected: []
-But was: null
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message with because if only subject is null`` () =
-        fun () ->
-            let x: seq<int> = null
-            x.Should().SequenceEqual([], "Some reason")
-        |> assertExnMsg
-            """
-Subject: x
-Because: Some reason
-Should: SequenceEqual
-Expected: []
-But was: null
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message if only expected is null`` () =
-        fun () ->
-            let x = List<int>.Empty
-            x.Should().SequenceEqual(null)
-        |> assertExnMsg
-            """
-Subject: x
-Should: SequenceEqual
-Expected: null
-But was: []
-"""
+    let ``Throws if null`` () =
+        assertThrows (fun () -> Unchecked.defaultof<seq<string>>.Should().SequenceEqual([]))
 
 
     [<Fact>]
@@ -1233,79 +1022,39 @@ module HaveSameItemsAs =
 
 
     let passData = [
-        [| box null; null |]
-        [| List<string>.Empty; List<string>.Empty |]
+        [| List<string | null>.Empty; List<string | null>.Empty |]
         [| [ "a" ]; [ "a" ] |]
         [| [ "a"; "b" ]; [ "a"; "b" ] |]
         [| [ "a"; "b" ]; [ "b"; "a" ] |]
-        [| [ "a"; (null: string) ]; [ (null: string); "a" ] |]
+        [| [ "a"; null ]; [ null; "a" ] |]
     ]
 
 
     [<Theory>]
     [<MemberData(nameof passData)>]
-    let ``Passes if both are null or contain the same values`` (subject: seq<string>) (expected: seq<string>) =
+    let ``Passes if both contain the same values`` (subject: seq<string | null>) (expected: seq<string | null>) =
         subject.Should().HaveSameItemsAs(expected)
 
 
     let failData = [
-        [| box null; List<string>.Empty |]
-        [| List<string>.Empty; [ "a" ] |]
+        [| List<string | null>.Empty; [ "a" ] |]
         [| [ "a" ]; [ "a"; "a" ] |]
         [| [ "a" ]; [ "a"; "b" ] |]
         [| [ "a" ]; [ "b" ] |]
-        [| [ "a" ]; [ (null: string) ] |]
+        [| [ "a" ]; [ nul<string> ] |]
     ]
 
 
     [<Theory>]
     [<MemberData(nameof failData)>]
-    let ``Fails if only one is null or they do not contain the same values`` (a: seq<string>) (b: seq<string>) =
+    let ``Fails if they do not contain the same values`` (a: seq<string | null>) (b: seq<string | null>) =
         assertFails (fun () -> a.Should().HaveSameItemsAs(b)) |> ignore
         assertFails (fun () -> b.Should().HaveSameItemsAs(a))
 
 
     [<Fact>]
-    let ``Fails with expected message if only subject is null`` () =
-        fun () ->
-            let x: seq<string> = null
-            x.Should().HaveSameItemsAs([])
-        |> assertExnMsg
-            """
-Subject: x
-Should: HaveSameItemsAs
-Expected: []
-But was: null
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message if only expected is null`` () =
-        fun () ->
-            let x = List<string>.Empty
-            x.Should().HaveSameItemsAs(null)
-        |> assertExnMsg
-            """
-Subject: x
-Should: HaveSameItemsAs
-Expected: null
-But was: []
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message with because if only subject is null`` () =
-        fun () ->
-            let x: seq<string> = null
-            x.Should().HaveSameItemsAs([], "Some reason")
-        |> assertExnMsg
-            """
-Subject: x
-Because: Some reason
-Should: HaveSameItemsAs
-Expected: []
-But was: null
-"""
+    let ``Throws if null`` () =
+        assertThrows (fun () -> Unchecked.defaultof<seq<string>>.Should().HaveSameItemsAs([]))
 
 
     [<Fact>]
@@ -1349,9 +1098,21 @@ module ContainExactlyOneItem =
         [ 1 ].Should().ContainExactlyOneItem().Id<AndDerived<int list, int>>().That.Should(()).Be(1)
 
 
+    let passData = [
+        // Comment to force break for readability
+        [| [ asNull "a" ] |]
+        [| [ null ] |]
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof passData)>]
+    let ``Passes if containing exactly one item`` (subject: seq<string | null>) =
+        subject.Should().ContainExactlyOneItem()
+
+
     let failData = [
         // Comment to force break for readability
-        [| box null |]
         [| List<string>.Empty |]
         [| [ "a"; "b" ] |]
     ]
@@ -1359,35 +1120,13 @@ module ContainExactlyOneItem =
 
     [<Theory>]
     [<MemberData(nameof failData)>]
-    let ``Fails if not containing exactly one item`` (subject: seq<string>) =
+    let ``Fails if not containing exactly one item`` (subject: seq<string | null>) =
         assertFails (fun () -> subject.Should().ContainExactlyOneItem()) |> ignore
 
 
     [<Fact>]
-    let ``Fails with expected message if subject is null`` () =
-        fun () ->
-            let x: seq<int> = null
-            x.Should().ContainExactlyOneItem()
-        |> assertExnMsg
-            """
-Subject: x
-Should: ContainExactlyOneItem
-But was: null
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message with because if subject is null`` () =
-        fun () ->
-            let x: seq<int> = null
-            x.Should().ContainExactlyOneItem("Some reason")
-        |> assertExnMsg
-            """
-Subject: x
-Because: Some reason
-Should: ContainExactlyOneItem
-But was: null
-"""
+    let ``Throws if null`` () =
+        assertThrows (fun () -> Unchecked.defaultof<seq<string>>.Should().ContainExactlyOneItem())
 
 
     [<Fact>]
@@ -1429,12 +1168,20 @@ module ContainExactlyOneItemMatching =
         [ 1; 2 ].Should().ContainExactlyOneItemMatching((=) 2).Id<AndDerived<int list, int>>().That.Should(()).Be(2)
 
 
-    let failData = [
+    let passData = [
         // Comment to force break for readability
-        [| box null |]
-        [| List<int>.Empty |]
-        [| [ 1; 1 ] |]
+        [| [ asNull "a" ] |]
+        [| [ null ] |]
     ]
+
+
+    [<Theory>]
+    [<MemberData(nameof passData)>]
+    let ``Passes if containing exactly one item the predicate`` (subject: seq<string | null>) =
+        subject.Should().ContainExactlyOneItemMatching(fun _ -> true)
+
+
+    let failData = [ [| List<int>.Empty |]; [| [ 1; 1 ] |] ]
 
 
     [<Theory>]
@@ -1445,30 +1192,8 @@ module ContainExactlyOneItemMatching =
 
 
     [<Fact>]
-    let ``Fails with expected message if subject is null`` () =
-        fun () ->
-            let x: seq<int> = null
-            x.Should().ContainExactlyOneItemMatching(fun _ -> true)
-        |> assertExnMsg
-            """
-Subject: x
-Should: ContainExactlyOneItemMatching
-But was: null
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message with because if subject is null`` () =
-        fun () ->
-            let x: seq<int> = null
-            x.Should().ContainExactlyOneItemMatching((fun _ -> true), "Some reason")
-        |> assertExnMsg
-            """
-Subject: x
-Because: Some reason
-Should: ContainExactlyOneItemMatching
-But was: null
-"""
+    let ``Throws if null`` () =
+        assertThrows (fun () -> Unchecked.defaultof<seq<string>>.Should().ContainExactlyOneItemMatching(fun _ -> true))
 
 
     [<Fact>]
@@ -1512,42 +1237,21 @@ module ContainAtLeastOneItem =
 
     let passData = [
         // Comment to force break for readability
-        [| [ 1 ] |]
-        [| [ 1; 2 ] |]
+        [| [ null ] |]
+        [| [ asNull "a" ] |]
+        [| [ "a"; "b" ] |]
     ]
 
 
     [<Theory>]
     [<MemberData(nameof passData)>]
-    let ``Passes if contains at least one item`` (subject: seq<int>) =
+    let ``Passes if contains at least one item`` (subject: seq<string | null>) =
         subject.Should().ContainAtLeastOneItem()
 
 
     [<Fact>]
-    let ``Fails with expected message if subject is null`` () =
-        fun () ->
-            let x: seq<int> = null
-            x.Should().ContainAtLeastOneItem()
-        |> assertExnMsg
-            """
-Subject: x
-Should: ContainAtLeastOneItem
-But was: null
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message with because if subject is null`` () =
-        fun () ->
-            let x: seq<int> = null
-            x.Should().ContainAtLeastOneItem("Some reason")
-        |> assertExnMsg
-            """
-Subject: x
-Because: Some reason
-Should: ContainAtLeastOneItem
-But was: null
-"""
+    let ``Throws if null`` () =
+        assertThrows (fun () -> Unchecked.defaultof<seq<string>>.Should().ContainAtLeastOneItem())
 
 
     [<Fact>]
@@ -1604,30 +1308,8 @@ module ContainAtLeastOneItemMatching =
 
 
     [<Fact>]
-    let ``Fails with expected message if subject is null`` () =
-        fun () ->
-            let x: seq<int> = null
-            x.Should().ContainAtLeastOneItemMatching(fun _ -> true)
-        |> assertExnMsg
-            """
-Subject: x
-Should: ContainAtLeastOneItemMatching
-But was: null
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message with because if subject is null`` () =
-        fun () ->
-            let x: seq<int> = null
-            x.Should().ContainAtLeastOneItemMatching((fun _ -> true), "Some reason")
-        |> assertExnMsg
-            """
-Subject: x
-Because: Some reason
-Should: ContainAtLeastOneItemMatching
-But was: null
-"""
+    let ``Throws if null`` () =
+        assertThrows (fun () -> Unchecked.defaultof<seq<string>>.Should().ContainAtLeastOneItemMatching(fun _ -> true))
 
 
     [<Fact>]
@@ -1675,30 +1357,8 @@ module ContainAtMostOneItem =
 
 
     [<Fact>]
-    let ``Fails with expected message if subject is null`` () =
-        fun () ->
-            let x: seq<int> = null
-            x.Should().ContainAtMostOneItem()
-        |> assertExnMsg
-            """
-Subject: x
-Should: ContainAtMostOneItem
-But was: null
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message with because if subject is null`` () =
-        fun () ->
-            let x: seq<int> = null
-            x.Should().ContainAtMostOneItem("Some reason")
-        |> assertExnMsg
-            """
-Subject: x
-Because: Some reason
-Should: ContainAtMostOneItem
-But was: null
-"""
+    let ``Throws if null`` () =
+        assertThrows (fun () -> Unchecked.defaultof<seq<string>>.Should().ContainAtMostOneItem())
 
 
     [<Fact>]
@@ -1754,30 +1414,8 @@ module ContainAtMostOneItemMatching =
 
 
     [<Fact>]
-    let ``Fails with expected message if subject is null`` () =
-        fun () ->
-            let x: seq<int> = null
-            x.Should().ContainAtMostOneItemMatching(fun _ -> true)
-        |> assertExnMsg
-            """
-Subject: x
-Should: ContainAtMostOneItemMatching
-But was: null
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message with because if subject is null`` () =
-        fun () ->
-            let x: seq<int> = null
-            x.Should().ContainAtMostOneItemMatching((fun _ -> true), "Some reason")
-        |> assertExnMsg
-            """
-Subject: x
-Because: Some reason
-Should: ContainAtMostOneItemMatching
-But was: null
-"""
+    let ``Throws if null`` () =
+        assertThrows (fun () -> Unchecked.defaultof<seq<string>>.Should().ContainAtMostOneItemMatching(fun _ -> true))
 
 
     [<Fact>]
@@ -1838,30 +1476,8 @@ module ContainItemsMatching =
 
 
     [<Fact>]
-    let ``Fails with expected message if subject is null`` () =
-        fun () ->
-            let x: seq<int> = null
-            x.Should().ContainItemsMatching(fun _ -> true)
-        |> assertExnMsg
-            """
-Subject: x
-Should: ContainItemsMatching
-But was: null
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message with because if subject is null`` () =
-        fun () ->
-            let x: seq<int> = null
-            x.Should().ContainItemsMatching((fun _ -> true), "Some reason")
-        |> assertExnMsg
-            """
-Subject: x
-Because: Some reason
-Should: ContainItemsMatching
-But was: null
-"""
+    let ``Throws if null`` () =
+        assertThrows (fun () -> Unchecked.defaultof<seq<string>>.Should().ContainItemsMatching(fun _ -> true))
 
 
     [<Fact>]
@@ -1903,7 +1519,6 @@ module NotContainItemsMatching =
 
     let passData = [
         // Comment to force break for readability
-        [| Unchecked.defaultof<List<int>> |]
         [| [ 1 ] |]
         [| [ 1; 2 ] |]
     ]
@@ -1911,8 +1526,13 @@ module NotContainItemsMatching =
 
     [<Theory>]
     [<MemberData(nameof passData)>]
-    let ``Passes if contains at least one item matching the predicate`` (subject: seq<int>) =
+    let ``Passes if not containing items matching the predicate`` (subject: seq<int>) =
         subject.Should().NotContainItemsMatching(fun x -> x > 3)
+
+
+    [<Fact>]
+    let ``Throws if null`` () =
+        assertThrows (fun () -> Unchecked.defaultof<seq<string>>.Should().NotContainItemsMatching(fun _ -> false))
 
 
     [<Fact>]
@@ -1968,30 +1588,8 @@ module BeDistinct =
 
 
     [<Fact>]
-    let ``Fails with expected message if null`` () =
-        fun () ->
-            let x: seq<int> = null
-            x.Should().BeDistinct()
-        |> assertExnMsg
-            """
-Subject: x
-Should: BeDistinct
-But was: null
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message with because if null`` () =
-        fun () ->
-            let x: seq<int> = null
-            x.Should().BeDistinct("Some reason")
-        |> assertExnMsg
-            """
-Subject: x
-Because: Some reason
-Should: BeDistinct
-But was: null
-"""
+    let ``Throws if null`` () =
+        assertThrows (fun () -> Unchecked.defaultof<seq<string>>.Should().BeDistinct())
 
 
     [<Fact>]
@@ -2049,35 +1647,13 @@ module BeDistinctBy =
 
     [<Theory>]
     [<MemberData(nameof passData)>]
-    let ``Passes if distinct by the specified projection`` (subject: seq<string>) =
+    let ``Passes if distinct by the specified projection`` (subject: seq<string | null>) =
         subject.Should().BeDistinctBy(fun s -> s.Length)
 
 
     [<Fact>]
-    let ``Fails with expected message if null`` () =
-        fun () ->
-            let x: seq<int> = null
-            x.Should().BeDistinctBy(id)
-        |> assertExnMsg
-            """
-Subject: x
-Should: BeDistinctBy
-But was: null
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message with because if null`` () =
-        fun () ->
-            let x: seq<int> = null
-            x.Should().BeDistinctBy(id, "Some reason")
-        |> assertExnMsg
-            """
-Subject: x
-Because: Some reason
-Should: BeDistinctBy
-But was: null
-"""
+    let ``Throws if null`` () =
+        assertThrows (fun () -> Unchecked.defaultof<seq<string>>.Should().BeDistinctBy(_.Length))
 
 
     [<Fact>]
@@ -2145,30 +1721,8 @@ module BeAscending =
 
 
     [<Fact>]
-    let ``Fails with expected message if null`` () =
-        fun () ->
-            let x: seq<int> = null
-            x.Should().BeAscending()
-        |> assertExnMsg
-            """
-Subject: x
-Should: BeAscending
-But was: null
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message with because if null`` () =
-        fun () ->
-            let x: seq<int> = null
-            x.Should().BeAscending("Some reason")
-        |> assertExnMsg
-            """
-Subject: x
-Because: Some reason
-Should: BeAscending
-But was: null
-"""
+    let ``Throws if null`` () =
+        assertThrows (fun () -> Unchecked.defaultof<seq<string>>.Should().BeAscending())
 
 
     [<Fact>]
@@ -2236,32 +1790,8 @@ module ``BeAscending (StringComparison)`` =
 
 
     [<Fact>]
-    let ``Fails with expected message if null`` () =
-        fun () ->
-            let x: seq<string> = null
-            x.Should().BeAscending(StringComparison.Ordinal)
-        |> assertExnMsg
-            """
-Subject: x
-Should: BeAscending
-Using StringComparison: Ordinal
-But was: null
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message with because if null`` () =
-        fun () ->
-            let x: seq<string> = null
-            x.Should().BeAscending(StringComparison.Ordinal, "Some reason")
-        |> assertExnMsg
-            """
-Subject: x
-Because: Some reason
-Should: BeAscending
-Using StringComparison: Ordinal
-But was: null
-"""
+    let ``Throws if null`` () =
+        assertThrows (fun () -> Unchecked.defaultof<seq<string>>.Should().BeAscending(StringComparison.Ordinal))
 
 
     [<Fact>]
@@ -2349,42 +1879,10 @@ module ``BeAscending (Culture CompareOptions)`` =
 
 
     [<Fact>]
-    let ``Fails with expected message if null`` () =
-        fun () ->
-            let x: seq<string> = null
-
-            x.Should().BeAscending(CultureInfo("nb-NO"), CompareOptions.IgnoreCase ||| CompareOptions.IgnoreSymbols)
-        |> assertExnMsg
-            """
-Subject: x
-Should: BeAscending
-In culture: nb-NO
-With CompareOptions: IgnoreCase, IgnoreSymbols
-But was: null
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message with because if null`` () =
-        fun () ->
-            let x: seq<string> = null
-
-            x
-                .Should()
-                .BeAscending(
-                    CultureInfo("nb-NO"),
-                    CompareOptions.IgnoreCase ||| CompareOptions.IgnoreSymbols,
-                    "Some reason"
-                )
-        |> assertExnMsg
-            """
-Subject: x
-Because: Some reason
-Should: BeAscending
-In culture: nb-NO
-With CompareOptions: IgnoreCase, IgnoreSymbols
-But was: null
-"""
+    let ``Throws if null`` () =
+        assertThrows (fun () ->
+            Unchecked.defaultof<seq<string>>.Should().BeAscending(CultureInfo.InvariantCulture, CompareOptions.Ordinal)
+        )
 
 
     [<Fact>]
@@ -2455,35 +1953,13 @@ module BeAscendingBy =
 
     [<Theory>]
     [<MemberData(nameof passData)>]
-    let ``Passes if non-strictly ascending by the specified projection`` (subject: seq<string>) =
+    let ``Passes if non-strictly ascending by the specified projection`` (subject: seq<string | null>) =
         subject.Should().BeAscendingBy(fun s -> s.Length)
 
 
     [<Fact>]
-    let ``Fails with expected message if null`` () =
-        fun () ->
-            let x: seq<int> = null
-            x.Should().BeAscendingBy(id)
-        |> assertExnMsg
-            """
-Subject: x
-Should: BeAscendingBy
-But was: null
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message with because if null`` () =
-        fun () ->
-            let x: seq<int> = null
-            x.Should().BeAscendingBy(id, "Some reason")
-        |> assertExnMsg
-            """
-Subject: x
-Because: Some reason
-Should: BeAscendingBy
-But was: null
-"""
+    let ``Throws if null`` () =
+        assertThrows (fun () -> Unchecked.defaultof<seq<string>>.Should().BeAscendingBy(_.Length))
 
 
     [<Fact>]
@@ -2549,40 +2025,17 @@ module ``BeAscendingBy (StringComparison)`` =
     [<Theory>]
     [<MemberData(nameof passData)>]
     let ``Passes if non-strictly ascending using the specified comparison``
-        (subject: seq<string>)
+        (subject: seq<string | null>)
         (comparison: StringComparison)
         =
         subject.Should().BeAscendingBy(_.Substring(0, 1), comparison)
 
 
     [<Fact>]
-    let ``Fails with expected message if null`` () =
-        fun () ->
-            let x: seq<string> = null
-            x.Should().BeAscendingBy(_.Substring(0, 1), StringComparison.Ordinal)
-        |> assertExnMsg
-            """
-Subject: x
-Should: BeAscendingBy
-Using StringComparison: Ordinal
-But was: null
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message with because if null`` () =
-        fun () ->
-            let x: seq<string> = null
-
-            x.Should().BeAscendingBy(_.Substring(0, 1), StringComparison.Ordinal, "Some reason")
-        |> assertExnMsg
-            """
-Subject: x
-Because: Some reason
-Should: BeAscendingBy
-Using StringComparison: Ordinal
-But was: null
-"""
+    let ``Throws if null`` () =
+        assertThrows (fun () ->
+            Unchecked.defaultof<seq<string>>.Should().BeAscendingBy(_.Substring(0, 1), StringComparison.Ordinal)
+        )
 
 
     [<Fact>]
@@ -2655,7 +2108,7 @@ module ``BeAscendingBy (Culture CompareOptions)`` =
     [<Theory>]
     [<MemberData(nameof passData)>]
     let ``Passes if non-strictly ascending using the specified comparison``
-        (subject: seq<string>)
+        (subject: seq<string | null>)
         (culture: CultureInfo)
         (compareOptions: CompareOptions)
         =
@@ -2676,7 +2129,7 @@ module ``BeAscendingBy (Culture CompareOptions)`` =
     [<Theory>]
     [<MemberData(nameof failData)>]
     let ``Fails if not non-strictly ascending using the specified comparison``
-        (subject: seq<string>)
+        (subject: seq<string | null>)
         (culture: CultureInfo)
         (compareOptions: CompareOptions)
         =
@@ -2684,49 +2137,12 @@ module ``BeAscendingBy (Culture CompareOptions)`` =
 
 
     [<Fact>]
-    let ``Fails with expected message if null`` () =
-        fun () ->
-            let x: seq<string> = null
-
-            x
+    let ``Throws if null`` () =
+        assertThrows (fun () ->
+            Unchecked.defaultof<seq<string>>
                 .Should()
-                .BeAscendingBy(
-                    _.Substring(0, 1),
-                    CultureInfo("nb-NO"),
-                    CompareOptions.IgnoreCase ||| CompareOptions.IgnoreSymbols
-                )
-        |> assertExnMsg
-            """
-Subject: x
-Should: BeAscendingBy
-In culture: nb-NO
-With CompareOptions: IgnoreCase, IgnoreSymbols
-But was: null
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message with because if null`` () =
-        fun () ->
-            let x: seq<string> = null
-
-            x
-                .Should()
-                .BeAscendingBy(
-                    _.Substring(0, 1),
-                    CultureInfo("nb-NO"),
-                    CompareOptions.IgnoreCase ||| CompareOptions.IgnoreSymbols,
-                    "Some reason"
-                )
-        |> assertExnMsg
-            """
-Subject: x
-Because: Some reason
-Should: BeAscendingBy
-In culture: nb-NO
-With CompareOptions: IgnoreCase, IgnoreSymbols
-But was: null
-"""
+                .BeAscendingBy(_.Substring(1, 1), CultureInfo.InvariantCulture, CompareOptions.None)
+        )
 
 
     [<Fact>]
@@ -2813,30 +2229,8 @@ module BeDescending =
 
 
     [<Fact>]
-    let ``Fails with expected message if null`` () =
-        fun () ->
-            let x: seq<int> = null
-            x.Should().BeDescending()
-        |> assertExnMsg
-            """
-Subject: x
-Should: BeDescending
-But was: null
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message with because if null`` () =
-        fun () ->
-            let x: seq<int> = null
-            x.Should().BeDescending("Some reason")
-        |> assertExnMsg
-            """
-Subject: x
-Because: Some reason
-Should: BeDescending
-But was: null
-"""
+    let ``Throws if null`` () =
+        assertThrows (fun () -> Unchecked.defaultof<seq<string>>.Should().BeDescending())
 
 
     [<Fact>]
@@ -2904,32 +2298,8 @@ module ``BeDescending (StringComparison)`` =
 
 
     [<Fact>]
-    let ``Fails with expected message if null`` () =
-        fun () ->
-            let x: seq<string> = null
-            x.Should().BeDescending(StringComparison.Ordinal)
-        |> assertExnMsg
-            """
-Subject: x
-Should: BeDescending
-Using StringComparison: Ordinal
-But was: null
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message with because if null`` () =
-        fun () ->
-            let x: seq<string> = null
-            x.Should().BeDescending(StringComparison.Ordinal, "Some reason")
-        |> assertExnMsg
-            """
-Subject: x
-Because: Some reason
-Should: BeDescending
-Using StringComparison: Ordinal
-But was: null
-"""
+    let ``Throws if null`` () =
+        assertThrows (fun () -> Unchecked.defaultof<seq<string>>.Should().BeDescending(StringComparison.Ordinal))
 
 
     [<Fact>]
@@ -3018,42 +2388,12 @@ module ``BeDescending (Culture CompareOptions)`` =
 
 
     [<Fact>]
-    let ``Fails with expected message if null`` () =
-        fun () ->
-            let x: seq<string> = null
-
-            x.Should().BeDescending(CultureInfo("nb-NO"), CompareOptions.IgnoreCase ||| CompareOptions.IgnoreSymbols)
-        |> assertExnMsg
-            """
-Subject: x
-Should: BeDescending
-In culture: nb-NO
-With CompareOptions: IgnoreCase, IgnoreSymbols
-But was: null
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message with because if null`` () =
-        fun () ->
-            let x: seq<string> = null
-
-            x
+    let ``Throws if null`` () =
+        assertThrows (fun () ->
+            Unchecked.defaultof<seq<string>>
                 .Should()
-                .BeDescending(
-                    CultureInfo("nb-NO"),
-                    CompareOptions.IgnoreCase ||| CompareOptions.IgnoreSymbols,
-                    "Some reason"
-                )
-        |> assertExnMsg
-            """
-Subject: x
-Because: Some reason
-Should: BeDescending
-In culture: nb-NO
-With CompareOptions: IgnoreCase, IgnoreSymbols
-But was: null
-"""
+                .BeDescending(CultureInfo.InvariantCulture, CompareOptions.Ordinal)
+        )
 
 
     [<Fact>]
@@ -3124,35 +2464,13 @@ module BeDescendingBy =
 
     [<Theory>]
     [<MemberData(nameof passData)>]
-    let ``Passes if non-strictly descending by the specified projection`` (subject: seq<string>) =
+    let ``Passes if non-strictly descending by the specified projection`` (subject: seq<string | null>) =
         subject.Should().BeDescendingBy(fun s -> s.Length)
 
 
     [<Fact>]
-    let ``Fails with expected message if null`` () =
-        fun () ->
-            let x: seq<int> = null
-            x.Should().BeDescendingBy(id)
-        |> assertExnMsg
-            """
-Subject: x
-Should: BeDescendingBy
-But was: null
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message with because if null`` () =
-        fun () ->
-            let x: seq<int> = null
-            x.Should().BeDescendingBy(id, "Some reason")
-        |> assertExnMsg
-            """
-Subject: x
-Because: Some reason
-Should: BeDescendingBy
-But was: null
-"""
+    let ``Throws if null`` () =
+        assertThrows (fun () -> Unchecked.defaultof<seq<string>>.Should().BeDescendingBy(fun s -> s.Length))
 
 
     [<Fact>]
@@ -3218,40 +2536,17 @@ module ``BeDescendingBy (StringComparison)`` =
     [<Theory>]
     [<MemberData(nameof passData)>]
     let ``Passes if non-strictly descending using the specified comparison``
-        (subject: seq<string>)
+        (subject: seq<string | null>)
         (comparison: StringComparison)
         =
         subject.Should().BeDescendingBy(_.Substring(0, 1), comparison)
 
 
     [<Fact>]
-    let ``Fails with expected message if null`` () =
-        fun () ->
-            let x: seq<string> = null
-            x.Should().BeDescendingBy(_.Substring(0, 1), StringComparison.Ordinal)
-        |> assertExnMsg
-            """
-Subject: x
-Should: BeDescendingBy
-Using StringComparison: Ordinal
-But was: null
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message with because if null`` () =
-        fun () ->
-            let x: seq<string> = null
-
-            x.Should().BeDescendingBy(_.Substring(0, 1), StringComparison.Ordinal, "Some reason")
-        |> assertExnMsg
-            """
-Subject: x
-Because: Some reason
-Should: BeDescendingBy
-Using StringComparison: Ordinal
-But was: null
-"""
+    let ``Throws if null`` () =
+        assertThrows (fun () ->
+            Unchecked.defaultof<seq<string>>.Should().BeDescendingBy(_.Substring(0, 1), StringComparison.Ordinal)
+        )
 
 
     [<Fact>]
@@ -3325,7 +2620,7 @@ module ``BeDescendingBy (Culture CompareOptions)`` =
     [<Theory>]
     [<MemberData(nameof passData)>]
     let ``Passes if non-strictly descending using the specified comparison``
-        (subject: seq<string>)
+        (subject: seq<string | null>)
         (culture: CultureInfo)
         (compareOptions: CompareOptions)
         =
@@ -3346,7 +2641,7 @@ module ``BeDescendingBy (Culture CompareOptions)`` =
     [<Theory>]
     [<MemberData(nameof failData)>]
     let ``Fails if not non-strictly descending using the specified comparison``
-        (subject: seq<string>)
+        (subject: seq<string | null>)
         (culture: CultureInfo)
         (compareOptions: CompareOptions)
         =
@@ -3354,49 +2649,12 @@ module ``BeDescendingBy (Culture CompareOptions)`` =
 
 
     [<Fact>]
-    let ``Fails with expected message if null`` () =
-        fun () ->
-            let x: seq<string> = null
-
-            x
+    let ``Throws if null`` () =
+        assertThrows (fun () ->
+            Unchecked.defaultof<seq<string>>
                 .Should()
-                .BeDescendingBy(
-                    _.Substring(0, 1),
-                    CultureInfo("nb-NO"),
-                    CompareOptions.IgnoreCase ||| CompareOptions.IgnoreSymbols
-                )
-        |> assertExnMsg
-            """
-Subject: x
-Should: BeDescendingBy
-In culture: nb-NO
-With CompareOptions: IgnoreCase, IgnoreSymbols
-But was: null
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message with because if null`` () =
-        fun () ->
-            let x: seq<string> = null
-
-            x
-                .Should()
-                .BeDescendingBy(
-                    _.Substring(0, 1),
-                    CultureInfo("nb-NO"),
-                    CompareOptions.IgnoreCase ||| CompareOptions.IgnoreSymbols,
-                    "Some reason"
-                )
-        |> assertExnMsg
-            """
-Subject: x
-Because: Some reason
-Should: BeDescendingBy
-In culture: nb-NO
-With CompareOptions: IgnoreCase, IgnoreSymbols
-But was: null
-"""
+                .BeDescendingBy(_.Substring(1, 1), CultureInfo.InvariantCulture, CompareOptions.None)
+        )
 
 
     [<Fact>]
@@ -3496,30 +2754,8 @@ module BeStrictlyAscending =
 
 
     [<Fact>]
-    let ``Fails with expected message if null`` () =
-        fun () ->
-            let x: seq<int> = null
-            x.Should().BeStrictlyAscending()
-        |> assertExnMsg
-            """
-Subject: x
-Should: BeStrictlyAscending
-But was: null
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message with because if null`` () =
-        fun () ->
-            let x: seq<int> = null
-            x.Should().BeStrictlyAscending("Some reason")
-        |> assertExnMsg
-            """
-Subject: x
-Because: Some reason
-Should: BeStrictlyAscending
-But was: null
-"""
+    let ``Throws if null`` () =
+        assertThrows (fun () -> Unchecked.defaultof<seq<string>>.Should().BeStrictlyAscending())
 
 
     [<Fact>]
@@ -3577,7 +2813,7 @@ module BeStrictlyAscendingBy =
 
     [<Theory>]
     [<MemberData(nameof passData)>]
-    let ``Passes if strictly ascending by the specified projection`` (subject: seq<string>) =
+    let ``Passes if strictly ascending by the specified projection`` (subject: seq<string | null>) =
         subject.Should().BeStrictlyAscendingBy(fun s -> s.Length)
 
 
@@ -3590,35 +2826,13 @@ module BeStrictlyAscendingBy =
 
     [<Theory>]
     [<MemberData(nameof failData)>]
-    let ``Fails if not strictly ascending by the specified projection`` (subject: seq<string>) =
+    let ``Fails if not strictly ascending by the specified projection`` (subject: seq<string | null>) =
         assertFails (fun () -> subject.Should().BeStrictlyAscendingBy(fun s -> s.Length))
 
 
     [<Fact>]
-    let ``Fails with expected message if null`` () =
-        fun () ->
-            let x: seq<int> = null
-            x.Should().BeStrictlyAscendingBy(id)
-        |> assertExnMsg
-            """
-Subject: x
-Should: BeStrictlyAscendingBy
-But was: null
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message with because if null`` () =
-        fun () ->
-            let x: seq<int> = null
-            x.Should().BeStrictlyAscendingBy(id, "Some reason")
-        |> assertExnMsg
-            """
-Subject: x
-Because: Some reason
-Should: BeStrictlyAscendingBy
-But was: null
-"""
+    let ``Throws if null`` () =
+        assertThrows (fun () -> Unchecked.defaultof<seq<string>>.Should().BeStrictlyAscendingBy(fun s -> s.Length))
 
 
     [<Fact>]
@@ -3699,30 +2913,8 @@ module BeStrictlyDescending =
 
 
     [<Fact>]
-    let ``Fails with expected message if null`` () =
-        fun () ->
-            let x: seq<int> = null
-            x.Should().BeStrictlyDescending()
-        |> assertExnMsg
-            """
-Subject: x
-Should: BeStrictlyDescending
-But was: null
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message with because if null`` () =
-        fun () ->
-            let x: seq<int> = null
-            x.Should().BeStrictlyDescending("Some reason")
-        |> assertExnMsg
-            """
-Subject: x
-Because: Some reason
-Should: BeStrictlyDescending
-But was: null
-"""
+    let ``Throws if null`` () =
+        assertThrows (fun () -> Unchecked.defaultof<seq<string>>.Should().BeStrictlyDescending())
 
 
     [<Fact>]
@@ -3780,7 +2972,7 @@ module BeStrictlyDescendingBy =
 
     [<Theory>]
     [<MemberData(nameof passData)>]
-    let ``Passes if strictly descending by the specified projection`` (subject: seq<string>) =
+    let ``Passes if strictly descending by the specified projection`` (subject: seq<string | null>) =
         subject.Should().BeStrictlyDescendingBy(fun s -> s.Length)
 
 
@@ -3793,35 +2985,13 @@ module BeStrictlyDescendingBy =
 
     [<Theory>]
     [<MemberData(nameof failData)>]
-    let ``Fails if not strictly descending by the specified projection`` (subject: seq<string>) =
+    let ``Fails if not strictly descending by the specified projection`` (subject: seq<string | null>) =
         assertFails (fun () -> subject.Should().BeStrictlyDescendingBy(fun s -> s.Length))
 
 
     [<Fact>]
-    let ``Fails with expected message if null`` () =
-        fun () ->
-            let x: seq<int> = null
-            x.Should().BeStrictlyDescendingBy(id)
-        |> assertExnMsg
-            """
-Subject: x
-Should: BeStrictlyDescendingBy
-But was: null
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message with because if null`` () =
-        fun () ->
-            let x: seq<int> = null
-            x.Should().BeStrictlyDescendingBy(id, "Some reason")
-        |> assertExnMsg
-            """
-Subject: x
-Because: Some reason
-Should: BeStrictlyDescendingBy
-But was: null
-"""
+    let ``Throws if null`` () =
+        assertThrows (fun () -> Unchecked.defaultof<seq<string>>.Should().BeStrictlyDescendingBy(fun s -> s.Length))
 
 
     [<Fact>]
@@ -3908,37 +3078,13 @@ module BeSupersetOf =
 
 
     [<Fact>]
-    let ``Throws ArgumentNullException if subset is null`` () =
-        Assert.Throws<ArgumentNullException>(fun () -> [ 1 ].Should().BeSupersetOf(null) |> ignore)
+    let ``Throws if null`` () =
+        assertThrows (fun () -> Unchecked.defaultof<seq<string>>.Should().BeSupersetOf([]))
 
 
     [<Fact>]
-    let ``Fails with expected message if null`` () =
-        fun () ->
-            let x: seq<int> = null
-            x.Should().BeSupersetOf([])
-        |> assertExnMsg
-            """
-Subject: x
-Should: BeSupersetOf
-Subset: []
-But was: null
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message with because if null`` () =
-        fun () ->
-            let x: seq<int> = null
-            x.Should().BeSupersetOf([], "Some reason")
-        |> assertExnMsg
-            """
-Subject: x
-Because: Some reason
-Should: BeSupersetOf
-Subset: []
-But was: null
-"""
+    let ``Throws if subset is null`` () =
+        assertThrows (fun () -> [ 1 ].Should().BeSupersetOf(Unchecked.defaultof<_>))
 
 
     [<Fact>]
@@ -4014,37 +3160,13 @@ module BeProperSupersetOf =
 
 
     [<Fact>]
-    let ``Throws ArgumentNullException if subset is null`` () =
-        Assert.Throws<ArgumentNullException>(fun () -> [ 1 ].Should().BeProperSupersetOf(null) |> ignore)
+    let ``Throws if null`` () =
+        assertThrows (fun () -> Unchecked.defaultof<seq<string>>.Should().BeProperSupersetOf([]))
 
 
     [<Fact>]
-    let ``Fails with expected message if null`` () =
-        fun () ->
-            let x: seq<int> = null
-            x.Should().BeProperSupersetOf([])
-        |> assertExnMsg
-            """
-Subject: x
-Should: BeProperSupersetOf
-Subset: []
-But was: null
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message with because if null`` () =
-        fun () ->
-            let x: seq<int> = null
-            x.Should().BeProperSupersetOf([], "Some reason")
-        |> assertExnMsg
-            """
-Subject: x
-Because: Some reason
-Should: BeProperSupersetOf
-Subset: []
-But was: null
-"""
+    let ``Throws if subset is null`` () =
+        assertThrows (fun () -> [ 1 ].Should().BeProperSupersetOf(Unchecked.defaultof<_>))
 
 
     [<Fact>]
@@ -4150,37 +3272,13 @@ module BeSubsetOf =
 
 
     [<Fact>]
-    let ``Throws ArgumentNullException if superset is null`` () =
-        Assert.Throws<ArgumentNullException>(fun () -> [ 1 ].Should().BeSubsetOf(null) |> ignore)
+    let ``Throws if superset is null`` () =
+        assertThrows (fun () -> [ 1 ].Should().BeSubsetOf(Unchecked.defaultof<_>))
 
 
     [<Fact>]
-    let ``Fails with expected message if null`` () =
-        fun () ->
-            let x: seq<int> = null
-            x.Should().BeSubsetOf([])
-        |> assertExnMsg
-            """
-Subject: x
-Should: BeSubsetOf
-Superset: []
-But was: null
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message with because if null`` () =
-        fun () ->
-            let x: seq<int> = null
-            x.Should().BeSubsetOf([], "Some reason")
-        |> assertExnMsg
-            """
-Subject: x
-Because: Some reason
-Should: BeSubsetOf
-Superset: []
-But was: null
-"""
+    let ``Throws if null`` () =
+        assertThrows (fun () -> Unchecked.defaultof<seq<string>>.Should().BeSubsetOf([]))
 
 
     [<Fact>]
@@ -4256,37 +3354,13 @@ module BeProperSubsetOf =
 
 
     [<Fact>]
-    let ``Throws ArgumentNullException if superset is null`` () =
-        Assert.Throws<ArgumentNullException>(fun () -> [ 1 ].Should().BeProperSubsetOf(null) |> ignore)
+    let ``Throws if superset is null`` () =
+        assertThrows (fun () -> [ 1 ].Should().BeProperSubsetOf(Unchecked.defaultof<_>))
 
 
     [<Fact>]
-    let ``Fails with expected message if null`` () =
-        fun () ->
-            let x: seq<int> = null
-            x.Should().BeProperSubsetOf([])
-        |> assertExnMsg
-            """
-Subject: x
-Should: BeProperSubsetOf
-Superset: []
-But was: null
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message with because if null`` () =
-        fun () ->
-            let x: seq<int> = null
-            x.Should().BeProperSubsetOf([], "Some reason")
-        |> assertExnMsg
-            """
-Subject: x
-Because: Some reason
-Should: BeProperSubsetOf
-Superset: []
-But was: null
-"""
+    let ``Throws if null`` () =
+        assertThrows (fun () -> Unchecked.defaultof<seq<string>>.Should().BeProperSubsetOf([]))
 
 
     [<Fact>]
@@ -4389,37 +3463,13 @@ module IntersectWith =
 
 
     [<Fact>]
-    let ``Throws ArgumentNullException if other is null`` () =
-        Assert.Throws<ArgumentNullException>(fun () -> [ 1 ].Should().IntersectWith(null) |> ignore)
+    let ``Throws if null`` () =
+        assertThrows (fun () -> Unchecked.defaultof<seq<string>>.Should().IntersectWith([]))
 
 
     [<Fact>]
-    let ``Fails with expected message if null`` () =
-        fun () ->
-            let x: seq<int> = null
-            x.Should().IntersectWith([])
-        |> assertExnMsg
-            """
-Subject: x
-Should: IntersectWith
-Other: []
-But was: null
-"""
-
-
-    [<Fact>]
-    let ``Fails with expected message with because if null`` () =
-        fun () ->
-            let x: seq<int> = null
-            x.Should().IntersectWith([], "Some reason")
-        |> assertExnMsg
-            """
-Subject: x
-Because: Some reason
-Should: IntersectWith
-Other: []
-But was: null
-"""
+    let ``Throws if other is null`` () =
+        assertThrows (fun () -> [ 1 ].Should().IntersectWith(Unchecked.defaultof<_>))
 
 
     [<Fact>]
@@ -4461,11 +3511,6 @@ module NotIntersectWith =
         [].Should().NotIntersectWith([]).Id<And<int list>>().And.Be([])
 
 
-    [<Fact>]
-    let ``Passes if null`` () =
-        (null: seq<int>).Should().NotIntersectWith([])
-
-
     let passData = [
         [| []; [] |] // Both empty
         [| []; [ 1 ] |] // Subject empty
@@ -4497,8 +3542,13 @@ module NotIntersectWith =
 
 
     [<Fact>]
-    let ``Throws ArgumentNullException if other is null`` () =
-        Assert.Throws<ArgumentNullException>(fun () -> [ 1 ].Should().NotIntersectWith(null) |> ignore)
+    let ``Throws if null`` () =
+        assertThrows (fun () -> Unchecked.defaultof<seq<string>>.Should().NotIntersectWith([]))
+
+
+    [<Fact>]
+    let ``Throws if other is null`` () =
+        assertThrows (fun () -> [ 1 ].Should().NotIntersectWith(Unchecked.defaultof<_>))
 
 
     [<Fact>]

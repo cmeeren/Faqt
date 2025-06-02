@@ -64,7 +64,7 @@ type StringAssertions =
     static member BeUpperCase(t: Testable<string>, culture: CultureInfo, ?because) : And<string> =
         use _ = t.Assert()
 
-        if isNull t.Subject || t.Subject <> t.Subject.ToUpper(culture) then
+        if t.Subject <> t.Subject.ToUpper(culture) then
             t.With("In culture", culture).With("But was", t.Subject).Fail(because)
 
         And(t)
@@ -84,7 +84,7 @@ type StringAssertions =
     static member BeLowerCase(t: Testable<string>, culture: CultureInfo, ?because) : And<string> =
         use _ = t.Assert()
 
-        if isNull t.Subject || t.Subject <> t.Subject.ToLower(culture) then
+        if t.Subject <> t.Subject.ToLower(culture) then
             t.With("In culture", culture).With("But was", t.Subject).Fail(because)
 
         And(t)
@@ -127,10 +127,7 @@ type StringAssertions =
         : And<string> =
         use _ = t.Assert()
 
-        if isNull substring then
-            nullArg (nameof substring)
-
-        if isNull t.Subject || not (t.Subject.Contains(substring, comparisonType)) then
+        if not (t.Subject.Contains(substring, comparisonType)) then
             comparisonFail t "Substring" substring comparisonType because
 
         And(t)
@@ -143,25 +140,20 @@ type StringAssertions =
         t.Contain(substring, StringComparison.Ordinal, ?because = because)
 
 
-    // Asserts that the subject does not contain the specified string using the specified string comparison type. Passes
-    // if the subject is null.
+    /// Asserts that the subject does not contain the specified string using the specified string comparison type.
     [<Extension>]
     static member NotContain
         (t: Testable<string>, substring: string, comparisonType: StringComparison, ?because)
         : And<string> =
         use _ = t.Assert()
 
-        if isNull substring then
-            nullArg (nameof substring)
-
-        if not (isNull t.Subject) && t.Subject.Contains(substring, comparisonType) then
+        if t.Subject.Contains(substring, comparisonType) then
             comparisonFail t "Substring" substring comparisonType because
 
         And(t)
 
 
-    // Asserts that the subject does not contain the specified string using ordinal string comparison. Passes if the
-    // subject is null.
+    /// Asserts that the subject does not contain the specified string using ordinal string comparison.
     [<Extension>]
     static member NotContain(t: Testable<string>, substring: string, ?because) : And<string> =
         use _ = t.Assert()
@@ -175,10 +167,7 @@ type StringAssertions =
         : And<string> =
         use _ = t.Assert()
 
-        if isNull substring then
-            nullArg (nameof substring)
-
-        if isNull t.Subject || not (t.Subject.StartsWith(substring, comparisonType)) then
+        if not (t.Subject.StartsWith(substring, comparisonType)) then
             comparisonFail t "Substring" substring comparisonType because
 
         And(t)
@@ -192,24 +181,19 @@ type StringAssertions =
 
 
     /// Asserts that the subject does not start with the specified string using the specified string comparison type.
-    /// Passes if the subject is null.
     [<Extension>]
     static member NotStartWith
         (t: Testable<string>, substring: string, comparisonType: StringComparison, ?because)
         : And<string> =
         use _ = t.Assert()
 
-        if isNull substring then
-            nullArg (nameof substring)
-
-        if not (isNull t.Subject) && t.Subject.StartsWith(substring, comparisonType) then
+        if t.Subject.StartsWith(substring, comparisonType) then
             comparisonFail t "Substring" substring comparisonType because
 
         And(t)
 
 
-    /// Asserts that the subject does not start with the specified string using ordinal string comparison. Passes if the
-    /// subject is null.
+    /// Asserts that the subject does not start with the specified string using ordinal string comparison.
     [<Extension>]
     static member NotStartWith(t: Testable<string>, substring: string, ?because) : And<string> =
         use _ = t.Assert()
@@ -223,10 +207,7 @@ type StringAssertions =
         : And<string> =
         use _ = t.Assert()
 
-        if isNull substring then
-            nullArg (nameof substring)
-
-        if isNull t.Subject || not (t.Subject.EndsWith(substring, comparisonType)) then
+        if not (t.Subject.EndsWith(substring, comparisonType)) then
             comparisonFail t "Substring" substring comparisonType because
 
         And(t)
@@ -240,24 +221,19 @@ type StringAssertions =
 
 
     /// Asserts that the subject does not end with the specified string using the specified string comparison type.
-    /// Passes if the subject is null.
     [<Extension>]
     static member NotEndWith
         (t: Testable<string>, substring: string, comparisonType: StringComparison, ?because)
         : And<string> =
         use _ = t.Assert()
 
-        if isNull substring then
-            nullArg (nameof substring)
-
-        if not (isNull t.Subject) && t.Subject.EndsWith(substring, comparisonType) then
+        if t.Subject.EndsWith(substring, comparisonType) then
             comparisonFail t "Substring" substring comparisonType because
 
         And(t)
 
 
-    /// Asserts that the subject does not end with the specified string using ordinal string comparison. Passes if the
-    /// subject is null.
+    /// Asserts that the subject does not end with the specified string using ordinal string comparison.
     [<Extension>]
     static member NotEndWith(t: Testable<string>, substring: string, ?because) : And<string> =
         use _ = t.Assert()
@@ -269,10 +245,7 @@ type StringAssertions =
     static member MatchRegex(t: Testable<string>, regex: Regex, ?because) : And<string> =
         use _ = t.Assert()
 
-        if isNull (box regex) then
-            nullArg (nameof regex)
-
-        if isNull t.Subject || not (regex.IsMatch(t.Subject)) then
+        if not (regex.IsMatch(t.Subject)) then
             regexFail t (regex.ToString()) regex.Options because
 
         And(t)
@@ -292,10 +265,7 @@ type StringAssertions =
         ) : And<string> =
         use _ = t.Assert()
 
-        if isNull pattern then
-            nullArg (nameof pattern)
-
-        if isNull t.Subject || not (Regex.IsMatch(t.Subject, pattern, options)) then
+        if not (Regex.IsMatch(t.Subject, pattern, options)) then
             regexFail t pattern options because
 
         And(t)
@@ -314,28 +284,21 @@ type StringAssertions =
         ) : And<string> =
         use _ = t.Assert()
 
-        if isNull pattern then
-            nullArg (nameof pattern)
-
         t.MatchRegex(pattern, RegexOptions.None, ?because = because)
 
 
-    /// Asserts that the subject does not match the specified regex. Passes if the subject is null.
+    /// Asserts that the subject does not match the specified regex.
     [<Extension>]
     static member NotMatchRegex(t: Testable<string>, regex: Regex, ?because) : And<string> =
         use _ = t.Assert()
 
-        if isNull regex then
-            nullArg (nameof regex)
-
-        if not (isNull t.Subject) && regex.IsMatch(t.Subject) then
+        if regex.IsMatch(t.Subject) then
             regexFail t (regex.ToString()) regex.Options because
 
         And(t)
 
 
-    /// Asserts that the subject does not match the specified regex pattern using the specified options. Passes if the
-    /// subject is null.
+    /// Asserts that the subject does not match the specified regex pattern using the specified options.
     [<Extension>]
     static member NotMatchRegex
         (
@@ -349,16 +312,13 @@ type StringAssertions =
         ) : And<string> =
         use _ = t.Assert()
 
-        if isNull pattern then
-            nullArg (nameof pattern)
-
-        if not (isNull t.Subject) && Regex.IsMatch(t.Subject, pattern, options) then
+        if Regex.IsMatch(t.Subject, pattern, options) then
             regexFail t pattern options because
 
         And(t)
 
 
-    /// Asserts that the subject does not match the specified regex pattern. Passes if the subject is null.
+    /// Asserts that the subject does not match the specified regex pattern.
     [<Extension>]
     static member NotMatchRegex
         (
@@ -371,9 +331,6 @@ type StringAssertions =
         ) : And<string> =
         use _ = t.Assert()
 
-        if isNull pattern then
-            nullArg (nameof pattern)
-
         t.NotMatchRegex(pattern, RegexOptions.None, ?because = because)
 
 
@@ -384,10 +341,7 @@ type StringAssertions =
     static member MatchWildcard(t: Testable<string>, pattern: string, ?because) : And<string> =
         use _ = t.Assert()
 
-        if isNull pattern then
-            nullArg (nameof pattern)
-
-        if isNull t.Subject || not (isWildcardMatch t.Subject pattern) then
+        if not (isWildcardMatch t.Subject pattern) then
             t.With("Pattern", pattern).With("But was", t.Subject).Fail(because)
 
         And(t)
@@ -395,16 +349,12 @@ type StringAssertions =
 
     /// Asserts that the subject does not match the specified wildcard pattern, which is case insensitive and may
     /// contain `*` (matches zero or more characters, including newlines) and `?` (matches a single character, including
-    /// newlines). Newlines are normalized to \n before matching. Passes if the subject is null. For more complicated
-    /// matching, use MatchRegex.
+    /// newlines). Newlines are normalized to \n before matching. For more complicated matching, use MatchRegex.
     [<Extension>]
     static member NotMatchWildcard(t: Testable<string>, pattern: string, ?because) : And<string> =
         use _ = t.Assert()
 
-        if isNull pattern then
-            nullArg (nameof pattern)
-
-        if not (isNull t.Subject) && isWildcardMatch t.Subject pattern then
+        if isWildcardMatch t.Subject pattern then
             t.With("Pattern", pattern).With("But was", t.Subject).Fail(because)
 
         And(t)
@@ -423,12 +373,6 @@ type StringAssertions =
             ?because
         ) : And<string> =
         use _ = t.Assert()
-
-        if isNull expected then
-            nullArg (nameof expected)
-
-        if isNull t.Subject then
-            t.With("Expected", expected).With("But was", t.Subject).Fail(because)
 
         let serializerOptions =
             JsonSerializerOptions(WriteIndented = true, Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping)
@@ -461,15 +405,75 @@ type StringAssertions =
         And(t)
 
 
-    /// Asserts that the subject is deserializable to the specified target type using the specified options.
+    /// Asserts that the subject is deserializable to a non-null instance of the specified target type using the
+    /// specified options.
     [<Extension>]
     static member DeserializeTo
-        (t: Testable<string>, targetType: Type, options: JsonSerializerOptions, ?because)
+        (t: Testable<string>, targetType: Type, options: JsonSerializerOptions | null, ?because)
         : AndDerived<string, obj> =
         use _ = t.Assert()
 
-        if isNull t.Subject then
-            t.With("Target type", targetType).With("But was", t.Subject).Fail(because)
+        try
+            match JsonSerializer.Deserialize(t.Subject, targetType, options) with
+            | null ->
+                t
+                    .With("Target type", targetType)
+                    .With("But deserialized to", null)
+                    .With("Subject value", t.Subject)
+                    .Fail(because)
+            | x -> AndDerived(t, x)
+        with
+        | :? AssertionFailedException -> reraise ()
+        | ex -> t.With("Target type", targetType).With("But threw", ex).With("Subject value", t.Subject).Fail(because)
+
+
+    /// Asserts that the subject is deserializable to a non-null instance of the specified target type.
+    [<Extension>]
+    static member DeserializeTo(t: Testable<string>, targetType: Type, ?because) : AndDerived<string, obj> =
+        use _ = t.Assert()
+        t.DeserializeTo(targetType, null, ?because = because)
+
+
+    /// Asserts that the subject is deserializable to a non-null instance of the specified target type using the
+    /// specified options.
+    [<Extension>]
+    [<RequiresExplicitTypeArguments>]
+    static member DeserializeTo<'a>
+        (t: Testable<string>, options: JsonSerializerOptions | null, ?because)
+        : AndDerived<string, 'a> =
+        use _ = t.Assert()
+
+        try
+            match JsonSerializer.Deserialize<'a>(t.Subject, options) with
+            | null when usesNullAsTrueValue typeof<'a> -> AndDerived(t, Unchecked.defaultof<'a>)
+            | null ->
+                t
+                    .With("Target type", typeof<'a>)
+                    .With("But deserialized to", null)
+                    .With("Subject value", t.Subject)
+                    .Fail(because)
+            | x -> AndDerived(t, x)
+
+        with
+        | :? AssertionFailedException -> reraise ()
+        | ex -> t.With("Target type", typeof<'a>).With("But threw", ex).With("Subject value", t.Subject).Fail(because)
+
+
+    /// Asserts that the subject is deserializable to a non-null instance of the specified target type.
+    [<Extension>]
+    [<RequiresExplicitTypeArguments>]
+    static member DeserializeTo<'a>(t: Testable<string>, ?because) : AndDerived<string, 'a> =
+        use _ = t.Assert()
+        t.DeserializeTo<'a>(null, ?because = because)
+
+
+    /// Asserts that the subject is deserializable to a (possibly null) instance of the specified target type using the
+    /// specified options.
+    [<Extension>]
+    static member DeserializeToNullable
+        (t: Testable<string>, targetType: Type, options: JsonSerializerOptions | null, ?because)
+        : AndDerived<string, obj | null> =
+        use _ = t.Assert()
 
         try
             AndDerived(t, JsonSerializer.Deserialize(t.Subject, targetType, options))
@@ -477,33 +481,36 @@ type StringAssertions =
             t.With("Target type", targetType).With("But threw", ex).With("Subject value", t.Subject).Fail(because)
 
 
-    /// Asserts that the subject is deserializable to the specified target type.
+    /// Asserts that the subject is deserializable to a (possibly null) instance of the specified target type.
     [<Extension>]
-    static member DeserializeTo(t: Testable<string>, targetType: Type, ?because) : AndDerived<string, obj> =
+    static member DeserializeToNullable
+        (t: Testable<string>, targetType: Type, ?because)
+        : AndDerived<string, obj | null> =
         use _ = t.Assert()
-        t.DeserializeTo(targetType, null, ?because = because)
+        t.DeserializeToNullable(targetType, null, ?because = because)
 
 
-    /// Asserts that the subject is deserializable to the specified target type using the specified options.
+    /// Asserts that the subject is deserializable to a (possibly null) instance of the specified target type using the
+    /// specified options.
     [<Extension>]
     [<RequiresExplicitTypeArguments>]
-    static member DeserializeTo<'a>
-        (t: Testable<string>, options: JsonSerializerOptions, ?because)
-        : AndDerived<string, 'a> =
+    static member DeserializeToNullable<'a when 'a: not null and 'a: not struct>
+        (t: Testable<string>, options: JsonSerializerOptions | null, ?because)
+        : AndDerived<string, 'a | null> =
         use _ = t.Assert()
-
-        if isNull t.Subject then
-            t.With("Target type", typeof<'a>).With("But was", t.Subject).Fail(because)
 
         try
             AndDerived(t, JsonSerializer.Deserialize<'a>(t.Subject, options))
+
         with ex ->
             t.With("Target type", typeof<'a>).With("But threw", ex).With("Subject value", t.Subject).Fail(because)
 
 
-    /// Asserts that the subject is deserializable to the specified target type using the specified options.
+    /// Asserts that the subject is deserializable to a (possibly null) instance of the specified target type.
     [<Extension>]
     [<RequiresExplicitTypeArguments>]
-    static member DeserializeTo<'a>(t: Testable<string>, ?because) : AndDerived<string, 'a> =
+    static member DeserializeToNullable<'a when 'a: not null and 'a: not struct>
+        (t: Testable<string>, ?because)
+        : AndDerived<string, 'a | null> =
         use _ = t.Assert()
-        t.DeserializeTo<'a>(null, ?because = because)
+        t.DeserializeToNullable<'a>(null, ?because = because)

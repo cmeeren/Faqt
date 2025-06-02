@@ -474,14 +474,13 @@ type Formatter private () =
         YamlFormatterBuilder.Default.Build()
 
 
-    static let localFormatter: AsyncLocal<FailureData -> string> = AsyncLocal()
+    static let localFormatter: AsyncLocal<(FailureData -> string) | null> = AsyncLocal()
 
 
     static member internal Current =
-        if isNull (box localFormatter.Value) then
-            globalFormatter
-        else
-            localFormatter.Value
+        match localFormatter.Value with
+        | null -> globalFormatter
+        | formatter -> formatter
 
 
     /// Sets the specified formatter as the default global formatter.

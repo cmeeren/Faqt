@@ -15,28 +15,33 @@ module Contain =
     let passData = [
         [| box (set [ "a" ]); "a" |]
         [| set [ "a"; "b" ]; "a" |]
-        [| set [ (null: string) ]; (null: string) |]
+        [| set [ nul<string> ]; nul<string> |]
     ]
 
 
     [<Theory>]
     [<MemberData(nameof passData)>]
-    let ``Passes if set contains value`` (subject: Set<string>) (value: string) = subject.Should().Contain(value)
+    let ``Passes if set contains value`` (subject: Set<string | null>) (value: string | null) =
+        subject.Should().Contain(value)
 
 
     let failData = [
-        [| box Unchecked.defaultof<Set<string>>; "a" |]
-        [| Set.empty<string>; "a" |]
+        [| box Set.empty<string>; "a" |]
         [| set [ "a" ]; "b" |]
-        [| set [ (null: string) ]; "a" |]
-        [| set [ "a" ]; (null: string) |]
+        [| set [ nul<string> ]; "a" |]
+        [| set [ "a" ]; nul<string> |]
     ]
 
 
     [<Theory>]
     [<MemberData(nameof failData)>]
-    let ``Fails if null or not containing value`` (subject: Set<string>) (value: string) =
+    let ``Fails if not containing value`` (subject: Set<string | null>) (value: string | null) =
         assertFails (fun () -> subject.Should().Contain(value))
+
+
+    [<Fact>]
+    let ``Throws if null`` () =
+        assertThrows (fun () -> Unchecked.defaultof<Set<string>>.Should().Contain(""))
 
 
     [<Fact>]
@@ -77,31 +82,35 @@ module NotContain =
 
 
     let passData = [
-        [| box Unchecked.defaultof<Set<string>>; "a" |]
-        [| Set.empty<string>; "a" |]
+        [| box Set.empty<string>; "a" |]
         [| set [ "a" ]; "b" |]
-        [| set [ (null: string) ]; "a" |]
-        [| set [ "a" ]; (null: string) |]
+        [| set [ nul<string> ]; "a" |]
+        [| set [ "a" ]; nul<string> |]
     ]
 
 
     [<Theory>]
     [<MemberData(nameof passData)>]
-    let ``Passes if null or not containing value`` (subject: Set<string>) (value: string) =
+    let ``Passes if not containing value`` (subject: Set<string | null>) (value: string | null) =
         subject.Should().NotContain(value)
 
 
     let failData = [
         [| box (set [ "a" ]); "a" |]
         [| set [ "a"; "b" ]; "a" |]
-        [| set [ (null: string) ]; (null: string) |]
+        [| set [ nul<string> ]; nul<string> |]
     ]
 
 
     [<Theory>]
     [<MemberData(nameof failData)>]
-    let ``Fails if sequence contains value`` (subject: Set<string>) (value: string) =
+    let ``Fails if sequence contains value`` (subject: Set<string | null>) (value: string | null) =
         assertFails (fun () -> subject.Should().NotContain(value))
+
+
+    [<Fact>]
+    let ``Throws if null`` () =
+        assertThrows (fun () -> Unchecked.defaultof<Set<string>>.Should().NotContain(""))
 
 
     [<Fact>]

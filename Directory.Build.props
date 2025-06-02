@@ -6,6 +6,7 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <WarnOn>1182;3390;$(WarnOn)</WarnOn>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>

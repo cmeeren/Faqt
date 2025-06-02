@@ -136,8 +136,9 @@ let ``HTTP content formatting is on by default`` () =
     fun () ->
         let x = new HttpRequestMessage(HttpMethod.Get, "/")
         x.Version <- Version.Parse("0.5")
-        x.Content <- new StringContent("{\"a\":1}")
-        x.Content.Headers.ContentType <- MediaTypeHeaderValue("application/json")
+        let content = new StringContent("{\"a\":1}")
+        content.Headers.ContentType <- MediaTypeHeaderValue("application/json")
+        x.Content <- content
         x.Should().FailWith("Value", x)
     |> assertExnMsg
         """
@@ -160,8 +161,9 @@ let ``HTTP content formatting can be turned off`` () =
     fun () ->
         let x = new HttpRequestMessage(HttpMethod.Get, "/")
         x.Version <- Version.Parse("0.5")
-        x.Content <- new StringContent("{\"a\":1}")
-        x.Content.Headers.ContentType <- MediaTypeHeaderValue("application/json")
+        let content = new StringContent("{\"a\":1}")
+        content.Headers.ContentType <- MediaTypeHeaderValue("application/json")
+        x.Content <- content
         x.Should().FailWith("Value", x)
     |> assertExnMsg
         """

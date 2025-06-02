@@ -2866,7 +2866,6 @@ Request: GET / HTTP/0.5
                         .Should()
                         .Transform(
                             function
-                            | null
                             | "" -> Ok()
                             | "Known" -> Error "KnownError"
                             | _ -> failwith "Unknown value"

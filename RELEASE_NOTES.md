@@ -3,7 +3,103 @@ Release notes
 
 ### Unreleased
 
-* `NotBeNull` now allows chaining the non-`null` value.
+**Breaking:** Faqt has been updated for nullable reference types, and now now works best with them. This has caused som
+necessary changes to Faqt's policy on null handling.
+
+#### Background
+
+To understand the reason for the changes, first a few points of background with limitations on F#'s implementation of
+nullable reference types, to be referenced further below:
+
+1. **Input vs. output nullability:** Many of Faqt's assertions used to pass for `null` subject values. However, for
+   assertions that are not completely generic, such as `string` assertions, accepting null input requires adding a
+   `| null` annotation to the subject type: `Testable<string | null>`. Since the assertion should pass for `null`, this
+   means that the chainable value will also be nullable, i.e., `And<string | null>`. What we _want_ is for the return
+   value to have the same nullability as the input (so it is known to be non-nullable if the input is non-nullable), but
+   since it must be typed as e.g. `And<string | null>`, it will always be nullable, even if it is known that the subject
+   is non-null at the callsite where the assertion is used. I expect that in the vast majority of cases, the input
+   subject is known to be non-null, and it would be unnecessary boilerplate to have to deal with a nullable return value
+   that will actually never be `null`.
+2. **Generics and value types:** Unlike C#'s `?` annotation, F#'s `| null` annotation only works for reference types. If
+   used with a generic type, it will constrain the type to be a reference type. This means that parameters that should
+   accept both reference types and value types cannot have `| null`. This applies not only to fully generic parameters,
+   but also to interfaces like `IDictionary<_, _>` or `seq<_>`: Adding `| null` here would prevent value-type
+   implementations of these interfaces.
+
+For the reasons above, and because one can now use `NotBeNull` to get from a nullable type to a non-nullable type to
+continue asserting on, I have decided that most assertions no longer accept `null` values.
+
+#### Specific changes
+
+(Remarks about nullness warnings are only relevant if you have enabled nullable reference types.)
+
+* Assertions that fail for `null` subjects or argument values now cause a nullness warning and, if actually called with
+  `null` (due to ignoring nullness warnings or not using nullable reference types), will throw a generic
+  `NullReferenceException` or similar instead of an `AssertionFailedException`. The following are exceptions:
+  * `NotBeNull`, for obvious reasons: The whole point of this assertion is to check for `null` subjects. The runtime
+    behavior is unchanged. At compile-time, it has been improved to guarantee that the return value is non-nullable.
+  * `BeOfType`, `BeOfType<_>`, `BeAssignableTo` and `BeAssignableTo<_>`: These work exactly as before. Ideally they
+    should statically reject `null` values, but that is not possible: They are "special" assertions implemented as
+    intrinsic extension methods on `Testable<_>` to avoid callers having to specify an additional type parameter, and
+    therefore can't introduce a non-null constraint on the subject. Adding a constraint here would require making them
+    normal extension members, and callers would have to write `BeOfType<MyType, _>` instead of `BeOfType<MyType>`.
+* Most assertions that used to pass for `null` subject values now no longer accept nullable types. They will produce
+  nullness warnings if called with nullable types, and, if called with `null` (due to ignoring nullness warnings or not
+  using nullable reference types), will now fail with an exception (typically a `NullReferenceException`). This applies
+  to:
+  * For reason #1: All assertions with subject types that are not fully generic:
+    * `string` assertions:
+      * `NotBe`
+      * `NotContain`
+      * `NotStartWith`
+      * `NotEndWith`
+      * `NotMatchRegex`
+      * `NotMatchWildcard`
+    * `Set<_>` assertions:
+      * `NotContain`
+  * For reason #1: The inner `string` in `seq<string>` assertions reject nulls at compile-time (i.e., reject
+    `seq<string | null>`). The runtime behavior for any such `null` elements is unchanged. This applies to the following
+    `seq<string>` assertions:
+    * `BeAscending`
+    * `BeDescending`
+    * `BeStrictlyAscending`
+    * `BeStrictlyDescending`
+  * For reason #1 and #2: All assertions with interface subject types. This applies to:
+    * `IDictionary<_, _>` assertions:
+      * `NotContain`
+      * `NotContainKey`
+      * `NotContainValue`
+      * `HaveSameItemsAs` (no longer passes if both dictionaries are `null`)
+    * `seq<_>` assertions:
+      * `NotContain`
+      * `SequenceEqual` (no longer passes if both sequences are `null`)
+      * `HaveSameItemsAs` (no longer passes if both sequences are `null`)
+      * `NotContainItemsMatching`
+      * `NotIntersectWith`
+  * Due to being fully generic, the following assertions have actually been _loosened_; they now accept `null` for the
+    subject and all arguments, and let then relevant operators handle nulls:
+    * `BeCloseTo`
+    * `NotBeCloseTo` (note that this no longer automatically passes for `null` subjects; instead, `null` values will be
+      compared like any other value)
+    * `BeGreaterThan`
+    * `BeGreaterThanOrEqualTo`
+    * `BeLessThan`
+    * `BeLessThanOrEqualTo`
+    * `BePositive`
+    * `BeNegative`
+    * `BeNonNegative`
+    * `BeNonPositive`
+    * `BeInRange`
+* For reason #1: The `Be` and `NotBe` overloads for strings produce nullness warnings for `string | null` arguments.
+  However, the runtime behavior is unchanged.
+* The `BeNull` and `NotBeNull` assertions now emit a nullness warning if called with a non-nullable type, since it makes
+  no sense to call them with non-nullable types. The runtime behavior is unchanged.
+* `BeNullOrEmpty` now statically returns a nullable type. If you know statically that you have a non-`null` input, you
+  can use `BeEmpty` instead to avoid having to deal with the nullable output. The runtime behavior is unchanged.
+* `DeserializeTo`: This now fails if deserializing to `null` (i.e., if the subject is `"null"` – a string containing
+  only the JSON null token), except if the target type is `Option<_>` or another type using
+  `CompilationRepresentationFlags.UseNullAsTrueValue`). To allow deserializing to `null`, use the new
+  `DeserializeToNullable`.
 
 ### 4.5.0 (2025-01-16)
 

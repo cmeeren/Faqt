@@ -7,6 +7,8 @@ open System.Collections.Generic
 #if NET7_0_OR_GREATER
 open System.Diagnostics.CodeAnalysis
 #endif
+open System.Reflection
+open System.Runtime.CompilerServices
 open System.Text.Json
 open System.Text.Json.Serialization
 open System.Text.RegularExpressions
@@ -60,6 +62,21 @@ let private makeCaseTupleTypeCached =
     memoizeRefEq (fun (unionCaseInfo: UnionCaseInfo) ->
         FSharpType.MakeTupleType [| for field in unionCaseInfo.GetFields() -> field.PropertyType |]
     )
+
+
+let usesNullAsTrueValue =
+    memoizeRefEq (fun (ty: Type) ->
+        match ty.GetCustomAttribute(typeof<CompilationRepresentationAttribute>) with
+        | :? CompilationRepresentationAttribute as cra ->
+            cra.Flags.HasFlag(CompilationRepresentationFlags.UseNullAsTrueValue)
+        | _ -> false
+    )
+
+
+[<CompilationRepresentation(CompilationRepresentationFlags.UseNullAsTrueValue)>]
+type A =
+    | A
+    | B of int
 
 
 type FSharpValue with
@@ -162,8 +179,8 @@ module String =
             str
 
 
-    // Trims an equal number of '(' from the start of the string and ')' from the end of the string. Does not change the
-    // string if it is only '()'.
+    /// Trims an equal number of '(' from the start of the string and ')' from the end of the string. Does not change the
+    /// string if it is only '()'.
     let rec trimBalancedParens (str: string) =
         if str <> "()" && str.StartsWith('(') && str.EndsWith(')') then
             trimBalancedParens (str.Substring(1, str.Length - 2))
@@ -214,3 +231,12 @@ type internal JsonElementSortedKeysConverter() =
 
     override this.Write(writer, value, options) =
         serializeRecursively writer value.RootElement options
+
+type NullabilityExtensions =
+
+
+    [<Extension>]
+    static member NonNull(this: 'a | null when 'a: not null and 'a: not struct) : 'a =
+        match box this with
+        | :? 'a as this -> this
+        | _ -> raise (NullReferenceException())
