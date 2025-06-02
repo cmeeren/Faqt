@@ -1,7 +1,7 @@
 Release notes
 ==============
 
-### Unreleased
+### 5.0.0 (2025-06-02)
 
 **Breaking:** Faqt has been updated for nullable reference types, and now now works best with them. This has caused som
 necessary changes to Faqt's policy on null handling.
