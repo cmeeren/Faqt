@@ -28,7 +28,7 @@ let assertExnMsg (msg: string) (f: unit -> 'a) =
     let ex = Assert.Throws<AssertionFailedException>(f >> ignore)
 
     Assert.Equal(
-        ("\n\n" + msg.ReplaceLineEndings("\n").Trim() + "\n") :> obj, // Cast to obj to force full output
+        ("\n\n" + "Assertion failed.\n" + msg.ReplaceLineEndings("\n").Trim() + "\n") :> obj, // Cast to obj to force full output
         ("\n\n" + ex.Message.ReplaceLineEndings("\n").Trim() + "\n")
     )
 
@@ -38,7 +38,7 @@ let assertExnMsgAsync (msg: string) (f: unit -> Async<'a>) =
         let! ex = Assert.ThrowsAsync<AssertionFailedException>(f >> Async.StartImmediateAsTask >> (fun t -> upcast t))
 
         Assert.Equal(
-            ("\n\n" + msg.ReplaceLineEndings("\n").Trim() + "\n") :> obj, // Cast to obj to force full output
+            ("\n\n" + "Assertion failed.\n" + msg.ReplaceLineEndings("\n").Trim() + "\n") :> obj, // Cast to obj to force full output
             ("\n\n" + ex.Message.ReplaceLineEndings("\n").Trim() + "\n")
         )
     }
@@ -50,7 +50,7 @@ let assertExnMsgWildcard (msg: string) (f: unit -> 'a) =
     match msg.Split('*') with
     | [| a; b |] ->
         let exnMsg = "\n\n" + ex.Message.ReplaceLineEndings("\n").Trim() + "\n"
-        let a = "\n\n" + a.ReplaceLineEndings("\n").Trim()
+        let a = "\n\n" + "Assertion failed.\n" + a.ReplaceLineEndings("\n").Trim()
         let b = b.ReplaceLineEndings("\n").Trim() + "\n"
         Assert.StartsWith(a, exnMsg)
         Assert.EndsWith(b, exnMsg)

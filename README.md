@@ -33,10 +33,9 @@ considered a non-breaking change.
 
 ## A motivating example
 
-Here is an example of what you can do with Faqt. Simply use `Should()` to start asserting. For subsequent calls
-to `Should` in the same chain, use `Should(())` (double parentheses - this is required for subject names to work
-properly). Like FluentAssertions, all assertions support an optional "because" parameter that will be used in the
-output.
+Here is an example of what you can do with Faqt. Simply use `Should()` to start asserting. For subsequent calls to
+`Should` in the same chain, use `Should(())` (double parentheses - this is required for subject names to work properly).
+Like FluentAssertions, all assertions support an optional "because" parameter that will be used in the output.
 
 ```f#
 // Example type definition for clarity
@@ -65,6 +64,7 @@ Depending on the input, a `Faqt.AssertionFailedException` may be raised with one
 If customer is `External`:
 
 ```
+Assertion failed.
 Subject: customer
 Because: This function should only be called with internal customers
 Should: BeOfCase
@@ -77,6 +77,7 @@ But was:
 If `ContactInfo` is `None`:
 
 ```
+Assertion failed.
 Subject:
 - customer
 - ContactInfo
@@ -87,6 +88,7 @@ But was: None
 If `LastName` is not `Armstrong`:
 
 ```
+Assertion failed.
 Subject:
 - customer
 - ContactInfo

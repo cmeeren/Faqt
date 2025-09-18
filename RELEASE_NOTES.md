@@ -1,6 +1,16 @@
 Release notes
 ==============
 
+### 5.1.0 (2025-09-18)
+
+* The `AssertionFailedException` message now begins with `Assertion failed.` on its own first line, with the structured
+  failure data on the following lines. This change improves readability because many tools render the exception message
+  on the same line as other text (e.g., the assertion type name), and the structured data (the YAML starting with
+  `Subject: ...` when using the default formatter) should start on a new line for optimal readability. I considered
+  prefixing the message with a newline, but most tooling trims leading newlines. This could be a breaking change if you
+  programmatically parse exception messages, but that is assumed to not be a common use-case, so this release bumps the
+  minor version only.
+
 ### 5.0.0 (2025-06-02)
 
 **Breaking:** Faqt has been updated for nullable reference types, and now works best with them. This has caused some

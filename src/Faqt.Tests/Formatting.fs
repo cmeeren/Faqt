@@ -111,6 +111,7 @@ SHOULD
 EXTRA
 %A{data.Extra}
         """
+            .Trim()
 
     use _ = Formatter.With(format)
 
