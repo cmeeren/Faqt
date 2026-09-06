@@ -1,0 +1,27 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path="CONTRIBUTING.md" />
+    <File Path="Directory.Build.props" />
+    <File Path="DOCUMENTATION.md" />
+    <File Path="global.json" />
+    <File Path="nuget.config" />
+    <File Path="README.md" />
+    <File Path="RELEASE_NOTES.md" />
+  </Folder>
+  <Folder Name="/Solution Items/.config/">
+    <File Path=".config/dotnet-tools.json" />
+  </Folder>
+  <Folder Name="/Solution Items/.github/">
+    <File Path=".github/ISSUE_TEMPLATE.md" />
+  </Folder>
+  <Folder Name="/Solution Items/.github/workflows/">
+    <File Path=".github/workflows/ci.yml" />
+  </Folder>
+  <Project Path="src/Faqt.Benchmarks/Faqt.Benchmarks.fsproj" />
+  <Folder Name="/Tests/">
+    <Project Path="src/Faqt.GlobalConfigTests/Faqt.GlobalConfigTests.fsproj" />
+    <Project Path="src/Faqt.Tests/Faqt.Tests.fsproj" />
+  </Folder>
+  <Project Path="src/Faqt/Faqt.fsproj" />
+</Solution>
