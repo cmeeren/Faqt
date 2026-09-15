@@ -230,6 +230,35 @@ Value: |-
 
 
 [<Fact>]
+let ``Setting negative HTTP content max length throws ArgumentException`` () =
+    Assert.Throws<ArgumentException>(fun () -> FaqtConfig.Default.SetHttpContentMaxLength(-1) |> ignore)
+
+
+[<Fact>]
+let ``Setting null HTTP header mapper throws ArgumentNullException`` () =
+    Assert.Throws<ArgumentNullException>(fun () ->
+        FaqtConfig.Default.SetMapHttpHeaderValues(Unchecked.defaultof<string -> string -> string>)
+        |> ignore
+    )
+    |> ignore
+
+
+[<Fact>]
+let ``Setting null global config throws ArgumentNullException`` () =
+    try
+        Assert.Throws<ArgumentNullException>(fun () -> Config.Set(Unchecked.defaultof<FaqtConfig>))
+        |> ignore
+    finally
+        Config.Set(FaqtConfig.Default)
+
+
+[<Fact>]
+let ``Setting null local config throws ArgumentNullException`` () =
+    Assert.Throws<ArgumentNullException>(fun () -> Config.With(Unchecked.defaultof<FaqtConfig>) |> ignore)
+    |> ignore
+
+
+[<Fact>]
 let ``HTTP headers are unchanged by default`` () =
     fun () ->
         let x = new HttpRequestMessage(HttpMethod.Get, "/")

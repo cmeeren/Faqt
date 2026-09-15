@@ -85,6 +85,21 @@ Subject: '"a"'
 Should: Fail
 """
 
+
+[<Fact>]
+let ``Setting null global formatter throws ArgumentNullException`` () =
+    try
+        Assert.Throws<ArgumentNullException>(fun () -> Formatter.Set(Unchecked.defaultof<FailureData -> string>))
+        |> ignore
+    finally
+        Formatter.Set(YamlFormatterBuilder.Default.Build())
+
+
+[<Fact>]
+let ``Setting null local formatter throws ArgumentNullException`` () =
+    Assert.Throws<ArgumentNullException>(fun () -> Formatter.With(Unchecked.defaultof<FailureData -> string>) |> ignore)
+    |> ignore
+
     do
         use _ = Formatter.With(fun _ -> "OVERRIDDEN FORMATTER")
 
@@ -1555,6 +1570,55 @@ module YamlFormatterBuilder =
 
 
     [<Fact>]
+    let ``ConfigureJsonSerializerOptions throws if null`` () =
+        Assert.Throws<ArgumentNullException>(fun () ->
+            YamlFormatterBuilder.Default.ConfigureJsonSerializerOptions(
+                Unchecked.defaultof<JsonSerializerOptions -> unit>
+            )
+            |> ignore
+        )
+        |> ignore
+
+
+    [<Fact>]
+    let ``ConfigureJsonFSharpOptions throws if null`` () =
+        Assert.Throws<ArgumentNullException>(fun () ->
+            YamlFormatterBuilder.Default.ConfigureJsonFSharpOptions(
+                Unchecked.defaultof<JsonFSharpOptions -> JsonFSharpOptions>
+            )
+            |> ignore
+        )
+        |> ignore
+
+
+    [<Fact>]
+    let ``AddConverter throws if null`` () =
+        Assert.Throws<ArgumentNullException>(fun () ->
+            YamlFormatterBuilder.Default.AddConverter(Unchecked.defaultof<JsonConverter>)
+            |> ignore
+        )
+        |> ignore
+
+
+    [<Fact>]
+    let ``SerializeAs throws if projection is null`` () =
+        Assert.Throws<ArgumentNullException>(fun () ->
+            YamlFormatterBuilder.Default.SerializeAs(Unchecked.defaultof<string -> int>)
+            |> ignore
+        )
+        |> ignore
+
+
+    [<Fact>]
+    let ``SerializeExactAs throws if projection is null`` () =
+        Assert.Throws<ArgumentNullException>(fun () ->
+            YamlFormatterBuilder.Default.SerializeExactAs(Unchecked.defaultof<string -> int>)
+            |> ignore
+        )
+        |> ignore
+
+
+    [<Fact>]
     let ``ConfigureJsonSerializerOptions works`` () =
         let format =
             YamlFormatterBuilder.Default
@@ -1707,9 +1771,237 @@ Value: FOO
             Assert.Throws<ArgumentException>(fun () -> YamlFormatterBuilder.Default.SerializeAs(id<string>) |> ignore)
 
         Assert.Equal(
-            "The projected type must be different from the input type, or a stack overflow would occur (Parameter 'projection')",
+            "The projected type must not be assignable to the input type, or a stack overflow would occur (Parameter 'projection')",
             ex.Message
         )
+
+
+    [<Theory>]
+    [<InlineData("subclass")>]
+    [<InlineData("interface class")>]
+    [<InlineData("interface struct")>]
+    [<InlineData("object")>]
+    let ``SerializeAs rejects output types matched by its own converter`` scenario =
+        let ex =
+            Assert.Throws<ArgumentException>(fun () ->
+                match scenario with
+                | "subclass" ->
+                    YamlFormatterBuilder.Default.SerializeAs(fun (_: TestBaseType) -> TestSubType())
+                    |> ignore
+                | "interface class" ->
+                    YamlFormatterBuilder.Default.SerializeAs(fun (_: IConvertible) -> "value")
+                    |> ignore
+                | "interface struct" -> YamlFormatterBuilder.Default.SerializeAs(fun (_: IConvertible) -> 42) |> ignore
+                | "object" -> YamlFormatterBuilder.Default.SerializeAs(fun (_: obj) -> "value") |> ignore
+                | _ -> failwith "Unknown scenario"
+            )
+
+        Assert.Equal("projection", ex.ParamName)
+
+
+    [<Fact>]
+    let ``SerializeExactAs allows projecting to a subtype without recursively applying the converter`` () =
+        let mutable calls = 0
+
+        let format =
+            YamlFormatterBuilder.Default
+                .SerializeExactAs(fun (_: TestBaseType) ->
+                    calls <- calls + 1
+                    TestSubType()
+                )
+                .Build()
+
+        use _ = Formatter.With(format)
+
+        fun () -> "a".Should().FailWith("Value", TestBaseType())
+        |> assertExnMsg
+            """
+Subject: '"a"'
+Should: FailWith
+Value: {}
+"""
+
+        Assert.Equal(1, calls)
+
+
+    [<Theory>]
+    [<InlineData(false)>]
+    [<InlineData(true)>]
+    let ``Boxed projections cannot select their own converter again`` exact =
+        let mutable calls = 0
+
+        let projection (value: int) : obj =
+            calls <- calls + 1
+
+            // Bound the broken implementation so this regression cannot overflow the test host's stack.
+            if calls >= 8 then
+                invalidOp "Test projection guard reached"
+
+            value
+
+        let builder =
+            if exact then
+                YamlFormatterBuilder.Default.SerializeExactAs(projection)
+            else
+                YamlFormatterBuilder.Default.SerializeAs(projection)
+
+        use _ = Formatter.With(builder.Build())
+        let error = assertFails (fun () -> ().Should().FailWith("Value", 42))
+        Assert.Equal(1, calls)
+        Assert.Contains("JsonException", error.Message)
+        Assert.DoesNotContain("Test projection guard reached", error.Message)
+
+
+    [<Theory>]
+    [<InlineData(false)>]
+    [<InlineData(true)>]
+    let ``Boxed projections can return a different type or null`` exact =
+        let projection (value: int) : obj | null =
+            if value = 0 then null else string value
+
+        let builder =
+            if exact then
+                YamlFormatterBuilder.Default.SerializeExactAs(projection)
+            else
+                YamlFormatterBuilder.Default.SerializeAs(projection)
+
+        use _ = Formatter.With(builder.Build())
+        let error = assertFails (fun () -> ().Should().FailWith("Value", [ 0; 42 ]))
+        Assert.Contains("Value: [null, '42']", error.Message)
+
+
+    type BoxedObjectConverter() =
+        inherit JsonConverter<obj>()
+
+        override _.Read(_, _, _) = failwith "Can only write"
+
+        override _.Write(writer, _, _) =
+            writer.WriteStringValue("object-converter")
+
+
+    type BoxedObjectConverterFactory() =
+        inherit JsonConverterFactory()
+
+        override _.CanConvert(t) = t = typeof<obj>
+
+        override _.CreateConverter(_, _) = BoxedObjectConverter()
+
+
+    [<Theory>]
+    [<InlineData(false, false)>]
+    [<InlineData(true, false)>]
+    [<InlineData(false, true)>]
+    [<InlineData(true, true)>]
+    let ``Boxed projections respect custom object converters`` exact useFactory =
+        let projection (value: int) : obj = value
+
+        let builder =
+            if exact then
+                YamlFormatterBuilder.Default.SerializeExactAs(projection)
+            else
+                YamlFormatterBuilder.Default.SerializeAs(projection)
+
+        let converter: JsonConverter =
+            if useFactory then
+                BoxedObjectConverterFactory()
+            else
+                BoxedObjectConverter()
+
+        use _ = Formatter.With(builder.AddConverter(converter).Build())
+        let error = assertFails (fun () -> ().Should().FailWith("Value", 42))
+        Assert.Contains("Value: object-converter", error.Message)
+
+
+    type ProjectionNode = {
+        Value: int
+        Children: ProjectionNode list
+    }
+
+
+    [<Theory>]
+    [<InlineData(false)>]
+    [<InlineData(true)>]
+    let ``Projections can serialize child values with the same converter`` exact =
+        let projection (node: ProjectionNode) = {|
+            Text = string node.Value
+            Children = node.Children
+        |}
+
+        let builder =
+            if exact then
+                YamlFormatterBuilder.Default.SerializeExactAs(projection)
+            else
+                YamlFormatterBuilder.Default.SerializeAs(projection)
+
+        let node = {
+            Value = 1
+            Children = [ { Value = 2; Children = [] } ]
+        }
+
+        use _ = Formatter.With(builder.Build())
+        let error = assertFails (fun () -> ().Should().FailWith("Value", node))
+        Assert.Contains("Text: '1'", error.Message)
+        Assert.Contains("Text: '2'", error.Message)
+        Assert.DoesNotContain("SERIALIZATION EXCEPTION", error.Message)
+
+
+    [<Fact>]
+    let ``Projection tracking is restored after a failed write`` () =
+        let mutable configuredOptions = Unchecked.defaultof<JsonSerializerOptions>
+
+        YamlFormatterBuilder.Default
+            .ConfigureJsonSerializerOptions(fun options -> configuredOptions <- options)
+            .SerializeAs(fun (value: int) ->
+                if value = 0 then
+                    invalidOp "Projection failed"
+
+                string value
+            )
+            .Build()
+        |> ignore
+
+        use stream = new MemoryStream()
+        use writer = new Utf8JsonWriter(stream)
+
+        Assert.Throws<InvalidOperationException>(fun () -> JsonSerializer.Serialize(writer, 0, configuredOptions))
+        |> ignore
+
+        JsonSerializer.Serialize(writer, 42, configuredOptions)
+        writer.Flush()
+        Assert.Equal("\"42\"", Encoding.UTF8.GetString(stream.ToArray()))
+
+
+    [<Fact>]
+    let ``Boxed subtype projections respect the selected converter`` () =
+        let format =
+            YamlFormatterBuilder.Default
+                .SerializeAs(fun (_: TestBaseType) -> TestSubType() :> obj)
+                .SerializeExactAs(fun (_: TestSubType) -> "subtype")
+                .Build()
+
+        use _ = Formatter.With(format)
+        let error = assertFails (fun () -> ().Should().FailWith("Value", TestBaseType()))
+        Assert.Contains("Value: subtype", error.Message)
+
+
+    [<Fact>]
+    let ``Exact boxed subtype projections do not select the base converter`` () =
+        let format =
+            YamlFormatterBuilder.Default.SerializeExactAs(fun (_: TestBaseType) -> TestSubType() :> obj).Build()
+
+        use _ = Formatter.With(format)
+        let error = assertFails (fun () -> ().Should().FailWith("Value", TestBaseType()))
+        Assert.Contains("Value: {}", error.Message)
+
+
+    [<Fact>]
+    let ``Statically typed base projections preserve static serialization`` () =
+        let format =
+            YamlFormatterBuilder.Default.SerializeAs(fun (value: TestSubType) -> value :> TestBaseType).Build()
+
+        use _ = Formatter.With(format)
+        let error = assertFails (fun () -> ().Should().FailWith("Value", TestSubType()))
+        Assert.Contains("Value: {}", error.Message)
 
 
     [<Fact>]
@@ -1828,6 +2120,15 @@ B:
 
 
     [<Fact>]
+    let ``TryFormatFallback throws if null`` () =
+        Assert.Throws<ArgumentNullException>(fun () ->
+            YamlFormatterBuilder.Default.TryFormatFallback(Unchecked.defaultof<exn -> obj -> obj>)
+            |> ignore
+        )
+        |> ignore
+
+
+    [<Fact>]
     let ``If TryFormatFallback function fails, exception bubbles up`` () =
         let format =
             YamlFormatterBuilder.Default.TryFormatFallback(fun _ _ -> invalidOp "foo").Build()
@@ -1847,6 +2148,15 @@ B:
         override _.Visit(scalar: YamlScalarNode) =
             scalar.Style <- style
             base.Visit(scalar)
+
+
+    [<Fact>]
+    let ``SetYamlVisitor throws if null`` () =
+        Assert.Throws<ArgumentNullException>(fun () ->
+            YamlFormatterBuilder.Default.SetYamlVisitor(Unchecked.defaultof<YamlDocument -> YamlVisitorBase>)
+            |> ignore
+        )
+        |> ignore
 
 
     [<Fact>]

@@ -1,4 +1,4 @@
-﻿namespace Faqt.Formatting
+namespace Faqt.Formatting
 
 open System
 open System.Globalization
@@ -258,6 +258,8 @@ module internal HttpResponseMessage =
 type private MappedValueConverter<'a, 'b>(mapping: 'a -> 'b, includeSubtypes) =
     inherit JsonConverter<'a>()
 
+    let activeWrites = new ThreadLocal<(Utf8JsonWriter * int) list>(fun () -> [])
+
     override this.CanConvert(t: Type) =
         if includeSubtypes then
             typeof<'a>.IsAssignableFrom(t)
@@ -268,7 +270,25 @@ type private MappedValueConverter<'a, 'b>(mapping: 'a -> 'b, includeSubtypes) =
         raise <| NotSupportedException("Can only write")
 
     override this.Write(writer, value, options) =
-        JsonSerializer.Serialize(writer, mapping value, options)
+        let previous = activeWrites.Value
+        let depth = writer.CurrentDepth
+
+        // Detect actual re-entry without blocking custom object converters or projections of child values.
+        if
+            previous
+            |> List.exists (fun (activeWriter, activeDepth) ->
+                Object.ReferenceEquals(activeWriter, writer) && activeDepth = depth
+            )
+        then
+            raise
+            <| JsonException("The projected value would select the same formatter converter recursively.")
+
+        activeWrites.Value <- (writer, depth) :: previous
+
+        try
+            JsonSerializer.Serialize(writer, mapping value, options)
+        finally
+            activeWrites.Value <- previous
 
 
 type private FailureDataConverter() =
@@ -430,14 +450,21 @@ type YamlFormatterBuilder = private {
 
     /// Adds a function to configure JsonSerializerOptions. Multiple calls are allowed and will be run in order.
     member this.ConfigureJsonSerializerOptions(configure: JsonSerializerOptions -> unit) =
+        if isNull (box configure) then
+            nullArg (nameof configure)
+
         this.ConfigureJsonSerializerOptions'(fun _ -> configure)
 
 
     /// Adds a function to configure JsonFSharpOptions. Multiple calls are allowed and will be run in order.
-    member this.ConfigureJsonFSharpOptions(configure: JsonFSharpOptions -> JsonFSharpOptions) = {
-        this with
-            getJsonFSharpOptions = this.getJsonFSharpOptions >> configure
-    }
+    member this.ConfigureJsonFSharpOptions(configure: JsonFSharpOptions -> JsonFSharpOptions) =
+        if isNull (box configure) then
+            nullArg (nameof configure)
+
+        {
+            this with
+                getJsonFSharpOptions = this.getJsonFSharpOptions >> configure
+        }
 
 
     member private this.AddConverter'(getConverter: YamlFormatterBuilder -> #JsonConverter) =
@@ -446,16 +473,24 @@ type YamlFormatterBuilder = private {
 
     /// Adds the specified JSON converter. If multiple converters return true for CanConvert, the last one added takes
     /// precedence.
-    member this.AddConverter(converter: #JsonConverter) = this.AddConverter'(fun _ -> converter)
+    member this.AddConverter(converter: #JsonConverter) =
+        if isNull (box converter) then
+            nullArg (nameof converter)
+
+        this.AddConverter'(fun _ -> converter)
 
 
     /// Adds a converter that serializes a transformed value instead of the original value. Only the last added
     /// converter for any given input type will take effect. Subtypes of the input type are included.
+    /// The projected type must not be assignable to the input type, since that would select this converter again.
     member this.SerializeAs(projection: 'a -> 'b) =
-        if typeof<'a> = typeof<'b> then
+        if isNull (box projection) then
+            nullArg (nameof projection)
+
+        if typeof<'a>.IsAssignableFrom(typeof<'b>) then
             invalidArg
                 (nameof projection)
-                "The projected type must be different from the input type, or a stack overflow would occur"
+                "The projected type must not be assignable to the input type, or a stack overflow would occur"
 
         this.AddConverter(MappedValueConverter(projection, true))
 
@@ -463,6 +498,9 @@ type YamlFormatterBuilder = private {
     /// Adds a converter that serializes a transformed value instead of the original value. Only the last added
     /// converter for any given input type will take effect. Subtypes of the input type are not included.
     member this.SerializeExactAs(projection: 'a -> 'b) =
+        if isNull (box projection) then
+            nullArg (nameof projection)
+
         if typeof<'a> = typeof<'b> then
             invalidArg
                 (nameof projection)
@@ -473,18 +511,26 @@ type YamlFormatterBuilder = private {
 
     /// Sets the transformation (e.g. ToString) that is used when values wrapped in TryFormat fail serialization.
     /// Only the last call to this method will take effect.
-    member this.TryFormatFallback(projection: exn -> obj -> obj) = {
-        this with
-            tryFormatFallback = projection
-    }
+    member this.TryFormatFallback(projection: exn -> obj -> obj) =
+        if isNull (box projection) then
+            nullArg (nameof projection)
+
+        {
+            this with
+                tryFormatFallback = projection
+        }
 
 
     /// Specifies which YAML visitor is used when converting JSON to YAML. Only the last call to this method will take
     /// effect.
-    member this.SetYamlVisitor(getYamlVisitor: YamlDocument -> YamlVisitorBase) = {
-        this with
-            getYamlVisitor = getYamlVisitor
-    }
+    member this.SetYamlVisitor(getYamlVisitor: YamlDocument -> YamlVisitorBase) =
+        if isNull (box getYamlVisitor) then
+            nullArg (nameof getYamlVisitor)
+
+        {
+            this with
+                getYamlVisitor = getYamlVisitor
+        }
 
 
     /// Returns a formatter according to the current configuration.
@@ -579,12 +625,19 @@ type Formatter private () =
 
 
     /// Sets the specified formatter as the default global formatter.
-    static member Set(format) = globalFormatter <- format
+    static member Set(format) =
+        if isNull (box format) then
+            nullArg (nameof format)
+
+        globalFormatter <- format
 
 
     /// Sets the specified formatter as the formatter for the current thread. When the returned value is disposed, the
     /// old formatter is restored.
     static member With(format) =
+        if isNull (box format) then
+            nullArg (nameof format)
+
         let oldLocalFormatter = localFormatter.Value
         localFormatter.Value <- format
 

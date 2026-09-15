@@ -29,10 +29,14 @@ type FaqtConfig = private {
     /// Obtaining the stream may first buffer generated content in full; this is not a total memory limit.
     /// Zero omits the body without reading it. Stream previews may read one additional byte to detect truncation.
     /// Seekable stream positions are restored; nonseekable bodies may be consumed.
-    member this.SetHttpContentMaxLength(length) = {
-        this with
-            httpContentMaxLength = length
-    }
+    member this.SetHttpContentMaxLength(length) =
+        if length < 0 then
+            invalidArg (nameof length) "The length must be non-negative"
+
+        {
+            this with
+                httpContentMaxLength = length
+        }
 
 
     /// Gets whether to attempt formatting HttpContent in assertion failure output.
@@ -53,10 +57,14 @@ type FaqtConfig = private {
 
     /// Sets the function used to format (e.g. mask) HTTP headers. The function accepts the header name and value, and
     /// returns the new value.
-    member this.SetMapHttpHeaderValues(mapHttpHeaderValues) = {
-        this with
-            mapHttpHeaderValues = mapHttpHeaderValues
-    }
+    member this.SetMapHttpHeaderValues(mapHttpHeaderValues) =
+        if isNull (box mapHttpHeaderValues) then
+            nullArg (nameof mapHttpHeaderValues)
+
+        {
+            this with
+                mapHttpHeaderValues = mapHttpHeaderValues
+        }
 
 
 /// Allows changing the current formatter, either temporarily (for the current thread) or globally.
@@ -76,12 +84,19 @@ type Config private () =
 
 
     /// Sets the specified config as the default global config.
-    static member Set(config) = globalConfig <- config
+    static member Set(config) =
+        if isNull (box config) then
+            nullArg (nameof config)
+
+        globalConfig <- config
 
 
     /// Sets the specified config as the config for the current thread. When the returned value is disposed, the old
     /// config is restored.
     static member With(config) =
+        if isNull (box config) then
+            nullArg (nameof config)
+
         let oldLocalConfig = localConfig.Value
         localConfig.Value <- config
 

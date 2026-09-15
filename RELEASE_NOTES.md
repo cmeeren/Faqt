@@ -12,6 +12,17 @@ Release notes
   `TimeSpan` with `ArgumentException`. Existing NaN handling takes precedence over this validation. Custom tolerance
   types retain their existing operator-based behavior.
 
+* **Breaking:** Configuration and formatter APIs now reject null inputs with `ArgumentNullException` when supplied,
+  rather than accepting them and potentially failing later. This applies to `Config.Set`/`With`,
+  `Formatter.Set`/`With`, `FaqtConfig.SetMapHttpHeaderValues`, and `YamlFormatterBuilder` methods accepting callbacks
+  or converters. `FaqtConfig.SetHttpContentMaxLength` now rejects negative lengths with `ArgumentException`.
+  `YamlFormatterBuilder.SerializeAs` now rejects projected types assignable to the input type with
+  `ArgumentException`, preventing the converter from recursively selecting itself. `SerializeExactAs` still allows
+  subtype outputs because its converter matches only the exact input type.
+
+* Stop formatter projections that re-enter the same converter at the same JSON depth, preventing stack overflows
+  from boxed self-projections. Custom object converters and projections of nested values remain supported.
+
 * Preserve dictionary comparer and set comparison semantics when returning stored containment matches.
   Collection assertions avoid unnecessary re-enumeration; `ContainItemsMatching` retains its lazy derived sequence.
   Multiset equality and subset/superset assertions now handle single-pass sequences correctly. Dictionary equality
