@@ -6,6 +6,7 @@ open System.Diagnostics.CodeAnalysis
 #endif
 open System.Globalization
 open System.Runtime.CompilerServices
+open System.Text
 open System.Text.Encodings.Web
 open System.Text.Json
 open System.Text.RegularExpressions
@@ -39,19 +40,32 @@ module private Helpers =
 
 
     let isWildcardMatch (subject: string) (pattern: string) =
-        let asteriskPlaceholder = "40b37b46d8a74affbdf34544f5355b05"
-        let questionMarkPlaceholder = "191590a562c744b499798af900dee217"
+        let subject = subject.Replace("\r\n", "\n")
+        let pattern = pattern.Replace("\r\n", "\n")
+        let sb = StringBuilder(pattern.Length * 2 + 2)
+        sb.Append('^') |> ignore
 
-        let regexPattern =
-            pattern
-            |> String.replace "*" asteriskPlaceholder
-            |> String.replace "?" questionMarkPlaceholder
-            |> Regex.Escape
-            |> String.replace asteriskPlaceholder ".*"
-            |> String.replace questionMarkPlaceholder "."
-            |> sprintf "^%s$"
+        for ch in pattern do
+            match ch with
+            | '*' -> sb.Append(".*") |> ignore
+            | '?' -> sb.Append('.') |> ignore
+            | '\\'
+            | '.'
+            | '$'
+            | '^'
+            | '{'
+            | '['
+            | '('
+            | '|'
+            | ')'
+            | '+'
+            | ']'
+            | '}' -> sb.Append('\\').Append(ch) |> ignore
+            | _ -> sb.Append(ch) |> ignore
 
-        Regex.IsMatch(subject.Replace("\r\n", "\n"), regexPattern, RegexOptions.IgnoreCase ||| RegexOptions.Singleline)
+        let regexPattern = sb.Append('$').ToString()
+
+        Regex.IsMatch(subject, regexPattern, RegexOptions.IgnoreCase ||| RegexOptions.Singleline)
 
 
 [<Extension>]

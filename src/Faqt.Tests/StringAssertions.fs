@@ -2056,6 +2056,11 @@ module MatchWildcard =
 
 
     [<Fact>]
+    let ``Passes if subject and pattern have different newline styles`` () =
+        "abc\ndef".Should().MatchWildcard("abc\r\ndef")
+
+
+    [<Fact>]
     let ``Throws if null`` () =
         assertThrows (fun () -> Unchecked.defaultof<string>.Should().MatchWildcard("*"))
 
@@ -2157,6 +2162,11 @@ module NotMatchWildcard =
     // Note: If adding more data, also add to the pass test for MatchWildcard
     let ``Fails if string matches pattern`` (subject: string) (pattern: string) =
         assertFails (fun () -> subject.Should().NotMatchWildcard(pattern))
+
+
+    [<Fact>]
+    let ``Fails if subject and pattern have different newline styles`` () =
+        assertFails (fun () -> "abc\ndef".Should().NotMatchWildcard("abc\r\ndef"))
 
 
     [<Fact>]
