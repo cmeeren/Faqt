@@ -65,7 +65,13 @@ module private Helpers =
 
         let regexPattern = sb.Append('$').ToString()
 
-        Regex.IsMatch(subject, regexPattern, RegexOptions.IgnoreCase ||| RegexOptions.Singleline)
+        Regex.IsMatch(
+            subject,
+            regexPattern,
+            RegexOptions.IgnoreCase
+            ||| RegexOptions.Singleline
+            ||| RegexOptions.CultureInvariant
+        )
 
 
 [<Extension>]
@@ -348,8 +354,9 @@ type StringAssertions =
         t.NotMatchRegex(pattern, RegexOptions.None, ?because = because)
 
 
-    /// Asserts that the subject matches the specified wildcard pattern, which is case insensitive and may contain `*`
-    /// (matches zero or more characters, including newlines) and `?` (matches a single character, including newlines).
+    /// Asserts that the subject matches the specified wildcard pattern, which is case insensitive using the invariant
+    /// culture and may contain `*` (matches zero or more characters, including newlines) and `?` (matches a single
+    /// character, including newlines).
     /// Newlines are normalized to \n before matching. For more complicated matching, use MatchRegex.
     [<Extension>]
     static member MatchWildcard(t: Testable<string>, pattern: string, ?because) : And<string> =
@@ -361,9 +368,10 @@ type StringAssertions =
         And(t)
 
 
-    /// Asserts that the subject does not match the specified wildcard pattern, which is case insensitive and may
-    /// contain `*` (matches zero or more characters, including newlines) and `?` (matches a single character, including
-    /// newlines). Newlines are normalized to \n before matching. For more complicated matching, use MatchRegex.
+    /// Asserts that the subject does not match the specified wildcard pattern, which is case insensitive using the
+    /// invariant culture and may contain `*` (matches zero or more characters, including newlines) and `?` (matches a
+    /// single character, including newlines). Newlines are normalized to \n before matching. For more complicated
+    /// matching, use MatchRegex.
     [<Extension>]
     static member NotMatchWildcard(t: Testable<string>, pattern: string, ?because) : And<string> =
         use _ = t.Assert()

@@ -10,6 +10,9 @@ Release notes
   Seekable positions are restored; nonseekable bodies may be consumed, as indicated in the diagnostics.
   Zero omits the body without reading it.
 
+* `MatchWildcard` and `NotMatchWildcard` now use case-insensitive invariant-culture matching instead of the current
+  culture. Results no longer depend on the current culture's casing rules, such as Turkish `I`/`i` behavior.
+
 * Unexpected callback, comparer, and HTTP content-read exceptions retain Faqt's diagnostic context but
   now use ordinary `Exception` wrappers instead of `AssertionFailedException`, preserving the original exception in
   the `InnerException` chain. Aggregation and evaluation of further alternatives stop on an unexpected error.

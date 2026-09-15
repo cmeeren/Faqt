@@ -2024,6 +2024,16 @@ But was: asd
 module MatchWildcard =
 
 
+    [<Theory>]
+    [<InlineData("")>]
+    [<InlineData("en-US")>]
+    [<InlineData("tr-TR")>]
+    let ``Uses invariant case matching regardless of current culture`` culture =
+        use _ = CultureInfo.withCurrentCulture culture
+        "FILE".Should().MatchWildcard("fi?*") |> ignore
+        assertFails (fun () -> "fıle".Should().MatchWildcard("FI?*")) |> ignore
+
+
     [<Fact>]
     let ``Can be chained with And`` () =
         "a".Should().MatchWildcard("a").Id<And<string>>().And.Be("a")
@@ -2131,6 +2141,16 @@ But was: asd
 
 
 module NotMatchWildcard =
+
+
+    [<Theory>]
+    [<InlineData("")>]
+    [<InlineData("en-US")>]
+    [<InlineData("tr-TR")>]
+    let ``Uses invariant case matching regardless of current culture`` culture =
+        use _ = CultureInfo.withCurrentCulture culture
+        assertFails (fun () -> "FILE".Should().NotMatchWildcard("fi?*")) |> ignore
+        "fıle".Should().NotMatchWildcard("FI?*")
 
 
     [<Fact>]
