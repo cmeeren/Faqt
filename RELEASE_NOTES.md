@@ -3,40 +3,44 @@ Release notes
 
 ### Unreleased
 
-* **Breaking:** HTTP failure diagnostics now limit captured body bytes before decoding, as well as rendered characters, using
+#### Breaking changes
+
+* HTTP failure diagnostics now limit captured body bytes before decoding, as well as rendered characters, using
   `HttpContentMaxLength`. Stream previews start at the current position, except byte-array and string content.
   Seekable positions are restored; nonseekable bodies may be consumed, as indicated in the diagnostics.
   Zero omits the body without reading it.
 
-* **Breaking:** Unexpected callback, comparer, and HTTP content-read exceptions retain Faqt's diagnostic context but
+* Unexpected callback, comparer, and HTTP content-read exceptions retain Faqt's diagnostic context but
   now use ordinary `Exception` wrappers instead of `AssertionFailedException`, preserving the original exception in
   the `InnerException` chain. Aggregation and evaluation of further alternatives stop on an unexpected error.
   Ordinary assertion failures and explicit exception-testing contracts retain their behavior.
   `OperationCanceledException` and its subtypes propagate without wrapping. Custom assertions can use
   `t.With(...).RaiseError(ex, because)` to report unexpected errors with context.
 
-* **Breaking:** `Throw`, `ThrowExactly`, `ThrowInner`, `NotThrow`, and all `Roundtrip` overloads now reject null function
+* `Throw`, `ThrowExactly`, `ThrowInner`, `NotThrow`, and all `Roundtrip` overloads now reject null function
   subjects with `ArgumentNullException` (`ParamName = "subject"`) before invocation. A null function can no longer
   satisfy a `Throw` assertion through the `NullReferenceException` caused by attempting to invoke it. Exceptions
   thrown by an actual function retain their existing behavior.
 
-* **Breaking:** `BeCloseTo` and `NotBeCloseTo` now reject negative tolerances for supported built-in numeric types and
+* `BeCloseTo` and `NotBeCloseTo` now reject negative tolerances for supported built-in numeric types and
   `TimeSpan` with `ArgumentException`. Existing NaN handling takes precedence over this validation. Custom tolerance
   types retain their existing operator-based behavior.
 
-* **Breaking:** The `Guid` overloads of `Be` and `NotBe` now reject invalid string arguments with `ArgumentException`.
+* The `Guid` overloads of `Be` and `NotBe` now reject invalid string arguments with `ArgumentException`.
   Previously, malformed strings threw `FormatException`, and null strings threw `ArgumentNullException`.
 
-* **Breaking:** The `Type` overloads of `BeOfType` and `BeAssignableTo` now reject a null `expectedType` with
+* The `Type` overloads of `BeOfType` and `BeAssignableTo` now reject a null `expectedType` with
   `ArgumentNullException`, before checking the subject.
 
-* **Breaking:** Configuration and formatter APIs now reject null inputs with `ArgumentNullException` when supplied,
+* Configuration and formatter APIs now reject null inputs with `ArgumentNullException` when supplied,
   rather than accepting them and potentially failing later. This applies to `Config.Set`/`With`,
   `Formatter.Set`/`With`, `FaqtConfig.SetMapHttpHeaderValues`, and `YamlFormatterBuilder` methods accepting callbacks
   or converters. `FaqtConfig.SetHttpContentMaxLength` now rejects negative lengths with `ArgumentException`.
   `YamlFormatterBuilder.SerializeAs` now rejects projected types assignable to the input type with
   `ArgumentException`, preventing the converter from recursively selecting itself. `SerializeExactAs` still allows
   subtype outputs because its converter matches only the exact input type.
+
+#### Fixes and improvements
 
 * Detect cycles and bound recursive serialization across nested `TryFormat` wrappers, including dictionary keys,
   so diagnostic formatting uses its fallback instead of overflowing the stack.
@@ -67,6 +71,8 @@ Release notes
 * Normalize JSON object-key order recursively for equivalence checks while preserving case-sensitive key names.
 
 * Fix wildcard matching when literal text collides with the previous internal placeholder strings.
+
+#### Clarifications
 
 * Clarified zero enum flag semantics: `HaveFlag` passes and `NotHaveFlag` fails for a zero mask, consistently with
   `Enum.HasFlag`. Use equality with the enum's zero value to assert that no flags are set.
