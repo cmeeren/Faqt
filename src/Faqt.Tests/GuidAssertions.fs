@@ -60,6 +60,11 @@ But was: 65006ace-504c-4ddb-8e4f-567c834d8125
 """
 
 
+    [<Fact>]
+    let ``Throws ArgumentException if expected is not a valid Guid string`` () =
+        Assert.Throws<ArgumentException>(fun () -> Guid.Empty.Should().Be("not-a-guid") |> ignore)
+
+
 module NotBe =
 
 
@@ -114,6 +119,11 @@ Should: NotBe
 Other: 65006ace-504c-4ddb-8e4f-567c834d8125
 But was: 65006ace-504c-4ddb-8e4f-567c834d8125
 """
+
+
+    [<Fact>]
+    let ``Throws ArgumentException if other is not a valid Guid string`` () =
+        Assert.Throws<ArgumentException>(fun () -> Guid.Empty.Should().NotBe("not-a-guid") |> ignore)
 
 
 module BeEmpty =

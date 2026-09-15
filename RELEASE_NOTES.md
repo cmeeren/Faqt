@@ -12,6 +12,9 @@ Release notes
   `TimeSpan` with `ArgumentException`. Existing NaN handling takes precedence over this validation. Custom tolerance
   types retain their existing operator-based behavior.
 
+* **Breaking:** The `Guid` overloads of `Be` and `NotBe` now reject invalid string arguments with `ArgumentException`.
+  Previously, malformed strings threw `FormatException`, and null strings threw `ArgumentNullException`.
+
 * **Breaking:** Configuration and formatter APIs now reject null inputs with `ArgumentNullException` when supplied,
   rather than accepting them and potentially failing later. This applies to `Config.Set`/`With`,
   `Formatter.Set`/`With`, `FaqtConfig.SetMapHttpHeaderValues`, and `YamlFormatterBuilder` methods accepting callbacks

@@ -9,12 +9,18 @@ open Faqt.AssertionHelpers
 type GuidAssertions =
 
 
+    static member private ParseGuid(parameterName: string, value: string) =
+        match Guid.TryParse(value) with
+        | true, guid -> guid
+        | false, _ -> invalidArg parameterName "The value must be a valid Guid string"
+
+
     /// Asserts that the subject is equal to the specified value.
     [<Extension>]
     static member Be(t: Testable<Guid>, expected: string, ?because) : And<Guid> =
         use _ = t.Assert()
 
-        if not (t.Subject = Guid.Parse(expected)) then
+        if not (t.Subject = GuidAssertions.ParseGuid(nameof expected, expected)) then
             t.With("Expected", expected).With("But was", t.Subject).Fail(because)
 
         And(t)
@@ -25,7 +31,7 @@ type GuidAssertions =
     static member NotBe(t: Testable<Guid>, other: string, ?because) : And<Guid> =
         use _ = t.Assert()
 
-        if t.Subject = Guid.Parse(other) then
+        if t.Subject = GuidAssertions.ParseGuid(nameof other, other) then
             t.With("Other", other).With("But was", t.Subject).Fail(because)
 
         And(t)
