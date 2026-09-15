@@ -81,12 +81,26 @@ these failures, collect them, try another alternative (`SatisfyAny`), or negate 
 
 Unexpected exceptions from assertion callbacks, custom comparers, and HTTP content reads are reported with diagnostic
 context in an ordinary `Exception`, with the original exception preserved in its `InnerException` chain. They stop
-aggregation or evaluation of further alternatives. `OperationCanceledException` and its subtypes propagate without
-wrapping. `SatisfyAny` still stops evaluating callbacks after the first success.
+aggregation or evaluation of further alternatives. On these unexpected-error paths, `OperationCanceledException` and
+its subtypes propagate without wrapping. `SatisfyAny` still stops evaluating callbacks after the first success.
 
 Assertions that explicitly test exception outcomes, such as `Throw`, `NotThrow`, `Transform`, and parsing assertions,
 retain their documented behavior. For example, `NotThrow` failing because the tested function threw is an ordinary
 assertion failure that can be negated.
+
+`DeserializeTo` and `DeserializeToNullable` intentionally treat all exceptions thrown during deserialization as
+assertion failures, including exceptions from custom converters. Like `Transform` and `Roundtrip`, they assert that
+an operation succeeds. Converter input rejection is not limited to `JsonException`: a converter may use a parser
+that throws `FormatException`, and an unsupported target type can cause `NotSupportedException`. Conversely, a
+converter bug can cause `JsonException`. Classifying exceptions by type cannot reliably separate invalid input from
+implementation errors. This operation-success contract also currently includes cancellation thrown during
+deserialization; the unexpected-error policy above does not apply to these catches. Invalid API arguments, such as
+a null target type, are validated before deserialization and remain unexpected errors.
+
+Consequently, `NotSatisfy` around deserialization proves only that it failed, not that the JSON was rejected for the
+intended reason. To test a particular rejection, call the deserializer directly and use `Throw<JsonException, _>`
+or another appropriate exception assertion. Narrowing the deserialization catches would be a deliberate breaking
+contract change, not merely consistent application of the unexpected-error policy.
 
 In custom assertions, use `Fail` for an ordinary assertion failure. To report an unexpected exception with additional
 context, use `t.With(...).RaiseError(ex, because)`, which includes the exception under `But threw` automatically.

@@ -427,6 +427,10 @@ type StringAssertions =
         And(t)
 
 
+    // Deserialization exceptions intentionally become assertion failures in all overloads below.
+    // Rationale: DOCUMENTATION.md, "Assertion failures and unexpected exceptions".
+
+
     /// Asserts that the subject is deserializable to a non-null instance of the specified target type using the
     /// specified options.
     [<Extension>]
