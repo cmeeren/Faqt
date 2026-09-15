@@ -15,6 +15,11 @@ Release notes
   `OperationCanceledException` and its subtypes propagate without wrapping. Custom assertions can use
   `t.With(...).RaiseError(ex, because)` to report unexpected errors with context.
 
+* **Breaking:** `Throw`, `ThrowExactly`, `ThrowInner`, `NotThrow`, and all `Roundtrip` overloads now reject null function
+  subjects with `ArgumentNullException` (`ParamName = "subject"`) before invocation. A null function can no longer
+  satisfy a `Throw` assertion through the `NullReferenceException` caused by attempting to invoke it. Exceptions
+  thrown by an actual function retain their existing behavior.
+
 * **Breaking:** `BeCloseTo` and `NotBeCloseTo` now reject negative tolerances for supported built-in numeric types and
   `TimeSpan` with `ArgumentException`. Existing NaN handling takes precedence over this validation. Custom tolerance
   types retain their existing operator-based behavior.

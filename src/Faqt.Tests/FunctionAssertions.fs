@@ -1,8 +1,26 @@
-﻿module FunctionAssertions
+module FunctionAssertions
 
 open System
 open Faqt
 open Xunit
+
+
+let private assertNullFunctionRejected composition (run: unit -> unit) =
+    let error =
+        match composition with
+        | "Direct" -> Assert.Throws<ArgumentNullException>(run)
+        | _ ->
+            let wrapped =
+                Assert.Throws<Exception>(fun () ->
+                    match composition with
+                    | "NotSatisfy" -> ().Should().NotSatisfy(run) |> ignore
+                    | "SatisfyAny" -> ().Should().SatisfyAny([ run; ignore ]) |> ignore
+                    | _ -> failwith "Unknown composition"
+                )
+
+            Assert.IsType<ArgumentNullException>(wrapped.GetBaseException())
+
+    Assert.Equal("subject", error.ParamName)
 
 
 let inner (inner: #exn) = Exception("", inner)
@@ -59,6 +77,19 @@ module Throw =
                     .Should()
             )
         )
+
+
+    [<Theory>]
+    [<InlineData("Direct")>]
+    [<InlineData("NotSatisfy")>]
+    [<InlineData("SatisfyAny")>]
+    let ``Rejects null functions as invalid input`` composition =
+        assertNullFunctionRejected
+            composition
+            (fun () ->
+                let f: unit -> obj = Unchecked.defaultof<_>
+                f.Should().Throw<ArgumentNullException, _>() |> ignore
+            )
 
 
     [<Fact>]
@@ -206,6 +237,19 @@ module ThrowInner =
         )
 
 
+    [<Theory>]
+    [<InlineData("Direct")>]
+    [<InlineData("NotSatisfy")>]
+    [<InlineData("SatisfyAny")>]
+    let ``Rejects null functions as invalid input`` composition =
+        assertNullFunctionRejected
+            composition
+            (fun () ->
+                let f: unit -> obj = Unchecked.defaultof<_>
+                f.Should().ThrowInner<ArgumentNullException, _>() |> ignore
+            )
+
+
     [<Fact>]
     let ``Fails with expected message if succeeds`` () =
         fun () ->
@@ -325,6 +369,19 @@ module ThrowExactly =
         )
 
 
+    [<Theory>]
+    [<InlineData("Direct")>]
+    [<InlineData("NotSatisfy")>]
+    [<InlineData("SatisfyAny")>]
+    let ``Rejects null functions as invalid input`` composition =
+        assertNullFunctionRejected
+            composition
+            (fun () ->
+                let f: unit -> obj = Unchecked.defaultof<_>
+                f.Should().ThrowExactly<ArgumentNullException, _>() |> ignore
+            )
+
+
     [<Fact>]
     let ``Fails with expected message if succeeds`` () =
         fun () ->
@@ -395,6 +452,19 @@ module NotThrow =
         (fun () -> 1).Should().NotThrow().Id<And<unit -> int>>()
 
 
+    [<Theory>]
+    [<InlineData("Direct")>]
+    [<InlineData("NotSatisfy")>]
+    [<InlineData("SatisfyAny")>]
+    let ``Rejects null functions as invalid input`` composition =
+        assertNullFunctionRejected
+            composition
+            (fun () ->
+                let f: unit -> obj = Unchecked.defaultof<_>
+                f.Should().NotThrow() |> ignore
+            )
+
+
     [<Fact>]
     let ``Fails with expected message`` () =
         fun () ->
@@ -432,6 +502,19 @@ module Roundtrip =
     [<Fact>]
     let ``Passes when the function does not throw and can be chained with And`` () =
         id.Should().Roundtrip("a").Id<And<string -> string>>()
+
+
+    [<Theory>]
+    [<InlineData("Direct")>]
+    [<InlineData("NotSatisfy")>]
+    [<InlineData("SatisfyAny")>]
+    let ``Rejects null functions as invalid input`` composition =
+        assertNullFunctionRejected
+            composition
+            (fun () ->
+                let f: string -> string = Unchecked.defaultof<_>
+                f.Should().Roundtrip("a") |> ignore
+            )
 
 
     [<Fact>]
@@ -502,6 +585,19 @@ module ``Roundtrip (option)`` =
     [<Fact>]
     let ``Passes when the function does not throw and can be chained with And`` () =
         Some.Should().Roundtrip("a").Id<And<string -> string option>>()
+
+
+    [<Theory>]
+    [<InlineData("Direct")>]
+    [<InlineData("NotSatisfy")>]
+    [<InlineData("SatisfyAny")>]
+    let ``Rejects null functions as invalid input`` composition =
+        assertNullFunctionRejected
+            composition
+            (fun () ->
+                let f: string -> string option = Unchecked.defaultof<_>
+                f.Should().Roundtrip("a") |> ignore
+            )
 
 
     [<Fact>]
@@ -603,6 +699,19 @@ module ``Roundtrip (Result)`` =
     [<Fact>]
     let ``Passes when the function does not throw and can be chained with And`` () =
         Ok.Should().Roundtrip("a").Id<And<string -> Result<string, string>>>()
+
+
+    [<Theory>]
+    [<InlineData("Direct")>]
+    [<InlineData("NotSatisfy")>]
+    [<InlineData("SatisfyAny")>]
+    let ``Rejects null functions as invalid input`` composition =
+        assertNullFunctionRejected
+            composition
+            (fun () ->
+                let f: string -> Result<string, string> = Unchecked.defaultof<_>
+                f.Should().Roundtrip("a") |> ignore
+            )
 
 
     [<Fact>]

@@ -19,6 +19,9 @@ type FunctionAssertions =
         : AndDerived<unit -> 'ignored, 'exn> =
         use _ = t.Assert()
 
+        if isNull (box t.Subject) then
+            nullArg "subject"
+
         let retVal =
             try
                 t.Subject() |> ignore
@@ -43,6 +46,9 @@ type FunctionAssertions =
         (t: Testable<unit -> 'ignored>, ?because)
         : AndDerived<unit -> 'ignored, 'exn> =
         use _ = t.Assert()
+
+        if isNull (box t.Subject) then
+            nullArg "subject"
 
         let rec getMatchingException (ex: Exception) =
             match ex with
@@ -78,6 +84,9 @@ type FunctionAssertions =
         : AndDerived<unit -> 'ignored, 'exn> =
         use _ = t.Assert()
 
+        if isNull (box t.Subject) then
+            nullArg "subject"
+
         let retVal =
             try
                 t.Subject() |> ignore
@@ -97,6 +106,9 @@ type FunctionAssertions =
     static member NotThrow(t: Testable<unit -> 'ignored>, ?because) : And<unit -> 'ignored> =
         use _ = t.Assert()
 
+        if isNull (box t.Subject) then
+            nullArg "subject"
+
         try
             t.Subject() |> ignore
             And(t)
@@ -109,6 +121,9 @@ type FunctionAssertions =
     [<Extension>]
     static member Roundtrip(t: Testable<'a -> 'a>, original: 'a, ?because) : And<'a -> 'a> =
         use _ = t.Assert()
+
+        if isNull (box t.Subject) then
+            nullArg "subject"
 
         let roundtripped =
             try
@@ -129,6 +144,9 @@ type FunctionAssertions =
     static member Roundtrip(t: Testable<'a -> 'a option>, original: 'a, ?because) : And<'a -> 'a option> =
         use _ = t.Assert()
 
+        if isNull (box t.Subject) then
+            nullArg "subject"
+
         let roundtripped =
             try
                 t.Subject original
@@ -147,6 +165,9 @@ type FunctionAssertions =
     [<Extension>]
     static member Roundtrip(t: Testable<'a -> Result<'a, 'b>>, original: 'a, ?because) : And<'a -> Result<'a, 'b>> =
         use _ = t.Assert()
+
+        if isNull (box t.Subject) then
+            nullArg "subject"
 
         let roundtripped =
             try

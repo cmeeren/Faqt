@@ -652,6 +652,17 @@ entirely), or make the subject name incorrect in many more cases (e.g. by removi
 assertion history altogether, thereby only giving correct subject names up to the first assertion of any given name in a
 chain).
 
+### Why does this assertion pass/fail for null?
+
+Most assertions require non-null inputs, as indicated by their signatures. Passing null despite that contract is
+invalid usage and raises an exception rather than an `AssertionFailedException`. Assertions designed to inspect
+null, such as `BeNull`, `NotBeNull`, `BeOfType`, and `BeAssignableTo`, retain their individual contracts. Use
+`NotBeNull` before continuing an assertion chain when the subject may be null.
+
+`Throw`, `ThrowExactly`, `ThrowInner`, `NotThrow`, and all `Roundtrip` overloads reject null function subjects with
+`ArgumentNullException` before attempting invocation. A missing function is invalid input, not an exception thrown
+by the function being tested. Exceptions thrown by an actual function retain the assertion's documented behavior.
+
 ### Why not FluentAssertions?
 
 FluentAssertions is a fantastic library, and very much the inspiration for Faqt. Unfortunately, its API design causes
