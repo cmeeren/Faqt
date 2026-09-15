@@ -170,6 +170,9 @@ type BasicAssertions =
     static member Transform(t: Testable<'a>, f: 'a -> 'b, ?because) : AndDerived<'a, 'b> =
         use _ = t.Assert()
 
+        if isNull (box f) then
+            nullArg (nameof f)
+
         try
             AndDerived(t, f t.Subject)
         with ex ->
@@ -181,6 +184,9 @@ type BasicAssertions =
     [<Extension>]
     static member TryTransform(t: Testable<'a>, f: 'a -> 'b option, ?because) : AndDerived<'a, 'b> =
         use _ = t.Assert()
+
+        if isNull (box f) then
+            nullArg (nameof f)
 
         let result =
             try
@@ -199,6 +205,9 @@ type BasicAssertions =
     static member TryTransform(t: Testable<'a>, f: 'a -> 'b voption, ?because) : AndDerived<'a, 'b> =
         use _ = t.Assert()
 
+        if isNull (box f) then
+            nullArg (nameof f)
+
         let result =
             try
                 f t.Subject
@@ -216,6 +225,9 @@ type BasicAssertions =
     static member TryTransform(t: Testable<'a>, f: 'a -> Result<'b, 'c>, ?because) : AndDerived<'a, 'b> =
         use _ = t.Assert()
 
+        if isNull (box f) then
+            nullArg (nameof f)
+
         let result =
             try
                 f t.Subject
@@ -232,6 +244,9 @@ type BasicAssertions =
     [<Extension>]
     static member TryTransform(t: Testable<'a>, f: 'a -> bool * 'b, ?because) : AndDerived<'a, 'b> =
         use _ = t.Assert()
+
+        if isNull (box f) then
+            nullArg (nameof f)
 
         let result =
             try

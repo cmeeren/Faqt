@@ -8,6 +8,37 @@ open Faqt
 open Xunit
 
 
+module DeserializationArgumentValidation =
+
+
+    let cases =
+        seq {
+            for nullable in [ false; true ] do
+                for withOptions in [ false; true ] do
+                    for subject in [ "1"; "invalid JSON" ] do
+                        for composition in [ "Direct"; "NotSatisfy"; "SatisfyAny" ] do
+                            yield [| box nullable; box withOptions; box subject; box composition |]
+        }
+
+
+    [<Theory>]
+    [<MemberData(nameof cases)>]
+    let ``Rejects null target types before deserializing`` nullable withOptions (subject: string) composition =
+        assertInvalidArgumentRejected<ArgumentNullException>
+            "targetType"
+            composition
+            (fun () ->
+                let targetType = Unchecked.defaultof<Type>
+                let t = subject.Should()
+
+                match nullable, withOptions with
+                | false, false -> t.DeserializeTo(targetType) |> ignore
+                | false, true -> t.DeserializeTo(targetType, JsonSerializerOptions()) |> ignore
+                | true, false -> t.DeserializeToNullable(targetType) |> ignore
+                | true, true -> t.DeserializeToNullable(targetType, JsonSerializerOptions()) |> ignore
+            )
+
+
 [<AutoOpen>]
 module private Helpers =
 

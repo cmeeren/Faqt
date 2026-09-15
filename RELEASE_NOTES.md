@@ -22,6 +22,14 @@ Release notes
   satisfy a `Throw` assertion through the `NullReferenceException` caused by attempting to invoke it. Exceptions
   thrown by an actual function retain their existing behavior.
 
+* `Transform` and all `TryTransform` overloads now reject null callbacks with `ArgumentNullException`
+  (`ParamName = "f"`). The runtime-type overloads of `DeserializeTo` and `DeserializeToNullable` now reject a null
+  target type with `ArgumentNullException` (`ParamName = "targetType"`) before deserializing. These invalid arguments
+  no longer become assertion failures that can satisfy `NotSatisfy` or be skipped by `SatisfyAny`.
+
+* `BeInRange` now rejects an upper bound smaller than the lower bound with `ArgumentException`
+  (`ParamName = "upper"`). Existing NaN assertion failures take precedence over this validation.
+
 * `BeCloseTo` and `NotBeCloseTo` now reject negative tolerances for supported built-in numeric types and
   `TimeSpan` with `ArgumentException`. Existing NaN handling takes precedence over this validation. Custom tolerance
   types retain their existing operator-based behavior.

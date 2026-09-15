@@ -336,7 +336,8 @@ type ComparisonAssertions =
         And(t)
 
 
-    /// Asserts that the subject is in the specified inclusive range.
+    /// Asserts that the subject is in the specified inclusive range. Rejects an upper bound smaller than the lower
+    /// bound with ArgumentException. Existing NaN assertion failures take precedence over this validation.
     [<Extension>]
     static member inline BeInRange(t: Testable<'a>, lower: 'a, upper: 'a, ?because) : And<'a> =
         use _ = t.Assert()
@@ -345,6 +346,9 @@ type ComparisonAssertions =
             ComparisonAssertions.IsNaN(t.Subject)
             || ComparisonAssertions.IsNaN(lower)
             || ComparisonAssertions.IsNaN(upper)
+
+        if not hasNaN && lower > upper then
+            invalidArg (nameof upper) "The upper bound must be greater than or equal to the lower bound"
 
         if hasNaN || t.Subject < lower || t.Subject > upper then
             t.With("Lower", lower).With("Upper", upper).With("But was", t.Subject).Fail(because)

@@ -1189,6 +1189,36 @@ Subject value: asd
 """
 
 
+module TransformationArgumentValidation =
+
+
+    let cases =
+        seq {
+            for assertion in [ "Transform"; "Option"; "ValueOption"; "Result"; "Tuple" ] do
+                for composition in [ "Direct"; "NotSatisfy"; "SatisfyAny" ] do
+                    yield [| box assertion; box composition |]
+        }
+
+
+    [<Theory>]
+    [<MemberData(nameof cases)>]
+    let ``Rejects null callbacks as invalid input`` assertion composition =
+        assertInvalidArgumentRejected<ArgumentNullException>
+            "f"
+            composition
+            (fun () ->
+                let t = "a".Should()
+
+                match assertion with
+                | "Transform" -> t.Transform(Unchecked.defaultof<string -> int>) |> ignore
+                | "Option" -> t.TryTransform(Unchecked.defaultof<string -> int option>) |> ignore
+                | "ValueOption" -> t.TryTransform(Unchecked.defaultof<string -> int voption>) |> ignore
+                | "Result" -> t.TryTransform(Unchecked.defaultof<string -> Result<int, string>>) |> ignore
+                | "Tuple" -> t.TryTransform(Unchecked.defaultof<string -> bool * int>) |> ignore
+                | _ -> failwith "Unknown assertion"
+            )
+
+
 module Transform =
 
 

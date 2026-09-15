@@ -24,6 +24,24 @@ let assertThrows f =
     Assert.ThrowsAny<Exception>(f >> ignore)
 
 
+let assertInvalidArgumentRejected<'a when 'a :> ArgumentException> paramName composition (run: unit -> unit) =
+    let error =
+        match composition with
+        | "Direct" -> Assert.Throws<'a>(run)
+        | _ ->
+            let wrapped =
+                Assert.Throws<Exception>(fun () ->
+                    match composition with
+                    | "NotSatisfy" -> ().Should().NotSatisfy(run) |> ignore
+                    | "SatisfyAny" -> ().Should().SatisfyAny([ run; ignore ]) |> ignore
+                    | _ -> failwith "Unknown composition"
+                )
+
+            Assert.IsType<'a>(wrapped.GetBaseException())
+
+    Assert.Equal(paramName, error.ParamName)
+
+
 let assertExnMsg (msg: string) (f: unit -> 'a) =
     let ex = Assert.Throws<AssertionFailedException>(f >> ignore)
 

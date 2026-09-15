@@ -427,6 +427,9 @@ type StringAssertions =
         : AndDerived<string, obj> =
         use _ = t.Assert()
 
+        if isNull (box targetType) then
+            nullArg (nameof targetType)
+
         try
             match JsonSerializer.Deserialize(t.Subject, targetType, options) with
             | null ->
@@ -488,6 +491,9 @@ type StringAssertions =
         (t: Testable<string>, targetType: Type, options: JsonSerializerOptions | null, ?because)
         : AndDerived<string, obj | null> =
         use _ = t.Assert()
+
+        if isNull (box targetType) then
+            nullArg (nameof targetType)
 
         try
             AndDerived(t, JsonSerializer.Deserialize(t.Subject, targetType, options))

@@ -922,6 +922,32 @@ But was: 1
 module BeInRange =
 
 
+    [<Theory>]
+    [<InlineData("Direct")>]
+    [<InlineData("NotSatisfy")>]
+    [<InlineData("SatisfyAny")>]
+    let ``Rejects inverted bounds as invalid input`` composition =
+        for subject in [ Int32.MinValue; 1; Int32.MaxValue ] do
+            assertInvalidArgumentRejected<ArgumentException>
+                "upper"
+                composition
+                (fun () -> subject.Should().BeInRange(2, 0) |> ignore)
+
+
+    [<Fact>]
+    let ``Rejects inverted bounds for custom comparable types`` () =
+        assertInvalidArgumentRejected<ArgumentException>
+            "upper"
+            "Direct"
+            (fun () -> (Comparison 1).Should().BeInRange(Comparison 2, Comparison 0) |> ignore)
+
+
+    [<Fact>]
+    let ``NaN failure takes precedence over inverted bounds`` () =
+        assertFails (fun () -> Double.NaN.Should().BeInRange(1.0, 0.0)) |> ignore
+        assertFails (fun () -> Single.NaN.Should().BeInRange(1.0f, 0.0f)) |> ignore
+
+
     [<Fact>]
     let ``Can be called with any type that has comparison`` () =
         (Comparison 0).Should().BeInRange(Comparison 0, Comparison 0)

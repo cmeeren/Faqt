@@ -663,6 +663,11 @@ null, such as `BeNull`, `NotBeNull`, `BeOfType`, and `BeAssignableTo`, retain th
 `ArgumentNullException` before attempting invocation. A missing function is invalid input, not an exception thrown
 by the function being tested. Exceptions thrown by an actual function retain the assertion's documented behavior.
 
+`Transform` and all `TryTransform` overloads likewise reject null callbacks with `ArgumentNullException`
+(`ParamName = "f"`). The runtime-type overloads of `DeserializeTo` and `DeserializeToNullable` reject null target
+types with `ArgumentNullException` (`ParamName = "targetType"`) before deserializing. Higher-order assertions treat
+these invalid arguments as unexpected errors, so they cannot make `NotSatisfy` pass or be skipped by `SatisfyAny`.
+
 ### Why not FluentAssertions?
 
 FluentAssertions is a fantastic library, and very much the inspiration for Faqt. Unfortunately, its API design causes
