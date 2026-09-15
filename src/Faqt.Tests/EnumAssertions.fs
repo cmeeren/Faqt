@@ -1,5 +1,6 @@
 ﻿module EnumAssertions
 
+open System
 open System.Text.RegularExpressions
 open Faqt
 open Xunit
@@ -30,6 +31,18 @@ module HaveFlag =
     [<InlineData(RegexOptions.Compiled ||| RegexOptions.Multiline, RegexOptions.Multiline ||| RegexOptions.IgnoreCase)>]
     let ``Fails if not has flag`` (subject: RegexOptions) (expected: RegexOptions) =
         assertFails (fun () -> subject.Should().HaveFlag(expected))
+
+
+    [<Theory>]
+    [<InlineData(RegexOptions.None, false)>]
+    [<InlineData(RegexOptions.Compiled, false)>]
+    [<InlineData(RegexOptions.None, true)>]
+    [<InlineData(RegexOptions.Compiled, true)>]
+    let ``Passes for a zero flag regardless of subject`` (subject: RegexOptions) asEnum =
+        if asEnum then
+            (subject :> Enum).Should().HaveFlag(RegexOptions.None :> Enum) |> ignore
+        else
+            subject.Should().HaveFlag(RegexOptions.None) |> ignore
 
 
     [<Fact>]
@@ -87,6 +100,20 @@ module NotHaveFlag =
     [<InlineData(RegexOptions.Compiled ||| RegexOptions.Multiline, RegexOptions.Compiled ||| RegexOptions.Multiline)>]
     let ``Fails if has flag`` (subject: RegexOptions) (expected: RegexOptions) =
         assertFails (fun () -> subject.Should().NotHaveFlag(expected))
+
+
+    [<Theory>]
+    [<InlineData(RegexOptions.None, false)>]
+    [<InlineData(RegexOptions.Compiled, false)>]
+    [<InlineData(RegexOptions.None, true)>]
+    [<InlineData(RegexOptions.Compiled, true)>]
+    let ``Fails for a zero flag regardless of subject`` (subject: RegexOptions) asEnum =
+        assertFails (fun () ->
+            if asEnum then
+                (subject :> Enum).Should().NotHaveFlag(RegexOptions.None :> Enum) |> ignore
+            else
+                subject.Should().NotHaveFlag(RegexOptions.None) |> ignore
+        )
 
 
     [<Fact>]

@@ -56,6 +56,9 @@ Release notes
 
 * Fix wildcard matching when literal text collides with the previous internal placeholder strings.
 
+* Clarified zero enum flag semantics: `HaveFlag` passes and `NotHaveFlag` fails for a zero mask, consistently with
+  `Enum.HasFlag`. Use equality with the enum's zero value to assert that no flags are set.
+
 ### 5.1.0 (2025-09-18)
 
 * The `AssertionFailedException` message now begins with `Assertion failed.` on its own first line, with the structured
