@@ -219,11 +219,20 @@ type internal JsonElementSortedKeysConverter() =
         | JsonValueKind.Object ->
             writer.WriteStartObject()
 
-            for prop in element.EnumerateObject() |> Seq.sortBy (_.Name.ToUpperInvariant()) do
+            for prop in
+                element.EnumerateObject()
+                |> Seq.sortWith (fun a b -> StringComparer.Ordinal.Compare(a.Name, b.Name)) do
                 writer.WritePropertyName(prop.Name)
-                JsonSerializer.Serialize(writer, prop.Value, options)
+                serializeRecursively writer prop.Value options
 
             writer.WriteEndObject()
+        | JsonValueKind.Array ->
+            writer.WriteStartArray()
+
+            for item in element.EnumerateArray() do
+                serializeRecursively writer item options
+
+            writer.WriteEndArray()
         | _ -> JsonSerializer.Serialize(writer, element, options)
 
 

@@ -2234,6 +2234,16 @@ module BeJsonEquivalentTo =
         subject.Should().BeJsonEquivalentTo(expected)
 
 
+    [<Fact>]
+    let ``Passes if nested object keys are reordered`` () =
+        """{"a":{"x":1,"y":2}}""".Should().BeJsonEquivalentTo("""{"a":{"y":2,"x":1}}""")
+
+
+    [<Fact>]
+    let ``Passes if keys differing only by case are reordered`` () =
+        """{"a":1,"A":2}""".Should().BeJsonEquivalentTo("""{"A":2,"a":1}""")
+
+
     [<Theory>]
     [<InlineData("1", "2")>]
     [<InlineData("1.0", "1")>]
@@ -2303,14 +2313,14 @@ Should: BeJsonEquivalentTo
 Expected: |-
   {
       "A": 1,
-      "b": ["a", "b", "c", "d", "e", "f", "g", "i", "j", "k", "l", "m", "n", "o", "p"],
       "C": {"d": 123.456},
+      "b": ["a", "b", "c", "d", "e", "f", "g", "i", "j", "k", "l", "m", "n", "o", "p"],
       "e": "Some long string that causes output to use multiple lines"
   }
 But was: |-
   {
-      "a": 1,
       "B": ["a", "b", "c", "d", "e", "f", "g", "i", "j", "k", "l", "m", "n", "o", "p"],
+      "a": 1,
       "c": {"d": 123.456},
       "e": "Some long string that causes output to use multiple lines"
   }
@@ -2337,14 +2347,14 @@ Should: BeJsonEquivalentTo
 Expected: |-
   {
       "A": 1,
-      "b": ["a", "b", "c", "d", "e", "f", "g", "i", "j", "k", "l", "m", "n", "o", "p"],
       "C": {"d": 123.456},
+      "b": ["a", "b", "c", "d", "e", "f", "g", "i", "j", "k", "l", "m", "n", "o", "p"],
       "e": "Some long string that causes output to use multiple lines"
   }
 But was: |-
   {
-      "a": 1,
       "B": ["a", "b", "c", "d", "e", "f", "g", "i", "j", "k", "l", "m", "n", "o", "p"],
+      "a": 1,
       "c": {"d": 123.456},
       "e": "Some long string that causes output to use multiple lines"
   }
