@@ -349,7 +349,7 @@ open Faqt.Configuration
 // Create a configuration
 let myConfig =
     FaqtConfig.Default
-        // Set the maximum length of rendered HttpContent in assertion failure output
+        // Limit HTTP previews to this many input bytes and rendered characters
         .SetHttpContentMaxLength(1024 * 1024)
         // Disable formatting of HttpContent (such as indenting JSON for readability)
         .SetFormatHttpContent(false)
@@ -367,6 +367,12 @@ use _ = Config.With(myConfig)
 // Config.Current is available globally and can be used in your own converters/formatters.
 myFormatter Config.Current
 ```
+
+HTTP failure diagnostics capture at most `HttpContentMaxLength` bytes before decoding, and limit the formatted body to the same number of characters. Truncation and consumption notices are additional to this limit. A zero limit omits the body without reading it. Truncated input is shown without JSON formatting.
+
+The preview starts at the content stream's current position. Seekable streams have their position restored, including after read failures. Nonseekable streams are consumed to obtain a useful preview, with up to one extra byte read to detect truncation; later reads resume after those consumed bytes. Diagnostics indicate this consumption. Byte-array and string content are previewed from the beginning, subject to the limit, while preserving any existing stream position.
+
+Faqt obtains the stream using `HttpContent.ReadAsStream()`. Streamed HTTP responses can therefore be previewed without buffering their entire bodies. However, obtaining the stream can itself buffer generated content, including `JsonContent`, in full. The limit bounds Faqt's preview reads and rendered output; it is not a total memory limit or a guarantee against buffering inside `HttpContent`.
 
 ## Assertion list
 

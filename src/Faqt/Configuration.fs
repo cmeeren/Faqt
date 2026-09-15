@@ -20,11 +20,15 @@ type FaqtConfig = private {
     }
 
 
-    /// Gets the maximum length of rendered HttpContent in assertion failure output.
+    /// Gets the HTTP content preview limit: bytes captured before decoding and characters rendered after formatting.
+    /// Obtaining the stream may first buffer generated content in full; this is not a total memory limit.
     member this.HttpContentMaxLength = this.httpContentMaxLength
 
 
-    /// Sets the maximum length of rendered HttpContent in assertion failure output.
+    /// Sets the HTTP content preview limit: bytes captured before decoding and characters rendered after formatting.
+    /// Obtaining the stream may first buffer generated content in full; this is not a total memory limit.
+    /// Zero omits the body without reading it. Stream previews may read one additional byte to detect truncation.
+    /// Seekable stream positions are restored; nonseekable bodies may be consumed.
     member this.SetHttpContentMaxLength(length) = {
         this with
             httpContentMaxLength = length

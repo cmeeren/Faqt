@@ -46,7 +46,7 @@ Value: |-
   Content-Length: 26
 
   lorem ipsu…
-  [content truncated after 10 characters]
+  [content truncated after 10 bytes]
 """
 
     fun () ->
@@ -108,7 +108,7 @@ Value: |-
   Content-Length: 26
 
   lorem ipsu…
-  [content truncated after 10 characters]
+  [content truncated after 10 bytes]
 """
             }
 
@@ -186,7 +186,7 @@ let ``HTTP content has expected max length`` () =
 
     let expectedBody =
         String.replicate expectedMaxLength "a"
-        + $"…\n  [content truncated after {expectedMaxLength} characters]"
+        + $"…\n  [content truncated after {expectedMaxLength} bytes]"
 
     fun () ->
         let x = new HttpRequestMessage(HttpMethod.Get, "/")
@@ -225,7 +225,7 @@ Value: |-
   Content-Length: 26
 
   lorem ipsu…
-  [content truncated after 10 characters]
+  [content truncated after 10 bytes]
 """
 
 
@@ -294,4 +294,31 @@ Value: |-
   Accept-Encoding: gzip!
   Accept-Encoding: deflate!
   Other: test
+"""
+
+
+[<Fact>]
+let ``HTTP content headers can be changed`` () =
+    use _ =
+        Config.With(
+            FaqtConfig.Default.SetMapHttpHeaderValues(fun name value -> if name = "Content-Type" then "***" else value)
+        )
+
+    fun () ->
+        let x = new HttpRequestMessage(HttpMethod.Get, "/")
+        x.Version <- Version.Parse("0.5")
+        let content = new StringContent("body")
+        content.Headers.ContentType <- MediaTypeHeaderValue("application/example")
+        x.Content <- content
+        x.Should().FailWith("Value", x)
+    |> assertExnMsg
+        """
+Subject: x
+Should: FailWith
+Value: |-
+  GET / HTTP/0.5
+  Content-Type: ***
+  Content-Length: 4
+
+  body
 """

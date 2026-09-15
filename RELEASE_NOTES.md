@@ -3,6 +3,11 @@ Release notes
 
 ### Unreleased
 
+* **Breaking:** HTTP failure diagnostics now limit captured body bytes before decoding, as well as rendered characters, using
+  `HttpContentMaxLength`. Stream previews start at the current position, except byte-array and string content.
+  Seekable positions are restored; nonseekable bodies may be consumed, as indicated in the diagnostics.
+  Zero omits the body without reading it.
+
 * **Breaking:** `BeCloseTo` and `NotBeCloseTo` now reject negative tolerances for supported built-in numeric types and
   `TimeSpan` with `ArgumentException`. Existing NaN handling takes precedence over this validation. Custom tolerance
   types retain their existing operator-based behavior.
@@ -19,6 +24,10 @@ Release notes
 
 * Match response and content headers consistently, including exact values and quoted comma-separated members.
   `HaveHeader` returns all matching header values for further assertions.
+
+* Read bounded HTTP body previews, preserve content headers, and honor quoted charset parameters when decoding
+  diagnostics. Restore seekable stream positions even when reading fails. Obtaining a stream may still buffer
+  generated content, such as `JsonContent`, in full.
 
 * Normalize JSON object-key order recursively for equivalence checks while preserving case-sensitive key names.
 

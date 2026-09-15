@@ -49,6 +49,42 @@ type FailureData = {
 module internal HttpContent =
 
 
+    let private readPreview (c: HttpContent) maxLength (buffer: MemoryStream) =
+        // Obtaining a stream can itself buffer generated content, such as JsonContent.
+        let stream = c.ReadAsStream()
+        let canSeek = stream.CanSeek
+        let position = if canSeek then stream.Position else 0L
+
+        try
+            // ByteArrayContent owns the complete body; other content exposes the remaining stream.
+            if canSeek && c :? ByteArrayContent then
+                stream.Position <- 0L
+
+            let bytes = Array.zeroCreate<byte> (min maxLength 4096)
+            let mutable finished = false
+
+            while buffer.Length < int64 maxLength && not finished do
+                let count = stream.Read(bytes, 0, min bytes.Length (maxLength - int buffer.Length))
+
+                if count = 0 then
+                    finished <- true
+                else
+                    buffer.Write(bytes, 0, count)
+
+            let truncated = not finished && stream.ReadByte() <> -1
+
+            let note =
+                if canSeek then
+                    ""
+                else
+                    "\n[nonseekable stream consumed for preview; subsequent reads resume after the consumed bytes]"
+
+            truncated, note
+        finally
+            if canSeek then
+                stream.Position <- position
+
+
     let private tryFormatJson (str: string) =
         try
             let serializerOptions =
@@ -70,24 +106,84 @@ module internal HttpContent =
         |> Option.defaultValue str
 
 
-    let serializeAppend formatContent maxLength (sb: StringBuilder) (c: HttpContent) =
+    let private tryGetEncoding (c: HttpContent) =
+        c.Headers.ContentType
+        |> Option.ofObj
+        |> Option.bind (fun ct -> ct.CharSet |> Option.ofObj)
+        |> Option.filter (String.IsNullOrWhiteSpace >> not)
+        |> Option.bind (fun charset ->
+            try
+                Encoding.GetEncoding(charset.Trim('"')) |> Some
+            with _ ->
+                None
+        )
+
+
+    let serializeAppend
+        formatContent
+        maxLength
+        (mapHeaderValues: string -> string -> string)
+        (sb: StringBuilder)
+        (c: HttpContent)
+        =
+        let appendHeaders () =
+            let hasContentLengthHeader =
+                c.Headers |> Seq.exists (fun h -> h.Key = "Content-Length")
+
+            for h in c.Headers do
+                for v in h.Value do
+                    sb.AppendLine().Append(h.Key).Append(": ").Append(mapHeaderValues h.Key v)
+                    |> ignore
+
+            if not hasContentLengthHeader then
+                match c.Headers.ContentLength with
+                | contentLength when contentLength.HasValue ->
+                    sb.AppendLine().Append("Content-Length: ").Append(contentLength.Value: int64)
+                    |> ignore
+                | _ -> ()
+
+        let hasNonLengthHeader =
+            c.Headers |> Seq.exists (fun h -> h.Key <> "Content-Length")
+
         try
-            if c.Headers.ContentLength <> Nullable(0L) then
-                for h in c.Headers do
-                    for v in h.Value do
-                        sb.AppendLine().Append(h.Key).Append(": ").Append(v) |> ignore
+            match c.Headers.ContentLength with
+            | contentLength when contentLength.HasValue && contentLength.Value = 0L ->
+                if hasNonLengthHeader then
+                    appendHeaders ()
+            | _ when maxLength = 0 ->
+                appendHeaders ()
 
-                let s = c.ReadAsStream()
-                let a = Array.zeroCreate (int s.Length)
-                s.Seek(0, SeekOrigin.Begin) |> ignore
-                s.Read(Span(a)) |> ignore
+                sb.AppendLine().AppendLine().Append("[content omitted: preview limit is 0]")
+                |> ignore
+            | _ ->
+                let strContent, note =
+                    use buffer = new MemoryStream()
+                    let truncated, note = readPreview c maxLength buffer
+                    buffer.Position <- 0L
 
-                let strContent =
-                    Encoding.UTF8.GetString(a)
-                    |> if formatContent then tryFormat else id
-                    |> String.truncate $"…\n[content truncated after %i{maxLength} characters]" maxLength
+                    use reader =
+                        new StreamReader(
+                            buffer,
+                            tryGetEncoding c |> Option.defaultValue Encoding.UTF8,
+                            detectEncodingFromByteOrderMarks = true,
+                            leaveOpen = true
+                        )
 
-                sb.AppendLine().AppendLine().Append(strContent) |> ignore
+                    let strContent =
+                        reader.ReadToEnd()
+                        |> if formatContent && not truncated then tryFormat else id
+                        |> String.truncate $"…\n[content truncated after %i{maxLength} characters]" maxLength
+
+                    let strContent =
+                        if truncated then
+                            strContent + $"…\n[content truncated after %i{maxLength} bytes]"
+                        else
+                            strContent
+
+                    strContent, note
+
+                appendHeaders ()
+                sb.AppendLine().AppendLine().Append(strContent).Append(note) |> ignore
         with
         | :? ObjectDisposedException ->
             sb.AppendLine().AppendLine().Append("[content is disposed and cannot be read]")
@@ -127,7 +223,7 @@ module internal HttpRequestMessage =
 
         m.Content
         |> Option.ofObj
-        |> Option.iter (HttpContent.serializeAppend formatContent maxLength sb)
+        |> Option.iter (HttpContent.serializeAppend formatContent maxLength mapHeaderValues sb)
 
         sb.ToString()
 
@@ -154,7 +250,7 @@ module internal HttpResponseMessage =
 
         m.Content
         |> Option.ofObj
-        |> Option.iter (HttpContent.serializeAppend formatContent maxLength sb)
+        |> Option.iter (HttpContent.serializeAppend formatContent maxLength mapHeaderValues sb)
 
         sb.ToString()
 
@@ -220,10 +316,9 @@ type private TryFormatConverter(fallback: exn -> obj -> obj) =
     override this.Write(writer, TryFormat value, options) =
         try
             let t = if isNull value then typeof<obj> else value.GetType()
-            // Serialize once without the writer first to ensure it can be serialized, then use the writer. This
-            // is needed because if we use the writer and it fails, we cannot continue writing.
-            JsonSerializer.Serialize(value, t, options) |> ignore<string>
-            JsonSerializer.Serialize(writer, value, t, options)
+            // Serialize to a string first to ensure failures do not leave the caller's writer in a partial state.
+            use doc = JsonSerializer.Serialize(value, t, options) |> JsonDocument.Parse
+            doc.WriteTo(writer)
         with ex ->
             let fallback = fallback ex value
             let t = if isNull fallback then typeof<obj> else fallback.GetType()

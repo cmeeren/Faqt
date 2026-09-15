@@ -39,7 +39,7 @@ Value: |-
   Content-Length: 26
 
   lorem ipsu…
-  [content truncated after 10 characters]
+  [content truncated after 10 bytes]
 """
 
     do
@@ -60,7 +60,7 @@ Value: |-
   Content-Length: 26
 
   lorem ipsum dolor si…
-  [content truncated after 20 characters]
+  [content truncated after 20 bytes]
 """
 
     fun () ->
@@ -78,7 +78,7 @@ Value: |-
   Content-Length: 26
 
   lorem ipsu…
-  [content truncated after 10 characters]
+  [content truncated after 10 bytes]
 """
 
 

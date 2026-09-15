@@ -3,12 +3,16 @@
 open System
 open System.Collections.Generic
 open System.Globalization
+open System.IO
 open System.Net
 open System.Net.Http
 open System.Net.Http.Json
+open System.Net.Sockets
 open System.Runtime.CompilerServices
+open System.Text
 open System.Text.Json
 open System.Text.Json.Serialization
+open System.Threading
 open Faqt
 open Faqt.AssertionHelpers
 open Faqt.Configuration
@@ -27,6 +31,48 @@ type private Assertions =
         use _ = t.Assert()
 
         t.With("A", TestUnserializableType()).With("B", [ TryFormat(TestUnserializableType()) ]).Fail(None)
+
+
+type private OneByteNonSeekableStream(bytes: byte[]) =
+    inherit Stream()
+
+    let mutable position = 0
+
+    override _.CanRead = true
+    override _.CanSeek = false
+    override _.CanWrite = false
+
+    override _.Length = raise <| NotSupportedException()
+
+    override _.Position
+        with get () = int64 position
+        and set _ = raise <| NotSupportedException()
+
+    override _.Flush() = ()
+
+    override _.Read(buffer: byte[], offset, count) =
+        if position >= bytes.Length then
+            0
+        else
+            let actualCount = min 1 (min count (bytes.Length - position))
+            Array.Copy(bytes, position, buffer, offset, actualCount)
+            position <- position + actualCount
+            actualCount
+
+    override this.Read(buffer: Span<byte>) =
+        if position >= bytes.Length then
+            0
+        else
+            let actualCount = min 1 (min buffer.Length (bytes.Length - position))
+            bytes.AsSpan(position, actualCount).CopyTo(buffer)
+            position <- position + actualCount
+            actualCount
+
+    override _.Seek(_, _) = raise <| NotSupportedException()
+
+    override _.SetLength(_) = raise <| NotSupportedException()
+
+    override _.Write(_, _, _) = raise <| NotSupportedException()
 
 
 [<Fact>]
@@ -908,7 +954,7 @@ Value: |-
   Content-Length: 26
 
   lorem ipsu…
-  [content truncated after 10 characters]
+  [content truncated after 10 bytes]
 """
 
 
@@ -923,6 +969,26 @@ Value: |-
 Subject: x
 Should: FailWith
 Value: HTTP/0.5 404 Not Found
+"""
+
+
+    [<Fact>]
+    let ``Rendering of HttpResponseMessage with empty content includes content headers`` () =
+        fun () ->
+            let x = new HttpResponseMessage(HttpStatusCode.OK)
+            x.Version <- Version.Parse("0.5")
+            let content = new StringContent("")
+            content.Headers.ContentType <- System.Net.Http.Headers.MediaTypeHeaderValue("application/json")
+            x.Content <- content
+            x.Should().FailWith("Value", x)
+        |> assertExnMsg
+            """
+Subject: x
+Should: FailWith
+Value: |-
+  HTTP/0.5 200 OK
+  Content-Type: application/json
+  Content-Length: 0
 """
 
 
@@ -975,6 +1041,384 @@ Value: |-
 
 
     [<Fact>]
+    let ``Rendering of HttpResponseMessage with non-seekable non-UTF8 content`` () =
+        fun () ->
+            let x = new HttpResponseMessage(HttpStatusCode.OK)
+            x.Version <- Version.Parse("0.5")
+            let bytes = Encoding.Unicode.GetBytes("Hej å")
+            let content = new StreamContent(new OneByteNonSeekableStream(bytes))
+
+            content.Headers.ContentType <-
+                System.Net.Http.Headers.MediaTypeHeaderValue.Parse("text/plain; charset=utf-16")
+
+            x.Content <- content
+            x.Should().FailWith("Value", x)
+        |> assertExnMsg
+            """
+Subject: x
+Should: FailWith
+Value: |-
+  HTTP/0.5 200 OK
+  Content-Type: text/plain; charset=utf-16
+
+  Hej å
+  [nonseekable stream consumed for preview; subsequent reads resume after the consumed bytes]
+"""
+
+
+    [<Theory>]
+    [<InlineData(true)>]
+    [<InlineData(false)>]
+    let ``Repeated HTTP message rendering includes the complete body`` isRequest =
+        use request = new HttpRequestMessage(HttpMethod.Post, "/")
+        use response = new HttpResponseMessage(HttpStatusCode.BadRequest)
+
+        let message =
+            if isRequest then
+                request.Content <- new StringContent("complete body")
+                box request
+            else
+                response.Content <- new StringContent("complete body")
+                box response
+
+        let render () =
+            assertFails (fun () -> message.Should().FailWith("Value", message))
+
+        render () |> ignore
+
+        Assert.Contains("complete body", (render ()).Message)
+
+
+    [<Theory>]
+    [<InlineData(true, true, 0)>]
+    [<InlineData(true, false, 0)>]
+    [<InlineData(false, true, 0)>]
+    [<InlineData(false, false, 0)>]
+    [<InlineData(true, true, 8)>]
+    [<InlineData(true, false, 8)>]
+    [<InlineData(false, true, 8)>]
+    [<InlineData(false, false, 8)>]
+    let ``HTTP previews bound reads and preserve or report stream consumption`` isRequest canSeek limit =
+        use _ = Config.With(FaqtConfig.Default.SetHttpContentMaxLength(limit))
+        let mutable position = 3L
+        let mutable bytesRead = 0
+        let mutable disposed = false
+
+        use stream =
+            { new Stream() with
+                override _.CanRead = not disposed
+                override _.CanSeek = canSeek
+                override _.CanWrite = false
+
+                override _.Length =
+                    if canSeek then
+                        Int64.MaxValue
+                    else
+                        raise (NotSupportedException())
+
+                override _.Position
+                    with get () = position
+                    and set value =
+                        if not canSeek then
+                            raise (NotSupportedException())
+
+                        position <- value
+
+                override _.Read(buffer, offset, count) =
+                    if bytesRead + count > limit + 1 then
+                        failwith "Read exceeded preview budget"
+
+                    for i in 0 .. count - 1 do
+                        buffer[offset + i] <- byte (int 'a' + int ((position + int64 i) % 26L))
+
+                    bytesRead <- bytesRead + count
+                    position <- position + int64 count
+                    count
+
+                override _.Flush() = ()
+                override _.Seek(_, _) = raise (NotSupportedException())
+                override _.SetLength(_) = raise (NotSupportedException())
+                override _.Write(_, _, _) = raise (NotSupportedException())
+
+                override _.Dispose(disposing) =
+                    disposed <- true
+                    base.Dispose(disposing)
+            }
+
+        use content = new StreamContent(stream)
+        use request = new HttpRequestMessage(HttpMethod.Post, "/")
+        use response = new HttpResponseMessage(HttpStatusCode.BadRequest)
+        content.Headers.Add("X-Content-Header", "preserved")
+
+        let message =
+            if isRequest then
+                request.Content <- content
+                box request
+            else
+                response.Content <- content
+                box response
+
+        let rendered =
+            (assertFails (fun () -> message.Should().FailWith("Value", message))).Message
+
+        Assert.Contains("X-Content-Header: preserved", rendered)
+        Assert.DoesNotContain("An exception", rendered)
+        Assert.False(disposed)
+
+        if limit = 0 then
+            Assert.Equal(0, bytesRead)
+            Assert.Equal(3L, position)
+            Assert.Contains("content omitted", rendered)
+        else
+            Assert.Contains("defghijk", rendered)
+            Assert.Contains("truncated after 8 bytes", rendered)
+            Assert.Equal(9, bytesRead)
+
+            if canSeek then
+                Assert.Equal(3L, position)
+            else
+                Assert.Equal(12L, position)
+                Assert.Contains("nonseekable stream consumed", rendered)
+                Assert.DoesNotContain("Content-Length:", rendered)
+
+
+    [<Theory>]
+    [<InlineData(0)>]
+    [<InlineData(7)>]
+    [<InlineData(8)>]
+    [<InlineData(9)>]
+    let ``HTTP previews distinguish complete bodies from truncated prefixes`` length =
+        use _ = Config.With(FaqtConfig.Default.SetHttpContentMaxLength(8))
+        use response = new HttpResponseMessage(HttpStatusCode.BadRequest)
+        response.Content <- new StringContent(String('a', length))
+        let rendered = (assertFails (fun () -> response.Should().Be200Ok())).Message
+
+        if length > 8 then
+            Assert.Contains("truncated after 8 bytes", rendered)
+        else
+            Assert.DoesNotContain("truncated", rendered)
+
+
+    [<Fact>]
+    let ``HTTP preview restores a seekable stream position after a read error`` () =
+        use _ = Config.With(FaqtConfig.Default.SetHttpContentMaxLength(8))
+
+        use stream =
+            { new MemoryStream(Encoding.UTF8.GetBytes("prefixBODY")) with
+                override this.Read(buffer, offset, count) =
+                    if this.Position > 6L then
+                        failwith "read failure"
+
+                    base.Read(buffer, offset, min 1 count)
+            }
+
+        stream.Position <- 6L
+        use response = new HttpResponseMessage(HttpStatusCode.BadRequest)
+        response.Content <- new StreamContent(stream)
+        let rendered = (assertFails (fun () -> response.Should().Be200Ok())).Message
+        Assert.Contains("read failure", rendered)
+        Assert.Equal(6L, stream.Position)
+
+
+    [<Theory>]
+    [<InlineData(false, false)>]
+    [<InlineData(false, true)>]
+    [<InlineData(true, false)>]
+    [<InlineData(true, true)>]
+    let ``HTTP client response previews leave remaining content readable`` buffered obtainFirst =
+        task {
+            use timeout = new CancellationTokenSource(TimeSpan.FromSeconds(10.0))
+            let ct = timeout.Token
+            use listener = new TcpListener(IPAddress.Loopback, 0)
+            listener.Start()
+            let port = (listener.LocalEndpoint :?> IPEndPoint).Port
+            let body = "abcdefghijklmnopqrstuvwxyz"
+
+            let serve =
+                task {
+                    use! connection = listener.AcceptTcpClientAsync(ct)
+                    use stream = connection.GetStream()
+                    use reader = new StreamReader(stream, leaveOpen = true)
+                    let mutable finished = false
+
+                    while not finished do
+                        let! line = reader.ReadLineAsync(ct)
+                        finished <- String.IsNullOrEmpty(line)
+
+                    let bytes =
+                        Encoding.ASCII.GetBytes(
+                            "HTTP/1.1 400 Bad Request\r\nContent-Length: 26\r\nConnection: close\r\n\r\n"
+                            + body
+                        )
+
+                    do! stream.WriteAsync(bytes.AsMemory(), ct)
+                }
+
+            use handler = new HttpClientHandler(UseProxy = false)
+            use client = new HttpClient(handler)
+
+            let completion =
+                if buffered then
+                    HttpCompletionOption.ResponseContentRead
+                else
+                    HttpCompletionOption.ResponseHeadersRead
+
+            use! response = client.GetAsync($"http://127.0.0.1:%i{port}/", completion, ct)
+            do! serve
+
+            // Keep thread-local configuration and assertion scope entirely after the asynchronous setup.
+            use _ = Config.With(FaqtConfig.Default.SetHttpContentMaxLength(8))
+            let initialPosition = if obtainFirst then 1 else 0
+
+            if obtainFirst then
+                Assert.Equal(int 'a', response.Content.ReadAsStream().ReadByte())
+
+            let rendered = (assertFails (fun () -> response.Should().Be200Ok())).Message
+            Assert.Contains(body.Substring(initialPosition, 8), rendered)
+            Assert.Contains("truncated after 8 bytes", rendered)
+            Assert.DoesNotContain("An exception", rendered)
+            Assert.Equal(not buffered, rendered.Contains("nonseekable stream consumed"))
+
+            let stream = response.Content.ReadAsStream()
+            let nextPosition = if buffered then initialPosition else initialPosition + 9
+            Assert.Equal(int body[nextPosition], stream.ReadByte())
+
+            let repeated = (assertFails (fun () -> response.Should().Be200Ok())).Message
+            Assert.Contains(body.Substring(nextPosition + 1, 8), repeated)
+            Assert.DoesNotContain("An exception", repeated)
+        }
+
+
+    [<Fact>]
+    let ``Truncated HTTP input is not formatted as a complete JSON document`` () =
+        use _ = Config.With(FaqtConfig.Default.SetHttpContentMaxLength(2))
+        use response = new HttpResponseMessage(HttpStatusCode.BadRequest)
+        response.Content <- new StringContent("{} trailing data")
+        let rendered = (assertFails (fun () -> response.Should().Be200Ok())).Message
+        Assert.Contains("{}", rendered)
+        Assert.Contains("truncated after 2 bytes", rendered)
+        Assert.DoesNotContain("content has been formatted", rendered)
+
+    [<Theory>]
+    [<InlineData(true, "utf-16")>]
+    [<InlineData(false, "utf-16")>]
+    [<InlineData(true, "iso-8859-1")>]
+    [<InlineData(false, "iso-8859-1")>]
+    let ``HTTP rendering honors quoted charset parameters`` isRequest (charset: string) =
+        use request = new HttpRequestMessage(HttpMethod.Post, "/")
+        use response = new HttpResponseMessage(HttpStatusCode.BadRequest)
+        use content = new ByteArrayContent(Encoding.GetEncoding(charset).GetBytes("Hej å"))
+
+        content.Headers.ContentType <-
+            System.Net.Http.Headers.MediaTypeHeaderValue.Parse($"text/plain; charset=\"%s{charset}\"")
+
+        let message =
+            if isRequest then
+                request.Content <- content
+                box request
+            else
+                response.Content <- content
+                box response
+
+        let rendered =
+            (assertFails (fun () -> message.Should().FailWith("Value", message))).Message
+
+        Assert.Contains("Hej å", rendered)
+
+
+    [<Theory>]
+    [<InlineData(1)>]
+    [<InlineData(5)>]
+    let ``Rendering partially or fully read seekable HTTP content previews the remaining body`` bytesRead =
+        use response = new HttpResponseMessage(HttpStatusCode.BadRequest)
+        response.Content <- new StreamContent(new MemoryStream(Encoding.UTF8.GetBytes("hello")))
+        let stream = response.Content.ReadAsStream()
+
+        for _ in 1..bytesRead do
+            stream.ReadByte() |> ignore
+
+        let failure = assertFails (fun () -> response.Should().Be200Ok())
+
+        Assert.DoesNotContain("hello", failure.Message)
+        Assert.Contains("hello".Substring(bytesRead), failure.Message)
+        Assert.Equal(int64 bytesRead, stream.Position)
+
+
+    [<Fact>]
+    let ``Nested HTTP assertion failures include the complete body`` () =
+        use response = new HttpResponseMessage(HttpStatusCode.BadRequest)
+        response.Content <- new StringContent("complete body")
+
+        let failure =
+            assertFails (fun () -> response.Should().Satisfy(fun r -> r.Should().Be200Ok()))
+
+        Assert.Equal(2, failure.Message.Split("complete body").Length - 1)
+
+
+    [<Theory>]
+    [<InlineData(0, false)>]
+    [<InlineData(1, false)>]
+    [<InlineData(4, false)>]
+    [<InlineData(0, true)>]
+    [<InlineData(1, true)>]
+    [<InlineData(4, true)>]
+    let ``Rendering StreamContent preserves its current position across repeated previews`` bytesRead renderFirst =
+        use stream = new MemoryStream(Encoding.UTF8.GetBytes("prefixBODY"))
+        stream.Position <- 6L
+        use response = new HttpResponseMessage(HttpStatusCode.BadRequest)
+        response.Version <- Version.Parse("0.5")
+        response.Content <- new StreamContent(stream)
+        let contentStream = response.Content.ReadAsStream()
+
+        for _ in 1..bytesRead do
+            contentStream.ReadByte() |> ignore
+
+        if renderFirst then
+            assertFails (fun () -> response.Should().Be200Ok()) |> ignore
+
+        let rendered = (assertFails (fun () -> response.Should().Be200Ok())).Message
+        Assert.Contains("Content-Length: 4", rendered)
+        Assert.Contains("BODY".Substring(bytesRead), rendered)
+        Assert.DoesNotContain("prefix", rendered)
+
+        if bytesRead > 0 then
+            Assert.DoesNotContain("BODY", rendered)
+
+        Assert.Equal(6L + int64 bytesRead, stream.Position)
+
+
+    [<Theory>]
+    [<InlineData(-1L)>]
+    [<InlineData(1L)>]
+    [<InlineData(10L)>]
+    let ``Rendering StreamContent does not infer its offset from an overridden Content-Length`` headerLength =
+        use stream = new MemoryStream(Encoding.UTF8.GetBytes("prefixBODY"))
+        stream.Position <- 6L
+        use response = new HttpResponseMessage(HttpStatusCode.BadRequest)
+        response.Version <- Version.Parse("0.5")
+        response.Content <- new StreamContent(stream)
+
+        response.Content.Headers.ContentLength <-
+            if headerLength < 0L then
+                Nullable()
+            else
+                Nullable(headerLength)
+
+        response.Content.ReadAsStream().ReadByte() |> ignore
+        let rendered = (assertFails (fun () -> response.Should().Be200Ok())).Message
+
+        if headerLength < 0L then
+            Assert.DoesNotContain("Content-Length:", rendered)
+        else
+            Assert.Contains($"Content-Length: %i{headerLength}", rendered)
+
+        Assert.Contains("ODY", rendered)
+        Assert.DoesNotContain("BODY", rendered)
+        Assert.DoesNotContain("prefix", rendered)
+        Assert.Equal(7L, stream.Position)
+
+
+    [<Fact>]
     let ``Rendering of HttpResponseMessage with headers and content when disposed`` () =
         fun () ->
             let x = new HttpResponseMessage(HttpStatusCode.NotFound)
@@ -1018,7 +1462,7 @@ Value: |-
   Content-Length: 26
 
   lorem ipsu…
-  [content truncated after 10 characters]
+  [content truncated after 10 bytes]
 """
 
 
