@@ -1,8 +1,21 @@
 ﻿module DictionaryAssertions
 
+open System
 open System.Collections.Generic
 open Faqt
 open Xunit
+
+
+type RefRecord = { Id: int }
+
+
+let singlePass (items: seq<'a>) : seq<'a> =
+    let queue = Queue<'a>(items)
+
+    seq {
+        while queue.Count > 0 do
+            yield queue.Dequeue()
+    }
 
 
 module AllSatisfy =
@@ -119,6 +132,21 @@ module SatisfyRespectively =
     [<Fact>]
     let ``Passes if subject and assertions are empty`` () =
         Map.empty<string, int>.Should().SatisfyRespectively([])
+
+
+    [<Fact>]
+    let ``Fails for single-pass assertions when an inner assertion fails`` () =
+        assertFails (fun () ->
+            (dict [ "a", 1; "b", 2 ])
+                .Should()
+                .SatisfyRespectively(
+                    singlePass [
+                        fun (x: KeyValuePair<string, int>) -> x.Value.Should().Be(99)
+                        fun (x: KeyValuePair<string, int>) -> x.Value.Should().Be(98)
+                    ]
+                )
+            |> ignore
+        )
 
 
     [<Fact>]
@@ -369,6 +397,49 @@ module ``Contain key and value`` =
             .Be(KeyValuePair("a", 1))
 
 
+    [<Fact>]
+    let ``Returns the supplied key and stored value as the derived value`` () =
+        let actualKey = { Id = 1 }
+        let actualValue = { Id = 2 }
+        let expectedKey = { Id = 1 }
+        let expectedValue = { Id = 2 }
+
+        let derived =
+            (dict [ actualKey, actualValue ]).Should().Contain(expectedKey, expectedValue).That
+
+        Object.ReferenceEquals(expectedKey, derived.Key).Should().BeTrue() |> ignore
+        Object.ReferenceEquals(actualValue, derived.Value).Should().BeTrue() |> ignore
+
+
+    [<Fact>]
+    let ``Uses the dictionary key comparer`` () =
+        let subject = Dictionary<string, int>(StringComparer.OrdinalIgnoreCase)
+        subject.Add("actual", 1)
+
+        subject.Should().Contain("ACTUAL", 1)
+
+
+    [<Fact>]
+    let ``Uses the dictionary value equality`` () =
+        let subject = Dictionary<string, int[]>()
+        subject.Add("key", [| 1 |])
+
+        assertFails (fun () -> subject.Should().Contain("key", [| 1 |]))
+
+
+    [<Fact>]
+    let ``Supports keys and values without FSharp equality`` () =
+        let key x = x + 1
+        let value x = x + 2
+
+        let subject =
+            Dictionary<int -> int, int -> int>(EqualityComparer<int -> int>.Default)
+
+        subject.Add(key, value)
+
+        subject.Should().Contain(key, value)
+
+
     let passData = [
         [| box (dict [ "a", "1" ]); "a"; "1" |]
         [| dict [ "a", "1"; "b", "2" ]; "b"; "2" |]
@@ -567,6 +638,50 @@ module HaveSameItemsAs =
 
 
     [<Fact>]
+    let ``Different comparer equivalence classes cannot hide a count mismatch`` () =
+        let subject = Dictionary<string, int>(System.StringComparer.Ordinal)
+        subject.Add("a", 1)
+        subject.Add("A", 1)
+        let expected = Dictionary<string, int>(System.StringComparer.OrdinalIgnoreCase)
+        expected.Add("a", 1)
+
+        let ex = assertFails (fun () -> subject.Should().HaveSameItemsAs(expected))
+        Assert.Contains("Expected count: 1", ex.Message)
+        Assert.Contains("Actual count: 2", ex.Message)
+        assertFails (fun () -> expected.Should().HaveSameItemsAs(subject)) |> ignore
+
+
+    [<Fact>]
+    let ``Equal counts preserve dictionary comparer matching`` () =
+        let subject = Dictionary<string, int>(System.StringComparer.OrdinalIgnoreCase)
+        subject.Add("a", 1)
+        let expected = Dictionary<string, int>(System.StringComparer.OrdinalIgnoreCase)
+        expected.Add("A", 1)
+
+        subject.Should().HaveSameItemsAs(expected) |> ignore
+        expected.Should().HaveSameItemsAs(subject) |> ignore
+
+
+    [<Fact>]
+    let ``Reports all value mismatches for structurally equal distinct keys`` () =
+        let first = [| 1 |]
+        let second = [| 1 |]
+        let subject = Dictionary<int[], int>()
+        subject.Add(first, 1)
+        subject.Add(second, 2)
+        let expected = Dictionary<int[], int>()
+        expected.Add(first, 10)
+        expected.Add(second, 20)
+
+        let ex = assertFails (fun () -> subject.Should().HaveSameItemsAs(expected))
+        Assert.Contains("Expected: 10", ex.Message)
+        Assert.Contains("Expected: 20", ex.Message)
+
+        subject.Should().NotSatisfy(fun value -> value.Should().HaveSameItemsAs(expected))
+        |> ignore
+
+
+    [<Fact>]
     let ``Can be chained with And`` () =
         Map.empty<string, int>
             .Should()
@@ -637,12 +752,12 @@ Should: HaveSameItemsAs
 Missing keys: [e]
 Additional keys: [d]
 Different values:
-  a:
-    Expected: 2
-    Actual: 1
-  b:
-    Expected: 1
-    Actual: 2
+- Key: a
+  Expected: 2
+  Actual: 1
+- Key: b
+  Expected: 1
+  Actual: 2
 Expected:
   a: 2
   b: 1
@@ -670,12 +785,12 @@ Should: HaveSameItemsAs
 Missing keys: [e]
 Additional keys: [d]
 Different values:
-  a:
-    Expected: 2
-    Actual: 1
-  b:
-    Expected: 1
-    Actual: 2
+- Key: a
+  Expected: 2
+  Actual: 1
+- Key: b
+  Expected: 1
+  Actual: 2
 Expected:
   a: 2
   b: 1
@@ -1094,6 +1209,33 @@ module ContainKey =
             .Id<AndDerived<Map<string, int>, KeyValuePair<string, int>>>()
             .Whose.Value.Should(())
             .Be(1)
+
+
+    [<Fact>]
+    let ``Returns the supplied key as the derived key`` () =
+        let actualKey = { Id = 1 }
+        let expectedKey = { Id = 1 }
+
+        let derived = (dict [ actualKey, "value" ]).Should().ContainKey(expectedKey).That
+
+        Object.ReferenceEquals(expectedKey, derived.Key).Should().BeTrue() |> ignore
+
+
+    [<Fact>]
+    let ``Uses the dictionary key comparer`` () =
+        let subject = Dictionary<string, int>(StringComparer.OrdinalIgnoreCase)
+        subject.Add("actual", 1)
+
+        subject.Should().ContainKey("ACTUAL")
+
+
+    [<Fact>]
+    let ``Supports keys without FSharp equality`` () =
+        let key x = x + 1
+        let subject = Dictionary<int -> int, int>(EqualityComparer<int -> int>.Default)
+        subject.Add(key, 1)
+
+        subject.Should().ContainKey(key)
 
 
     let passData = [

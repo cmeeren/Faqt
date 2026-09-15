@@ -13,10 +13,9 @@ type SetAssertions =
     static member Contain(t: Testable<Set<'a>>, item: 'a, ?because) : AndDerived<_, 'a> =
         use _ = t.Assert()
 
-        if not (Set.contains item t.Subject) then
-            t.With("Item", item).With("But was", t.Subject).Fail(because)
-
-        AndDerived(t, item)
+        match t.Subject |> Seq.tryFind (fun actualItem -> compare actualItem item = 0) with
+        | Some actualItem -> AndDerived(t, actualItem)
+        | None -> t.With("Item", item).With("But was", t.Subject).Fail(because)
 
 
     /// Asserts that the subject does not contain the specified item.

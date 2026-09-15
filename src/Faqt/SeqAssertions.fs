@@ -30,6 +30,20 @@ module private SeqAssertionsHelpers =
     }
 
 
+    [<Struct>]
+    type ZeroOneMany<'a> =
+        | Zero
+        | One of item: 'a
+        | Many of count: int
+
+
+    [<Struct>]
+    type ZeroOneManyMatches<'a> =
+        | ZeroMatches
+        | OneMatch of item: 'a
+        | ManyMatches of count: int * matchingItems: 'a list
+
+
     let getMissingFromSupersetAndIsProperSuperset superset subset =
         let freqMap = Dictionary()
 
@@ -56,6 +70,7 @@ module private SeqAssertionsHelpers =
             newCount
 
         superset |> Seq.iter (increment >> ignore)
+        let subset = Seq.toArray subset
         subset |> Seq.iter (decrement >> ignore)
 
         let containedItemNotInSubset = freqMap |> Seq.exists (fun kvp -> kvp.Value > 0)
@@ -67,6 +82,88 @@ module private SeqAssertionsHelpers =
                 extraItemsInSubset.Add item
 
         extraItemsInSubset, containedItemNotInSubset
+
+
+    let tryGetFirstItem (source: seq<'a>) =
+        use enumerator = source.GetEnumerator()
+
+        if enumerator.MoveNext() then
+            ValueSome enumerator.Current
+        else
+            ValueNone
+
+
+    let tryGetFirstMatchingItem predicate (source: seq<'a>) =
+        use enumerator = source.GetEnumerator()
+
+        let mutable matchingItem = ValueNone
+
+        while ValueOption.isNone matchingItem && enumerator.MoveNext() do
+            let item = enumerator.Current
+
+            if predicate item then
+                matchingItem <- ValueSome item
+
+        matchingItem
+
+
+    let getZeroOneManyItems (source: seq<'a>) =
+        use enumerator = source.GetEnumerator()
+
+        if not (enumerator.MoveNext()) then
+            Zero
+        else
+            let firstItem = enumerator.Current
+
+            if not (enumerator.MoveNext()) then
+                One firstItem
+            else
+                let mutable count = 2
+
+                while enumerator.MoveNext() do
+                    count <- count + 1
+
+                Many count
+
+
+    let getZeroOneManyMatchingItems predicate (source: seq<'a>) =
+        use enumerator = source.GetEnumerator()
+
+        let mutable firstMatchingItem = Unchecked.defaultof<'a>
+        let mutable count = 0
+        let mutable matchingItems = Unchecked.defaultof<ResizeArray<'a>>
+
+        while enumerator.MoveNext() do
+            let item = enumerator.Current
+
+            if predicate item then
+                count <- count + 1
+
+                match count with
+                | 1 -> firstMatchingItem <- item
+                | 2 ->
+                    let items = ResizeArray()
+                    items.Add(firstMatchingItem)
+                    items.Add(item)
+                    matchingItems <- items
+                | _ -> matchingItems.Add(item)
+
+        match count with
+        | 0 -> ZeroMatches
+        | 1 -> OneMatch firstMatchingItem
+        | _ -> ManyMatches(count, List.ofSeq matchingItems)
+
+
+    let countRemainingItems processedCount hasCurrent (enumerator: IEnumerator<'a>) =
+        let mutable count = processedCount
+
+        if hasCurrent then
+            count <- count + 1
+
+            while enumerator.MoveNext() do
+                count <- count + 1
+
+        count
 
 
 [<Extension>]
@@ -104,31 +201,57 @@ type SeqAssertions =
     static member SatisfyRespectively(t: Testable<#seq<'a>>, assertions: seq<'a -> 'ignored>, ?because) : And<_> =
         use _ = t.Assert(true)
 
-        let subjectLength = Seq.stringOptimizedLength t.Subject
-        let assertionsLength = Seq.length assertions
+        use subjectEnumerator = t.Subject.GetEnumerator()
+        use assertionsEnumerator = assertions.GetEnumerator()
 
-        if subjectLength <> assertionsLength then
+        let mutable index = 0
+        let mutable subjectHasNext = subjectEnumerator.MoveNext()
+        let mutable assertionsHasNext = assertionsEnumerator.MoveNext()
+        let mutable failures = Unchecked.defaultof<ResizeArray<obj>>
+
+        let addFailure failure =
+            if isNull failures then
+                failures <- ResizeArray()
+
+            failures.Add failure
+
+        while subjectHasNext && assertionsHasNext do
+            try
+                assertionsEnumerator.Current subjectEnumerator.Current |> ignore
+            with
+            | :? AssertionFailedException as ex ->
+                {
+                    Index = index
+                    Failure = ex.FailureData
+                }
+                |> box
+                |> addFailure
+            | ex ->
+                {
+                    Index = index
+                    Exception = TryFormat ex
+                }
+                |> box
+                |> addFailure
+
+            index <- index + 1
+            subjectHasNext <- subjectEnumerator.MoveNext()
+            assertionsHasNext <- assertionsEnumerator.MoveNext()
+
+        if subjectHasNext <> assertionsHasNext then
+            let subjectLength = countRemainingItems index subjectHasNext subjectEnumerator
+
+            let assertionsLength =
+                countRemainingItems index assertionsHasNext assertionsEnumerator
+
             t
                 .With("Expected length", assertionsLength)
                 .With("Actual length", subjectLength)
                 .With("Subject value", t.Subject)
                 .Fail(because)
 
-        let failures =
-            Seq.zip t.Subject assertions
-            |> Seq.indexed
-            |> Seq.choose (fun (i, (x, assertion)) ->
-                try
-                    assertion x |> ignore
-                    None
-                with
-                | :? AssertionFailedException as ex -> { Index = i; Failure = ex.FailureData } |> box |> Some
-                | ex -> { Index = i; Exception = TryFormat ex } |> box |> Some
-            )
-            |> Seq.toArray
-
-        if failures.Length > 0 then
-            t.With("Failures", failures).With("Subject value", t.Subject).Fail(because)
+        if not (isNull failures) then
+            t.With("Failures", failures.ToArray()).With("Subject value", t.Subject).Fail(because)
 
         And(t)
 
@@ -190,10 +313,9 @@ type SeqAssertions =
     static member Contain(t: Testable<#seq<'a>>, item: 'a, ?because) : AndDerived<_, 'a> =
         use _ = t.Assert()
 
-        if not (Seq.contains item t.Subject) then
-            t.With("Item", item).With("But was", t.Subject).Fail(because)
-
-        AndDerived(t, item)
+        match tryGetFirstMatchingItem ((=) item) t.Subject with
+        | ValueSome actualItem -> AndDerived(t, actualItem)
+        | ValueNone -> t.With("Item", item).With("But was", t.Subject).Fail(because)
 
 
     /// Asserts that the subject does not contain the specified item.
@@ -264,15 +386,24 @@ type SeqAssertions =
     static member AllBeEqual(t: Testable<#seq<'a>>, ?because) : And<_> =
         use _ = t.Assert()
 
-        if not (Seq.stringOptimizedIsEmpty t.Subject) then
-            let first = Seq.head t.Subject
+        use enumerator = t.Subject.GetEnumerator()
 
-            for i, item in Seq.indexed t.Subject do
+        if enumerator.MoveNext() then
+            let first = enumerator.Current
+            let mutable index = 1
+            let mutable hasNext = enumerator.MoveNext()
+
+            while hasNext do
+                let item = enumerator.Current
+
                 if item <> first then
                     t
-                        .With("But found", [ {| Index = 0; Value = first |}; {| Index = i; Value = item |} ])
+                        .With("But found", [ {| Index = 0; Value = first |}; {| Index = index; Value = item |} ])
                         .With("Subject value", t.Subject)
                         .Fail(because)
+
+                index <- index + 1
+                hasNext <- enumerator.MoveNext()
 
         And(t)
 
@@ -282,11 +413,16 @@ type SeqAssertions =
     static member AllBeEqualBy(t: Testable<#seq<'a>>, projection: 'a -> 'b, ?because) : And<_> =
         use _ = t.Assert()
 
-        if not (Seq.stringOptimizedIsEmpty t.Subject) then
-            let first = Seq.head t.Subject
-            let firstProjected = projection first
+        use enumerator = t.Subject.GetEnumerator()
 
-            for i, item in Seq.indexed t.Subject do
+        if enumerator.MoveNext() then
+            let first = enumerator.Current
+            let firstProjected = projection first
+            let mutable index = 1
+            let mutable hasNext = enumerator.MoveNext()
+
+            while hasNext do
+                let item = enumerator.Current
                 let projected = projection item
 
                 if projected <> firstProjected then
@@ -300,7 +436,7 @@ type SeqAssertions =
                                     Value = first
                                 |}
                                 {|
-                                    Index = i
+                                    Index = index
                                     Projected = projected
                                     Value = item
                                 |}
@@ -308,6 +444,9 @@ type SeqAssertions =
                         )
                         .With("Subject value", t.Subject)
                         .Fail(because)
+
+                index <- index + 1
+                hasNext <- enumerator.MoveNext()
 
         And(t)
 
@@ -317,33 +456,48 @@ type SeqAssertions =
     static member SequenceEqual(t: Testable<#seq<'a>>, expected: seq<'a>, ?because) : And<_> =
         use _ = t.Assert()
 
-        let subjectLength = Seq.stringOptimizedLength t.Subject
-        let expectedLength = Seq.stringOptimizedLength expected
+        use subjectEnumerator = t.Subject.GetEnumerator()
+        use expectedEnumerator = expected.GetEnumerator()
 
-        if subjectLength <> expectedLength then
+        let mutable index = 0
+        let mutable subjectHasNext = subjectEnumerator.MoveNext()
+        let mutable expectedHasNext = expectedEnumerator.MoveNext()
+
+        let mutable failures =
+            Unchecked.defaultof<ResizeArray<ExpectedActualReportItem<TryFormat>>>
+
+        while subjectHasNext && expectedHasNext do
+            let actualItem = subjectEnumerator.Current
+            let expectedItem = expectedEnumerator.Current
+
+            if actualItem <> expectedItem then
+                if isNull failures then
+                    failures <- ResizeArray()
+
+                failures.Add(
+                    {
+                        Index = index
+                        Expected = TryFormat expectedItem
+                        Actual = TryFormat actualItem
+                    }
+                )
+
+            index <- index + 1
+            subjectHasNext <- subjectEnumerator.MoveNext()
+            expectedHasNext <- expectedEnumerator.MoveNext()
+
+        if subjectHasNext <> expectedHasNext then
+            let subjectLength = countRemainingItems index subjectHasNext subjectEnumerator
+            let expectedLength = countRemainingItems index expectedHasNext expectedEnumerator
+
             t
                 .With("Expected length", expectedLength)
                 .With("Actual length", subjectLength)
                 .With("Expected", expected)
                 .With("Actual", t.Subject)
                 .Fail(because)
-        else
-            let differentItems =
-                Seq.zip t.Subject expected
-                |> Seq.indexed
-                |> Seq.choose (fun (i, (actualItem, expectedItem)) ->
-                    if actualItem <> expectedItem then
-                        Some {
-                            Index = i
-                            Expected = TryFormat expectedItem
-                            Actual = TryFormat actualItem
-                        }
-                    else
-                        None
-                )
-
-            if not (Seq.isEmpty differentItems) then
-                t.With("Failures", differentItems).With("Expected", expected).With("Actual", t.Subject).Fail(because)
+        elif not (isNull failures) then
+            t.With("Failures", failures).With("Expected", expected).With("Actual", t.Subject).Fail(because)
 
         And(t)
 
@@ -353,11 +507,12 @@ type SeqAssertions =
     static member HaveSameItemsAs(t: Testable<#seq<'a>>, expected: seq<'a>, ?because) : And<_> =
         use _ = t.Assert()
 
+        let subjectItems = Seq.toArray t.Subject
         let freqMap = Dictionary()
         let additionalSubjectItems = ResizeArray<_>()
         let missingSubjectItems = ResizeArray<_>()
 
-        for x in t.Subject do
+        for x in subjectItems do
             let key = Key x
 
             match freqMap.TryGetValue(key) with
@@ -372,7 +527,7 @@ type SeqAssertions =
             | true, count -> freqMap[key] <- count - 1
             | false, _ -> missingSubjectItems.Add(x)
 
-        for x in t.Subject do
+        for x in subjectItems do
             let key = Key x
 
             match freqMap.TryGetValue(key) with
@@ -389,7 +544,7 @@ type SeqAssertions =
                 .With("Missing items", missingSubjectItems)
                 .With("Additional items", additionalSubjectItems)
                 .With("Expected", expected)
-                .With("Actual", t.Subject)
+                .With("Actual", subjectItems)
                 .Fail(because)
 
         And(t)
@@ -400,12 +555,10 @@ type SeqAssertions =
     static member ContainExactlyOneItem(t: Testable<#seq<'a>>, ?because) : AndDerived<_, 'a> =
         use _ = t.Assert()
 
-        let subjectLength = Seq.stringOptimizedLength t.Subject
-
-        if subjectLength <> 1 then
-            t.With("But length was", subjectLength).With("Subject value", t.Subject).Fail(because)
-
-        AndDerived(t, Seq.head t.Subject)
+        match getZeroOneManyItems t.Subject with
+        | One item -> AndDerived(t, item)
+        | Zero -> t.With("But length was", 0).With("Subject value", t.Subject).Fail(because)
+        | Many count -> t.With("But length was", count).With("Subject value", t.Subject).Fail(because)
 
 
     /// Asserts that the subject contains exactly one item matching the predicate.
@@ -415,17 +568,16 @@ type SeqAssertions =
         : AndDerived<_, 'a> =
         use _ = t.Assert()
 
-        let matchingItems = t.Subject |> Seq.filter predicate
-        let matchingLength = Seq.stringOptimizedLength matchingItems
-
-        if matchingLength <> 1 then
+        match getZeroOneManyMatchingItems predicate t.Subject with
+        | OneMatch item -> AndDerived(t, item)
+        | ZeroMatches ->
+            t.With("But found", 0).With("Matching items", []).With("Subject value", t.Subject).Fail(because)
+        | ManyMatches(count, matchingItems) ->
             t
-                .With("But found", matchingLength)
+                .With("But found", count)
                 .With("Matching items", matchingItems)
                 .With("Subject value", t.Subject)
                 .Fail(because)
-
-        AndDerived(t, Seq.head matchingItems)
 
 
     /// Asserts that the subject contains at least one item. Equivalent to NotBeEmpty, but with a different error
@@ -434,10 +586,9 @@ type SeqAssertions =
     static member ContainAtLeastOneItem(t: Testable<#seq<'a>>, ?because) : AndDerived<_, 'a> =
         use _ = t.Assert()
 
-        if Seq.stringOptimizedIsEmpty t.Subject then
-            t.With("But was", t.Subject).Fail(because)
-
-        AndDerived(t, Seq.head t.Subject)
+        match tryGetFirstItem t.Subject with
+        | ValueSome item -> AndDerived(t, item)
+        | ValueNone -> t.With("But was", t.Subject).Fail(because)
 
 
     /// Asserts that the subject contains at least one item matching the predicate. Similar to ContainItemsMatching, but
@@ -448,12 +599,9 @@ type SeqAssertions =
         : AndDerived<_, 'a> =
         use _ = t.Assert()
 
-        let matchingItems = t.Subject |> Seq.filter predicate
-
-        if Seq.stringOptimizedIsEmpty matchingItems then
-            t.With("But found", 0).With("Matching items", matchingItems).With("Subject value", t.Subject).Fail(because)
-
-        AndDerived(t, Seq.head matchingItems)
+        match tryGetFirstMatchingItem predicate t.Subject with
+        | ValueSome item -> AndDerived(t, item)
+        | ValueNone -> t.With("But found", 0).With("Matching items", []).With("Subject value", t.Subject).Fail(because)
 
 
     /// Asserts that the subject contains at most one item.
@@ -461,12 +609,10 @@ type SeqAssertions =
     static member ContainAtMostOneItem(t: Testable<#seq<'a>>, ?because) : AndDerived<_, 'a option> =
         use _ = t.Assert()
 
-        let subjectLength = Seq.stringOptimizedLength t.Subject
-
-        if subjectLength > 1 then
-            t.With("But length was", subjectLength).With("Subject value", t.Subject).Fail(because)
-
-        AndDerived(t, Seq.tryHead t.Subject)
+        match getZeroOneManyItems t.Subject with
+        | Zero -> AndDerived(t, None)
+        | One item -> AndDerived(t, Some item)
+        | Many count -> t.With("But length was", count).With("Subject value", t.Subject).Fail(because)
 
 
     /// Asserts that the subject contains at most one item matching the predicate.
@@ -476,22 +622,23 @@ type SeqAssertions =
         : AndDerived<_, 'a option> =
         use _ = t.Assert()
 
-        let matchingItems = t.Subject |> Seq.filter predicate
-        let matchingLength = Seq.stringOptimizedLength matchingItems
-
-        if matchingLength > 1 then
+        match getZeroOneManyMatchingItems predicate t.Subject with
+        | ZeroMatches -> AndDerived(t, None)
+        | OneMatch item -> AndDerived(t, Some item)
+        | ManyMatches(count, matchingItems) ->
             t
-                .With("But found", matchingLength)
+                .With("But found", count)
                 .With("Matching items", matchingItems)
                 .With("Subject value", t.Subject)
                 .Fail(because)
-
-        AndDerived(t, Seq.tryHead matchingItems)
 
 
     /// Asserts that the subject contains at least one item matching the predicate. Similar to
     /// ContainAtLeastOneItemMatching, but allows continuing to assert on all the matching items instead of just the
     /// first.
+    ///
+    /// Stops at the first match. Enumerating the derived matching items re-enumerates the source and re-evaluates
+    /// the predicate. Materialize single-pass sources before calling this assertion if using the derived items.
     [<Extension>]
     static member ContainItemsMatching
         (t: Testable<#seq<'a>>, predicate: 'a -> bool, ?because)

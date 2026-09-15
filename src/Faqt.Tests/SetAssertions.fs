@@ -1,7 +1,27 @@
 ﻿module SetAssertions
 
+open System
 open Faqt
 open Xunit
+
+
+type RefRecord = { Id: int }
+
+
+type ComparisonItem(id: int) =
+    member _.Id = id
+
+    override this.Equals(other) = Object.ReferenceEquals(this, other)
+
+    override this.GetHashCode() =
+        System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(this)
+
+    interface IComparable with
+        member _.CompareTo(other) =
+            match other with
+            | null -> 1
+            | :? ComparisonItem as other -> compare id other.Id
+            | _ -> invalidArg (nameof other) "Expected a ComparisonItem"
 
 
 module Contain =
@@ -10,6 +30,29 @@ module Contain =
     [<Fact>]
     let ``Can be chained with AndDerived with found value`` () =
         (set [ 1 ]).Should().Contain(1).Id<AndDerived<Set<int>, int>>().That.Should().Be(1)
+
+
+    [<Fact>]
+    let ``Returns the actual matched item as the derived value`` () =
+        let actual = { Id = 1 }
+        let expected = { Id = 1 }
+        let derived = (set [ actual ]).Should().Contain(expected).That
+
+        Object.ReferenceEquals(actual, derived).Should().BeTrue() |> ignore
+
+
+    [<Fact>]
+    let ``Passes when the set contains NaN`` () =
+        (set [ Double.NaN ]).Should().Contain(Double.NaN)
+
+
+    [<Fact>]
+    let ``Returns the stored item when comparison and equality differ`` () =
+        let actual = ComparisonItem(1)
+        let expected = ComparisonItem(1)
+        let derived = (set [ actual ]).Should().Contain(expected).That
+
+        Object.ReferenceEquals(actual, derived).Should().BeTrue() |> ignore
 
 
     let passData = [

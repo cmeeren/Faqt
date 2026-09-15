@@ -19,7 +19,23 @@ module private DictionaryAssertionsHelpers =
 
 
     [<Struct>]
-    type ExpectedActualReportItem<'a> = { Expected: 'a; Actual: 'a }
+    type ExpectedActualReportItem<'key, 'value> = {
+        Key: 'key
+        Expected: 'value
+        Actual: 'value
+    }
+
+
+    let countRemainingItems processedCount hasCurrent (enumerator: IEnumerator<'a>) =
+        let mutable count = processedCount
+
+        if hasCurrent then
+            count <- count + 1
+
+            while enumerator.MoveNext() do
+                count <- count + 1
+
+        count
 
 
 [<Extension>]
@@ -73,41 +89,55 @@ type DictionaryAssertions =
         use _ = t.Assert(true)
 
         let subjectCount = t.Subject.Count
-        let assertionsCount = Seq.length assertions
+        use subjectEnumerator = t.Subject.GetEnumerator()
+        use assertionsEnumerator = assertions.GetEnumerator()
 
-        if subjectCount <> assertionsCount then
+        let mutable processedCount = 0
+        let mutable subjectHasNext = subjectEnumerator.MoveNext()
+        let mutable assertionsHasNext = assertionsEnumerator.MoveNext()
+        let mutable failures = Unchecked.defaultof<ResizeArray<obj>>
+
+        let addFailure failure =
+            if isNull failures then
+                failures <- ResizeArray()
+
+            failures.Add failure
+
+        while subjectHasNext && assertionsHasNext do
+            try
+                assertionsEnumerator.Current subjectEnumerator.Current |> ignore
+            with
+            | :? AssertionFailedException as ex ->
+                {
+                    Key = TryFormat subjectEnumerator.Current.Key
+                    Failure = ex.FailureData
+                }
+                |> box
+                |> addFailure
+            | ex ->
+                {
+                    Key = TryFormat subjectEnumerator.Current.Key
+                    Exception = TryFormat(box ex)
+                }
+                |> box
+                |> addFailure
+
+            processedCount <- processedCount + 1
+            subjectHasNext <- subjectEnumerator.MoveNext()
+            assertionsHasNext <- assertionsEnumerator.MoveNext()
+
+        if subjectHasNext <> assertionsHasNext then
+            let assertionsCount =
+                countRemainingItems processedCount assertionsHasNext assertionsEnumerator
+
             t
                 .With("Expected count", assertionsCount)
                 .With("Actual count", subjectCount)
                 .With("Subject value", t.Subject)
                 .Fail(because)
 
-        let failures =
-            Seq.zip t.Subject assertions
-            |> Seq.choose (fun (kvp, assertion) ->
-                try
-                    assertion kvp |> ignore
-                    None
-                with
-                | :? AssertionFailedException as ex ->
-                    {
-                        Key = TryFormat kvp.Key
-                        Failure = ex.FailureData
-                    }
-                    |> box
-                    |> Some
-                | ex ->
-                    {
-                        Key = TryFormat kvp.Key
-                        Exception = TryFormat(box ex)
-                    }
-                    |> box
-                    |> Some
-            )
-            |> Seq.toArray
-
-        if failures.Length > 0 then
-            t.With("Failures", failures).With("Subject value", t.Subject).Fail(because)
+        if not (isNull failures) then
+            t.With("Failures", failures.ToArray()).With("Subject value", t.Subject).Fail(because)
 
         And(t)
 
@@ -118,12 +148,12 @@ type DictionaryAssertions =
         (t: Testable<#IDictionary<'key, 'value>>, key: 'key, value: 'value, ?because)
         : AndDerived<_, KeyValuePair<'key, 'value>> =
         use _ = t.Assert()
-        let kvp = KeyValuePair(key, value)
+        let expected = KeyValuePair(key, value)
 
-        if not (t.Subject.Contains(kvp)) then
-            t.With("Item", kvp).With("But was", t.Subject).Fail(because)
+        if not (t.Subject.Contains(expected)) then
+            t.With("Item", expected).With("But was", t.Subject).Fail(because)
 
-        AndDerived(t, kvp)
+        AndDerived(t, KeyValuePair(key, t.Subject[key]))
 
 
     /// Asserts that the subject does not contain the specified key-value pair.
@@ -145,7 +175,15 @@ type DictionaryAssertions =
         : And<_> =
         use _ = t.Assert()
 
-        let differentValues = Dictionary()
+        if t.Subject.Count <> expected.Count then
+            t
+                .With("Expected count", expected.Count)
+                .With("Actual count", t.Subject.Count)
+                .With("Expected", expected)
+                .With("Actual", t.Subject)
+                .Fail(because)
+
+        let differentValues = ResizeArray()
         let extraKeys = ResizeArray()
         let missingKeys = ResizeArray()
 
@@ -154,8 +192,8 @@ type DictionaryAssertions =
             | true, expectedItem when expectedItem = kvp.Value -> ()
             | true, expectedItem ->
                 differentValues.Add(
-                    TryFormat(Key kvp.Key),
                     {
+                        Key = TryFormat kvp.Key
                         Expected = TryFormat expectedItem
                         Actual = TryFormat kvp.Value
                     }
@@ -186,8 +224,8 @@ type DictionaryAssertions =
         use _ = t.Assert()
 
         match t.Subject.TryGetValue key with
-        | false, _ -> t.With("Key", key).With("But was", t.Subject).Fail(because)
         | true, value -> AndDerived(t, KeyValuePair(key, value))
+        | false, _ -> t.With("Key", key).With("But was", t.Subject).Fail(because)
 
 
     /// Asserts that the subject does not contain the specified key.

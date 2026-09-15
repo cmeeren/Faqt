@@ -7,6 +7,11 @@ Release notes
   `TimeSpan` with `ArgumentException`. Existing NaN handling takes precedence over this validation. Custom tolerance
   types retain their existing operator-based behavior.
 
+* Preserve dictionary comparer and set comparison semantics when returning stored containment matches.
+  Collection assertions avoid unnecessary re-enumeration; `ContainItemsMatching` retains its lazy derived sequence.
+  Multiset equality and subset/superset assertions now handle single-pass sequences correctly. Dictionary equality
+  checks item counts and reports mismatched values as a list so structurally equal distinct keys cannot collide.
+
 * Fix decimal and `TimeSpan` overflow and unsigned underflow (including `UInt128`) in close-to
   comparisons. Reject NaN operands (including `Half.NaN`) in scalar comparisons and adjacent sequence-ordering
   comparisons, including projected ordering keys. Equality-based assertions continue to follow F# equality

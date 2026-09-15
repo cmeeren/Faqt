@@ -83,6 +83,18 @@ module NaNOrdering =
         check [ Double.NaN ]
 
 
+type RefRecord = { Id: int }
+
+
+let singlePass (items: seq<'a>) : seq<'a> =
+    let queue = System.Collections.Generic.Queue<'a>(items)
+
+    seq {
+        while queue.Count > 0 do
+            yield queue.Dequeue()
+    }
+
+
 module AllSatisfy =
 
 
@@ -182,6 +194,21 @@ module SatisfyRespectively =
     [<Fact>]
     let ``Passes if subject and assertions are empty`` () =
         List<int>.Empty.Should().SatisfyRespectively([])
+
+
+    [<Fact>]
+    let ``Fails for single-pass subject and assertions when an inner assertion fails`` () =
+        assertFails (fun () ->
+            (singlePass [ 1; 2 ])
+                .Should()
+                .SatisfyRespectively(
+                    singlePass [
+                        fun x -> x.Should().Be(99)
+                        fun x -> x.Should().Be(98)
+                    ]
+                )
+            |> ignore
+        )
 
 
     [<Fact>]
@@ -502,6 +529,15 @@ module Contain =
     [<Fact>]
     let ``Can be chained with AndDerived with found value`` () =
         [ 1 ].Should().Contain(1).Id<AndDerived<int list, int>>().That.Should().Be(1)
+
+
+    [<Fact>]
+    let ``Returns the actual matched item as the derived value`` () =
+        let actual = { Id = 1 }
+        let expected = { Id = 1 }
+        let derived = [ actual ].Should().Contain(expected).That
+
+        Object.ReferenceEquals(actual, derived).Should().BeTrue() |> ignore
 
 
     let passData = [
@@ -831,6 +867,11 @@ module AllBeEqual =
     let ``Passes if all items are equal`` (subject: seq<string | null>) = subject.Should().AllBeEqual()
 
 
+    [<Fact>]
+    let ``Fails for single-pass sequence when items are not equal`` () =
+        assertFails (fun () -> (singlePass [ 1; 2 ]).Should().AllBeEqual() |> ignore)
+
+
     let failData = [
         // Comment to force break
         [| [ asNull "a"; "b" ] |]
@@ -907,6 +948,11 @@ module AllBeEqualBy =
     [<MemberData(nameof passData)>]
     let ``Passes if all items are equal by the specified projection`` (subject: seq<string | null>) =
         subject.Should().AllBeEqualBy(fun x -> x.Length)
+
+
+    [<Fact>]
+    let ``Fails for single-pass sequence when projected items are not equal`` () =
+        assertFails (fun () -> (singlePass [ "a"; "ab" ]).Should().AllBeEqualBy(fun x -> x.Length) |> ignore)
 
 
     let failData = [ [| [ "a"; "ab" ] |] ]
@@ -988,6 +1034,11 @@ module SequenceEqual =
         (expected: seq<string | null>)
         =
         subject.Should().SequenceEqual(expected)
+
+
+    [<Fact>]
+    let ``Fails for single-pass sequences when items differ`` () =
+        assertFails (fun () -> (singlePass [ 1; 2 ]).Should().SequenceEqual(singlePass [ 1; 3 ]) |> ignore)
 
 
     let failData = [
@@ -1086,6 +1137,67 @@ Actual: [1, 3, 2]
 """
 
 
+module SinglePassMultisets =
+
+
+    let cases =
+        let lists: (string | null) list list = [
+            []
+            [ null ]
+            [ "a" ]
+            [ "a"; "a" ]
+            [ "a"; "b" ]
+            [ "b"; "a" ]
+            [ null; "a"; "a" ]
+        ]
+
+        [
+            for subject in lists do
+                for expected in lists do
+                    yield [| box subject; box expected |]
+        ]
+
+
+    [<Theory>]
+    [<MemberData(nameof cases)>]
+    let ``Single-pass multiset assertions respect item multiplicities``
+        (subject: (string | null) list)
+        (expected: (string | null) list)
+        =
+        let isSubset subset superset =
+            subset
+            |> List.forall (fun item ->
+                List.length (List.filter ((=) item) subset)
+                <= List.length (List.filter ((=) item) superset)
+            )
+
+        let check passes assertion =
+            if passes then
+                assertion ()
+            else
+                assertFails assertion |> ignore
+
+        check
+            (subject.Length = expected.Length && isSubset subject expected)
+            (fun () -> (singlePass subject).Should().HaveSameItemsAs(singlePass expected) |> ignore)
+
+        check
+            (isSubset subject expected)
+            (fun () -> (singlePass subject).Should().BeSubsetOf(singlePass expected) |> ignore)
+
+        check
+            (subject.Length < expected.Length && isSubset subject expected)
+            (fun () -> (singlePass subject).Should().BeProperSubsetOf(singlePass expected) |> ignore)
+
+        check
+            (isSubset expected subject)
+            (fun () -> (singlePass subject).Should().BeSupersetOf(singlePass expected) |> ignore)
+
+        check
+            (subject.Length > expected.Length && isSubset expected subject)
+            (fun () -> (singlePass subject).Should().BeProperSupersetOf(singlePass expected) |> ignore)
+
+
 module HaveSameItemsAs =
 
 
@@ -1175,6 +1287,11 @@ module ContainExactlyOneItem =
         [ 1 ].Should().ContainExactlyOneItem().Id<AndDerived<int list, int>>().That.Should(()).Be(1)
 
 
+    [<Fact>]
+    let ``Passes for single-pass sequence and returns the only value`` () =
+        (singlePass [ 1 ]).Should().ContainExactlyOneItem().That.Should(()).Be(1)
+
+
     let passData = [
         // Comment to force break for readability
         [| [ asNull "a" ] |]
@@ -1245,6 +1362,11 @@ module ContainExactlyOneItemMatching =
         [ 1; 2 ].Should().ContainExactlyOneItemMatching((=) 2).Id<AndDerived<int list, int>>().That.Should(()).Be(2)
 
 
+    [<Fact>]
+    let ``Passes for single-pass sequence and returns the only matching value`` () =
+        (singlePass [ 1; 2 ]).Should().ContainExactlyOneItemMatching((=) 2).That.Should(()).Be(2)
+
+
     let passData = [
         // Comment to force break for readability
         [| [ asNull "a" ] |]
@@ -1312,6 +1434,11 @@ module ContainAtLeastOneItem =
         [ 1; 2 ].Should().ContainAtLeastOneItem().Id<AndDerived<int list, int>>().That.Should(()).Be(1)
 
 
+    [<Fact>]
+    let ``Passes for single-pass sequence and returns the first value`` () =
+        (singlePass [ 1; 2 ]).Should().ContainAtLeastOneItem().That.Should(()).Be(1)
+
+
     let passData = [
         // Comment to force break for readability
         [| [ null ] |]
@@ -1369,6 +1496,11 @@ module ContainAtLeastOneItemMatching =
             .Id<AndDerived<int list, int>>()
             .That.Should(())
             .Be(2)
+
+
+    [<Fact>]
+    let ``Passes for single-pass sequence and returns the first matched value`` () =
+        (singlePass [ 1; 2; 3 ]).Should().ContainAtLeastOneItemMatching(fun x -> x > 1).That.Should(()).Be(2)
 
 
     let passData = [
@@ -1429,6 +1561,11 @@ module ContainAtMostOneItem =
 
 
     [<Fact>]
+    let ``Passes for single-pass sequence and returns Some value`` () =
+        (singlePass [ 1 ]).Should().ContainAtMostOneItem().That.Should(()).Be(Some 1)
+
+
+    [<Fact>]
     let ``Can be chained with AndDerived with None if empty`` () =
         List.empty<int>.Should().ContainAtMostOneItem().Id<AndDerived<int list, int option>>().That.Should(()).Be(None)
 
@@ -1478,6 +1615,11 @@ module ContainAtMostOneItemMatching =
             .Id<AndDerived<int list, int option>>()
             .That.Should(())
             .Be(Some 3)
+
+
+    [<Fact>]
+    let ``Passes for single-pass sequence and returns Some matching value`` () =
+        (singlePass [ 1; 2; 3 ]).Should().ContainAtMostOneItemMatching(fun x -> x > 2).That.Should(()).Be(Some 3)
 
 
     [<Fact>]
@@ -1537,6 +1679,66 @@ module ContainItemsMatching =
             .Id<AndDerived<int list, seq<int>>>()
             .That.Should(())
             .SequenceEqual([ 2; 3 ])
+
+
+    [<Fact>]
+    let ``Stops enumerating the source at the first match`` () =
+        let subject =
+            seq {
+                yield 0
+                yield 1
+                failwith "The tail must not be enumerated"
+            }
+
+        subject.Should().ContainItemsMatching(fun x -> x > 0)
+
+
+    [<Fact>]
+    let ``Stops evaluating the predicate at the first match`` () =
+        [ 0; 1; 2 ]
+            .Should()
+            .ContainItemsMatching(fun x ->
+                if x = 2 then
+                    failwith "The predicate must not be evaluated after the first match"
+
+                x > 0
+            )
+
+
+    [<Fact>]
+    let ``Derived matches can be consumed without evaluating the remaining tail`` () =
+        let subject =
+            seq {
+                yield 0
+                yield 1
+                yield 2
+                yield 3
+                failwith "The tail must not be enumerated"
+            }
+
+        let matches = subject.Should().ContainItemsMatching(fun x -> x % 2 = 1).That
+        (matches |> Seq.take 2).Should().SequenceEqual([ 1; 3 ])
+
+
+    [<Theory>]
+    [<InlineData(1)>]
+    [<InlineData(2)>]
+    let ``Enumerating derived matches re-enumerates the source`` times =
+        let mutable enumerationCount = 0
+
+        let subject =
+            seq {
+                enumerationCount <- enumerationCount + 1
+                yield 0
+                yield enumerationCount
+            }
+
+        let matches = subject.Should().ContainItemsMatching(fun x -> x > 0).That
+
+        for _ in 1 .. times - 1 do
+            matches |> Seq.iter ignore
+
+        matches.Should().SequenceEqual([ times + 1 ])
 
 
     let passData = [
