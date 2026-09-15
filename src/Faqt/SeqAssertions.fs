@@ -578,7 +578,7 @@ type SeqAssertions =
 
         for i, (a, b) in t.Subject |> Seq.pairwise |> Seq.indexed do
 
-            if a > b then
+            if ComparisonAssertions.IsNaN(a) || ComparisonAssertions.IsNaN(b) || a > b then
                 t
                     .With("But found", [ {| Index = i; Item = TryFormat a |}; {| Index = i + 1; Item = TryFormat b |} ])
                     .With("Subject value", t.Subject)
@@ -639,7 +639,7 @@ type SeqAssertions =
             let a' = projection a
             let b' = projection b
 
-            if a' > b' then
+            if ComparisonAssertions.IsNaN(a') || ComparisonAssertions.IsNaN(b') || a' > b' then
                 t
                     .With(
                         "But found",
@@ -749,7 +749,7 @@ type SeqAssertions =
 
         for i, (a, b) in t.Subject |> Seq.pairwise |> Seq.indexed do
 
-            if a < b then
+            if ComparisonAssertions.IsNaN(a) || ComparisonAssertions.IsNaN(b) || a < b then
                 t
                     .With("But found", [ {| Index = i; Item = TryFormat a |}; {| Index = i + 1; Item = TryFormat b |} ])
                     .With("Subject value", t.Subject)
@@ -810,7 +810,7 @@ type SeqAssertions =
             let a' = projection a
             let b' = projection b
 
-            if a' < b' then
+            if ComparisonAssertions.IsNaN(a') || ComparisonAssertions.IsNaN(b') || a' < b' then
                 t
                     .With(
                         "But found",
@@ -920,7 +920,7 @@ type SeqAssertions =
 
         for i, (a, b) in t.Subject |> Seq.pairwise |> Seq.indexed do
 
-            if a >= b then
+            if ComparisonAssertions.IsNaN(a) || ComparisonAssertions.IsNaN(b) || a >= b then
                 t
                     .With("But found", [ {| Index = i; Item = TryFormat a |}; {| Index = i + 1; Item = TryFormat b |} ])
                     .With("Subject value", t.Subject)
@@ -938,7 +938,7 @@ type SeqAssertions =
             let a' = projection a
             let b' = projection b
 
-            if a' >= b' then
+            if ComparisonAssertions.IsNaN(a') || ComparisonAssertions.IsNaN(b') || a' >= b' then
                 t
                     .With(
                         "But found",
@@ -968,7 +968,7 @@ type SeqAssertions =
 
         for i, (a, b) in t.Subject |> Seq.pairwise |> Seq.indexed do
 
-            if a <= b then
+            if ComparisonAssertions.IsNaN(a) || ComparisonAssertions.IsNaN(b) || a <= b then
                 t
                     .With("But found", [ {| Index = i; Item = TryFormat a |}; {| Index = i + 1; Item = TryFormat b |} ])
                     .With("Subject value", t.Subject)
@@ -986,7 +986,7 @@ type SeqAssertions =
             let a' = projection a
             let b' = projection b
 
-            if a' <= b' then
+            if ComparisonAssertions.IsNaN(a') || ComparisonAssertions.IsNaN(b') || a' <= b' then
                 t
                     .With(
                         "But found",

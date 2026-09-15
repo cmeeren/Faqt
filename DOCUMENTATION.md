@@ -393,7 +393,14 @@ myFormatter Config.Current
 * `BeOfType`: Exact type check
 * `BeAssignableTo`: Polymorphic type check
 
+Equality-based assertions use F# default equality/inequality semantics. In particular, floating-point `NaN` is not
+equal to itself, so assertions such as `Be`, `NotBe`, `BeOneOf`, `NotBeOneOf`, and `Roundtrip` follow that behavior.
+
 ### Comparison assertions
+
+Comparison assertions fail when an operand is a built-in floating-point `NaN`, including `Half.NaN`.
+Sequence-ordering assertions also reject adjacent comparisons involving NaN items or projected keys. Empty and
+singleton sequences still satisfy ordering assertions because there are no adjacent items to compare.
 
 * `BeCloseTo`: Same as `Be`, but with a tolerance
 * `NotBeCloseTo`: Same as `NotBe`, but with a tolerance

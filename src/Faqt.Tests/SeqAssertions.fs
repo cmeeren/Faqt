@@ -6,6 +6,83 @@ open Faqt
 open Xunit
 
 
+module NaNOrdering =
+
+
+    type private ReverseRank(rank: int) =
+        member _.Rank = rank
+
+        override _.Equals(other) =
+            match other with
+            | :? ReverseRank as other -> rank = other.Rank
+            | _ -> false
+
+        override _.GetHashCode() = rank.GetHashCode()
+
+        interface IComparable with
+            member _.CompareTo(other) =
+                compare (unbox<ReverseRank> other).Rank rank
+
+
+    let private casesFor name (nan: 'a) (low: 'a) (high: 'a) =
+        [
+            [ nan; high ], [ nan; low ]
+            [ low; nan ], [ high; nan ]
+            [ high; nan; low ], [ low; nan; high ]
+        ]
+        |> List.mapi (fun position (ascending, descending) ->
+            [
+                "ascending", (fun () -> ascending.Should().BeAscending() |> ignore)
+                "descending", (fun () -> descending.Should().BeDescending() |> ignore)
+                "strictly ascending", (fun () -> ascending.Should().BeStrictlyAscending() |> ignore)
+                "strictly descending", (fun () -> descending.Should().BeStrictlyDescending() |> ignore)
+                "ascending by", (fun () -> (List.indexed ascending).Should().BeAscendingBy(snd) |> ignore)
+                "descending by", (fun () -> (List.indexed descending).Should().BeDescendingBy(snd) |> ignore)
+                "strictly ascending by",
+                (fun () -> (List.indexed ascending).Should().BeStrictlyAscendingBy(snd) |> ignore)
+                "strictly descending by",
+                (fun () -> (List.indexed descending).Should().BeStrictlyDescendingBy(snd) |> ignore)
+            ]
+            |> List.map (fun (assertion, run) -> [| box $"%s{name}: %s{assertion}, position %i{position}"; box run |])
+        )
+        |> List.concat
+
+
+    let cases = [
+        yield! casesFor "double" Double.NaN 1.0 2.0
+        yield! casesFor "single" Single.NaN 1.0f 2.0f
+        yield! casesFor "Half" Half.NaN Half.Zero Half.One
+        yield! casesFor "interface double" (Double.NaN :> IComparable) (1.0 :> IComparable) (2.0 :> IComparable)
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof cases)>]
+    let ``Rejects comparisons involving NaN in sequence ordering`` (_name: string) (run: unit -> unit) =
+        assertFails run |> ignore
+
+
+    [<Fact>]
+    let ``Preserves ordering of infinities and custom comparable values`` () =
+        let check ascending =
+            let descending = List.rev ascending
+            ascending.Should().BeAscending().And.BeStrictlyAscending() |> ignore
+            descending.Should().BeDescending().And.BeStrictlyDescending() |> ignore
+
+            (List.indexed ascending).Should().BeAscendingBy(snd).And.BeStrictlyAscendingBy(snd)
+            |> ignore
+
+            (List.indexed descending).Should().BeDescendingBy(snd).And.BeStrictlyDescendingBy(snd)
+            |> ignore
+
+        check [ Double.NegativeInfinity; 0.0; Double.PositiveInfinity ]
+        check [ Single.NegativeInfinity; 0.0f; Single.PositiveInfinity ]
+        check [ Half.NegativeInfinity; Half.Zero; Half.PositiveInfinity ]
+        check [ ReverseRank(2); ReverseRank(1) ]
+        check ([]: double list)
+        check [ Double.NaN ]
+
+
 module AllSatisfy =
 
 

@@ -1,6 +1,17 @@
 Release notes
 ==============
 
+### Unreleased
+
+* **Breaking:** `BeCloseTo` and `NotBeCloseTo` now reject negative tolerances for supported built-in numeric types and
+  `TimeSpan` with `ArgumentException`. Existing NaN handling takes precedence over this validation. Custom tolerance
+  types retain their existing operator-based behavior.
+
+* Fix decimal and `TimeSpan` overflow and unsigned underflow (including `UInt128`) in close-to
+  comparisons. Reject NaN operands (including `Half.NaN`) in scalar comparisons and adjacent sequence-ordering
+  comparisons, including projected ordering keys. Equality-based assertions continue to follow F# equality
+  semantics, including NaN not being equal to itself.
+
 ### 5.1.0 (2025-09-18)
 
 * The `AssertionFailedException` message now begins with `Assertion failed.` on its own first line, with the structured
