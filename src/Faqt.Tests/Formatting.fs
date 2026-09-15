@@ -75,6 +75,12 @@ type private OneByteNonSeekableStream(bytes: byte[]) =
     override _.Write(_, _, _) = raise <| NotSupportedException()
 
 
+type TestUnserializableTypeWithThrowingToString() =
+    member _.WillThrow = failwith<int> "Foo"
+
+    override _.ToString() = failwith "Bar"
+
+
 [<Fact>]
 let ``Can override and restore the default formatter`` () =
 
@@ -466,6 +472,33 @@ Value: 1.2
 
 
     [<Fact>]
+    let ``Rendering of special floating point values`` () =
+        fun () -> "a".Should().FailWith("Value", Double.NaN)
+        |> assertExnMsg
+            """
+Subject: '"a"'
+Should: FailWith
+Value: NaN
+"""
+
+        fun () -> "a".Should().FailWith("Value", Double.PositiveInfinity)
+        |> assertExnMsg
+            """
+Subject: '"a"'
+Should: FailWith
+Value: Infinity
+"""
+
+        fun () -> "a".Should().FailWith("Value", Double.NegativeInfinity)
+        |> assertExnMsg
+            """
+Subject: '"a"'
+Should: FailWith
+Value: -Infinity
+"""
+
+
+    [<Fact>]
     let ``Rendering of string sequences`` () =
         fun () -> "a".Should().FailWith("Value", [ "a"; "b" ])
         |> assertExnMsg
@@ -825,6 +858,21 @@ Value:
 
 
     [<Fact>]
+    let ``Rendering when serialization and ToString throw`` () =
+        fun () -> "".Should().FailWith("Value", TestUnserializableTypeWithThrowingToString())
+        |> assertExnMsgWildcard
+            """
+Subject: '""'
+Should: FailWith
+Value:
+  SERIALIZATION EXCEPTION: |-
+    System.Exception: Foo
+       at *
+  ToString: '[ToString() threw: Bar]'
+"""
+
+
+    [<Fact>]
     let ``Can render null values even if type is not serializable`` () =
         fun () -> "".Should().FailWith("Value", Unchecked.defaultof<TestUnserializableType>)
         |> assertExnMsg
@@ -850,6 +898,20 @@ Value:
 
 
     [<Fact>]
+    let ``Supports TryFormat with escaped string as dictionary key`` () =
+        fun () ->
+            let x = dict [ TryFormat "a\"b", 1 ]
+            x.Should().FailWith("Value", x)
+        |> assertExnMsg
+            """
+Subject: x
+Should: FailWith
+Value:
+  a"b: 1
+"""
+
+
+    [<Fact>]
     let ``Supports TryFormat with int as dictionary key`` () =
         fun () ->
             let x = dict [ TryFormat 1, 1 ]
@@ -860,6 +922,39 @@ Subject: x
 Should: FailWith
 Value:
   '1': 1
+"""
+
+
+    [<Fact>]
+    let ``Supports TryFormat with null as dictionary key`` () =
+        fun () ->
+            let x = dict [ TryFormat null, 1 ]
+            x.Should().FailWith("Value", x)
+        |> assertExnMsg
+            """
+Subject: x
+Should: FailWith
+Value:
+  'null': 1
+"""
+
+
+    [<Fact>]
+    let ``Supports TryFormatFallback for dictionary keys`` () =
+        let format =
+            YamlFormatterBuilder.Default.TryFormatFallback(fun _ _ -> "BROKEN").Build()
+
+        use _ = Formatter.With(format)
+
+        fun () ->
+            let x = dict [ TryFormat(TestUnserializableType()), 1 ]
+            x.Should().FailWith("Value", x)
+        |> assertExnMsg
+            """
+Subject: x
+Should: FailWith
+Value:
+  BROKEN: 1
 """
 
 
@@ -1564,6 +1659,160 @@ Value:
   '1': a
   '2': b
 """
+
+
+module TryFormatCycles =
+
+
+    type Node(getNext: unit -> (obj | null)) =
+        member _.Next = getNext ()
+
+
+    let private data (value: obj | null) =
+        match value with
+        | null -> invalidArg (nameof value) "Expected a non-null test value"
+        | value -> {
+            Subject = [ "subject" ]
+            Because = None
+            Should = "Fail"
+            Extra = [ "Value", value; "After", "preserved" ]
+          }
+
+
+    [<Theory>]
+    [<InlineData(false)>]
+    [<InlineData(true)>]
+    let ``Cycles crossing TryFormat use the fallback before exhausting the stack`` dictionaryKey =
+        let mutable reads = 0
+        let mutable value = obj ()
+
+        let node =
+            Node(fun () ->
+                reads <- reads + 1
+
+                // Bound the broken implementation so this regression fails without crashing the test host.
+                if reads >= 8 then
+                    invalidOp "Test cycle guard reached"
+
+                if dictionaryKey then
+                    box (dict [ TryFormat value, 1 ])
+                else
+                    box (TryFormat value)
+            )
+
+        value <- node
+        let output = YamlFormatterBuilder.Default.Build () (data value)
+        Assert.InRange(reads, 1, 7)
+        Assert.Contains("SERIALIZATION EXCEPTION", output)
+        Assert.Contains("JsonException", output)
+        Assert.Contains("After: preserved", output)
+
+
+    [<Theory>]
+    [<InlineData(0, 80, true)>]
+    [<InlineData(4, 12, true)>]
+    [<InlineData(96, 80, false)>]
+    let ``Nested TryFormat values respect the configured recursion limit`` maxDepth wrapperCount expectFallback =
+        let format =
+            YamlFormatterBuilder.Default
+                .ConfigureJsonSerializerOptions(fun options -> options.MaxDepth <- maxDepth)
+                .Build()
+
+        let value =
+            (box "leaf", [ 1..wrapperCount ])
+            ||> List.fold (fun value _ -> box (TryFormat value))
+
+        let output = format (data value)
+        Assert.Equal(expectFallback, output.Contains("SERIALIZATION EXCEPTION"))
+        Assert.Contains("After: preserved", output)
+        Assert.Contains("Value: healthy", format (data (box "healthy")))
+
+
+    [<Fact>]
+    let ``Shared values in sibling branches are not cycles`` () =
+        let shared = Node(fun () -> box "leaf")
+
+        let output =
+            YamlFormatterBuilder.Default.Build () (data (box [ TryFormat shared; TryFormat shared ]))
+
+        Assert.DoesNotContain("SERIALIZATION EXCEPTION", output)
+        Assert.Equal(2, output.Split("Next: leaf").Length - 1)
+
+
+    [<Fact>]
+    let ``Concurrent formatting of the same value does not share cycle tracking`` () =
+        use barrier = new Barrier(2)
+
+        let shared =
+            Node(fun () ->
+                Assert.True(barrier.SignalAndWait(TimeSpan.FromSeconds(10.0)))
+                box "leaf"
+            )
+
+        let format = YamlFormatterBuilder.Default.Build()
+
+        let start () =
+            System.Threading.Tasks.Task.Factory.StartNew(
+                (fun () -> format (data (box shared))),
+                System.Threading.Tasks.TaskCreationOptions.LongRunning
+            )
+
+        let first = start ()
+        let second = start ()
+
+        for output in [ first.GetAwaiter().GetResult(); second.GetAwaiter().GetResult() ] do
+            Assert.DoesNotContain("SERIALIZATION EXCEPTION", output)
+            Assert.Contains("Next: leaf", output)
+
+
+    [<Fact>]
+    let ``Cycle tracking is restored when the fallback throws`` () =
+        let mutable shouldThrow = true
+
+        let value =
+            Node(fun () ->
+                if shouldThrow then
+                    invalidOp "Cannot serialize yet"
+
+                box "leaf"
+            )
+
+        let format =
+            YamlFormatterBuilder.Default.TryFormatFallback(fun _ _ -> invalidOp "Fallback failed").Build()
+
+        Assert.Throws<InvalidOperationException>(fun () -> format (data value) |> ignore)
+        |> ignore
+
+        shouldThrow <- false
+        Assert.Contains("Next: leaf", format (data value))
+
+
+    [<Theory>]
+    [<InlineData(false)>]
+    [<InlineData(true)>]
+    let ``Fallbacks that wrap the failing value cannot recursively retry their own cycle error`` dictionaryKey =
+        let mutable fallbackCalls = 0
+
+        let format =
+            YamlFormatterBuilder.Default
+                .TryFormatFallback(fun _ value ->
+                    fallbackCalls <- fallbackCalls + 1
+
+                    if fallbackCalls >= 8 then
+                        invalidOp "Test fallback guard reached"
+
+                    TryFormat value :> obj
+                )
+                .Build()
+
+        let value: obj =
+            if dictionaryKey then
+                dict [ TryFormat(TestUnserializableType()), 1 ]
+            else
+                TestUnserializableType()
+
+        Assert.Throws<JsonException>(fun () -> format (data value) |> ignore) |> ignore
+        Assert.InRange(fallbackCalls, 1, 7)
 
 
 module YamlFormatterBuilder =

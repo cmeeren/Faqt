@@ -330,30 +330,75 @@ type private FailureDataConverter() =
 type private TryFormatConverter(fallback: exn -> obj -> obj) =
     inherit JsonConverter<TryFormat>()
 
+    // Each wrapper starts a fresh serializer, so its cycle/depth tracking must span those calls.
+    let activeValues = new ThreadLocal<(obj | null) list>(fun () -> [])
+
+    let withSerializationScope value (options: JsonSerializerOptions) action =
+        let previous = activeValues.Value
+        let maxDepth = if options.MaxDepth = 0 then 64 else options.MaxDepth
+
+        if
+            previous.Length >= maxDepth
+            || previous |> List.exists (fun active -> Object.ReferenceEquals(active, value))
+        then
+            raise
+            <| JsonException("A cycle or excessive nesting was detected while serializing a TryFormat value.")
+
+        activeValues.Value <- value :: previous
+
+        try
+            action ()
+        finally
+            activeValues.Value <- previous
+
+    let serialize (value: obj | null) (options: JsonSerializerOptions) =
+        let t = if isNull value then typeof<obj> else value.GetType()
+        JsonSerializer.Serialize(value, t, options)
+
+    let serializePropertyName (value: obj | null) (options: JsonSerializerOptions) =
+        let str = serialize value options
+        use doc = JsonDocument.Parse(str)
+
+        if doc.RootElement.ValueKind = JsonValueKind.String then
+            doc.RootElement.GetString()
+        else
+            str
+
     override this.Read(_, _, _) =
         raise <| NotSupportedException("Can only write")
 
     override this.Write(writer, TryFormat value, options) =
-        try
-            let t = if isNull value then typeof<obj> else value.GetType()
-            // Serialize to a string first to ensure failures do not leave the caller's writer in a partial state.
-            use doc = JsonSerializer.Serialize(value, t, options) |> JsonDocument.Parse
-            doc.WriteTo(writer)
-        with ex ->
-            let fallback = fallback ex value
-            let t = if isNull fallback then typeof<obj> else fallback.GetType()
-            JsonSerializer.Serialize(writer, fallback, t, options)
+        // Enter outside the catch so a recursive fallback cannot catch and retry its own cycle error.
+        withSerializationScope
+            value
+            options
+            (fun () ->
+                try
+                    // Serialize to a string first to ensure failures do not leave the caller's writer in a partial state.
+                    use doc = serialize value options |> JsonDocument.Parse
+                    doc.WriteTo(writer)
+                with ex ->
+                    let fallbackValue = fallback ex value
+
+                    let fallbackType =
+                        if isNull fallbackValue then
+                            typeof<obj>
+                        else
+                            fallbackValue.GetType()
+
+                    JsonSerializer.Serialize(writer, fallbackValue, fallbackType, options)
+            )
 
     override this.WriteAsPropertyName(writer, TryFormat value, options) =
-        let str = JsonSerializer.Serialize(value, value.GetType(), options)
-
-        let str =
-            if str.StartsWith('"') && str.EndsWith('"') then
-                str.Substring(1, str.Length - 2)
-            else
-                str
-
-        writer.WritePropertyName(str)
+        withSerializationScope
+            value
+            options
+            (fun () ->
+                try
+                    writer.WritePropertyName(serializePropertyName value options)
+                with ex ->
+                    writer.WritePropertyName(serializePropertyName (fallback ex value) options)
+            )
 
 
 type private NoOpYamlVisitor() =
@@ -409,6 +454,16 @@ type private JsonToYamlConverterVisitor(doc: YamlDocument) =
 
 [<AutoOpen>]
 module private FormattingHelpers =
+
+
+    let safeToString (value: obj | null) =
+        if isNull value then
+            null
+        else
+            try
+                value.ToString()
+            with ex ->
+                $"[ToString() threw: %s{ex.Message}]"
 
 
     let formatAsYaml getYamlVisitor (json: string) =
@@ -547,7 +602,7 @@ type YamlFormatterBuilder = private {
         tryFormatFallback =
             fun ex obj -> {|
                 ``SERIALIZATION EXCEPTION`` = ex
-                ToString = obj.ToString()
+                ToString = safeToString obj
             |}
         getYamlVisitor = fun _ -> NoOpYamlVisitor()
     }
@@ -557,6 +612,9 @@ type YamlFormatterBuilder = private {
     /// is immutable; all instance methods return a new instance.
     static member Default =
         YamlFormatterBuilder.Empty
+            .ConfigureJsonSerializerOptions(fun opts ->
+                opts.NumberHandling <- opts.NumberHandling ||| JsonNumberHandling.AllowNamedFloatingPointLiterals
+            )
             .ConfigureJsonFSharpOptions(fun opts ->
                 opts
                     .WithUnionExternalTag()

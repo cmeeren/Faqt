@@ -20,6 +20,9 @@ Release notes
   `ArgumentException`, preventing the converter from recursively selecting itself. `SerializeExactAs` still allows
   subtype outputs because its converter matches only the exact input type.
 
+* Detect cycles and bound recursive serialization across nested `TryFormat` wrappers, including dictionary keys,
+  so diagnostic formatting uses its fallback instead of overflowing the stack.
+
 * Stop formatter projections that re-enter the same converter at the same JSON depth, preventing stack overflows
   from boxed self-projections. Custom object converters and projections of nested values remain supported.
 
@@ -39,6 +42,9 @@ Release notes
 * Read bounded HTTP body previews, preserve content headers, and honor quoted charset parameters when decoding
   diagnostics. Restore seekable stream positions even when reading fails. Obtaining a stream may still buffer
   generated content, such as `JsonContent`, in full.
+
+* Improve diagnostic formatting for `TryFormat` dictionary keys, serialization failures, throwing `ToString`
+  implementations, and special floating-point values.
 
 * Normalize JSON object-key order recursively for equivalence checks while preserving case-sensitive key names.
 
