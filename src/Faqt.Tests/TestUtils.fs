@@ -57,6 +57,58 @@ let assertExnMsgWildcard (msg: string) (f: unit -> 'a) =
     | _ -> failwith "Expected msg to contain a single *"
 
 
+let assertErrorMsgWildcard (msg: string) (f: unit -> 'a) =
+    let ex = Assert.Throws<Exception>(f >> ignore)
+
+    match msg.Split('*') with
+    | [| a; b |] ->
+        let exnMsg = "\n\n" + ex.Message.ReplaceLineEndings("\n").Trim() + "\n"
+
+        let a =
+            "\n\n"
+            + "Assertion could not be evaluated.\n"
+            + a.ReplaceLineEndings("\n").Trim()
+
+        let b = b.ReplaceLineEndings("\n").Trim() + "\n"
+        Assert.StartsWith(a, exnMsg)
+        Assert.EndsWith(b, exnMsg)
+    | _ -> failwith "Expected msg to contain a single *"
+
+
+let evaluationErrorCases assertions =
+    seq {
+        for assertion in assertions do
+            for composition in [ "Direct"; "NotSatisfy"; "SatisfyAny" ] do
+                for cancellation in [ false; true ] do
+                    yield [| box assertion; box composition; box cancellation |]
+    }
+
+
+let assertEvaluationError composition cancellation (assertion: Exception -> unit) =
+    let original: Exception =
+        if cancellation then
+            OperationCanceledException("cancelled assertion")
+        else
+            InvalidOperationException("unexpected assertion error")
+
+    let run () =
+        match composition with
+        | "Direct" -> assertion original
+        | "NotSatisfy" -> ().Should().NotSatisfy(fun () -> assertion original) |> ignore
+        | "SatisfyAny" ->
+            ().Should().SatisfyAny([ (fun () -> assertion original); (fun () -> ()) ])
+            |> ignore
+        | _ -> failwith "Unknown composition"
+
+    if cancellation then
+        let actual = Assert.Throws<OperationCanceledException>(run)
+        Assert.Same(original, actual)
+    else
+        let actual = Assert.Throws<Exception>(run)
+        Assert.StartsWith("Assertion could not be evaluated.", actual.Message.Trim())
+        Assert.Same(original, actual.GetBaseException())
+
+
 type TestInterface = interface end
 
 

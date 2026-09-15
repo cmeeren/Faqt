@@ -32,7 +32,7 @@ type HigherOrderAssertions =
         with
         | :? AssertionFailedException as ex ->
             t.With("Failure", ex.FailureData).With("Subject value", t.Subject).Fail(because)
-        | ex -> t.With("But threw", ex).With("Subject value", t.Subject).Fail(because)
+        | ex -> t.With("But threw", ex).With("Subject value", t.Subject).RaiseErrorWithEmbeddedException(ex, because)
 
 
     /// Asserts that the subject does not satisfy the supplied assertion. If using this in performance critical
@@ -45,8 +45,10 @@ type HigherOrderAssertions =
             try
                 assertion t.Subject |> ignore
                 true
-            with :? AssertionFailedException ->
-                false
+            with
+            | :? AssertionFailedException -> false
+            | ex ->
+                t.With("But threw", ex).With("Subject value", t.Subject).RaiseErrorWithEmbeddedException(ex, because)
 
         if succeeded then
             t.With("Subject value", t.Subject).Fail(because)
@@ -54,8 +56,9 @@ type HigherOrderAssertions =
         And(t)
 
 
-    /// Asserts that the subject satisfies at least one of the supplied assertions. If using this in performance
-    /// critical scenarios, note that in general, assertions are optimized for success, not failure.
+    /// Asserts that the subject satisfies at least one of the supplied assertions. Passes if the assertion collection
+    /// is empty. If using this in performance critical scenarios, note that in general, assertions are optimized for
+    /// success, not failure.
     [<Extension>]
     static member SatisfyAny(t: Testable<'a>, assertions: seq<'a -> 'ignored>, ?because) : And<'a> =
         use _ = t.Assert(true)
@@ -72,7 +75,13 @@ type HigherOrderAssertions =
                         succeeded <- true
                     with
                     | :? AssertionFailedException as ex -> failures.Add(box ex.FailureData)
-                    | ex -> failures.Add(box {| Exception = ex |})
+                    | ex ->
+                        failures.Add(box {| Exception = ex |})
+
+                        t
+                            .With("Failures", failures)
+                            .With("Subject value", t.Subject)
+                            .RaiseErrorWithEmbeddedException(ex, because)
 
             if not succeeded then
                 t.With("Failures", failures).With("Subject value", t.Subject).Fail(because)
@@ -86,30 +95,22 @@ type HigherOrderAssertions =
         use _ = t.Assert(true)
         let assertions = assertions |> Seq.toArray
 
-        let exceptions =
-            assertions
-            |> Seq.indexed
-            |> Seq.choose (fun (i, f) ->
-                try
-                    f t.Subject |> ignore
-                    None
-                with ex ->
-                    Some(i, ex)
-            )
-            |> Seq.toArray
+        let failures = ResizeArray()
 
-        if exceptions.Length > 0 then
-            t
-                .With(
-                    "Failures",
-                    exceptions
-                    |> Array.map (fun (i, ex) ->
-                        match ex with
-                        | :? AssertionFailedException as ex -> box { Index = i; Failure = ex.FailureData }
-                        | ex -> box { Index = i; Exception = TryFormat ex }
-                    )
-                )
-                .With("Subject value", t.Subject)
-                .Fail(because)
+        for i, f in assertions |> Seq.indexed do
+            try
+                f t.Subject |> ignore
+            with
+            | :? AssertionFailedException as ex -> failures.Add(box { Index = i; Failure = ex.FailureData })
+            | ex ->
+                failures.Add(box { Index = i; Exception = TryFormat ex })
+
+                t
+                    .With("Failures", failures.ToArray())
+                    .With("Subject value", t.Subject)
+                    .RaiseErrorWithEmbeddedException(ex, because)
+
+        if failures.Count > 0 then
+            t.With("Failures", failures.ToArray()).With("Subject value", t.Subject).Fail(because)
 
         And(t)

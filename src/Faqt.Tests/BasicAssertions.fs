@@ -5,6 +5,46 @@ open Faqt
 open Xunit
 
 
+module EvaluationErrors =
+
+
+    let cases = evaluationErrorCases [ "Be"; "NotBe" ]
+
+
+    [<Theory>]
+    [<MemberData(nameof cases)>]
+    let ``Comparer errors cannot become successful negation or alternatives`` assertion composition cancellation =
+        assertEvaluationError
+            composition
+            cancellation
+            (fun error ->
+                let comparer _ _ = raise error
+
+                match assertion with
+                | "Be" -> (1).Should().Be(2, comparer) |> ignore
+                | "NotBe" -> (1).Should().NotBe(2, comparer) |> ignore
+                | _ -> failwith "Unknown assertion"
+            )
+
+
+    [<Theory>]
+    [<InlineData("Be")>]
+    [<InlineData("NotBe")>]
+    let ``Ordinary comparer assertion failures can still be negated`` assertion =
+        let comparer (_: int) (_: int) =
+            ().Should().Fail() |> ignore
+            true
+
+        (1)
+            .Should()
+            .NotSatisfy(fun subject ->
+                match assertion with
+                | "Be" -> subject.Should().Be(2, comparer) |> ignore
+                | "NotBe" -> subject.Should().NotBe(2, comparer) |> ignore
+                | _ -> failwith "Unknown assertion"
+            )
+
+
 module Be =
 
 
@@ -113,6 +153,26 @@ WithCustomEquality: true
 """
 
 
+    [<Fact>]
+    let ``Fails with expected message if comparer throws`` () =
+        let isEqual _ _ = failwith "foo"
+
+        fun () ->
+            let x = 1
+            x.Should().Be(2, isEqual)
+        |> assertErrorMsgWildcard
+            """
+Subject: x
+Should: Be
+Expected: 2
+But threw: |-
+  System.Exception: foo
+     at *
+Subject value: 1
+WithCustomEquality: true
+"""
+
+
 module NotBe =
 
 
@@ -217,6 +277,26 @@ Because: Some reason
 Should: NotBe
 Other: 1
 But was: 1
+WithCustomEquality: true
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if comparer throws`` () =
+        let isEqual _ _ = failwith "foo"
+
+        fun () ->
+            let x = 1
+            x.Should().NotBe(2, isEqual)
+        |> assertErrorMsgWildcard
+            """
+Subject: x
+Should: NotBe
+Other: 2
+But threw: |-
+  System.Exception: foo
+     at *
+Subject value: 1
 WithCustomEquality: true
 """
 

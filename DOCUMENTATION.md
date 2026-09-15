@@ -8,6 +8,7 @@
 
 * [Security considerations](#security-considerations)
 * [Installation and requirements](#installation-and-requirements)
+* [Assertion failures and unexpected exceptions](#assertion-failures-and-unexpected-exceptions)
 * [Avoiding `|> ignore` after assertion chains](#avoiding--ignore-after-assertion-chains)
 * [Writing your own assertions](#writing-your-own-assertions)
   * [A basic assertion](#a-basic-assertion)
@@ -72,6 +73,25 @@ code.
 
    Note that `DebugType=embedded` is automatically set
    by [DotNet.ReproducibleBuilds](https://github.com/dotnet/reproducible-builds) if you use that.
+
+## Assertion failures and unexpected exceptions
+
+Faqt reports ordinary assertion failures with `AssertionFailedException`. Higher-order assertions can add context to
+these failures, collect them, try another alternative (`SatisfyAny`), or negate them (`NotSatisfy`).
+
+Unexpected exceptions from assertion callbacks, custom comparers, and HTTP content reads are reported with diagnostic
+context in an ordinary `Exception`, with the original exception preserved in its `InnerException` chain. They stop
+aggregation or evaluation of further alternatives. `OperationCanceledException` and its subtypes propagate without
+wrapping. `SatisfyAny` still stops evaluating callbacks after the first success.
+
+Assertions that explicitly test exception outcomes, such as `Throw`, `NotThrow`, `Transform`, and parsing assertions,
+retain their documented behavior. For example, `NotThrow` failing because the tested function threw is an ordinary
+assertion failure that can be negated.
+
+In custom assertions, use `Fail` for an ordinary assertion failure. To report an unexpected exception with additional
+context, use `t.With(...).RaiseError(ex, because)`, which includes the exception under `But threw` automatically.
+Custom higher-order assertions should handle only `AssertionFailedException` as an ordinary assertion failure and let
+other errors propagate or add context using `RaiseError`.
 
 ## Avoiding `|> ignore` after assertion chains
 
@@ -380,7 +400,7 @@ Faqt obtains the stream using `HttpContent.ReadAsStream()`. Streamed HTTP respon
 
 * `Satisfy`
 * `NotSatisfy`
-* `SatisfyAny`
+* `SatisfyAny`: Passes if any supplied assertion passes, and also if the assertion list is empty
 * `SatisfyAll`
 
 ### Basic assertions

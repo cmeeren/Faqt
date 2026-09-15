@@ -49,33 +49,35 @@ type DictionaryAssertions =
         : And<_> =
         use _ = t.Assert(true, true)
 
-        let failures =
-            t.Subject
-            |> Seq.choose (fun kvp ->
-                try
-                    use _ = t.AssertItem()
-                    assertion kvp |> ignore
-                    None
-                with
-                | :? AssertionFailedException as ex ->
-                    {
+        let failures = ResizeArray()
+
+        for kvp in t.Subject do
+            try
+                use _ = t.AssertItem()
+                assertion kvp |> ignore
+            with
+            | :? AssertionFailedException as ex ->
+                failures.Add(
+                    box {
                         Key = TryFormat kvp.Key
                         Failure = ex.FailureData
                     }
-                    |> box
-                    |> Some
-                | ex ->
-                    {
+                )
+            | ex ->
+                failures.Add(
+                    box {
                         Key = TryFormat kvp.Key
                         Exception = TryFormat(box ex)
                     }
-                    |> box
-                    |> Some
-            )
-            |> Seq.toArray
+                )
 
-        if failures.Length > 0 then
-            t.With("Failures", failures).With("Subject value", t.Subject).Fail(because)
+                t
+                    .With("Failures", failures.ToArray())
+                    .With("Subject value", t.Subject)
+                    .RaiseErrorWithEmbeddedException(ex, because)
+
+        if failures.Count > 0 then
+            t.With("Failures", failures.ToArray()).With("Subject value", t.Subject).Fail(because)
 
         And(t)
 
@@ -121,6 +123,11 @@ type DictionaryAssertions =
                 }
                 |> box
                 |> addFailure
+
+                t
+                    .With("Failures", failures.ToArray())
+                    .With("Subject value", t.Subject)
+                    .RaiseErrorWithEmbeddedException(ex, because)
 
             processedCount <- processedCount + 1
             subjectHasNext <- subjectEnumerator.MoveNext()

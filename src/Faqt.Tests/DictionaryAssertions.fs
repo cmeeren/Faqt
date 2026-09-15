@@ -6,6 +6,72 @@ open Faqt
 open Xunit
 
 
+module EvaluationErrors =
+
+
+    let cases = evaluationErrorCases [ "AllSatisfy"; "SatisfyRespectively" ]
+
+
+    [<Theory>]
+    [<MemberData(nameof cases)>]
+    let ``Entry errors cannot become successful negation or alternatives`` assertion composition cancellation =
+        assertEvaluationError
+            composition
+            cancellation
+            (fun error ->
+                let callback (_: KeyValuePair<int, int>) : unit = raise error
+                let subject = Map [ 1, 1 ]
+
+                match assertion with
+                | "AllSatisfy" -> subject.Should().AllSatisfy(callback) |> ignore
+                | "SatisfyRespectively" -> subject.Should().SatisfyRespectively([ callback ]) |> ignore
+                | _ -> failwith "Unknown assertion"
+            )
+
+
+    [<Theory>]
+    [<InlineData("AllSatisfy")>]
+    [<InlineData("SatisfyRespectively")>]
+    let ``Aggregators stop at errors after earlier entry failures`` assertion =
+        assertEvaluationError
+            "Direct"
+            false
+            (fun error ->
+                let callback (item: KeyValuePair<int, int>) =
+                    match item.Key with
+                    | 1 -> item.Should().Fail() |> ignore
+                    | 2 -> raise error
+                    | _ -> failwith "This later entry must not run"
+
+                let subject = Map [ 1, 1; 2, 2; 3, 3 ]
+
+                match assertion with
+                | "AllSatisfy" -> subject.Should().AllSatisfy(callback) |> ignore
+                | "SatisfyRespectively" ->
+                    subject.Should().SatisfyRespectively([ callback; callback; callback ]) |> ignore
+                | _ -> failwith "Unknown assertion"
+            )
+
+
+    [<Theory>]
+    [<InlineData("AllSatisfy")>]
+    [<InlineData("SatisfyRespectively")>]
+    let ``Ordinary entry failures are still aggregated`` assertion =
+        let callback (item: KeyValuePair<string, int>) = item.Value.Should().Be(0)
+        let subject = Map [ "first", 1; "second", 2 ]
+
+        let error =
+            assertFails (fun () ->
+                match assertion with
+                | "AllSatisfy" -> subject.Should().AllSatisfy(callback) |> ignore
+                | "SatisfyRespectively" -> subject.Should().SatisfyRespectively([ callback; callback ]) |> ignore
+                | _ -> failwith "Unknown assertion"
+            )
+
+        Assert.Contains("Key: first", error.Message)
+        Assert.Contains("Key: second", error.Message)
+
+
 type RefRecord = { Id: int }
 
 
@@ -55,7 +121,7 @@ module AllSatisfy =
                         y.Value.Should().Test(y.Value = 1)
                 )
 
-        |> assertExnMsgWildcard
+        |> assertErrorMsgWildcard
             """
 Subject: x
 Should: AllSatisfy
@@ -94,7 +160,7 @@ Subject value:
                     "Some reason"
                 )
 
-        |> assertExnMsgWildcard
+        |> assertErrorMsgWildcard
             """
 Subject: x
 Because: Some reason
@@ -207,7 +273,7 @@ Subject value:
                         (fun _ -> failwith "foo")
                     ]
                 )
-        |> assertExnMsgWildcard
+        |> assertErrorMsgWildcard
             """
 Subject: x
 Should: SatisfyRespectively
@@ -244,7 +310,7 @@ Subject value:
                     ],
                     "Some reason"
                 )
-        |> assertExnMsgWildcard
+        |> assertErrorMsgWildcard
             """
 Subject: x
 Because: Some reason

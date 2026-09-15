@@ -597,9 +597,9 @@ type HttpResponseMessageAssertions =
             use _ = t.Assert(true)
 
             let! ct = Async.CancellationToken
-            let! str = t.Subject.Content.ReadAsStringAsync(ct) |> Async.AwaitTask
 
             try
+                let! str = t.Subject.Content.ReadAsStringAsync(ct) |> Async.AwaitTask
                 return assertion str
             with
             | :? AssertionFailedException as ex ->
@@ -615,5 +615,5 @@ type HttpResponseMessageAssertions =
                         .With("But threw", ex)
                         .With("Response", t.Subject)
                         .With("Request", t.Subject.RequestMessage)
-                        .Fail(because)
+                        .RaiseErrorWithEmbeddedException(ex, because)
         }

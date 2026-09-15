@@ -8,6 +8,13 @@ Release notes
   Seekable positions are restored; nonseekable bodies may be consumed, as indicated in the diagnostics.
   Zero omits the body without reading it.
 
+* **Breaking:** Unexpected callback, comparer, and HTTP content-read exceptions retain Faqt's diagnostic context but
+  now use ordinary `Exception` wrappers instead of `AssertionFailedException`, preserving the original exception in
+  the `InnerException` chain. Aggregation and evaluation of further alternatives stop on an unexpected error.
+  Ordinary assertion failures and explicit exception-testing contracts retain their behavior.
+  `OperationCanceledException` and its subtypes propagate without wrapping. Custom assertions can use
+  `t.With(...).RaiseError(ex, because)` to report unexpected errors with context.
+
 * **Breaking:** `BeCloseTo` and `NotBeCloseTo` now reject negative tolerances for supported built-in numeric types and
   `TimeSpan` with `ArgumentException`. Existing NaN handling takes precedence over this validation. Custom tolerance
   types retain their existing operator-based behavior.
@@ -58,6 +65,8 @@ Release notes
 
 * Clarified zero enum flag semantics: `HaveFlag` passes and `NotHaveFlag` fails for a zero mask, consistently with
   `Enum.HasFlag`. Use equality with the enum's zero value to assert that no flags are set.
+
+* Clarified that `SatisfyAny` passes when its assertion list is empty. This behavior is unchanged.
 
 ### 5.1.0 (2025-09-18)
 

@@ -83,6 +83,69 @@ module NaNOrdering =
         check [ Double.NaN ]
 
 
+module EvaluationErrors =
+
+
+    let cases = evaluationErrorCases [ "AllSatisfy"; "SatisfyRespectively" ]
+
+
+    [<Theory>]
+    [<MemberData(nameof cases)>]
+    let ``Item errors cannot become successful negation or alternatives`` assertion composition cancellation =
+        assertEvaluationError
+            composition
+            cancellation
+            (fun error ->
+                let callback (_: int) : unit = raise error
+
+                match assertion with
+                | "AllSatisfy" -> [ 1 ].Should().AllSatisfy(callback) |> ignore
+                | "SatisfyRespectively" -> [ 1 ].Should().SatisfyRespectively([ callback ]) |> ignore
+                | _ -> failwith "Unknown assertion"
+            )
+
+
+    [<Theory>]
+    [<InlineData("AllSatisfy")>]
+    [<InlineData("SatisfyRespectively")>]
+    let ``Aggregators stop at errors after earlier item failures`` assertion =
+        assertEvaluationError
+            "Direct"
+            false
+            (fun error ->
+                let callback item =
+                    match item with
+                    | 1 -> item.Should().Fail() |> ignore
+                    | 2 -> raise error
+                    | _ -> failwith "This later item must not run"
+
+                match assertion with
+                | "AllSatisfy" -> [ 1; 2; 3 ].Should().AllSatisfy(callback) |> ignore
+                | "SatisfyRespectively" ->
+                    [ 1; 2; 3 ].Should().SatisfyRespectively([ callback; callback; callback ])
+                    |> ignore
+                | _ -> failwith "Unknown assertion"
+            )
+
+
+    [<Theory>]
+    [<InlineData("AllSatisfy")>]
+    [<InlineData("SatisfyRespectively")>]
+    let ``Ordinary item failures are still aggregated`` assertion =
+        let callback item = item.Should().Be(0)
+
+        let error =
+            assertFails (fun () ->
+                match assertion with
+                | "AllSatisfy" -> [ 1; 2 ].Should().AllSatisfy(callback) |> ignore
+                | "SatisfyRespectively" -> [ 1; 2 ].Should().SatisfyRespectively([ callback; callback ]) |> ignore
+                | _ -> failwith "Unknown assertion"
+            )
+
+        Assert.Contains("Index: 0", error.Message)
+        Assert.Contains("Index: 1", error.Message)
+
+
 type RefRecord = { Id: int }
 
 
@@ -126,7 +189,7 @@ module AllSatisfy =
                     else
                         y.Length.Should().Test(y.Length = 3)
                 )
-        |> assertExnMsgWildcard
+        |> assertErrorMsgWildcard
             """
 Subject: x
 Should: AllSatisfy
@@ -161,7 +224,7 @@ Subject value: [asd, test, '1234']
                     ),
                     "Some reason"
                 )
-        |> assertExnMsgWildcard
+        |> assertErrorMsgWildcard
             """
 Subject: x
 Because: Some reason
@@ -268,7 +331,7 @@ Subject value: [asd, test, '1234']
                         (fun _ -> failwith "foo")
                     ]
                 )
-        |> assertExnMsgWildcard
+        |> assertErrorMsgWildcard
             """
 Subject: x
 Should: SatisfyRespectively
@@ -302,7 +365,7 @@ Subject value: [asd, test, '1234']
                     ],
                     "Some reason"
                 )
-        |> assertExnMsgWildcard
+        |> assertErrorMsgWildcard
             """
 Subject: x
 Because: Some reason

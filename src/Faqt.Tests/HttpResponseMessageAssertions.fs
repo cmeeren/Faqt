@@ -2781,6 +2781,55 @@ Request: GET / HTTP/0.5
 module HaveStringContentSatisfying =
 
 
+    type private ThrowingContent(error: Exception) =
+        inherit HttpContent()
+
+
+        override _.SerializeToStreamAsync(_, _) =
+            System.Threading.Tasks.Task.FromException(error)
+
+
+        override _.TryComputeLength(length: byref<int64>) =
+            length <- 0L
+            false
+
+
+    let evaluationErrorData = evaluationErrorCases [ "Callback"; "Read" ]
+
+
+    [<Theory>]
+    [<MemberData(nameof evaluationErrorData)>]
+    let ``Content errors cannot become successful negation or alternatives`` source composition cancellation =
+        let assertion error =
+            use response = respContent 200 "foo"
+
+            let callback (_: string) =
+                if source = "Callback" then
+                    raise error
+
+            if source = "Read" then
+                response.Content <- new ThrowingContent(error)
+
+            response.Should().HaveStringContentSatisfying(callback)
+            |> Async.RunSynchronously
+
+        if source = "Read" && cancellation then
+            // HttpContent turns the original cancellation into a cancelled task before Faqt observes it.
+            let run () =
+                assertion (OperationCanceledException("cancelled read"))
+
+            Assert.ThrowsAny<OperationCanceledException>(fun () ->
+                match composition with
+                | "Direct" -> run ()
+                | "NotSatisfy" -> ().Should().NotSatisfy(run) |> ignore
+                | "SatisfyAny" -> ().Should().SatisfyAny([ run; ignore ]) |> ignore
+                | _ -> failwith "Unknown composition"
+            )
+            |> ignore
+        else
+            assertEvaluationError composition cancellation assertion
+
+
     [<Fact>]
     let ``Passes if has content and the inner assertion passes and returns the inner value`` () =
         (respContent 200 "foo").Should().HaveStringContentSatisfying(_.Should().Be("foo").Subject).Id<Async<string>>()
@@ -2869,7 +2918,7 @@ Request: GET / HTTP/0.5
         fun () ->
             (respContent 200 "foo").Should().HaveStringContentSatisfying(fun _ -> failwith "foo")
             |> Async.RunSynchronously
-        |> assertExnMsgWildcard
+        |> assertErrorMsgWildcard
             """
 Subject: respContent 200 "foo"
 Should: HaveStringContentSatisfying
@@ -2891,7 +2940,7 @@ Request: GET / HTTP/0.5
         fun () ->
             (respContent 200 "foo").Should().HaveStringContentSatisfying((fun _ -> failwith "foo"), "Some reason")
             |> Async.RunSynchronously
-        |> assertExnMsgWildcard
+        |> assertErrorMsgWildcard
             """
 Subject: respContent 200 "foo"
 Because: Some reason
@@ -2905,6 +2954,28 @@ Response: |-
   Content-Length: 3
 
   foo
+Request: GET / HTTP/0.5
+"""
+
+
+    [<Fact>]
+    let ``Fails with expected message if content read throws`` () =
+        fun () ->
+            let respMsg = respContent 200 "foo"
+            respMsg.Dispose()
+
+            respMsg.Should().HaveStringContentSatisfying(_.Should().Be("foo"))
+            |> Async.RunSynchronously
+        |> assertErrorMsgWildcard
+            """
+Subject: respMsg
+Should: HaveStringContentSatisfying
+But threw: |-
+  System.ObjectDisposedException: Cannot access a disposed object.*
+Response: |-
+  HTTP/0.5 200 OK
+
+  [content is disposed and cannot be read]
 Request: GET / HTTP/0.5
 """
 

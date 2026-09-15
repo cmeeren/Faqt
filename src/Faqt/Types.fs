@@ -3,6 +3,7 @@
 open System
 open System.Reflection
 open System.Runtime.CompilerServices
+open System.Runtime.ExceptionServices
 open System.Runtime.InteropServices
 open Faqt.Formatting
 
@@ -39,6 +40,11 @@ type Testable<'a> internal (subject: 'a, origin: CallChainOrigin) =
     member internal _.CallChainAssertionHistory = CallChain.AssertionHistory origin
 
 
+module private EvaluationError =
+
+    let originalExceptionKey = obj ()
+
+
 /// A type to help build assertion failures.
 type FailureBuilder<'a> = private {
     Testable: Testable<'a>
@@ -64,21 +70,61 @@ type FailureBuilder<'a> = private {
     member this.With(key: string, value: 'b) = this.With(true, key, value)
 
 
-    /// Raises an AssertionFailedException with the specified and previously added data.
-    member this.Fail(because: string option) =
+    member private this.GetFailureData(because: string option) =
         if List.isEmpty this.Testable.CallChainAssertionHistory then
             invalidOp
                 "Call chain assertion history is empty. Testable.Assert must be called in all assertions before calling Fail."
 
-        let data = {
+        {
             Subject = SubjectName.get this.Testable.CallChainOrigin this.Testable.CallChainAssertionHistory
             Because = because
             Should = this.Testable.CallChainAssertionHistory |> List.last
             Extra = this.Data
         }
 
+
+    /// Raises an AssertionFailedException with the specified and previously added data.
+    member this.Fail(because: string option) =
+        let data = this.GetFailureData(because)
+
         AssertionFailedException("Assertion failed." + Environment.NewLine + Formatter.Current data, data)
         |> raise
+
+
+    // The caller must include innerException in the diagnostic data before calling this method.
+    member internal this.RaiseErrorWithEmbeddedException(innerException: exn, because: string option) =
+        match innerException with
+        | :? OperationCanceledException ->
+            ExceptionDispatchInfo.Capture(innerException).Throw()
+            Unchecked.defaultof<_>
+        | _ ->
+            let data = this.GetFailureData(because)
+
+            // The previous Faqt wrapper is already rendered in the diagnostic data. Retaining it in the exception
+            // chain as well would duplicate its entire diagnostics at every nesting level.
+            let originalException =
+                match innerException.Data[EvaluationError.originalExceptionKey] with
+                | :? exn as original -> original
+                | _ -> innerException
+
+            let error =
+                Exception(
+                    "Assertion could not be evaluated."
+                    + Environment.NewLine
+                    + Formatter.Current data,
+                    originalException
+                )
+
+            error.Data[EvaluationError.originalExceptionKey] <- originalException
+            raise error
+
+
+    /// Raises an ordinary exception with diagnostic context and the original exception as InnerException. This does
+    /// not represent an assertion failure. Includes the exception under "But threw" in the diagnostic context.
+    ///
+    /// Cancellation exceptions propagate unchanged.
+    member this.RaiseError(innerException: exn, because: string option) =
+        this.With("But threw", innerException).RaiseErrorWithEmbeddedException(innerException, because)
 
 
 /// A type which allows chaining assertions.

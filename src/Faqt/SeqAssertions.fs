@@ -175,22 +175,24 @@ type SeqAssertions =
     static member AllSatisfy(t: Testable<#seq<'a>>, assertion: 'a -> 'ignored, ?because) : And<_> =
         use _ = t.Assert(true, true)
 
-        let failures =
-            t.Subject
-            |> Seq.indexed
-            |> Seq.choose (fun (i, x) ->
-                try
-                    use _ = t.AssertItem()
-                    assertion x |> ignore
-                    None
-                with
-                | :? AssertionFailedException as ex -> { Index = i; Failure = ex.FailureData } |> box |> Some
-                | ex -> { Index = i; Exception = TryFormat ex } |> box |> Some
-            )
-            |> Seq.toArray
+        let failures = ResizeArray()
 
-        if failures.Length > 0 then
-            t.With("Failures", failures).With("Subject value", t.Subject).Fail(because)
+        for i, x in t.Subject |> Seq.indexed do
+            try
+                use _ = t.AssertItem()
+                assertion x |> ignore
+            with
+            | :? AssertionFailedException as ex -> failures.Add(box { Index = i; Failure = ex.FailureData })
+            | ex ->
+                failures.Add(box { Index = i; Exception = TryFormat ex })
+
+                t
+                    .With("Failures", failures.ToArray())
+                    .With("Subject value", t.Subject)
+                    .RaiseErrorWithEmbeddedException(ex, because)
+
+        if failures.Count > 0 then
+            t.With("Failures", failures.ToArray()).With("Subject value", t.Subject).Fail(because)
 
         And(t)
 
@@ -233,6 +235,11 @@ type SeqAssertions =
                 }
                 |> box
                 |> addFailure
+
+                t
+                    .With("Failures", failures.ToArray())
+                    .With("Subject value", t.Subject)
+                    .RaiseErrorWithEmbeddedException(ex, because)
 
             index <- index + 1
             subjectHasNext <- subjectEnumerator.MoveNext()

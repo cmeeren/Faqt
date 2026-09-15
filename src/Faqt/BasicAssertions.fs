@@ -14,7 +14,20 @@ type BasicAssertions =
     static member Be(t: Testable<'a>, expected: 'b, isEqual: 'a -> 'b -> bool, ?because) : AndDerived<'a, 'b> =
         use _ = t.Assert()
 
-        if not (isEqual t.Subject expected) then
+        let areEqual =
+            try
+                isEqual t.Subject expected
+            with
+            | :? AssertionFailedException -> reraise ()
+            | ex ->
+                t
+                    .With("Expected", expected)
+                    .With("But threw", ex)
+                    .With("Subject value", t.Subject)
+                    .With("WithCustomEquality", true)
+                    .RaiseErrorWithEmbeddedException(ex, because)
+
+        if not areEqual then
             t.With("Expected", expected).With("But was", t.Subject).With("WithCustomEquality", true).Fail(because)
 
         AndDerived(t, expected)
@@ -36,7 +49,20 @@ type BasicAssertions =
     static member NotBe(t: Testable<'a>, other: 'b, isEqual: 'a -> 'b -> bool, ?because) : And<'a> =
         use _ = t.Assert()
 
-        if isEqual t.Subject other then
+        let areEqual =
+            try
+                isEqual t.Subject other
+            with
+            | :? AssertionFailedException -> reraise ()
+            | ex ->
+                t
+                    .With("Other", other)
+                    .With("But threw", ex)
+                    .With("Subject value", t.Subject)
+                    .With("WithCustomEquality", true)
+                    .RaiseErrorWithEmbeddedException(ex, because)
+
+        if areEqual then
             t.With("Other", other).With("But was", t.Subject).With("WithCustomEquality", true).Fail(because)
 
         And(t)
