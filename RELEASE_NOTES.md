@@ -17,6 +17,9 @@ Release notes
   comparisons, including projected ordering keys. Equality-based assertions continue to follow F# equality
   semantics, including NaN not being equal to itself.
 
+* Match response and content headers consistently, including exact values and quoted comma-separated members.
+  `HaveHeader` returns all matching header values for further assertions.
+
 * Normalize JSON object-key order recursively for equivalence checks while preserving case-sensitive key names.
 
 * Fix wildcard matching when literal text collides with the previous internal placeholder strings.

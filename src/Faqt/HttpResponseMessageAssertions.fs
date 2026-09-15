@@ -1,9 +1,71 @@
 ﻿namespace Faqt
 
+open System
+open System.Collections.Generic
 open System.Net
 open System.Net.Http
 open System.Runtime.CompilerServices
+open System.Text
 open Faqt.AssertionHelpers
+
+
+module private HttpHeaderValueParsing =
+
+    let private commaSeparatedListHeaders =
+        HashSet<string>(
+            [|
+                "Accept-Ranges"
+                "Access-Control-Allow-Headers"
+                "Access-Control-Allow-Methods"
+                "Access-Control-Expose-Headers"
+                "Allow"
+                "Cache-Control"
+                "Connection"
+                "Content-Encoding"
+                "Content-Language"
+                "Pragma"
+                "Trailer"
+                "Transfer-Encoding"
+                "Upgrade"
+                "Vary"
+            |],
+            StringComparer.OrdinalIgnoreCase
+        )
+
+    let private splitCommaSeparatedHeaderValue (value: string) =
+        seq {
+            let part = StringBuilder()
+            let mutable inQuotes = false
+            let mutable escaped = false
+
+            let emitPart () =
+                let value = part.ToString().Trim()
+                part.Clear() |> ignore
+                value
+
+            for c in value do
+                if escaped then
+                    part.Append(c) |> ignore
+                    escaped <- false
+                else
+                    match c with
+                    | '\\' when inQuotes ->
+                        part.Append(c) |> ignore
+                        escaped <- true
+                    | '"' ->
+                        part.Append(c) |> ignore
+                        inQuotes <- not inQuotes
+                    | ',' when not inQuotes -> yield emitPart ()
+                    | _ -> part.Append(c) |> ignore
+
+            yield emitPart ()
+        }
+
+    let containsValue (name: string) (value: string) (headerValues: string list) =
+        (headerValues |> Seq.contains value)
+        || (commaSeparatedListHeaders.Contains name
+            && headerValues
+               |> Seq.exists (fun headerValue -> headerValue |> splitCommaSeparatedHeaderValue |> Seq.contains value))
 
 
 [<Extension>]
@@ -438,34 +500,40 @@ type HttpResponseMessageAssertions =
         : AndDerived<HttpResponseMessage, seq<string>> =
         use _ = t.Assert()
 
-        match t.Subject.Headers.TryGetValues name with
-        | false, _ ->
-            match
-                t.Subject.Content
-                |> ValueOption.ofObj
-                |> ValueOption.map _.Headers.TryGetValues(name)
-            with
-            | ValueNone
-            | ValueSome(false, _) ->
-                t
-                    .With("Header", name)
-                    .With("Response", t.Subject)
-                    .With("Request", t.Subject.RequestMessage)
-                    .Fail(because)
-            | ValueSome(true, values) -> AndDerived(t, values)
-        | true, values -> AndDerived(t, values)
+        match HttpResponseMessageAssertions.GetAllHeaderValues(t.Subject, name) with
+        | [] ->
+            t.With("Header", name).With("Response", t.Subject).With("Request", t.Subject.RequestMessage).Fail(because)
+        | values -> AndDerived(t, values)
 
 
-    /// Asserts that the response has at least one header with the specified name and value (or alternatively, that the
-    /// response has a header with the specified name whose possibly comma-separated values contains at least one
-    /// instance of the specified value).
+    static member private GetAllHeaderValues(m: HttpResponseMessage, name: string) : string list =
+        let responseValues =
+            match m.Headers.TryGetValues name with
+            | true, values -> values |> Seq.toList
+            | false, _ -> []
+
+        let contentValues =
+            match m.Content |> ValueOption.ofObj with
+            | ValueNone -> []
+            | ValueSome content ->
+                match content.Headers.TryGetValues name with
+                | true, values -> values |> Seq.toList
+                | false, _ -> []
+
+        responseValues @ contentValues
+
+
+    /// Asserts that the response has at least one header with the specified name and exact value.
+    ///
+    /// For known comma-separated list headers such as Cache-Control and Vary, this also matches an individual list
+    /// member value.
     ///
     /// For example, if using the header name "A" and the value "x", the following will pass:
     ///
     /// A: x
     /// A: y
     ///
-    /// The following will also pass:
+    /// The following will not pass:
     ///
     /// A: x,y
     [<Extension>]
@@ -482,19 +550,13 @@ type HttpResponseMessageAssertions =
                 .With("Request", t.Subject.RequestMessage)
                 .Fail(because)
 
-        match t.Subject.Headers.TryGetValues name with
-        | false, _ ->
-            match
-                t.Subject.Content
-                |> ValueOption.ofObj
-                |> ValueOption.map _.Headers.TryGetValues(name)
-            with
-            | ValueNone
-            | ValueSome(false, _) -> fail ()
-            | ValueSome(true, values) when not (values |> Seq.contains value) -> fail ()
-            | _ -> ()
-        | true, values when not (values |> Seq.contains value) -> fail ()
-        | _ -> ()
+        let values = HttpResponseMessageAssertions.GetAllHeaderValues(t.Subject, name)
+
+        if
+            List.isEmpty values
+            || not (HttpHeaderValueParsing.containsValue name value values)
+        then
+            fail ()
 
         And(t)
 
@@ -504,9 +566,9 @@ type HttpResponseMessageAssertions =
     static member NotHaveHeader(t: Testable<HttpResponseMessage>, name: string, ?because) : And<HttpResponseMessage> =
         use _ = t.Assert()
 
-        match t.Subject.Headers.TryGetValues name with
-        | false, _ -> ()
-        | true, values ->
+        match HttpResponseMessageAssertions.GetAllHeaderValues(t.Subject, name) with
+        | [] -> ()
+        | values ->
             match values |> Seq.tryExactlyOne with
             | Some value ->
                 t

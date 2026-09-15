@@ -572,7 +572,7 @@ All assertion failure messages contain the full response and the original reques
 * `Be200Ok`
 * (etc. for other status codes)
 * `HaveHeader`: Check for the existence of a header (and continue asserting on the header value(s))
-* `HaveHeaderValue`: Check for the existence of a header with a specific value
+* `HaveHeaderValue`: Check for the existence of a header with a specific exact value, or a specific member of a known comma-separated list header
 * `HaveStringContentSatisfying`: Check for string content satisfying a specified inner assertion
 
 ## FAQ

@@ -2556,6 +2556,16 @@ module HaveHeader =
 
 
     [<Fact>]
+    let ``Returns values from both response and content headers when both are present`` () =
+        let response = resp 200
+        response.Headers.TryAddWithoutValidation("A", "x") |> ignore
+        response.Content <- StringContent("ignored")
+        response.Content.Headers.TryAddWithoutValidation("A", "y") |> ignore
+
+        response.Should().HaveHeader("A").WhoseValue.Should().SequenceEqual([ "x"; "y" ])
+
+
+    [<Fact>]
     let ``Fails with expected message if header is not found`` () =
         fun () ->
             let x = respHeader 200 [ "A", "x" ]
@@ -2616,6 +2626,36 @@ module HaveHeaderValue =
 
 
     [<Fact>]
+    let ``Passes when the expected value is contained in a comma-separated list header value`` () =
+        (respHeader 200 [ "Cache-Control", "no-cache, private" ]).Should().HaveHeaderValue("Cache-Control", "no-cache")
+
+
+    [<Fact>]
+    let ``Passes for full Last-Modified header value containing commas`` () =
+        (respHeader 200 [ "Last-Modified", "Thu, 30 May 2024 11:34:24 GMT" ])
+            .Should()
+            .HaveHeaderValue("Last-Modified", "Thu, 30 May 2024 11:34:24 GMT")
+
+
+    [<Fact>]
+    let ``Fails when the expected value only matches part of a non-list header value`` () =
+        fun () ->
+            let x = respHeader 200 [ "Date", "Thu, 30 May 2024 11:34:24 GMT" ]
+            x.Should().HaveHeaderValue("Date", "Thu")
+        |> assertExnMsg
+            """
+Subject: x
+Should: HaveHeaderValue
+Header: Date
+Value: Thu
+Response: |-
+  HTTP/0.5 200 OK
+  Date: Thu, 30 May 2024 11:34:24 GMT
+Request: GET / HTTP/0.5
+"""
+
+
+    [<Fact>]
     let ``Passes for multiple headers and can be chained with AndDerived with the header value`` () =
         (respHeader 200 [ "A", "x"; "A", "y" ])
             .Should()
@@ -2630,6 +2670,16 @@ module HaveHeaderValue =
         (respHeader 200 [ "Content-Type", "application/json" ])
             .Should()
             .HaveHeaderValue("Content-Type", "application/json")
+
+
+    [<Fact>]
+    let ``Passes when the matching header value is found in content headers`` () =
+        let response = resp 200
+        response.Headers.TryAddWithoutValidation("A", "y") |> ignore
+        response.Content <- StringContent("ignored")
+        response.Content.Headers.TryAddWithoutValidation("A", "x") |> ignore
+
+        response.Should().HaveHeaderValue("A", "x")
 
 
     [<Fact>]
@@ -2700,6 +2750,13 @@ Response: |-
   A: x
 Request: GET / HTTP/0.5
 """
+
+
+    [<Fact>]
+    let ``Fails if header is present in content headers`` () =
+        assertFails (fun () ->
+            (respHeader 200 [ "Content-Type", "application/json" ]).Should().NotHaveHeader("Content-Type")
+        )
 
 
     [<Fact>]
