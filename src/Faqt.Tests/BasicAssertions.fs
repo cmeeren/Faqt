@@ -701,6 +701,12 @@ module ``BeOfType non-generic`` =
         "asd".Should().BeOfType(typeof<string>).Id<And<string>>().And.Be("asd")
 
 
+    [<Fact>]
+    let ``Throws ArgumentNullException if expected type is null`` () =
+        Assert.Throws<ArgumentNullException>(fun () -> "asd".Should().BeOfType(Unchecked.defaultof<Type>) |> ignore)
+        |> ignore
+
+
     let passData = [
         [| box "a"; typeof<string> |]
         [| 1; typeof<int> |]
@@ -900,6 +906,14 @@ module ``BeAssignableTo non-generic`` =
     [<Fact>]
     let ``Can be chained with And`` () =
         "asd".Should().BeAssignableTo(typeof<string>).Id<And<string>>().And.Be("asd")
+
+
+    [<Fact>]
+    let ``Throws ArgumentNullException if expected type is null`` () =
+        Assert.Throws<ArgumentNullException>(fun () ->
+            "asd".Should().BeAssignableTo(Unchecked.defaultof<Type>) |> ignore
+        )
+        |> ignore
 
 
     let passData = [

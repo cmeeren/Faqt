@@ -175,6 +175,9 @@ type Testable<'a> with
     member this.BeOfType(expectedType: Type, ?because) : And<'a> =
         use _ = this.Assert'()
 
+        if isNull (box expectedType) then
+            nullArg (nameof expectedType)
+
         if isNull (box this.Subject) then
             this.With'("Expected", expectedType).With("But was", this.Subject).Fail(because)
         else
@@ -204,6 +207,9 @@ type Testable<'a> with
     /// requiring an exact type.
     member this.BeAssignableTo(expectedType: Type, ?because) : And<'a> =
         use _ = this.Assert'()
+
+        if isNull (box expectedType) then
+            nullArg (nameof expectedType)
 
         if isNull (box this.Subject) then
             this.With'("Expected", expectedType).With("But was", this.Subject).Fail(because)
