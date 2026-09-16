@@ -59,6 +59,56 @@ type ComparisonAssertions =
         // Dispatch on static types so inlined numeric calls can eliminate the type checks and box/unbox casts.
         if typeof<'a> <> typeof<'b> || typeof<'a> <> typeof<'c> then
             ValueNone
+        elif typeof<'a> = typeof<sbyte> then
+            ValueSome(
+                withinSignedTolerance
+                    0y
+                    (unbox<sbyte> (box subject))
+                    (unbox<sbyte> (box target))
+                    (unbox<sbyte> (box tolerance))
+            )
+        elif typeof<'a> = typeof<int16> then
+            ValueSome(
+                withinSignedTolerance
+                    0s
+                    (unbox<int16> (box subject))
+                    (unbox<int16> (box target))
+                    (unbox<int16> (box tolerance))
+            )
+        elif typeof<'a> = typeof<int> then
+            ValueSome(
+                withinSignedTolerance
+                    0
+                    (unbox<int> (box subject))
+                    (unbox<int> (box target))
+                    (unbox<int> (box tolerance))
+            )
+        elif typeof<'a> = typeof<int64> then
+            ValueSome(
+                withinSignedTolerance
+                    0L
+                    (unbox<int64> (box subject))
+                    (unbox<int64> (box target))
+                    (unbox<int64> (box tolerance))
+            )
+        elif typeof<'a> = typeof<nativeint> then
+            ValueSome(
+                withinSignedTolerance
+                    0n
+                    (unbox<nativeint> (box subject))
+                    (unbox<nativeint> (box target))
+                    (unbox<nativeint> (box tolerance))
+            )
+#if NET7_0_OR_GREATER
+        elif typeof<'a> = typeof<Int128> then
+            ValueSome(
+                withinSignedTolerance
+                    Int128.Zero
+                    (unbox<Int128> (box subject))
+                    (unbox<Int128> (box target))
+                    (unbox<Int128> (box tolerance))
+            )
+#endif
         elif typeof<'a> = typeof<byte> then
             ValueSome(
                 withinTolerance (unbox<byte> (box subject)) (unbox<byte> (box target)) (unbox<byte> (box tolerance))

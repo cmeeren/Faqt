@@ -150,6 +150,12 @@ module SignedTolerance =
 
 
     let cases = [
+        yield! casesFor "sbyte" SByte.MinValue SByte.MaxValue 0y 1y
+        yield! casesFor "int16" Int16.MinValue Int16.MaxValue 0s 1s
+        yield! casesFor "int" Int32.MinValue Int32.MaxValue 0 1
+        yield! casesFor "int64" Int64.MinValue Int64.MaxValue 0L 1L
+        yield! casesFor "nativeint" IntPtr.MinValue IntPtr.MaxValue 0n 1n
+        yield! casesFor "Int128" Int128.MinValue Int128.MaxValue Int128.Zero Int128.One
         yield! casesFor "TimeSpan" TimeSpan.MinValue TimeSpan.MaxValue TimeSpan.Zero (TimeSpan.FromTicks(1L))
     ]
 
