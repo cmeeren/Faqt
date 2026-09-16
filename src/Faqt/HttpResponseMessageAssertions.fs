@@ -594,13 +594,21 @@ type HttpResponseMessageAssertions =
         (t: Testable<HttpResponseMessage>, assertion: string -> 'a, ?because)
         : Async<'a> =
         async {
-            use _ = t.Assert(true)
-
             let! ct = Async.CancellationToken
 
+            let! content =
+                async { return! t.Subject.Content.ReadAsStringAsync(ct) |> Async.AwaitTask }
+                |> Async.Catch
+
+            // Keep the thread-local assertion scope entirely on the continuation thread.
+            use _ = t.Assert(true)
+
             try
-                let! str = t.Subject.Content.ReadAsStringAsync(ct) |> Async.AwaitTask
-                return assertion str
+                match content with
+                | Choice1Of2 str -> return assertion str
+                | Choice2Of2 ex ->
+                    System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(ex).Throw()
+                    return Unchecked.defaultof<_>
             with
             | :? AssertionFailedException as ex ->
                 return

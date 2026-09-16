@@ -57,11 +57,14 @@ Release notes
 
 #### Fixes and improvements
 
+* Stop formatter projections that re-enter the same converter at the same JSON depth, preventing stack overflows
+  from boxed self-projections. Custom object converters and projections of nested values remain supported.
+
 * Detect cycles and bound recursive serialization across nested `TryFormat` wrappers, including dictionary keys,
   so diagnostic formatting uses its fallback instead of overflowing the stack.
 
-* Stop formatter projections that re-enter the same converter at the same JSON depth, preventing stack overflows
-  from boxed self-projections. Custom object converters and projections of nested values remain supported.
+* Fix `HaveStringContentSatisfying` crashing or losing error context when an asynchronous content read resumes
+  on another thread. Preserve successful results, assertion failures, unexpected errors, and cancellation.
 
 * Preserve dictionary comparer and set comparison semantics when returning stored containment matches.
   Collection assertions avoid unnecessary re-enumeration; `ContainItemsMatching` retains its lazy derived sequence.

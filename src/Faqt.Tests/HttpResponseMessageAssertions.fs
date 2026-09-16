@@ -2781,6 +2781,95 @@ Request: GET / HTTP/0.5
 module HaveStringContentSatisfying =
 
 
+    type private DeferredContent() =
+        inherit HttpContent()
+
+        let completion = System.Threading.Tasks.TaskCompletionSource<unit>()
+        let mutable output = None
+
+
+        override _.SerializeToStreamAsync(stream, _) =
+            output <- Some stream
+            completion.Task
+
+
+        override _.TryComputeLength(length: byref<int64>) =
+            length <- 0L
+            false
+
+
+        member _.Complete(error: Exception option) =
+            match error with
+            | Some(:? OperationCanceledException) -> completion.SetCanceled()
+            | Some error -> completion.SetException(error)
+            | None ->
+                let bytes = System.Text.Encoding.UTF8.GetBytes("foo")
+                output.Value.Write(bytes, 0, bytes.Length)
+                completion.SetResult(())
+
+
+    [<Theory>]
+    [<InlineData("Success")>]
+    [<InlineData("Assertion failure")>]
+    [<InlineData("Callback error")>]
+    [<InlineData("Read error")>]
+    [<InlineData("Callback cancellation")>]
+    [<InlineData("Read cancellation")>]
+    let ``Preserves assertion outcomes when content completes on a fresh thread`` outcome =
+        use response = resp 200
+        use content = new DeferredContent()
+        response.Content <- content
+        let error = InvalidOperationException("unexpected content error")
+        let cancellation = OperationCanceledException("cancelled content")
+
+        let callback (body: string) =
+            match outcome with
+            | "Assertion failure" -> body.Should().Be("bar") |> ignore
+            | "Callback error" -> raise error
+            | "Callback cancellation" -> raise cancellation
+            | _ -> ()
+
+            body
+
+        let operation =
+            response.Should().HaveStringContentSatisfying(callback, "async content")
+            |> Async.StartImmediateAsTask
+
+        // StartImmediateAsTask returns only once the incomplete content read has suspended.
+        // Completing on a dedicated thread exercises a continuation with no prior Faqt state.
+        let worker =
+            System.Threading.Thread(fun () ->
+                content.Complete(
+                    match outcome with
+                    | "Read error" -> Some error
+                    | "Read cancellation" -> Some cancellation
+                    | _ -> None
+                )
+            )
+
+        worker.IsBackground <- true
+        worker.Start()
+
+        let result () =
+            operation.WaitAsync(TimeSpan.FromSeconds(10.0)).GetAwaiter().GetResult()
+
+        match outcome with
+        | "Success" -> Assert.Equal("foo", result ())
+        | "Assertion failure" ->
+            let ex = Assert.Throws<AssertionFailedException>(fun () -> result () |> ignore)
+            Assert.Equal("HaveStringContentSatisfying", ex.FailureData.Should)
+            Assert.Equal(Some "async content", ex.FailureData.Because)
+        | "Callback error"
+        | "Read error" ->
+            let ex = Assert.Throws<Exception>(fun () -> result () |> ignore)
+            Assert.Same(error, ex.GetBaseException())
+            Assert.Contains("HaveStringContentSatisfying", ex.Message)
+            Assert.Contains("async content", ex.Message)
+        | _ ->
+            Assert.ThrowsAny<OperationCanceledException>(fun () -> result () |> ignore)
+            |> ignore
+
+
     type private ThrowingContent(error: Exception) =
         inherit HttpContent()
 
