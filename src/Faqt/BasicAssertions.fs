@@ -164,6 +164,10 @@ type BasicAssertions =
         | s -> And(Testable(s, t.CallChainOrigin))
 
 
+    // Transform/TryTransform intentionally treat cancellation from the tested operation as an assertion failure.
+    // Rationale: DOCUMENTATION.md, "Assertion failures and unexpected exceptions".
+
+
     /// Asserts that the subject can be transformed using the specified function (i.e., that the function does not
     /// throw).
     [<Extension>]

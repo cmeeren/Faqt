@@ -427,7 +427,7 @@ type StringAssertions =
         And(t)
 
 
-    // Deserialization exceptions intentionally become assertion failures in all overloads below.
+    // Deserialization exceptions, including cancellation, intentionally become assertion failures in all overloads below.
     // Rationale: DOCUMENTATION.md, "Assertion failures and unexpected exceptions".
 
 

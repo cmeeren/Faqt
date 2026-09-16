@@ -93,9 +93,18 @@ assertion failures, including exceptions from custom converters. Like `Transform
 an operation succeeds. Converter input rejection is not limited to `JsonException`: a converter may use a parser
 that throws `FormatException`, and an unsupported target type can cause `NotSupportedException`. Conversely, a
 converter bug can cause `JsonException`. Classifying exceptions by type cannot reliably separate invalid input from
-implementation errors. This operation-success contract also currently includes cancellation thrown during
-deserialization; the unexpected-error policy above does not apply to these catches. Invalid API arguments, such as
-a null target type, are validated before deserialization and remain unexpected errors.
+implementation errors. Invalid API arguments, such as a null target type, are validated before deserialization and
+remain unexpected errors.
+
+`Transform`, all `TryTransform` and `Roundtrip` overloads, `DeserializeTo`, and `DeserializeToNullable` intentionally
+also treat `OperationCanceledException` and its subtypes as assertion failures when thrown by the tested operation.
+Cancellation can be thrown synchronously, but these assertions accept no cancellation token and test whether a
+synchronous operation succeeds. They cannot distinguish cancellation of the surrounding test from cancellation as
+an outcome of that operation. Retaining the operation-success contract is deliberate; the unexpected-error
+propagation policy above does not apply to these catches. Consequently, this cancellation can be negated by
+`NotSatisfy` or followed by another `SatisfyAny` alternative. Use an explicit exception assertion such as
+`Throw<OperationCanceledException, _>` when cancellation is the expected outcome. Changing this policy would require
+a deliberate contract change across these assertions, rather than an isolated cancellation-propagation fix.
 
 Consequently, `NotSatisfy` around deserialization proves only that it failed, not that the JSON was rejected for the
 intended reason. To test a particular rejection, call the deserializer directly and use `Throw<JsonException, _>`

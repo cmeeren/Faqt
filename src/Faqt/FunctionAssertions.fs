@@ -116,6 +116,10 @@ type FunctionAssertions =
             t.With("But threw", ex).Fail(because)
 
 
+    // All Roundtrip overloads intentionally treat cancellation from the tested operation as an assertion failure.
+    // Rationale: DOCUMENTATION.md, "Assertion failures and unexpected exceptions".
+
+
     /// Asserts that the subject returns the original value (i.e., that the returned value is equal to the original
     /// value and that the subject does not throw). The subject would typically be a composition, e.g. toX >> fromX.
     [<Extension>]
