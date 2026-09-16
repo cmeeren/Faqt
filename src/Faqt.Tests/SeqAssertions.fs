@@ -3771,6 +3771,26 @@ module IntersectWith =
 
 
     [<Fact>]
+    let ``Passes for separately allocated structurally equal arrays`` () =
+        [ [| 1; 2 |] ].Should().IntersectWith([ [| 1; 2 |] ])
+
+
+    [<Fact>]
+    let ``Passes for structurally equal nested arrays`` () =
+        [ [| [| 1; 2 |] |] ].Should().IntersectWith([ [| [| 1; 2 |] |] ])
+
+
+    [<Fact>]
+    let ``Fails for structurally different arrays`` () =
+        assertFails (fun () -> [ [| 1; 2 |] ].Should().IntersectWith([ [| 2; 1 |] ]))
+
+
+    [<Fact>]
+    let ``Passes for shared null items`` () =
+        [ nul<string> ].Should().IntersectWith([ nul<string> ])
+
+
+    [<Fact>]
     let ``Can be chained with And`` () =
         [ 1 ].Should().IntersectWith([ 1 ]).Id<And<int list>>().And.Be([ 1 ])
 
@@ -3846,6 +3866,81 @@ Subject value: [1, 2]
 
 
 module NotIntersectWith =
+
+
+    let private nanCasesFor name nan one two =
+        let lists = [ []; [ nan ]; [ one ]; [ two ]; [ nan; nan ]; [ nan; one ]; [ one; nan; one ] ]
+
+        [
+            for i, subject in List.indexed lists do
+                for j, other in List.indexed lists do
+                    let run () =
+                        let intersects =
+                            subject |> List.exists (fun item -> other |> List.exists ((=) item))
+
+                        let assertDisjoint () =
+                            (singlePass subject).Should().NotIntersectWith(singlePass other) |> ignore
+
+                        if intersects then
+                            assertFails assertDisjoint |> ignore
+                        else
+                            assertDisjoint ()
+
+                    yield [| box $"%s{name}: %i{i}, %i{j}"; box run |]
+        ]
+
+
+    let nanCases = [
+        yield! nanCasesFor "double" Double.NaN 1.0 2.0
+        yield! nanCasesFor "single" Single.NaN 1.0f 2.0f
+        yield! nanCasesFor "Half" Half.NaN Half.Zero Half.One
+        yield! nanCasesFor "array" [| Double.NaN |] [| 1.0 |] [| 2.0 |]
+        yield! nanCasesFor "record" {| Value = Double.NaN |} {| Value = 1.0 |} {| Value = 2.0 |}
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof nanCases)>]
+    let ``NaN intersection agrees with itemwise FSharp equality for single-pass inputs``
+        (_name: string)
+        (run: unit -> unit)
+        =
+        run ()
+
+
+    [<Fact>]
+    let ``Diagnostics exclude unmatched NaNs and retain distinct common values`` () =
+        let ex =
+            assertFails (fun () -> [ Double.NaN; 1.0; 1.0; 2.0 ].Should().NotIntersectWith([ 1.0; Double.NaN; 1.0 ]))
+
+        let commonItems =
+            ex.FailureData.Extra
+            |> List.find (fun (key, _) -> key = "But found common items")
+            |> snd
+            |> unbox<seq<double>>
+            |> Seq.toList
+
+        Assert.Equal<double list>([ 1.0 ], commonItems)
+
+
+    [<Fact>]
+    let ``Fails for separately allocated structurally equal arrays`` () =
+        assertFails (fun () -> [ [| 1; 2 |] ].Should().NotIntersectWith([ [| 1; 2 |] ]))
+
+
+    [<Fact>]
+    let ``Fails for structurally equal nested arrays`` () =
+        assertFails (fun () -> [ [| [| 1; 2 |] |] ].Should().NotIntersectWith([ [| [| 1; 2 |] |] ]))
+
+
+    [<Fact>]
+    let ``Passes for structurally different arrays`` () =
+        [ [| 1; 2 |] ].Should().NotIntersectWith([ [| 2; 1 |] ])
+
+
+    [<Fact>]
+    let ``Fails for shared null items`` () =
+        assertFails (fun () -> [ nul<string> ].Should().NotIntersectWith([ nul<string> ]))
 
 
     [<Fact>]

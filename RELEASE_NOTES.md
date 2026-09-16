@@ -10,6 +10,10 @@ Release notes
   Seekable positions are restored; nonseekable bodies may be consumed, as indicated in the diagnostics.
   Zero omits the body without reading it.
 
+* `IntersectWith` and `NotIntersectWith` now use F# structural equality instead of .NET default equality, and require
+  element types supporting equality. Separately allocated arrays with the same contents now count as common items.
+  `NotIntersectWith` excludes unmatched `double`/`single` NaNs, including nested NaNs, from common items.
+
 * `MatchWildcard` and `NotMatchWildcard` now use case-insensitive invariant-culture matching instead of the current
   culture. Results no longer depend on the current culture's casing rules, such as Turkish `I`/`i` behavior.
 

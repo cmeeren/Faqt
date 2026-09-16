@@ -1235,12 +1235,13 @@ type SeqAssertions =
         t.BeSubsetOf'(superset, true, ?because = because)
 
 
-    /// Asserts that the subject has at least one item in common with the other. Fails if either sequence is empty.
+    /// Asserts that the subject has at least one item in common with the other using F# structural equality.
+    /// Fails if either sequence is empty.
     [<Extension>]
     static member IntersectWith(t: Testable<#seq<'a>>, other: seq<'a>, ?because) : And<_> =
         use _ = t.Assert()
 
-        let set = HashSet(t.Subject :> seq<'a>)
+        let set = HashSet(t.Subject :> seq<'a>, HashIdentity.Structural)
 
         if not (other |> Seq.exists set.Contains) then
             t.With("Other", other).With("But had no common items", []).With("Subject value", t.Subject).Fail(because)
@@ -1248,12 +1249,16 @@ type SeqAssertions =
         And(t)
 
 
-    /// Asserts that the subject has no items in common with the other sequence. Passes if either sequence is empty.
+    /// Asserts that the subject has no items in common with the other sequence using F# structural equality.
+    /// Passes if either sequence is empty.
     [<Extension>]
     static member NotIntersectWith(t: Testable<#seq<'a>>, other: seq<'a>, ?because) : And<_> =
         use _ = t.Assert()
 
-        let set = HashSet(t.Subject :> seq<'a>)
+        // IntersectWith cannot remove values that are unequal to themselves, even when no items match.
+        let set =
+            HashSet(t.Subject |> Seq.filter (fun item -> item = item), HashIdentity.Structural)
+
         set.IntersectWith(other)
 
         if set.Count > 0 then
