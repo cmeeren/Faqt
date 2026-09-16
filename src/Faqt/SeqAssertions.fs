@@ -45,43 +45,31 @@ module private SeqAssertionsHelpers =
 
 
     let getMissingFromSupersetAndIsProperSuperset superset subset =
-        let freqMap = Dictionary()
+        let freqMap = Dictionary<_, int>(HashIdentity.Structural)
+        let mutable hasUnmatchableItem = false
 
-        let increment item =
-            let key = Key item
+        for item in superset do
+            // Values unequal to themselves, such as double/single NaNs, cannot be matched under F# equality.
+            if item <> item then
+                hasUnmatchableItem <- true
+            else
+                let key = Key item
 
-            let newCount =
                 match freqMap.TryGetValue(key) with
-                | false, _ -> 1
-                | true, count -> count + 1
-
-            freqMap[key] <- newCount
-            newCount
-
-        let decrement item =
-            let key = Key item
-
-            let newCount =
-                match freqMap.TryGetValue(key) with
-                | false, _ -> -1
-                | true, count -> count - 1
-
-            freqMap[key] <- newCount
-            newCount
-
-        superset |> Seq.iter (increment >> ignore)
-        let subset = Seq.toArray subset
-        subset |> Seq.iter (decrement >> ignore)
-
-        let containedItemNotInSubset = freqMap |> Seq.exists (fun kvp -> kvp.Value > 0)
+                | false, _ -> freqMap[key] <- 1
+                | true, count -> freqMap[key] <- count + 1
 
         let extraItemsInSubset = ResizeArray()
 
         for item in subset do
-            if increment item < 1 then
-                extraItemsInSubset.Add item
+            let key = Key item
 
-        extraItemsInSubset, containedItemNotInSubset
+            match freqMap.TryGetValue(key) with
+            | true, 1 -> freqMap.Remove(key) |> ignore
+            | true, count -> freqMap[key] <- count - 1
+            | false, _ -> extraItemsInSubset.Add item
+
+        extraItemsInSubset, (hasUnmatchableItem || freqMap.Count > 0)
 
 
     let tryGetFirstItem (source: seq<'a>) =
@@ -515,16 +503,18 @@ type SeqAssertions =
         use _ = t.Assert()
 
         let subjectItems = Seq.toArray t.Subject
-        let freqMap = Dictionary()
+        let freqMap = Dictionary<_, int>(HashIdentity.Structural)
         let additionalSubjectItems = ResizeArray<_>()
         let missingSubjectItems = ResizeArray<_>()
 
         for x in subjectItems do
-            let key = Key x
+            // Keep non-reflexive values out of the map; they are always additional subject items.
+            if x = x then
+                let key = Key x
 
-            match freqMap.TryGetValue(key) with
-            | true, count -> freqMap[key] <- count + 1
-            | false, _ -> freqMap[key] <- 1
+                match freqMap.TryGetValue(key) with
+                | true, count -> freqMap[key] <- count + 1
+                | false, _ -> freqMap[key] <- 1
 
         for x in expected do
             let key = Key x
@@ -535,16 +525,19 @@ type SeqAssertions =
             | false, _ -> missingSubjectItems.Add(x)
 
         for x in subjectItems do
-            let key = Key x
+            if x <> x then
+                additionalSubjectItems.Add(x)
+            else
+                let key = Key x
 
-            match freqMap.TryGetValue(key) with
-            | true, 1 ->
-                additionalSubjectItems.Add(x)
-                freqMap.Remove(key) |> ignore
-            | true, count ->
-                additionalSubjectItems.Add(x)
-                freqMap[key] <- count - 1
-            | false, _ -> ()
+                match freqMap.TryGetValue(key) with
+                | true, 1 ->
+                    additionalSubjectItems.Add(x)
+                    freqMap.Remove(key) |> ignore
+                | true, count ->
+                    additionalSubjectItems.Add(x)
+                    freqMap[key] <- count - 1
+                | false, _ -> ()
 
         if missingSubjectItems.Count > 0 || additionalSubjectItems.Count > 0 then
             t

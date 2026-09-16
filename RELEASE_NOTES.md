@@ -5,6 +5,11 @@ Release notes
 
 #### Breaking changes
 
+* Sequence `HaveSameItemsAs` and the subset/superset assertions now use F# equality consistently and require element
+  types supporting equality. `double` and `single` NaNs, including those nested in structural values, no longer match
+  each other. Unmatched NaNs still count as additional items when checking for a proper subset or superset.
+  `Half.NaN` continues to match itself, consistently with F# equality for `Half`.
+
 * HTTP failure diagnostics now limit captured body bytes before decoding, as well as rendered characters, using
   `HttpContentMaxLength`. Stream previews start at the current position, except byte-array and string content.
   Seekable positions are restored; nonseekable bodies may be consumed, as indicated in the diagnostics.
@@ -76,7 +81,7 @@ Release notes
 * Fix signed integer, decimal, and `TimeSpan` overflow and unsigned underflow (including `UInt128`) in close-to
   comparisons. Reject NaN operands (including `Half.NaN`) in scalar comparisons and adjacent sequence-ordering
   comparisons, including projected ordering keys. Equality-based assertions continue to follow F# equality
-  semantics, including NaN not being equal to itself.
+  semantics: `double` and `single` NaNs are unequal to themselves, while `Half.NaN` equals itself.
 
 * Match response and content headers consistently, including exact values and quoted comma-separated members.
   `HaveHeader` returns all matching header values for further assertions.

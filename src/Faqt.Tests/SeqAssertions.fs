@@ -1261,6 +1261,111 @@ module SinglePassMultisets =
             (fun () -> (singlePass subject).Should().BeProperSupersetOf(singlePass expected) |> ignore)
 
 
+module MultisetEquality =
+
+
+    let rec private removeFirst item =
+        function
+        | [] -> None
+        | head :: tail when head = item -> Some tail
+        | head :: tail -> removeFirst item tail |> Option.map (fun remaining -> head :: remaining)
+
+
+    let rec private isSubset subset superset =
+        match subset with
+        | [] -> true
+        | head :: tail ->
+            match removeFirst head superset with
+            | None -> false
+            | Some remaining -> isSubset tail remaining
+
+
+    let private casesFor name nan ordinary =
+        let lists = [
+            []
+            [ nan ]
+            [ ordinary ]
+            [ nan; nan ]
+            [ ordinary; nan ]
+            [ nan; ordinary ]
+            [ ordinary; ordinary ]
+            [ nan; ordinary; nan ]
+        ]
+
+        [
+            for i, subject in List.indexed lists do
+                for j, expected in List.indexed lists do
+                    let run () =
+                        let check passes assertion =
+                            if passes then
+                                assertion ()
+                            else
+                                assertFails assertion |> ignore
+
+                        check
+                            (subject.Length = expected.Length && isSubset subject expected)
+                            (fun () -> (singlePass subject).Should().HaveSameItemsAs(singlePass expected) |> ignore)
+
+                        check
+                            (isSubset subject expected)
+                            (fun () -> (singlePass subject).Should().BeSubsetOf(singlePass expected) |> ignore)
+
+                        check
+                            (subject.Length < expected.Length && isSubset subject expected)
+                            (fun () -> (singlePass subject).Should().BeProperSubsetOf(singlePass expected) |> ignore)
+
+                        check
+                            (isSubset expected subject)
+                            (fun () -> (singlePass subject).Should().BeSupersetOf(singlePass expected) |> ignore)
+
+                        check
+                            (subject.Length > expected.Length && isSubset expected subject)
+                            (fun () -> (singlePass subject).Should().BeProperSupersetOf(singlePass expected) |> ignore)
+
+                    yield [| box $"%s{name}: %i{i}, %i{j}"; box run |]
+        ]
+
+
+    let cases = [
+        yield! casesFor "double" Double.NaN 1.0
+        yield! casesFor "single" Single.NaN 1.0f
+        yield! casesFor "Half" Half.NaN Half.One
+        yield! casesFor "list" [ Double.NaN ] [ 1.0 ]
+        yield! casesFor "array" [| Double.NaN |] [| 1.0 |]
+        yield! casesFor "record" {| Value = Double.NaN |} {| Value = 1.0 |}
+        yield! casesFor "option" (Some Double.NaN) (Some 1.0)
+        yield! casesFor "tuple" (Double.NaN, 0) (1.0, 0)
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof cases)>]
+    let ``Single-pass multisets agree with itemwise FSharp equality`` (_name: string) (run: unit -> unit) = run ()
+
+
+    [<Fact>]
+    let ``Reports unmatched NaNs on both sides in source order`` () =
+        let ex =
+            assertFails (fun () -> [ Double.NaN; 2.0; Double.NaN ].Should().HaveSameItemsAs([ 1.0; Double.NaN ]))
+
+        let values key =
+            ex.FailureData.Extra
+            |> List.find (fun (name, _) -> name = key)
+            |> snd
+            |> unbox<seq<double>>
+            |> Seq.toArray
+
+        let missing = values "Missing items"
+        let additional = values "Additional items"
+        Assert.Equal(2, missing.Length)
+        Assert.Equal(1.0, missing[0])
+        Assert.True(Double.IsNaN missing[1])
+        Assert.Equal(3, additional.Length)
+        Assert.True(Double.IsNaN additional[0])
+        Assert.Equal(2.0, additional[1])
+        Assert.True(Double.IsNaN additional[2])
+
+
 module HaveSameItemsAs =
 
 

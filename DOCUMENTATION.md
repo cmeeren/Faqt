@@ -442,8 +442,9 @@ Faqt obtains the stream using `HttpContent.ReadAsStream()`. Streamed HTTP respon
 * `BeOfType`: Exact type check
 * `BeAssignableTo`: Polymorphic type check
 
-Equality-based assertions use F# default equality/inequality semantics. In particular, floating-point `NaN` is not
-equal to itself, so assertions such as `Be`, `NotBe`, `BeOneOf`, `NotBeOneOf`, and `Roundtrip` follow that behavior.
+Equality-based assertions use F# default equality/inequality semantics. In particular, `double` and `single` NaNs are
+not equal to themselves, while `Half.NaN` equals itself under F# equality. Assertions such as `Be`, `NotBe`, `BeOneOf`,
+`NotBeOneOf`, and `Roundtrip` follow those semantics.
 
 ### Comparison assertions
 
