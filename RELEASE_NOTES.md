@@ -71,6 +71,8 @@ Release notes
   Multiset equality and subset/superset assertions now handle single-pass sequences correctly. Dictionary equality
   checks item counts and reports mismatched values as a list so structurally equal distinct keys cannot collide.
 
+* Allow `BeOfCase` to read unions with private representations, including their case fields.
+
 * Fix signed integer, decimal, and `TimeSpan` overflow and unsigned underflow (including `UInt128`) in close-to
   comparisons. Reject NaN operands (including `Half.NaN`) in scalar comparisons and adjacent sequence-ordering
   comparisons, including projected ordering keys. Equality-based assertions continue to follow F# equality

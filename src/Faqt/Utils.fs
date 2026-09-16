@@ -51,11 +51,15 @@ let memoize2 (f: 'a -> 'b -> 'c) =
 
 
 let private preComputeUnionReaderCached =
-    memoizeRefEq FSharpValue.PreComputeUnionReader
+    memoizeRefEq (fun caseInfo ->
+        FSharpValue.PreComputeUnionReader(caseInfo, BindingFlags.Public ||| BindingFlags.NonPublic)
+    )
 
 
 let private preComputeUnionTagReaderCached: Type -> (obj -> int) =
-    memoizeRefEq FSharpValue.PreComputeUnionTagReader
+    memoizeRefEq (fun unionType ->
+        FSharpValue.PreComputeUnionTagReader(unionType, BindingFlags.Public ||| BindingFlags.NonPublic)
+    )
 
 
 let private makeCaseTupleTypeCached =

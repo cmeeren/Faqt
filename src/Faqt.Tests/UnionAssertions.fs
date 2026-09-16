@@ -131,6 +131,60 @@ But was:
         Assert.Equal("The specified expression is not a case constructor for UnionAssertions+BeOfCase+MyDu", ex.Message)
 
 
+module BeOfCasePrivateRepresentation =
+
+
+    type MyDu =
+        private
+        | NoFields
+        | SingleField of int
+        | MultipleFields of int * string
+
+
+    [<Fact>]
+    let ``No fields passes and preserves the subject`` () =
+        NoFields.Should().BeOfCase(NoFields).And.Be(NoFields)
+
+
+    [<Fact>]
+    let ``Single field passes and returns the field`` () =
+        (SingleField 42).Should().BeOfCase(SingleField).WhoseValue.Should(()).Be(42)
+
+
+    [<Fact>]
+    let ``Multiple fields passes and returns the fields`` () =
+        MultipleFields(42, "value").Should().BeOfCase(MultipleFields).WhoseValue.Should(()).Be((42, "value"))
+
+
+    [<Fact>]
+    let ``Case with fields fails when actual value is a different case`` () =
+        fun () ->
+            let x = NoFields
+            x.Should().BeOfCase(SingleField)
+        |> assertExnMsg
+            """
+Subject: x
+Should: BeOfCase
+Expected: SingleField
+But was: NoFields
+"""
+
+
+    [<Fact>]
+    let ``Case without fields fails when actual value is a different case`` () =
+        fun () ->
+            let x = SingleField 42
+            x.Should().BeOfCase(NoFields)
+        |> assertExnMsg
+            """
+Subject: x
+Should: BeOfCase
+Expected: NoFields
+But was:
+  SingleField: 42
+"""
+
+
 module BeSome =
 
 
