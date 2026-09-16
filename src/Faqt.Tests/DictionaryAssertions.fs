@@ -2,6 +2,7 @@
 
 open System
 open System.Collections.Generic
+open System.Globalization
 open Faqt
 open Xunit
 
@@ -701,6 +702,77 @@ But was:
 
 
 module HaveSameItemsAs =
+
+
+    let private crossingComparers subjectA subjectPunctuation expectedA expectedUpper =
+        let subject = Dictionary<string, int>(StringComparer.OrdinalIgnoreCase)
+        subject.Add("a", subjectA)
+        subject.Add("a-", subjectPunctuation)
+
+        let comparer =
+            Comparer<string>.Create(fun a b ->
+                CultureInfo.InvariantCulture.CompareInfo.Compare(a, b, CompareOptions.IgnoreSymbols)
+            )
+
+        let expected = SortedDictionary<string, int>(comparer)
+        expected.Add("a", expectedA)
+        expected.Add("A", expectedUpper)
+        subject, expected
+
+
+    let crossingComparerCases = [
+        for subjectA in [ 1; 2 ] do
+            for subjectPunctuation in [ 1; 2 ] do
+                for expectedA in [ 1; 2 ] do
+                    for expectedUpper in [ 1; 2 ] do
+                        yield [| box subjectA; box subjectPunctuation; box expectedA; box expectedUpper |]
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof crossingComparerCases)>]
+    let ``Crossing key comparers require matching values in both directions``
+        subjectA
+        subjectPunctuation
+        expectedA
+        expectedUpper
+        =
+        let subject, expected =
+            crossingComparers subjectA subjectPunctuation expectedA expectedUpper
+        // These key mappings connect all four entries, so their values must all agree.
+        let passes =
+            [ subjectA; subjectPunctuation; expectedA; expectedUpper ]
+            |> List.distinct
+            |> List.length = 1
+
+        let check assertion =
+            if passes then
+                assertion ()
+            else
+                assertFails assertion |> ignore
+
+        check (fun () -> subject.Should().HaveSameItemsAs(expected) |> ignore)
+        check (fun () -> expected.Should().HaveSameItemsAs(subject) |> ignore)
+
+
+    [<Fact>]
+    let ``Reports a value mismatch only visible from expected keys`` () =
+        let subject, expected = crossingComparers 1 1 1 999
+        let ex = assertFails (fun () -> subject.Should().HaveSameItemsAs(expected))
+        Assert.Contains("Key: A", ex.Message)
+        Assert.Contains("Expected: 999", ex.Message)
+        Assert.Contains("Actual: 1", ex.Message)
+
+
+    [<Fact>]
+    let ``Preserves dictionary matching for keys without FSharp equality`` () =
+        let key = fun value -> value + 1
+        let subject = Dictionary<int -> int, int>(EqualityComparer<int -> int>.Default)
+        let expected = Dictionary<int -> int, int>(EqualityComparer<int -> int>.Default)
+        subject.Add(key, 1)
+        expected.Add(key, 1)
+        subject.Should().HaveSameItemsAs(expected) |> ignore
+        expected.Should().HaveSameItemsAs(subject) |> ignore
 
 
     [<Fact>]

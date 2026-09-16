@@ -175,7 +175,8 @@ type DictionaryAssertions =
         And(t)
 
 
-    /// Asserts that the subject contains the same items as the specified dictionary.
+    /// Asserts that the dictionaries have equal counts and that every key in either dictionary resolves to an equal
+    /// value in the other dictionary. Key lookups use each dictionary's own comparer; values use F# equality.
     [<Extension>]
     static member HaveSameItemsAs
         (t: Testable<#IDictionary<'key, 'value>>, expected: IDictionary<'key, 'value>, ?because)
@@ -207,9 +208,21 @@ type DictionaryAssertions =
                 )
             | false, _ -> extraKeys.Add(TryFormat kvp.Key)
 
+        // Avoid duplicating ordinary value mismatches already reported by the forward comparison.
+        let checkReverseValues = differentValues.Count = 0
+
         for kvp in expected do
-            if not (t.Subject.ContainsKey kvp.Key) then
-                missingKeys.Add(TryFormat kvp.Key)
+            match t.Subject.TryGetValue kvp.Key with
+            | true, actualItem when checkReverseValues && kvp.Value <> actualItem ->
+                differentValues.Add(
+                    {
+                        Key = TryFormat kvp.Key
+                        Expected = TryFormat kvp.Value
+                        Actual = TryFormat actualItem
+                    }
+                )
+            | true, _ -> ()
+            | false, _ -> missingKeys.Add(TryFormat kvp.Key)
 
         if differentValues.Count > 0 || extraKeys.Count > 0 || missingKeys.Count > 0 then
             t

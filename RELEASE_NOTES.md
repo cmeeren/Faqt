@@ -5,6 +5,11 @@ Release notes
 
 #### Breaking changes
 
+* Dictionary `HaveSameItemsAs` now requires matching values when looking up keys in both directions, preserving each
+  dictionary's own key comparer. Equal-size dictionaries with different key comparers can now fail where a value
+  mismatch was previously hidden. Dictionaries whose lookups agree in both directions continue to pass, even when
+  their comparers differ.
+
 * Sequence `HaveSameItemsAs` and the subset/superset assertions now use F# equality consistently and require element
   types supporting equality. `double` and `single` NaNs, including those nested in structural values, no longer match
   each other. Unmatched NaNs still count as additional items when checking for a proper subset or superset.
