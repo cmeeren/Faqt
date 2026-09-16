@@ -63,7 +63,7 @@ module private Helpers =
             | '}' -> sb.Append('\\').Append(ch) |> ignore
             | _ -> sb.Append(ch) |> ignore
 
-        let regexPattern = sb.Append('$').ToString()
+        let regexPattern = sb.Append(@"\z").ToString()
 
         Regex.IsMatch(
             subject,
@@ -354,7 +354,7 @@ type StringAssertions =
         t.NotMatchRegex(pattern, RegexOptions.None, ?because = because)
 
 
-    /// Asserts that the subject matches the specified wildcard pattern, which is case insensitive using the invariant
+    /// Asserts that the entire subject matches the specified wildcard pattern, which is case insensitive using the invariant
     /// culture and may contain `*` (matches zero or more characters, including newlines) and `?` (matches a single
     /// character, including newlines).
     /// Newlines are normalized to \n before matching. For more complicated matching, use MatchRegex.
@@ -368,7 +368,7 @@ type StringAssertions =
         And(t)
 
 
-    /// Asserts that the subject does not match the specified wildcard pattern, which is case insensitive using the
+    /// Asserts that the entire subject does not match the specified wildcard pattern, which is case insensitive using the
     /// invariant culture and may contain `*` (matches zero or more characters, including newlines) and `?` (matches a
     /// single character, including newlines). Newlines are normalized to \n before matching. For more complicated
     /// matching, use MatchRegex.

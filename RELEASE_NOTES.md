@@ -87,6 +87,9 @@ Release notes
 
 * Fix wildcard matching when literal text collides with the previous internal placeholder strings.
 
+* Wildcard matching now requires the entire string to match, including any trailing newline. A literal pattern
+  such as `abc` no longer matches `abc\n`; use `abc?`, `abc*`, or an explicit newline to match that character.
+
 #### Clarifications
 
 * Clarified zero enum flag semantics: `HaveFlag` passes and `NotHaveFlag` fails for a zero mask, consistently with

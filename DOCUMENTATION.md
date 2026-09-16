@@ -499,8 +499,8 @@ singleton sequences still satisfy ordering assertions because there are no adjac
 * `NotEndWith`: Suffix check with ordinal or specified comparison type
 * `MatchRegex`
 * `NotMatchRegex`
-* `MatchWildcard`: Case-insensitive invariant-culture wildcard check with `*` (zero or more characters) and `?` (one character)
-* `NotMatchWildcard`: Case-insensitive invariant-culture wildcard check with `*` (zero or more characters) and `?` (one character)
+* `MatchWildcard`: Case-insensitive invariant-culture wildcard check of the entire string with `*` (zero or more characters) and `?` (one character)
+* `NotMatchWildcard`: Case-insensitive invariant-culture wildcard check of the entire string with `*` (zero or more characters) and `?` (one character)
 * `BeJsonEquivalentTo`: Checks that two JSON strings are equivalent (ignoring formatting)
 * `DeserializeTo`: Checks that a string is deserializable to a specified target type
 * All `seq<_>` assertions, including:
