@@ -181,9 +181,28 @@ module DecimalTolerance =
             "crossing zero outside boundary", -1m, Decimal.MaxValue, Decimal.MaxValue, false
             "fractional boundary", -0.125m, 0.375m, 0.5m, true
             "outside fractional boundary", -0.125m, 0.375m, 0.499m, false
+            "fraction beyond maximum distance", -0.1m, Decimal.MaxValue, Decimal.MaxValue, false
+            "rounded distance below lower endpoint", 0.9m, Decimal.MaxValue, Decimal.MaxValue - 1m, false
+            "exact lower endpoint", 1m, Decimal.MaxValue, Decimal.MaxValue - 1m, true
+            "inside lower endpoint", 1.1m, Decimal.MaxValue, Decimal.MaxValue - 1m, true
+            "tiny fraction beyond ordinary tolerance", -0.0000000000000000000000000001m, 10m, 10m, false
+            "equivalent values with different scales", 1.00m, 1m, 0m, true
+            "negative scaled zero", Decimal(0, 0, 0, true, 28uy), 0m, 0m, true
+            "adjacent integers across 32 bits", 4294967295m, 4294967296m, 1m, true
+            "outside tolerance across 32 bits", 4294967295m, 4294967296m, 0.9m, false
+            "adjacent integers across 64 bits", 18446744073709551615m, 18446744073709551616m, 1m, true
+            "outside tolerance across 64 bits", 18446744073709551615m, 18446744073709551616m, 0.9m, false
+
+            // target - tolerance is exactly zero at every scale, without computing a rounded distance.
+            for scale in 0..28 do
+                let target = Decimal(-1, -1, -1, false, byte scale)
+                let epsilon = 0.0000000000000000000000000001m
+                $"outside zero endpoint at scale %i{scale}", -epsilon, target, target, false
+                $"on zero endpoint at scale %i{scale}", 0m, target, target, true
+                $"inside zero endpoint at scale %i{scale}", epsilon, target, target, true
         ]
         |> List.collect (fun (name, subject, target, tolerance, expectedClose) ->
-            [ subject, target; target, subject ]
+            [ subject, target; target, subject; -subject, -target; -target, -subject ]
             |> List.mapi (fun direction (subject, target) -> [|
                 box $"%s{name}, direction %i{direction}"
                 box subject
@@ -196,7 +215,7 @@ module DecimalTolerance =
 
     [<Theory>]
     [<MemberData(nameof cases)>]
-    let ``Honors decimal tolerance without overflow``
+    let ``Honors exact decimal tolerance without rounding or overflow``
         (_name: string)
         (subject: decimal)
         (target: decimal)

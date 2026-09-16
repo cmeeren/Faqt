@@ -5,6 +5,10 @@ Release notes
 
 #### Breaking changes
 
+* Decimal `BeCloseTo` and `NotBeCloseTo` now compare exact distances without decimal subtraction rounding. Values
+  just outside the tolerance no longer pass `BeCloseTo` (or fail `NotBeCloseTo`) when rounding previously hid the
+  difference. Floating-point and custom-type tolerance behavior is unchanged.
+
 * Dictionary `HaveSameItemsAs` now requires matching values when looking up keys in both directions, preserving each
   dictionary's own key comparer. Equal-size dictionaries with different key comparers can now fail where a value
   mismatch was previously hidden. Dictionaries whose lookups agree in both directions continue to pass, even when

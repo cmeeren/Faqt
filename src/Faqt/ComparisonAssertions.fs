@@ -151,16 +151,18 @@ type ComparisonAssertions =
             )
 #endif
         elif typeof<'a> = typeof<decimal> then
-            try
-                ValueSome(
-                    withinTolerance
-                        (unbox<decimal> (box subject))
-                        (unbox<decimal> (box target))
-                        (unbox<decimal> (box tolerance))
-                )
-            with :? OverflowException ->
-                // An overflowing decimal distance exceeds every representable tolerance.
-                ValueSome false
+            // Compare exact integers in units of 10^-28 to avoid rounding or overflowing the decimal distance.
+            let scaledInteger (value: decimal) =
+                let scale = 10000000000000000000000000000m // 10^28
+                let whole = Decimal.Truncate value
+                let fraction = value - whole
+                // The fraction has at most 28 digits, so scaling it stays exact and within decimal's range.
+                bigint whole * bigint scale + bigint (fraction * scale)
+
+            let subject = scaledInteger (unbox<decimal> (box subject))
+            let target = scaledInteger (unbox<decimal> (box target))
+            let tolerance = scaledInteger (unbox<decimal> (box tolerance))
+            ValueSome(abs (subject - target) <= tolerance)
         elif typeof<'a> = typeof<TimeSpan> then
             ValueSome(
                 withinSignedTolerance
