@@ -1,7 +1,7 @@
 Release notes
 ==============
 
-### Unreleased
+### 6.0.0 (2026-09-17)
 
 This major release improves assertion correctness and failure diagnostics, and distinguishes assertion failures from
 unexpected errors in callbacks and other user code.
@@ -47,6 +47,8 @@ unexpected errors in callbacks and other user code.
   HTTP assertion diagnostics.
 * Improve automatic subject names and nested generic type names in failure messages.
 * Allow `BeOfCase` to inspect unions with private representations.
+* Add an optional agent skill for writing Faqt assertions, available in the repository and bundled with the NuGet
+  package.
 
 ### 5.1.0 (2025-09-18)
 
