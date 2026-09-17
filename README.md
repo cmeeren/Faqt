@@ -29,6 +29,7 @@ Upgrading? See the [release notes](https://github.com/cmeeren/Faqt/blob/main/REL
 * [A motivating example](#a-motivating-example)
 * [Faqt in a nutshell](#faqt-in-a-nutshell)
 * [Documentation](#documentation)
+* [Agent skill](#agent-skill)
 * [Contributing](#contributing)
 
 <!-- TOC -->
@@ -157,6 +158,16 @@ As expected by the discerning F# developer, Faqt is:
 See the [documentation](https://github.com/cmeeren/Faqt/blob/main/DOCUMENTATION.md) for additional details, such as the list of assertions, how to use the
 optional `%` operator (alias for `ignore`), instructions on writing your own assertions, customizing the output format,
 security considerations, and a FAQ with, among other things, a brief comparison with other assertion frameworks.
+
+## Agent skill
+
+The [Faqt skill](https://github.com/cmeeren/Faqt/tree/main/.agents/skills/faqt) helps coding agents write idiomatic Faqt assertions and useful failure diagnostics.
+
+To install it, copy the `.agents/skills/faqt` folder from this repository into your project's skill directory (for Codex, `.agents/skills/faqt`), or ask your agent's skill installer to install that folder. Install only `faqt`; `release-faqt` is for maintainers of this library.
+
+The consumer skill is available starting with Faqt 6.0. Use the Git tag matching your package version (`v/<version>`), or `main` for development builds. Review and commit the installed skill with your project, and update it when upgrading Faqt. Installation is optional and explicit; the NuGet package does not install agent instructions during builds.
+
+The same skill is bundled as `skills/SKILL.md` in the NuGet package. Agents and package-aware tools can read it from `<global-packages-folder>/faqt/<version>/skills/SKILL.md` after restore. Run `dotnet nuget locals global-packages --list` to locate that folder. This copy matches the installed package version; bundling it does not automatically make it discoverable by your agent.
 
 ## Contributing
 

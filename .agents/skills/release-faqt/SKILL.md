@@ -25,6 +25,7 @@ Use this skill to release Faqt through the repo's normal tag-driven NuGet flow, 
 
 3. Prepare the release content:
    - Update code and docs only as needed for the release.
+   - Check `.agents/skills/faqt/SKILL.md` against the release's supported APIs and behavior, including its stated version scope and documentation links, and keep the README's skill installation guidance current.
    - Update `RELEASE_NOTES.md` with user-facing behavior, migration impact, and usage guidance. Add entries under `### Unreleased`, creating that section if necessary.
    - Put actionable breaking changes first, using a `#### Breaking changes` or `#### Upgrading from <previous major>.x` subsection. Explain what affected users need to change. Group correctness fixes that restore expected behavior; do not catalog niche edge cases unless they have meaningful migration consequences.
    - Use other categorizing subsections only when grouping materially improves readability; for small releases, prefer plain bullets under the version heading.
@@ -54,7 +55,7 @@ dotnet pack -c Release src/Faqt/Faqt.fsproj --output $packageDir
 if ($LASTEXITCODE -ne 0) { throw "Package creation failed" }
 ````
 
-   Inspect `Faqt.<Version>.nupkg`: confirm the version, versioned release-notes URL, packaged README and icon, and assemblies for every target framework declared in the project. Check that README links work outside GitHub. Local pack proves that the release URL is embedded; it cannot resolve until the matching GitHub Release exists. If preparing a major release, inspect important known consumers for affected contracts and run representative compatibility checks when practical.
+   Inspect `Faqt.<Version>.nupkg`: confirm the version, versioned release-notes URL, packaged README and icon, and assemblies for every target framework declared in the project. Verify that `skills/SKILL.md` matches `.agents/skills/faqt/SKILL.md` byte for byte. Check that README links work outside GitHub. Local pack proves that the release URL is embedded; it cannot resolve until the matching GitHub Release exists. If preparing a major release, inspect important known consumers for affected contracts and run representative compatibility checks when practical.
 
 6. Commit and tag when authorized:
    - Use `git-commit` to execute the authorized commit; it routes message authoring to `git-commit-message`.
