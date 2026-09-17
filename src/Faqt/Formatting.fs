@@ -46,6 +46,17 @@ type FailureData = {
 }
 
 
+module internal HttpHeader =
+
+
+    let mapValue (mapping: string -> string -> string) name value =
+        try
+            mapping name value
+        with ex ->
+            // The raw value and exception message may contain secrets; only include the exception type.
+            $"[header value omitted: header mapping failed with %s{ex.GetType().FullName}]"
+
+
 module internal HttpContent =
 
 
@@ -132,7 +143,7 @@ module internal HttpContent =
 
             for h in c.Headers do
                 for v in h.Value do
-                    sb.AppendLine().Append(h.Key).Append(": ").Append(mapHeaderValues h.Key v)
+                    sb.AppendLine().Append(h.Key).Append(": ").Append(HttpHeader.mapValue mapHeaderValues h.Key v)
                     |> ignore
 
             if not hasContentLengthHeader then
@@ -218,7 +229,7 @@ module internal HttpRequestMessage =
 
         for h in m.Headers do
             for v in h.Value do
-                sb.AppendLine().Append(h.Key).Append(": ").Append(mapHeaderValues h.Key v)
+                sb.AppendLine().Append(h.Key).Append(": ").Append(HttpHeader.mapValue mapHeaderValues h.Key v)
                 |> ignore
 
         m.Content
@@ -245,7 +256,7 @@ module internal HttpResponseMessage =
 
         for h in m.Headers do
             for v in h.Value do
-                sb.AppendLine().Append(h.Key).Append(": ").Append(mapHeaderValues h.Key v)
+                sb.AppendLine().Append(h.Key).Append(": ").Append(HttpHeader.mapValue mapHeaderValues h.Key v)
                 |> ignore
 
         m.Content

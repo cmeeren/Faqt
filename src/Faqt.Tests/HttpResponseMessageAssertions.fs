@@ -6,6 +6,7 @@ open System
 open System.Net
 open System.Net.Http
 open Faqt
+open Faqt.Configuration
 open Xunit
 
 
@@ -2603,6 +2604,48 @@ Request: GET / HTTP/0.5
 module HaveHeaderValue =
 
 
+    [<Theory>]
+    [<InlineData(false, false)>]
+    [<InlineData(false, true)>]
+    [<InlineData(true, false)>]
+    [<InlineData(true, true)>]
+    let ``Masks expected header values without changing comparisons`` contentHeader headerPresent =
+        let name = "X-Private"
+        let actual = "private-actual"
+        let expected = "private-expected"
+        let masked = "[masked]"
+
+        use _ =
+            Config.With(FaqtConfig.Default.SetMapHttpHeaderValues(fun n value -> if n = name then masked else value))
+
+        use response = respContent 200 "body"
+
+        let headers =
+            if contentHeader then
+                response.Content.Headers :> Headers.HttpHeaders
+            else
+                response.Headers
+
+        if headerPresent then
+            headers.Add(name, actual)
+            response.Should().HaveHeaderValue(name, actual) |> ignore
+
+        let error =
+            assertFails (fun () -> response.Should().HaveHeaderValue(name, expected))
+
+        Assert.Equal(
+            masked,
+            error.FailureData.Extra
+            |> List.find (fst >> (=) "Value")
+            |> snd
+            |> unbox<string>
+        )
+
+        Assert.Contains(masked, error.Message)
+        Assert.DoesNotContain(expected, error.Message)
+        Assert.DoesNotContain(actual, error.Message)
+
+
     [<Fact>]
     let ``Passes for single header with single value and can be chained with And`` () =
         (respHeader 200 [ "A", "x" ])
@@ -2722,6 +2765,52 @@ Request: GET / HTTP/0.5
 
 
 module NotHaveHeader =
+
+
+    [<Theory>]
+    [<InlineData(false, 1)>]
+    [<InlineData(false, 2)>]
+    [<InlineData(true, 1)>]
+    [<InlineData(true, 2)>]
+    let ``Masks all unexpected header values`` contentHeader valueCount =
+        let name = "X-Private"
+        let values = [ for i in 1..valueCount -> "private-value-" + string i ]
+        let masked = "[masked]"
+
+        use _ =
+            Config.With(FaqtConfig.Default.SetMapHttpHeaderValues(fun n value -> if n = name then masked else value))
+
+        use response = respContent 200 "body"
+
+        let headers =
+            if contentHeader then
+                response.Content.Headers :> Headers.HttpHeaders
+            else
+                response.Headers
+
+        headers.Add(name, values)
+
+        let error = assertFails (fun () -> response.Should().NotHaveHeader(name))
+
+        let actual =
+            if valueCount = 1 then
+                [
+                    error.FailureData.Extra
+                    |> List.find (fst >> (=) "But was present with value")
+                    |> snd
+                    |> unbox<string>
+                ]
+            else
+                error.FailureData.Extra
+                |> List.find (fst >> (=) "But was present with values")
+                |> snd
+                |> unbox<string list>
+
+        Assert.True((actual = List.replicate valueCount masked))
+        Assert.Contains(masked, error.Message)
+
+        for value in values do
+            Assert.DoesNotContain(value, error.Message)
 
 
     [<Fact>]

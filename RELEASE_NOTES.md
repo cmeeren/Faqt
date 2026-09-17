@@ -77,6 +77,11 @@ Release notes
 * Detect cycles and bound recursive serialization across nested `TryFormat` wrappers, including dictionary keys,
   so diagnostic formatting uses its fallback instead of overflowing the stack.
 
+* Honor configured HTTP header value masking in `HaveHeaderValue` and `NotHaveHeader` diagnostic fields, in addition
+  to the request and response dumps. If a header mapping callback throws while rendering a request or response,
+  omit that value and report only the exception type, without exposing raw headers or exception messages, and
+  continue rendering the remaining values.
+
 * Preserve nested type names and their declaring types' generic arguments in assertion diagnostics.
 
 * Avoid exponential regex backtracking in `MatchWildcard` and `NotMatchWildcard` for patterns with repeated `*`

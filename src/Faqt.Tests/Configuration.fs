@@ -351,3 +351,71 @@ Value: |-
 
   body
 """
+
+
+[<Theory>]
+[<InlineData(false, false, false)>]
+[<InlineData(false, false, true)>]
+[<InlineData(false, true, false)>]
+[<InlineData(false, true, true)>]
+[<InlineData(true, false, false)>]
+[<InlineData(true, false, true)>]
+[<InlineData(true, true, false)>]
+[<InlineData(true, true, true)>]
+let ``Throwing header mapping does not expose values or stop rendering`` response contentHeader throwFirst =
+    let secret = "sensitive-header-value"
+    let failingValue = "sensitive-failing-value"
+
+    use _ =
+        Config.With(
+            FaqtConfig.Default.SetMapHttpHeaderValues(fun name value ->
+                if name = "X-Failing" && value = failingValue then
+                    failwith $"Cannot map %s{value}"
+                elif name = "X-Secret" then
+                    "[masked]"
+                else
+                    value
+            )
+        )
+
+    use request = new HttpRequestMessage(HttpMethod.Post, "/")
+    use reply = new HttpResponseMessage(System.Net.HttpStatusCode.BadRequest)
+    use content = new StringContent("retained body")
+
+    let message, headers =
+        if response then
+            reply.Content <- content
+            box reply, reply.Headers :> HttpHeaders
+        else
+            request.Content <- content
+            box request, request.Headers :> HttpHeaders
+
+    let headers =
+        if contentHeader then
+            content.Headers :> HttpHeaders
+        else
+            headers
+
+    let addFailure () =
+        headers.Add("X-Failing", [| "retained first"; failingValue; "retained last" |])
+
+    if throwFirst then
+        addFailure ()
+
+    headers.Add("X-Secret", secret)
+
+    if not throwFirst then
+        addFailure ()
+
+    headers.Add("X-Other", "retained other")
+
+    for value in [ message; box [ Faqt.Formatting.TryFormat message ] ] do
+        let error = assertFails (fun () -> (0).Should().FailWith("Value", value))
+        Assert.DoesNotContain(secret, error.Message)
+        Assert.DoesNotContain(failingValue, error.Message)
+        Assert.Contains("X-Secret: [masked]", error.Message)
+        Assert.Contains("X-Failing: [header value omitted: header mapping failed with System.Exception]", error.Message)
+        Assert.Contains("X-Failing: retained first", error.Message)
+        Assert.Contains("X-Failing: retained last", error.Message)
+        Assert.Contains("X-Other: retained other", error.Message)
+        Assert.Contains("retained body", error.Message)
