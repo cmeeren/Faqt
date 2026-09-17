@@ -95,6 +95,9 @@ Release notes
 * Preserve underscores in quoted literals and identifiers when deriving subject names, including method arguments
   inside shorthand lambdas.
 
+* Preserve lambdas inside parenthesized subject expressions, such as `items.Select(_.Name)`, when deriving subject
+  names. Enclosing assertion lambdas continue to be omitted.
+
 * Avoid exponential regex backtracking in `MatchWildcard` and `NotMatchWildcard` for patterns with repeated `*`
   sections, preserving existing matching behavior.
 

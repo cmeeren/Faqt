@@ -240,8 +240,8 @@ module internal EmbeddedSource =
 module internal SubjectName =
 
 
-    let private trimToShorthandLambda (source: string) =
-        // Match quoted tokens first so underscores within them are not treated as lambda parameters.
+    let private trimToContainingLambda (source: string) =
+        // Skip quoted tokens and restore the enclosing lambda when a parenthesized expression ends.
         let pattern =
             [
                 "\"\"\".*?\"\"\""
@@ -249,16 +249,26 @@ module internal SubjectName =
                 "\"(?:\\\\.|[^\"\\\\])*\""
                 "'(?:\\\\.|[^'\\\\])'"
                 "``.*?``"
-                "(?<lambda>(?<![\\w'])_(?=\\.|$))"
+                "(?<lambda>\\bfun .+? -> )"
+                "(?<shorthand>(?<![\\w'])_(?=\\.|$))"
+                "[()]"
             ]
             |> String.concat "|"
 
-        Regex.Matches(source, pattern)
-        |> Seq.cast<Match>
-        |> Seq.filter (fun m -> m.Groups["lambda"].Success)
-        |> Seq.tryLast
-        |> Option.map (fun m -> source.Substring(m.Index))
-        |> Option.defaultValue source
+        let enclosingStarts = Stack<int>()
+        let mutable start = 0
+
+        for m in Regex.Matches(source, pattern) do
+            if m.Groups["lambda"].Success then
+                start <- m.Index + m.Length
+            elif m.Groups["shorthand"].Success then
+                start <- m.Index
+            elif m.Value = "(" then
+                enclosingStarts.Push(start)
+            elif m.Value = ")" && enclosingStarts.Count > 0 then
+                start <- enclosingStarts.Pop()
+
+        source.Substring(start)
 
 
     let getFileLines = memoize File.ReadAllLines
@@ -339,11 +349,8 @@ module internal SubjectName =
             // Remove remaining calls to transformation placeholder + Should).
             |> String.regexReplace (Regex.Escape transformationPlaceholder + "\Should *\((\(\))?\)") ""
 
-            // Remove from start of line until final lambda (e.g. in single-line chains in Satisfy)
-            |> String.regexReplace ".*fun .+? -> " ""
-
-            // Remove from start of line until final short-hand lambda (e.g. in single-line chains in Satisfy)
-            |> trimToShorthandLambda
+            // Remove enclosing assertion lambdas, preserving lambdas inside completed subject expressions.
+            |> trimToContainingLambda
 
             // Remove 'let'/'use' bindings from start of line (e.g. when binding a subject or derived value)
             |> String.regexReplace "^ *(let|use)!? *[^=]+?= *" ""

@@ -1105,24 +1105,56 @@ Subject value:
 
 
 [<Fact>]
-let ``Known limitation: Lambdas in subject does not work`` () =
+let ``Lambdas inside subject expressions are preserved`` () =
     fun () ->
         // Comment to force break
         [ 1; 2; 3 ].Select(fun x -> x.ToString()).Should().Fail()
     |> assertExnMsg
         """
-Subject: x.ToString())
+Subject: '[ 1; 2; 3 ].Select(fun x -> x.ToString())'
 Should: Fail
 """
 
 
 [<Fact>]
-let ``Known limitation: Shorthand lambdas in subject does not work`` () =
+let ``Shorthand lambdas inside subject expressions are preserved`` () =
     fun () ->
         // Comment to force break
         [ 1; 2; 3 ].Select(_.ToString()).Should().Fail()
     |> assertExnMsg
         """
-Subject: _.ToString())
+Subject: '[ 1; 2; 3 ].Select(_.ToString())'
 Should: Fail
 """
+
+
+[<Fact>]
+let ``Single-line assertion lambda preserves lambdas inside its subject`` () =
+    let error =
+        assertFails (fun () -> [ 1; 2 ].Select(fun x -> x.ToString()).Should().Fail())
+
+    Assert.Equal<string list>([ "[ 1; 2 ].Select(fun x -> x.ToString())" ], error.FailureData.Subject)
+
+
+[<Fact>]
+let ``Nested assertion lambda preserves shorthand lambdas inside its subject`` () =
+    let error =
+        assertFails (fun () -> [ 1; 2 ].Should().Satisfy(fun xs -> xs.Select(_.ToString()).Should().Fail()))
+
+    Assert.Contains("Subject: xs.Select(_.ToString())", error.Message)
+
+
+[<Fact>]
+let ``Nested shorthand assertion lambda preserves lambdas inside its subject`` () =
+    let error =
+        assertFails (fun () -> [ 1; 2 ].Should().Satisfy(_.Select(fun x -> x.ToString()).Should().Fail()))
+
+    Assert.Contains("Subject: _.Select(fun x -> x.ToString())", error.Message)
+
+
+[<Fact>]
+let ``Parentheses in lambda string arguments do not affect subject boundaries`` () =
+    let error =
+        assertFails (fun () -> [ "a" ].Select(fun x -> x.Replace("(", ")")).Should().Fail())
+
+    Assert.Equal<string list>([ "[ \"a\" ].Select(fun x -> x.Replace(\"(\", \")\"))" ], error.FailureData.Subject)
