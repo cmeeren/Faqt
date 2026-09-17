@@ -113,12 +113,41 @@ type Type with
                 |> String.concat "; "
                 |> fun s -> "{| " + s + " |}"
             elif this.IsGenericType then
-                let fullNameWithoutGenerics = fullName.Substring(0, fullName.IndexOf("`"))
+                // Nested types include their declaring types' generic arguments before their own.
+                let arguments = this.GetGenericArguments()
 
-                this.GenericTypeArguments
-                |> Array.map _.AssertionName
-                |> String.concat ", "
-                |> fun s -> fullNameWithoutGenerics + "<" + s + ">"
+                let rec formatName (t: Type) =
+                    let prefix, inheritedArgumentCount =
+                        match t.DeclaringType with
+                        | null ->
+                            let prefix =
+                                match t.Namespace with
+                                | null
+                                | "" -> ""
+                                | ns -> ns + "."
+
+                            prefix, 0
+                        | parent -> formatName parent + "+", parent.GetGenericArguments().Length
+
+                    let name = prefix + t.Name.Split('`')[0]
+                    let argumentCount = t.GetGenericArguments().Length - inheritedArgumentCount
+
+                    if argumentCount = 0 then
+                        name
+                    else
+                        arguments
+                        |> Array.skip inheritedArgumentCount
+                        |> Array.take argumentCount
+                        |> Array.map (fun argument ->
+                            if argument.IsGenericParameter then
+                                argument.Name
+                            else
+                                argument.AssertionName
+                        )
+                        |> String.concat ", "
+                        |> fun s -> name + "<" + s + ">"
+
+                formatName this
             else
                 fullName
 

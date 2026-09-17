@@ -745,6 +745,93 @@ Value: '{| A: System.Int32; B: Microsoft.FSharp.Collections.FSharpMap<System.Str
 """
 
 
+    let nestedTypeNames = [
+        [|
+            box typeof<Dictionary<string, int>.KeyCollection>
+            box "System.Collections.Generic.Dictionary<System.String, System.Int32>+KeyCollection"
+        |]
+        [|
+            box typeof<Dictionary<string, int>.ValueCollection>
+            box "System.Collections.Generic.Dictionary<System.String, System.Int32>+ValueCollection"
+        |]
+        [|
+            box typeof<Dictionary<string, int>.KeyCollection.Enumerator>
+            box "System.Collections.Generic.Dictionary<System.String, System.Int32>+KeyCollection+Enumerator"
+        |]
+        [|
+            box typeof<List<Dictionary<string, int>.Enumerator>>
+            box
+                "System.Collections.Generic.List<System.Collections.Generic.Dictionary<System.String, System.Int32>+Enumerator>"
+        |]
+        [|
+            box (typeof<Dictionary<string, int>.KeyCollection>.GetGenericTypeDefinition())
+            box "System.Collections.Generic.Dictionary<TKey, TValue>+KeyCollection"
+        |]
+        [|
+            box typeof<Environment.SpecialFolder>
+            box "System.Environment+SpecialFolder"
+        |]
+    ]
+
+
+    [<Theory>]
+    [<MemberData(nameof nestedTypeNames)>]
+    let ``Rendering of nested types preserves each declaring type`` (value: Type) (expected: string) =
+        let error = assertFails (fun () -> ().Should().FailWith("Value", value))
+        Assert.Contains("Value: " + expected, error.Message)
+
+
+    [<Fact>]
+    let ``Type mismatch diagnostics distinguish nested types of the same generic parent`` () =
+        let value = Dictionary<string, int>().Values
+
+        let error =
+            assertFails (fun () -> value.Should().BeOfType(typeof<Dictionary<string, int>.KeyCollection>))
+
+        Assert.Contains(
+            "Expected: System.Collections.Generic.Dictionary<System.String, System.Int32>+KeyCollection",
+            error.Message
+        )
+
+        Assert.Contains(
+            "But was: System.Collections.Generic.Dictionary<System.String, System.Int32>+ValueCollection",
+            error.Message
+        )
+
+
+    [<Fact>]
+    let ``Rendering assigns generic arguments to the level that declares them`` () =
+        let assembly =
+            System.Reflection.Emit.AssemblyBuilder.DefineDynamicAssembly(
+                System.Reflection.AssemblyName("Faqt.NestedTypeFormatting"),
+                System.Reflection.Emit.AssemblyBuilderAccess.Run
+            )
+
+        let moduleBuilder = assembly.DefineDynamicModule("Types")
+
+        let outer =
+            moduleBuilder.DefineType("Fixtures.Outer`1", System.Reflection.TypeAttributes.Public)
+
+        outer.DefineGenericParameters("TOuter") |> ignore
+
+        let middle =
+            outer.DefineNestedType("Middle", System.Reflection.TypeAttributes.NestedPublic)
+
+        middle.DefineGenericParameters("TOuter") |> ignore
+
+        let inner =
+            middle.DefineNestedType("Inner`1", System.Reflection.TypeAttributes.NestedPublic)
+
+        inner.DefineGenericParameters("TOuter", "TInner") |> ignore
+        outer.CreateType() |> ignore
+        middle.CreateType() |> ignore
+        let definition = inner.CreateType()
+        let value = definition.MakeGenericType(typeof<string>, typeof<int>)
+        let error = assertFails (fun () -> ().Should().FailWith("Value", value))
+
+        Assert.Contains("Value: Fixtures.Outer<System.String>+Middle+Inner<System.Int32>", error.Message)
+
+
     [<Fact>]
     let ``Rendering of CultureInfo`` () =
         fun () -> "a".Should().FailWith("Value", CultureInfo("nb-NO"))

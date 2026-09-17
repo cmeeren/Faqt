@@ -77,6 +77,8 @@ Release notes
 * Detect cycles and bound recursive serialization across nested `TryFormat` wrappers, including dictionary keys,
   so diagnostic formatting uses its fallback instead of overflowing the stack.
 
+* Preserve nested type names and their declaring types' generic arguments in assertion diagnostics.
+
 * Avoid exponential regex backtracking in `MatchWildcard` and `NotMatchWildcard` for patterns with repeated `*`
   sections, preserving existing matching behavior.
 
