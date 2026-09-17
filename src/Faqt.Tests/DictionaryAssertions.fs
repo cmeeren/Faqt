@@ -1516,6 +1516,14 @@ module ContainKeys =
 
 
     [<Fact>]
+    let ``Retains requested and missing keys from a single-pass sequence`` () =
+        let keys = singlePass [ "a"; "b"; "b"; "c" ]
+        let error = assertFails (fun () -> (dict [ "a", 1 ]).Should().ContainKeys(keys))
+
+        Assert.Contains("Keys: [a, b, b, c]\nBut was missing: [b, c]\n", error.Message.ReplaceLineEndings("\n"))
+
+
+    [<Fact>]
     let ``Can be chained with AndDerived with found KeyValuePair`` () =
         Map.empty.Add("a", 1).Should().ContainKeys([ "a" ]).Id<And<Map<string, int>>>().And.Be(Map.empty.Add("a", 1))
 

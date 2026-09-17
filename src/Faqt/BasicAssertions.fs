@@ -84,8 +84,16 @@ type BasicAssertions =
     static member BeOneOf(t: Testable<'a>, candidates: seq<'a>, ?because) : AndDerived<'a, 'a> =
         use _ = t.Assert()
 
-        match candidates |> Seq.tryFind ((=) t.Subject) with
-        | None -> t.With("Candidates", candidates).With("But was", t.Subject).Fail(because)
+        let checkedCandidates = ResizeArray<_>()
+
+        match
+            candidates
+            |> Seq.tryFind (fun candidate ->
+                checkedCandidates.Add(candidate)
+                t.Subject = candidate
+            )
+        with
+        | None -> t.With("Candidates", List.ofSeq checkedCandidates).With("But was", t.Subject).Fail(because)
         | Some x -> AndDerived(t, x)
 
 
@@ -95,18 +103,28 @@ type BasicAssertions =
     static member BeOneOf(t: Testable<'a>, candidateMapping: seq<'a * 'b>, ?because) : AndDerived<'a, 'b> =
         use _ = t.Assert()
 
-        match candidateMapping |> Seq.tryFind (fst >> (=) t.Subject) with
-        | None -> t.With("Candidates", candidateMapping |> Seq.map fst).With("But was", t.Subject).Fail(because)
+        let checkedCandidates = ResizeArray<_>()
+
+        match
+            candidateMapping
+            |> Seq.tryFind (fun (candidate, _) ->
+                checkedCandidates.Add(candidate)
+                t.Subject = candidate
+            )
+        with
+        | None -> t.With("Candidates", List.ofSeq checkedCandidates).With("But was", t.Subject).Fail(because)
         | Some(_, b) -> AndDerived(t, b)
 
 
     /// Asserts that the subject is not equal to one of the specified values. Passes if the candidate list is empty.
+    /// Stops at the first match and reports the matching candidate without enumerating the remaining candidates.
     [<Extension>]
     static member NotBeOneOf(t: Testable<'a>, candidates: seq<'a>, ?because) : And<'a> =
         use _ = t.Assert()
 
-        if candidates |> Seq.exists ((=) t.Subject) then
-            t.With("Candidates", candidates).With("But was", t.Subject).Fail(because)
+        match candidates |> Seq.tryFind ((=) t.Subject) with
+        | Some candidate -> t.With("Matching candidate", candidate).With("But was", t.Subject).Fail(because)
+        | None -> ()
 
         And(t)
 

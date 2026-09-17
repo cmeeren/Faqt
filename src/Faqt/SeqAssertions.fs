@@ -341,8 +341,9 @@ type SeqAssertions =
                 else
                     None
             )
+            |> Seq.toList
 
-        if not (Seq.isEmpty differentItems) then
+        if not (List.isEmpty differentItems) then
             t.With("Expected", expected).With("Failures", differentItems).With("Subject value", t.Subject).Fail(because)
 
         And(t)
@@ -355,22 +356,27 @@ type SeqAssertions =
         use _ = t.Assert()
 
         let differentItems =
-            t.Subject
-            |> Seq.indexed
-            |> Seq.choose (fun (i, actualItem) ->
-                let projected = projection actualItem
+            try
+                t.Subject
+                |> Seq.indexed
+                |> Seq.choose (fun (i, actualItem) ->
+                    let projected = projection actualItem
 
-                if projected <> expected then
-                    Some {|
-                        Index = i
-                        Projected = TryFormat projected
-                        Value = TryFormat actualItem
-                    |}
-                else
-                    None
-            )
+                    if projected <> expected then
+                        Some {|
+                            Index = i
+                            Projected = TryFormat projected
+                            Value = TryFormat actualItem
+                        |}
+                    else
+                        None
+                )
+                |> Seq.toList
+            with
+            | :? AssertionFailedException -> reraise ()
+            | ex -> t.With("Expected", expected).With("Subject value", t.Subject).RaiseError(ex, because)
 
-        if not (Seq.isEmpty differentItems) then
+        if not (List.isEmpty differentItems) then
             t.With("Expected", expected).With("Failures", differentItems).With("Subject value", t.Subject).Fail(because)
 
         And(t)
@@ -658,8 +664,8 @@ type SeqAssertions =
     static member NotContainItemsMatching(t: Testable<#seq<'a>>, predicate: 'a -> bool, ?because) : And<_> =
         use _ = t.Assert()
 
-        let matchingItems = t.Subject |> Seq.filter predicate
-        let numMatching = Seq.stringOptimizedLength matchingItems
+        let matchingItems = t.Subject |> Seq.filter predicate |> Seq.toList
+        let numMatching = matchingItems.Length
 
         if numMatching > 0 then
             t

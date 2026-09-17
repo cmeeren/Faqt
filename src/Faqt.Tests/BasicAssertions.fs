@@ -5,6 +5,15 @@ open Faqt
 open Xunit
 
 
+let private singlePass (items: seq<'a>) : seq<'a> =
+    let queue = System.Collections.Generic.Queue<'a>(items)
+
+    seq {
+        while queue.Count > 0 do
+            yield queue.Dequeue()
+    }
+
+
 module EvaluationErrors =
 
 
@@ -305,6 +314,29 @@ module BeOneOf =
 
 
     [<Fact>]
+    let ``Retains candidates from a single-pass sequence`` () =
+        let error = assertFails (fun () -> (1).Should().BeOneOf(singlePass [ 2; 3 ]))
+        Assert.Contains("Candidates: [2, 3]", error.Message)
+
+
+    [<Fact>]
+    let ``Stops and disposes at the first match`` () =
+        let mutable disposed = false
+
+        let candidates =
+            seq {
+                try
+                    yield 1
+                    failwith "The tail must not be enumerated"
+                finally
+                    disposed <- true
+            }
+
+        (1).Should().BeOneOf(candidates).That.Should().Be(1) |> ignore
+        Assert.True(disposed)
+
+
+    [<Fact>]
     let ``Can be chained with AndDerived with found value`` () =
         let x = (1, 2)
         let y = (1, 2)
@@ -369,6 +401,31 @@ But was: 1
 
 
 module ``BeOneOf with mapping`` =
+
+
+    [<Fact>]
+    let ``Retains candidates from a single-pass sequence`` () =
+        let error =
+            assertFails (fun () -> (1).Should().BeOneOf(singlePass [ 2, "b"; 3, "c" ]))
+
+        Assert.Contains("Candidates: [2, 3]", error.Message)
+
+
+    [<Fact>]
+    let ``Stops and disposes at the first match`` () =
+        let mutable disposed = false
+
+        let candidates =
+            seq {
+                try
+                    yield 1, "first"
+                    failwith "The tail must not be enumerated"
+                finally
+                    disposed <- true
+            }
+
+        (1).Should().BeOneOf(candidates).That.Should().Be("first") |> ignore
+        Assert.True(disposed)
 
 
     [<Fact>]
@@ -437,6 +494,31 @@ module NotBeOneOf =
 
 
     [<Fact>]
+    let ``Retains the matching candidate from a single-pass sequence`` () =
+        let error = assertFails (fun () -> (1).Should().NotBeOneOf(singlePass [ 2; 1; 3 ]))
+        Assert.Contains("Matching candidate: 1", error.Message)
+
+
+    [<Fact>]
+    let ``Stops and disposes at the first match including diagnostics`` () =
+        let mutable disposed = false
+
+        let candidates =
+            seq {
+                try
+                    yield 1
+                    failwith "The tail must not be enumerated"
+                finally
+                    disposed <- true
+            }
+
+        let error = assertFails (fun () -> (1).Should().NotBeOneOf(candidates))
+        Assert.Contains("Matching candidate: 1", error.Message)
+        Assert.DoesNotContain("The tail must not be enumerated", error.Message)
+        Assert.True(disposed)
+
+
+    [<Fact>]
     let ``Can be chained with And`` () =
         (1).Should().NotBeOneOf([ 2 ]).Id<And<int>>().And.Be(1)
 
@@ -478,7 +560,7 @@ module NotBeOneOf =
             """
 Subject: x
 Should: NotBeOneOf
-Candidates: [1, 2]
+Matching candidate: 1
 But was: 1
 """
 
@@ -493,7 +575,7 @@ But was: 1
 Subject: x
 Because: Some reason
 Should: NotBeOneOf
-Candidates: [1, 2]
+Matching candidate: 1
 But was: 1
 """
 

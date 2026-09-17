@@ -77,6 +77,11 @@ Release notes
 * Detect cycles and bound recursive serialization across nested `TryFormat` wrappers, including dictionary keys,
   so diagnostic formatting uses its fallback instead of overflowing the stack.
 
+* Preserve single-pass mismatch reports in `AllBe`, `AllBeMappedTo`, `ContainKeys`, `BeOneOf`, and
+  `NotContainItemsMatching`. `NotBeOneOf` now reports the matching candidate without enumerating the remaining
+  candidates. Evaluate projections once before formatting, so unexpected projection errors and cancellation cannot
+  be swallowed as serialization failures.
+
 * Honor configured HTTP header value masking in `HaveHeaderValue` and `NotHaveHeader` diagnostic fields, in addition
   to the request and response dumps. If a header mapping callback throws while rendering a request or response,
   omit that value and report only the exception type, without exposing raw headers or exception messages, and

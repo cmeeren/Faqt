@@ -267,12 +267,13 @@ type DictionaryAssertions =
         if isNull (box t.Subject) then
             nullArg "subject"
 
-        let missingKeys = keys |> Seq.filter (not << t.Subject.ContainsKey)
+        let keys = Seq.toList keys
+        let missingKeys = keys |> List.filter (not << t.Subject.ContainsKey)
 
-        if not (Seq.isEmpty missingKeys) then
+        if not (List.isEmpty missingKeys) then
             t
                 .With("Keys", keys)
-                .With("But was missing", missingKeys |> Seq.distinct |> Seq.map (box >> TryFormat))
+                .With("But was missing", missingKeys |> List.distinct |> List.map (box >> TryFormat))
                 .With("Subject value", t.Subject)
                 .Fail(because)
 

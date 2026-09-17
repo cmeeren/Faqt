@@ -737,6 +737,17 @@ module AllBe =
 
 
     [<Fact>]
+    let ``Retains mismatches from a single-pass sequence`` () =
+        let subject = singlePass [ 1; 3; 2 ]
+        let error = assertFails (fun () -> subject.Should().AllBe(3))
+
+        Assert.Contains(
+            "Failures:\n- Index: 0\n  Value: 1\n- Index: 2\n  Value: 2\n",
+            error.Message.ReplaceLineEndings("\n")
+        )
+
+
+    [<Fact>]
     let ``Can be chained with And`` () =
         [ 1 ].Should().AllBe(1).Id<And<int list>>().And.Be([ 1 ])
 
@@ -819,6 +830,51 @@ Subject value: [1, 3, 2]
 
 
 module ``AllBe with projection`` =
+
+
+    [<Fact>]
+    let ``Retains mismatches from a single-pass projected sequence`` () =
+        let subject = singlePass [ "a"; "ab"; "abc" ]
+        let error = assertFails (fun () -> subject.Should().AllBeMappedTo(2, String.length))
+
+        Assert.Contains(
+            "Failures:\n- Index: 0\n  Projected: 1\n  Value: a\n- Index: 2\n  Projected: 3\n  Value: abc\n",
+            error.Message.ReplaceLineEndings("\n")
+        )
+
+
+    [<Theory>]
+    [<InlineData(false)>]
+    [<InlineData(true)>]
+    let ``Evaluates each projection once including when reporting mismatches`` hasMismatch =
+        let calls = ResizeArray<int>()
+
+        let projection item =
+            calls.Add(item)
+            if hasMismatch then item else 0
+
+        if hasMismatch then
+            assertFails (fun () -> [ 1; 2; 3 ].Should().AllBeMappedTo(0, projection))
+            |> ignore
+        else
+            [ 1; 2; 3 ].Should().AllBeMappedTo(0, projection) |> ignore
+
+        Assert.Equal<int>([ 1; 2; 3 ], calls)
+
+
+    let projectionErrorCases = evaluationErrorCases [ "AllBeMappedTo" ]
+
+
+    [<Theory>]
+    [<MemberData(nameof projectionErrorCases)>]
+    let ``Propagates projection errors after a mismatch`` _ composition cancellation =
+        assertEvaluationError
+            composition
+            cancellation
+            (fun error ->
+                [ 1; 2 ].Should().AllBeMappedTo(0, fun item -> if item = 2 then raise error else item)
+                |> ignore
+            )
 
 
     [<Fact>]
@@ -1957,6 +2013,37 @@ Subject value: [1, 2, 3]
 
 
 module NotContainItemsMatching =
+
+
+    [<Theory>]
+    [<InlineData(false)>]
+    [<InlineData(true)>]
+    let ``Retains matches without re-evaluating the predicate`` singlePassSource =
+        let mutable calls = 0
+
+        let subject =
+            if singlePassSource then
+                singlePass [ 1; 2; 3 ]
+            else
+                seq {
+                    1
+                    2
+                    3
+                }
+
+        let error =
+            assertFails (fun () ->
+                subject
+                    .Should()
+                    .NotContainItemsMatching(fun x ->
+                        calls <- calls + 1
+                        x > 1
+                    )
+            )
+
+        Assert.Contains("But found: 2", error.Message)
+        Assert.Contains("Matching items: [2, 3]", error.Message)
+        Assert.Equal(3, calls)
 
 
     [<Fact>]
