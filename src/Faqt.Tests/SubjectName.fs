@@ -523,6 +523,58 @@ Should: Fail
 
 
 [<Fact>]
+let ``Underscores in regular string literals are preserved`` () =
+    let error = assertFails (fun () -> "_.value".Should().Fail())
+    Assert.Equal<string list>([ "\"_.value\"" ], error.FailureData.Subject)
+
+
+[<Fact>]
+let ``Underscores after escaped quotes are preserved`` () =
+    let error = assertFails (fun () -> "\"_.value".Should().Fail())
+    Assert.Equal<string list>([ "\"\\\"_.value\"" ], error.FailureData.Subject)
+
+
+[<Fact>]
+let ``Underscores in verbatim string literals are preserved`` () =
+    let error = assertFails (fun () -> @"""_.value".Should().Fail())
+    Assert.Equal<string list>([ "@\"\"\"_.value\"" ], error.FailureData.Subject)
+
+
+[<Fact>]
+let ``Underscores in triple quoted string literals are preserved`` () =
+    let error = assertFails (fun () -> """"_.value""".Should().Fail())
+    Assert.Equal<string list>([ "\"\"\"\"_.value\"\"\"" ], error.FailureData.Subject)
+
+
+[<Fact>]
+let ``Underscores in character literals are preserved`` () =
+    let error = assertFails (fun () -> '_'.Should().Fail())
+    Assert.Equal<string list>([ "'_'" ], error.FailureData.Subject)
+
+
+[<Fact>]
+let ``Underscores in quoted identifiers are preserved`` () =
+    let ``_.value`` = 1
+    let error = assertFails (fun () -> ``_.value``.Should().Fail())
+    Assert.Equal<string list>([ "``_.value``" ], error.FailureData.Subject)
+
+
+[<Fact>]
+let ``Leading underscores in identifiers are preserved`` () =
+    let _value = 1
+    let error = assertFails (fun () -> _value.Should().Fail())
+    Assert.Equal<string list>([ "_value" ], error.FailureData.Subject)
+
+
+[<Fact>]
+let ``Shorthand lambda preserves underscores in method arguments`` () =
+    let error =
+        assertFails (fun () -> "value".Should().Satisfy(_.Replace("v", "_.").Should().Fail()))
+
+    Assert.Contains("_.Replace(\"v\", \"_.\")", error.Message)
+
+
+[<Fact>]
 let ``Names containing _ outside of shorthand lambda syntax`` () =
     fun () ->
         let myVar_123 = ""

@@ -92,6 +92,9 @@ Release notes
 
 * Preserve nested type names and their declaring types' generic arguments in assertion diagnostics.
 
+* Preserve underscores in quoted literals and identifiers when deriving subject names, including method arguments
+  inside shorthand lambdas.
+
 * Avoid exponential regex backtracking in `MatchWildcard` and `NotMatchWildcard` for patterns with repeated `*`
   sections, preserving existing matching behavior.
 

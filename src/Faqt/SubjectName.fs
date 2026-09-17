@@ -240,6 +240,27 @@ module internal EmbeddedSource =
 module internal SubjectName =
 
 
+    let private trimToShorthandLambda (source: string) =
+        // Match quoted tokens first so underscores within them are not treated as lambda parameters.
+        let pattern =
+            [
+                "\"\"\".*?\"\"\""
+                "@\"(?:[^\"]|\"\")*\""
+                "\"(?:\\\\.|[^\"\\\\])*\""
+                "'(?:\\\\.|[^'\\\\])'"
+                "``.*?``"
+                "(?<lambda>(?<![\\w'])_(?=\\.|$))"
+            ]
+            |> String.concat "|"
+
+        Regex.Matches(source, pattern)
+        |> Seq.cast<Match>
+        |> Seq.filter (fun m -> m.Groups["lambda"].Success)
+        |> Seq.tryLast
+        |> Option.map (fun m -> source.Substring(m.Index))
+        |> Option.defaultValue source
+
+
     let getFileLines = memoize File.ReadAllLines
 
 
@@ -322,7 +343,7 @@ module internal SubjectName =
             |> String.regexReplace ".*fun .+? -> " ""
 
             // Remove from start of line until final short-hand lambda (e.g. in single-line chains in Satisfy)
-            |> String.regexReplace ".*(?<!\w)_" "_"
+            |> trimToShorthandLambda
 
             // Remove 'let'/'use' bindings from start of line (e.g. when binding a subject or derived value)
             |> String.regexReplace "^ *(let|use)!? *[^=]+?= *" ""
