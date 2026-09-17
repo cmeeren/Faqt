@@ -77,6 +77,9 @@ Release notes
 * Detect cycles and bound recursive serialization across nested `TryFormat` wrappers, including dictionary keys,
   so diagnostic formatting uses its fallback instead of overflowing the stack.
 
+* Avoid exponential regex backtracking in `MatchWildcard` and `NotMatchWildcard` for patterns with repeated `*`
+  sections, preserving existing matching behavior.
+
 * Fix `BeDistinct` recomputing duplicate counts when reporting a failure, which could lose duplicates or throw for
   single-pass sequences.
 

@@ -42,26 +42,22 @@ module private Helpers =
     let isWildcardMatch (subject: string) (pattern: string) =
         let subject = subject.Replace("\r\n", "\n")
         let pattern = pattern.Replace("\r\n", "\n")
-        let sb = StringBuilder(pattern.Length * 2 + 2)
-        sb.Append('^') |> ignore
 
-        for ch in pattern do
-            match ch with
-            | '*' -> sb.Append(".*") |> ignore
-            | '?' -> sb.Append('.') |> ignore
-            | '\\'
-            | '.'
-            | '$'
-            | '^'
-            | '{'
-            | '['
-            | '('
-            | '|'
-            | ')'
-            | '+'
-            | ']'
-            | '}' -> sb.Append('\\').Append(ch) |> ignore
-            | _ -> sb.Append(ch) |> ignore
+        let parts =
+            pattern.Split('*')
+            |> Array.map (fun part -> Regex.Escape(part).Replace(@"\?", "."))
+
+        let sb = StringBuilder(pattern.Length * 2 + 2)
+        sb.Append('^').Append(parts[0]) |> ignore
+
+        for i in 1 .. parts.Length - 1 do
+            if i = parts.Length - 1 then
+                // The final section must be free to match at the end of the subject.
+                sb.Append(".*").Append(parts[i]) |> ignore
+            else
+                // Before another '*', the earliest match leaves the most room for the remaining sections.
+                // Commit to it so a later mismatch cannot retry exponentially many combinations.
+                sb.Append("(?>.*?").Append(parts[i]).Append(')') |> ignore
 
         let regexPattern = sb.Append(@"\z").ToString()
 

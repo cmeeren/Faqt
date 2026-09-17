@@ -2021,6 +2021,83 @@ But was: asd
 """
 
 
+module WildcardMatching =
+
+
+    [<Fact>]
+    let ``Repeated wildcard sections do not cause excessive backtracking`` () =
+        // Warm up assertion and regex initialization before measuring the adversarial input.
+        "warmup".Should().NotMatchWildcard("other") |> ignore
+        let subject = String.replicate 28 "a" + "bc"
+        let pattern = String.replicate 28 "*a" + "c"
+        let timer = System.Diagnostics.Stopwatch.StartNew()
+        subject.Should().NotMatchWildcard(pattern) |> ignore
+        timer.Stop()
+        Assert.True(timer.Elapsed < TimeSpan.FromSeconds(2.0), $"Wildcard matching took %O{timer.Elapsed}")
+
+
+    [<Fact>]
+    let ``Both wildcard assertions agree with regex semantics for short patterns and subjects`` () =
+        let rec strings alphabet length =
+            if length = 0 then
+                [ "" ]
+            else
+                [
+                    for prefix in strings alphabet (length - 1) do
+                        for suffix in alphabet do
+                            yield prefix + suffix
+                ]
+
+        let subjects = [
+            for length in 0..3 do
+                yield! strings [ "a"; "B"; "\n" ] length
+        ]
+
+        let patterns = [
+            for length in 0..4 do
+                yield! strings [ "a"; "b"; "*"; "?" ] length
+        ]
+
+        use _ =
+            Faqt.Formatting.Formatter.With(fun _ -> "Wildcard result differed from the reference regex")
+
+        for pattern in patterns do
+            let reference =
+                Regex(
+                    "^" + Regex.Escape(pattern).Replace(@"\*", ".*").Replace(@"\?", ".") + @"\z",
+                    RegexOptions.IgnoreCase
+                    ||| RegexOptions.Singleline
+                    ||| RegexOptions.CultureInvariant
+                )
+
+            for subject in subjects do
+                if reference.IsMatch(subject) then
+                    subject.Should().MatchWildcard(pattern) |> ignore
+                    assertFails (fun () -> subject.Should().NotMatchWildcard(pattern)) |> ignore
+                else
+                    subject.Should().NotMatchWildcard(pattern) |> ignore
+                    assertFails (fun () -> subject.Should().MatchWildcard(pattern)) |> ignore
+
+
+    [<Theory>]
+    [<InlineData("ababa", "*aba", true)>]
+    [<InlineData("ababa", "*ab*ba", true)>]
+    [<InlineData("ababa", "*aba*ba", true)>]
+    [<InlineData("aba", "*aba*ba", false)>]
+    [<InlineData("a\nB\r\nc", "**?*b*?c", true)>]
+    [<InlineData("a\\b[.]c", "*\\*[*]*", true)>]
+    [<InlineData("a\\b[.]c", "*\\*[*]", false)>]
+    [<InlineData("生命", "*生*?", true)>]
+    [<InlineData("İı", "*i*", false)>]
+    let ``Preserves wildcard segment boundaries and literal matching`` (subject: string) pattern matches =
+        if matches then
+            subject.Should().MatchWildcard(pattern) |> ignore
+            assertFails (fun () -> subject.Should().NotMatchWildcard(pattern)) |> ignore
+        else
+            subject.Should().NotMatchWildcard(pattern) |> ignore
+            assertFails (fun () -> subject.Should().MatchWildcard(pattern)) |> ignore
+
+
 module MatchWildcard =
 
 
