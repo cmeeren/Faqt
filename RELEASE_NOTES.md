@@ -77,6 +77,9 @@ Release notes
 * Detect cycles and bound recursive serialization across nested `TryFormat` wrappers, including dictionary keys,
   so diagnostic formatting uses its fallback instead of overflowing the stack.
 
+* Fix `BeDistinct` recomputing duplicate counts when reporting a failure, which could lose duplicates or throw for
+  single-pass sequences.
+
 * Fall back to JSON diagnostics when serialized failure data cannot be loaded as YAML, such as when property names
   are duplicated.
 

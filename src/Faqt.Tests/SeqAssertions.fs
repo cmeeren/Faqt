@@ -2034,6 +2034,61 @@ module BeDistinct =
     let ``Passes if distinct`` (subject: seq<int>) = subject.Should().BeDistinct()
 
 
+    [<Theory>]
+    [<InlineData("consumed")>]
+    [<InlineData("throws")>]
+    [<InlineData("changes")>]
+    let ``Reports duplicates from the original enumeration`` sourceBehavior =
+        let items = [ 1; 2; 2; 2; 5; 5; 0 ]
+        let mutable enumerationCount = 0
+
+        let subject =
+            match sourceBehavior with
+            | "consumed" -> singlePass items
+            | _ ->
+                seq {
+                    enumerationCount <- enumerationCount + 1
+
+                    if enumerationCount = 1 then
+                        yield! items
+                    elif sourceBehavior = "throws" then
+                        failwith "The sequence cannot be enumerated again"
+                    else
+                        yield! [ 9; 9 ]
+                }
+
+        let error = assertFails (fun () -> subject.Should().BeDistinct())
+
+        Assert.Contains(
+            "Duplicates:\n- Count: 3\n  Item: 2\n- Count: 2\n  Item: 5\n",
+            error.Message.ReplaceLineEndings("\n")
+        )
+
+
+    [<Theory>]
+    [<InlineData(false)>]
+    [<InlineData(true)>]
+    let ``Enumerates once to evaluate distinctness and build the duplicate report`` hasDuplicates =
+        let mutable enumerationCount = 0
+
+        let subject =
+            seq {
+                enumerationCount <- enumerationCount + 1
+                yield 1
+                yield if hasDuplicates then 1 else 2
+            }
+
+        // Isolate assertion evaluation from optional enumeration by a diagnostic formatter.
+        use _ = Faqt.Formatting.Formatter.With(fun _ -> "failure")
+
+        if hasDuplicates then
+            assertFails (fun () -> subject.Should().BeDistinct()) |> ignore
+        else
+            subject.Should().BeDistinct() |> ignore
+
+        Assert.Equal(1, enumerationCount)
+
+
     [<Fact>]
     let ``Throws if null`` () =
         assertThrows (fun () -> Unchecked.defaultof<seq<string>>.Should().BeDistinct())

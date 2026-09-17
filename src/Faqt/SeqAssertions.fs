@@ -676,16 +676,15 @@ type SeqAssertions =
     static member BeDistinct(t: Testable<#seq<'a>>, ?because) : And<_> =
         use _ = t.Assert()
 
-        let nonDistinctItemsWithCounts =
-            t.Subject |> Seq.countBy id |> Seq.filter (fun (_, c) -> c > 1)
+        let duplicates =
+            t.Subject
+            |> Seq.countBy id
+            |> Seq.filter (fun (_, c) -> c > 1)
+            |> Seq.map (fun (x, c) -> {| Count = c; Item = TryFormat x |})
+            |> Seq.toList
 
-        if not (Seq.isEmpty nonDistinctItemsWithCounts) then
-            let items =
-                nonDistinctItemsWithCounts
-                |> Seq.map (fun (x, c) -> {| Count = c; Item = TryFormat x |})
-                |> Seq.toList
-
-            t.With("Duplicates", items).With("Subject value", t.Subject).Fail(because)
+        if not (List.isEmpty duplicates) then
+            t.With("Duplicates", duplicates).With("Subject value", t.Subject).Fail(because)
 
         And(t)
 
