@@ -8,6 +8,10 @@
 
 * [Security considerations](#security-considerations)
 * [Installation and requirements](#installation-and-requirements)
+* [Everyday usage](#everyday-usage)
+  * [Chaining assertions](#chaining-assertions)
+  * [Asserting on derived values](#asserting-on-derived-values)
+  * [Collecting failures](#collecting-failures)
 * [Assertion failures and unexpected exceptions](#assertion-failures-and-unexpected-exceptions)
 * [Avoiding `|> ignore` after assertion chains](#avoiding--ignore-after-assertion-chains)
 * [Writing your own assertions](#writing-your-own-assertions)
@@ -18,7 +22,7 @@
 * [Customizing the format](#customizing-the-format)
 * [Configuring options](#configuring-options)
 * [Assertion list](#assertion-list)
-  * [Higher-order assertions](#higher-order-assertions-1)
+  * [Generic higher-order assertions](#generic-higher-order-assertions)
   * [Basic assertions](#basic-assertions)
   * [Comparison assertions](#comparison-assertions)
   * [Union assertions](#union-assertions)
@@ -46,12 +50,15 @@
 
 ## Security considerations
 
-**Treat assertion exception messages (and therefore test failure messages) as securely as you treat your source code.**
+**Treat assertion exception messages (and therefore test failure messages) as securely as the source code and data they contain.**
 
-Faqt derives subject names from your source code. Known existing limitations (described later in this document) as well
-as bugs can cause Faqt to use a lot more of your code in the subject name than intended (up to entire source files).
-Therefore, do not give anyone access to Faqt assertion failure messages if they should not have access to your source
-code.
+Faqt derives subject names from your source code. Known limitations and bugs can cause it to include more source than
+intended. Failure messages also include assertion values and, for HTTP assertions, request and response details.
+
+HTTP header values are unchanged by default. Use `SetMapHttpHeaderValues`, as shown in [Configuring options](#configuring-options),
+to mask sensitive headers. This does not mask secrets in URLs, bodies, other assertion values, or source code.
+You can omit HTTP body previews with `SetHttpContentMaxLength(0)`. Assertions on body content can still include that
+content in failure messages.
 
 ## Installation and requirements
 
@@ -74,42 +81,86 @@ code.
    Note that `DebugType=embedded` is automatically set
    by [DotNet.ReproducibleBuilds](https://github.com/dotnet/reproducible-builds) if you use that.
 
+## Everyday usage
+
+### Chaining assertions
+
+Start a chain with `Should()`. Use `And` to make another assertion about the same value. All assertions accept an
+optional `because` argument, which appears in the failure message.
+
+```f#
+open Faqt
+open Faqt.Operators
+
+let count = 3
+%count.Should().BePositive().And.BeLessThan(10, "There are fewer than ten seats")
+```
+
+The examples use `%` to discard the return value. You can use `|> ignore` instead.
+
+### Asserting on derived values
+
+Assertions such as `BeSome`, `BeOk`, and `ContainExactlyOneItem` expose a derived value after they pass. Use `Whose`
+to access that value or its properties, then `Should(())` to continue the same chain. The double parentheses preserve
+the subject name in failure messages. Start each separate chain with `Should()`.
+
+```f#
+let result = Some "Ada"
+%result.Should().BeSome().Whose.Length.Should(()).Be(3)
+
+// You can also extract the value for later use.
+let name = result.Should().BeSome().Whose
+```
+
+`Whose`, `WhoseValue`, `That`, and `Derived` are aliases for the derived value; choose whichever reads best.
+`And` continues assertions on the original value, while `Subject` returns that original value directly.
+
+### Collecting failures
+
+A normal assertion chain stops at the first failure. Use `SatisfyAll` to run separate checks and report their assertion
+failures together:
+
+```f#
+let customer = {| Name = "Ada"; Age = 37 |}
+
+%customer.Should().SatisfyAll(
+    [
+        fun c -> %c.Name.Should().NotBeEmpty()
+        fun c -> %c.Age.Should().BeGreaterThanOrEqualTo(18)
+    ]
+)
+```
+
+Each callback starts its own chain with `Should()`. Each callback still stops at its first failure, so use separate
+callbacks for checks you want reported independently.
+
+Use `AllSatisfy` to check every item in a collection and collect failures with their item indexes:
+
+```f#
+let quantities = [ 2; 4; 6 ]
+%quantities.Should().AllSatisfy(fun quantity -> quantity.Should().BePositive())
+```
+
+`SatisfyAny` tries alternatives until one succeeds. `NotSatisfy` passes when its callback raises an assertion failure.
+Unexpected errors stop these assertions, as described below.
+
 ## Assertion failures and unexpected exceptions
 
-Faqt reports ordinary assertion failures with `AssertionFailedException`. Higher-order assertions can add context to
-these failures, collect them, try another alternative (`SatisfyAny`), or negate them (`NotSatisfy`).
+Faqt distinguishes a failed assertion from an error in the code performing the check:
 
-Unexpected exceptions from assertion callbacks, custom comparers, and HTTP content reads are reported with diagnostic
-context in an ordinary `Exception`, with the original exception preserved in its `InnerException` chain. They stop
-aggregation or evaluation of further alternatives. On these unexpected-error paths, `OperationCanceledException` and
-its subtypes propagate without wrapping. `SatisfyAny` still stops evaluating callbacks after the first success.
+| Outcome | Behavior |
+| --- | --- |
+| An assertion fails | Raises `AssertionFailedException`. Higher-order assertions can collect it, try another alternative, or negate it. |
+| A callback, comparer, or HTTP content read throws unexpectedly | Stops evaluation and raises an ordinary `Exception` with diagnostic context and the original exception in its `InnerException` chain. |
+| Cancellation occurs on an unexpected-error path | Propagates `OperationCanceledException` without wrapping. |
 
-Assertions that explicitly test exception outcomes, such as `Throw`, `NotThrow`, `Transform`, and parsing assertions,
-retain their documented behavior. For example, `NotThrow` failing because the tested function threw is an ordinary
-assertion failure that can be negated.
+Assertions that explicitly test exceptions or whether an operation succeeds follow their own contracts. For example,
+`NotThrow` fails if the tested function throws. `Transform`, `TryTransform`, `Roundtrip`, `DeserializeTo`, and
+`DeserializeToNullable` treat exceptions from the tested operation, including cancellation, as assertion failures.
+Invalid API arguments remain errors rather than assertion failures.
 
-`DeserializeTo` and `DeserializeToNullable` intentionally treat all exceptions thrown during deserialization as
-assertion failures, including exceptions from custom converters. Like `Transform` and `Roundtrip`, they assert that
-an operation succeeds. Converter input rejection is not limited to `JsonException`: a converter may use a parser
-that throws `FormatException`, and an unsupported target type can cause `NotSupportedException`. Conversely, a
-converter bug can cause `JsonException`. Classifying exceptions by type cannot reliably separate invalid input from
-implementation errors. Invalid API arguments, such as a null target type, are validated before deserialization and
-remain unexpected errors.
-
-`Transform`, all `TryTransform` and `Roundtrip` overloads, `DeserializeTo`, and `DeserializeToNullable` intentionally
-also treat `OperationCanceledException` and its subtypes as assertion failures when thrown by the tested operation.
-Cancellation can be thrown synchronously, but these assertions accept no cancellation token and test whether a
-synchronous operation succeeds. They cannot distinguish cancellation of the surrounding test from cancellation as
-an outcome of that operation. Retaining the operation-success contract is deliberate; the unexpected-error
-propagation policy above does not apply to these catches. Consequently, this cancellation can be negated by
-`NotSatisfy` or followed by another `SatisfyAny` alternative. Use an explicit exception assertion such as
-`Throw<OperationCanceledException, _>` when cancellation is the expected outcome. Changing this policy would require
-a deliberate contract change across these assertions, rather than an isolated cancellation-propagation fix.
-
-Consequently, `NotSatisfy` around deserialization proves only that it failed, not that the JSON was rejected for the
-intended reason. To test a particular rejection, call the deserializer directly and use `Throw<JsonException, _>`
-or another appropriate exception assertion. Narrowing the deserialization catches would be a deliberate breaking
-contract change, not merely consistent application of the unexpected-error policy.
+To test a specific rejection, call the operation directly and use an exception assertion such as
+`Throw<JsonException, _>`. Negating `DeserializeTo` only proves that deserialization failed, not why.
 
 In custom assertions, use `Fail` for an ordinary assertion failure. To report an unexpected exception with additional
 context, use `t.With(...).RaiseError(ex, because)`, which includes the exception under `But threw` automatically.
@@ -377,8 +428,8 @@ let myFormatter : FailureData -> string =
 // Set the default formatter
 Formatter.Set(myFormatter)
 
-// Set the config for a certain scope (until the returned value is disposed)
-use _ = Formatter.With(myConfig)
+// Set the formatter for a certain scope (until the returned value is disposed)
+use _ = Formatter.With(myFormatter)
 ```
 
 ## Configuring options
@@ -386,6 +437,7 @@ use _ = Formatter.With(myConfig)
 Faqt contains some configurable options, which are adjusted similarly to the formatter:
 
 ```f#
+open System
 open Faqt
 open Faqt.Configuration
 
@@ -406,16 +458,16 @@ Config.Set(myConfig)
 
 // Set the config for a certain scope (until the returned value is disposed)
 use _ = Config.With(myConfig)
-
-// Config.Current is available globally and can be used in your own converters/formatters.
-myFormatter Config.Current
 ```
 
-HTTP failure diagnostics capture at most `HttpContentMaxLength` bytes before decoding, and limit the formatted body to the same number of characters. Truncation and consumption notices are additional to this limit. A zero limit omits the body without reading it. Truncated input is shown without JSON formatting.
+Use `Config.Current` to access the effective configuration in your own converters and formatters.
 
-The preview starts at the content stream's current position. Seekable streams have their position restored, including after read failures. Nonseekable streams are consumed to obtain a useful preview, with up to one extra byte read to detect truncation; later reads resume after those consumed bytes. Diagnostics indicate this consumption. Byte-array and string content are previewed from the beginning, subject to the limit, while preserving any existing stream position.
+HTTP failure diagnostics limit both captured body bytes and rendered body characters using `HttpContentMaxLength`
+(1 MiB by default). Set it to zero to omit bodies without reading them.
 
-Faqt obtains the stream using `HttpContent.ReadAsStream()`. Streamed HTTP responses can therefore be previewed without buffering their entire bodies. However, obtaining the stream can itself buffer generated content, including `JsonContent`, in full. The limit bounds Faqt's preview reads and rendered output; it is not a total memory limit or a guarantee against buffering inside `HttpContent`.
+Previews preserve seekable stream positions. Reading a nonseekable stream consumes data, which is indicated in the
+diagnostics. Obtaining the stream can still buffer generated content such as `JsonContent` in full; the preview limit
+is not a total memory limit.
 
 ## Assertion list
 
@@ -442,15 +494,9 @@ Faqt obtains the stream using `HttpContent.ReadAsStream()`. Streamed HTTP respon
 * `BeOfType`: Exact type check
 * `BeAssignableTo`: Polymorphic type check
 
-Equality-based assertions use F# default equality/inequality semantics. In particular, `double` and `single` NaNs are
-not equal to themselves, while `Half.NaN` equals itself under F# equality. Assertions such as `Be`, `NotBe`, `BeOneOf`,
-`NotBeOneOf`, and `Roundtrip` follow those semantics.
+`Be`, `NotBe`, `BeOneOf`, and `NotBeOneOf` use F# equality unless a custom comparer is supplied.
 
 ### Comparison assertions
-
-Comparison assertions fail when an operand is a built-in floating-point `NaN`, including `Half.NaN`.
-Sequence-ordering assertions also reject adjacent comparisons involving NaN items or projected keys. Empty and
-singleton sequences still satisfy ordering assertions because there are no adjacent items to compare.
 
 * `BeCloseTo`: Same as `Be`, but with a tolerance
 * `NotBeCloseTo`: Same as `NotBe`, but with a tolerance
@@ -504,6 +550,7 @@ singleton sequences still satisfy ordering assertions because there are no adjac
 * `NotMatchWildcard`: Case-insensitive invariant-culture wildcard check of the entire string with `*` (zero or more characters) and `?` (one character)
 * `BeJsonEquivalentTo`: Checks that two JSON strings are equivalent (ignoring formatting)
 * `DeserializeTo`: Checks that a string is deserializable to a specified target type
+* `DeserializeToNullable`: Like `DeserializeTo`, but allows a null result
 * All `seq<_>` assertions, including:
   * `HaveLength`
   * `BeEmpty`
@@ -609,7 +656,8 @@ singleton sequences still satisfy ordering assertions because there are no adjac
 
 ### `HttpResponseMessage` assertions
 
-All assertion failure messages contain the full response and the original request.
+Failure messages include response details and the original request when available, with bounded body previews.
+See [Configuring options](#configuring-options) for preview limits and header masking.
 
 * `HaveStatusCode`
 * `Be1XXInformational`
@@ -622,6 +670,7 @@ All assertion failure messages contain the full response and the original reques
 * `Be200Ok`
 * (etc. for other status codes)
 * `HaveHeader`: Check for the existence of a header (and continue asserting on the header value(s))
+* `NotHaveHeader`: Check that a header is absent
 * `HaveHeaderValue`: Check for the existence of a header with a specific exact value, or a specific member of a known comma-separated list header
 * `HaveStringContentSatisfying`: Check for string content satisfying a specified inner assertion
 
@@ -683,14 +732,8 @@ invalid usage and raises an exception rather than an `AssertionFailedException`.
 null, such as `BeNull`, `NotBeNull`, `BeOfType`, and `BeAssignableTo`, retain their individual contracts. Use
 `NotBeNull` before continuing an assertion chain when the subject may be null.
 
-`Throw`, `ThrowExactly`, `ThrowInner`, `NotThrow`, and all `Roundtrip` overloads reject null function subjects with
-`ArgumentNullException` before attempting invocation. A missing function is invalid input, not an exception thrown
-by the function being tested. Exceptions thrown by an actual function retain the assertion's documented behavior.
-
-`Transform` and all `TryTransform` overloads likewise reject null callbacks with `ArgumentNullException`
-(`ParamName = "f"`). The runtime-type overloads of `DeserializeTo` and `DeserializeToNullable` reject null target
-types with `ArgumentNullException` (`ParamName = "targetType"`) before deserializing. Higher-order assertions treat
-these invalid arguments as unexpected errors, so they cannot make `NotSatisfy` pass or be skipped by `SatisfyAny`.
+Null functions, callbacks, and required type arguments are invalid inputs. They cannot make `NotSatisfy` pass or be
+skipped by `SatisfyAny`.
 
 ### Why not FluentAssertions?
 
@@ -711,9 +754,8 @@ trouble for F#. Here are the reasons I decided to make Faqt instead of just usin
 * Some assertions run contrary to expectations of F# (or even C#)
   developers ([discussion](https://github.com/fluentassertions/fluentassertions/discussions/2143#discussioncomment-5525582)).
 
-Note that Faqt does not aim for feature parity with FluentAssertions. For example, Faqt does not execute and report on
-multiple assertions simultaneously; like almost all assertion libraries, it stops at the first failure ("monadic"
-instead of "applicative" behavior).
+Faqt does not aim for feature parity with FluentAssertions. Normal assertion chains stop at the first failure;
+use `SatisfyAll` or `AllSatisfy` to [collect assertion failures](#collecting-failures).
 
 ### Why not Shouldly?
 

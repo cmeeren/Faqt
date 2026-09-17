@@ -19,17 +19,44 @@ Faqt follows [SemVer v2.0.0](https://semver.org/) and aims to preserve **source 
 releases, except when the major version is incremented. Note that any change to the assertion message format is
 considered a non-breaking change.
 
+Upgrading? See the [release notes](RELEASE_NOTES.md), including [guidance for upgrading from 5.x](RELEASE_NOTES.md#upgrading-from-5x).
+
 ## Table of contents
 
 <!-- TOC -->
 
-* [A motivating example](#a-motivating-example)
 * [Installation and requirements](#installation-and-requirements)
+* [A motivating example](#a-motivating-example)
 * [Faqt in a nutshell](#faqt-in-a-nutshell)
 * [Documentation](#documentation)
 * [Contributing](#contributing)
 
 <!-- TOC -->
+
+## Installation and requirements
+
+Install [Faqt from NuGet](https://www.nuget.org/packages/Faqt) in your F# project. Faqt supports .NET 5.0 and higher.
+
+```sh
+dotnet add package Faqt
+```
+
+Open `Faqt` and start asserting with `Should()`:
+
+```f#
+open Faqt
+open Faqt.Operators
+
+let answer = 42
+%answer.Should().Be(42)
+```
+
+The optional `%` operator discards the assertion's return value; you can use `|> ignore` instead. Faqt works with any
+test framework and can also be used in domain code.
+
+If you use path mapping, deterministic source paths, or run assertions without source files available, set `DebugType`
+to `embedded` and `EmbedAllSources` to `true` in each project that calls assertions. See the
+[setup instructions](DOCUMENTATION.md#installation-and-requirements) and [everyday usage guide](DOCUMENTATION.md#everyday-usage).
 
 ## A motivating example
 
@@ -54,10 +81,6 @@ customer
     .Whose.Name.LastName.Should(())
     .Be("Armstrong", "Only customers named Armstrong get free shipping")
 ```
-
-(The example is formatted using [Fantomas](https://fsprojects.github.io/fantomas/), which line-breaks fluent chains at
-method calls. While the readability of Faqt assertion chains could be slightly improved by manual formatting, entirely
-foregoing automatic formatting is not worth the slight benefit to readability.)
 
 Depending on the input, a `Faqt.AssertionFailedException` may be raised with one of these messages:
 
@@ -103,14 +126,7 @@ As you can see, the output is YAML-based (because this is both human readable an
 values). The top-level `Subject` key tells you which part of the code fails, and an array of values is used when using
 derived state from an assertion, so you can track the transformations on the original subject.
 
-**Yes, this works even in Release mode or when source files are not available!** See the very simple requirements below.
-
-## Installation and requirements
-
-1. Install Faqt [from NuGet](https://www.nuget.org/packages/Faqt). Faqt supports .NET 5.0 and higher.
-2. If you use path mapping, deterministic source paths, or want to execute assertions where source files are not
-   available (e.g. in production), set `DebugType` to `embedded` and `EmbedAllSources` to `true`. For more details, see
-   the [documentation](DOCUMENTATION.md).
+**Yes, this works even in Release mode or when source files are not available!** Use the settings described above.
 
 ## Faqt in a nutshell
 

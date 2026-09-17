@@ -3,148 +3,50 @@ Release notes
 
 ### Unreleased
 
-#### Breaking changes
+This major release improves assertion correctness and failure diagnostics, and distinguishes assertion failures from
+unexpected errors in callbacks and other user code.
 
-* `BeJsonEquivalentTo` now preserves exact JSON number spelling in comparisons and failure output. Long arrays
-  containing distinct numbers no longer compare equal because of numeric rounding or normalization.
+#### Upgrading from 5.x
 
-* Decimal `BeCloseTo` and `NotBeCloseTo` now compare exact distances without decimal subtraction rounding. Values
-  just outside the tolerance no longer pass `BeCloseTo` (or fail `NotBeCloseTo`) when rounding previously hid the
-  difference. Floating-point and custom-type tolerance behavior is unchanged.
+* **Review code that catches `AssertionFailedException` or uses higher-order assertions.** Unexpected callback,
+  comparer, and HTTP content-read exceptions now stop evaluation and raise an ordinary `Exception`, preserving
+  diagnostic context and the original exception in the `InnerException` chain. For example, a bug in a `NotSatisfy`
+  callback now raises an error instead of making the assertion pass; `SatisfyAny` stops instead of trying another
+  alternative after such an error. Assertions that explicitly test exception outcomes retain their contracts.
+  See [Assertion failures and unexpected exceptions](DOCUMENTATION.md#assertion-failures-and-unexpected-exceptions).
 
-* Dictionary `HaveSameItemsAs` now requires matching values when looking up keys in both directions, preserving each
-  dictionary's own key comparer. Equal-size dictionaries with different key comparers can now fail where a value
-  mismatch was previously hidden. Dictionaries whose lookups agree in both directions continue to pass, even when
-  their comparers differ.
+* **Recompile collection assertion helpers.** Sequence `HaveSameItemsAs`, subset/superset assertions, `IntersectWith`,
+  and `NotIntersectWith` now consistently use F# equality and require element types supporting equality. Generic
+  wrappers may need an `'a : equality` constraint. If your element type does not support equality, compare a suitable
+  projection instead.
 
-* Sequence `HaveSameItemsAs` and the subset/superset assertions now use F# equality consistently and require element
-  types supporting equality. `double` and `single` NaNs, including those nested in structural values, no longer match
-  each other. Unmatched NaNs still count as additional items when checking for a proper subset or superset.
-  `Half.NaN` continues to match itself, consistently with F# equality for `Half`.
+* **Review tests of invalid API arguments.** Invalid inputs such as null callbacks, reversed ranges, and negative
+  built-in tolerances now raise argument exceptions rather than assertion failures or incidental exceptions. Fix
+  invalid calls; when deliberately testing them, expect an argument exception. Such errors cannot satisfy `NotSatisfy`
+  or be skipped by `SatisfyAny`.
 
-* HTTP failure diagnostics now limit captured body bytes before decoding, as well as rendered characters, using
-  `HttpContentMaxLength`. Stream previews start at the current position, except byte-array and string content.
-  Seekable positions are restored; nonseekable bodies may be consumed, as indicated in the diagnostics.
-  Zero omits the body without reading it.
+* **Check wildcard assertions that rely on the current culture.** `MatchWildcard` and `NotMatchWildcard` now use
+  case-insensitive invariant-culture matching, so their results are consistent across machines.
 
-* `IntersectWith` and `NotIntersectWith` now use F# structural equality instead of .NET default equality, and require
-  element types supporting equality. Separately allocated arrays with the same contents now count as common items.
-  `NotIntersectWith` excludes unmatched `double`/`single` NaNs, including nested NaNs, from common items.
+* **If you customize HTTP diagnostics, review your preview limit.** `HttpContentMaxLength` now bounds captured bytes
+  as well as rendered characters. A zero limit omits bodies without reading them. Previews now support nonseekable
+  streams, consuming data as they read. See [Configuring options](DOCUMENTATION.md#configuring-options).
 
-* `MatchWildcard` and `NotMatchWildcard` now use case-insensitive invariant-culture matching instead of the current
-  culture. Results no longer depend on the current culture's casing rules, such as Turkish `I`/`i` behavior.
-
-* Unexpected callback, comparer, and HTTP content-read exceptions retain Faqt's diagnostic context but
-  now use ordinary `Exception` wrappers instead of `AssertionFailedException`, preserving the original exception in
-  the `InnerException` chain. Aggregation and evaluation of further alternatives stop on an unexpected error.
-  Ordinary assertion failures and explicit exception-testing contracts retain their behavior.
-  `OperationCanceledException` and its subtypes propagate without wrapping. Custom assertions can use
-  `t.With(...).RaiseError(ex, because)` to report unexpected errors with context.
-
-* `Throw`, `ThrowExactly`, `ThrowInner`, `NotThrow`, and all `Roundtrip` overloads now reject null function
-  subjects with `ArgumentNullException` (`ParamName = "subject"`) before invocation. A null function can no longer
-  satisfy a `Throw` assertion through the `NullReferenceException` caused by attempting to invoke it. Exceptions
-  thrown by an actual function retain their existing behavior.
-
-* `Transform` and all `TryTransform` overloads now reject null callbacks with `ArgumentNullException`
-  (`ParamName = "f"`). The runtime-type overloads of `DeserializeTo` and `DeserializeToNullable` now reject a null
-  target type with `ArgumentNullException` (`ParamName = "targetType"`) before deserializing. These invalid arguments
-  no longer become assertion failures that can satisfy `NotSatisfy` or be skipped by `SatisfyAny`.
-
-* `BeInRange` now rejects an upper bound smaller than the lower bound with `ArgumentException`
-  (`ParamName = "upper"`). Existing NaN assertion failures take precedence over this validation.
-
-* `BeCloseTo` and `NotBeCloseTo` now reject negative tolerances for supported built-in numeric types and
-  `TimeSpan` with `ArgumentException`. Existing NaN handling takes precedence over this validation. Custom tolerance
-  types retain their existing operator-based behavior.
-
-* The `Guid` overloads of `Be` and `NotBe` now reject invalid string arguments with `ArgumentException`.
-  Previously, malformed strings threw `FormatException`, and null strings threw `ArgumentNullException`.
-
-* The `Type` overloads of `BeOfType` and `BeAssignableTo` now reject a null `expectedType` with
-  `ArgumentNullException`, before checking the subject.
-
-* Configuration and formatter APIs now reject null inputs with `ArgumentNullException` when supplied,
-  rather than accepting them and potentially failing later. This applies to `Config.Set`/`With`,
-  `Formatter.Set`/`With`, `FaqtConfig.SetMapHttpHeaderValues`, and `YamlFormatterBuilder` methods accepting callbacks
-  or converters. `FaqtConfig.SetHttpContentMaxLength` now rejects negative lengths with `ArgumentException`.
-  `YamlFormatterBuilder.SerializeAs` now rejects projected types assignable to the input type with
-  `ArgumentException`, preventing the converter from recursively selecting itself. `SerializeExactAs` still allows
-  subtype outputs because its converter matches only the exact input type.
+* **If you write custom assertions, distinguish failures from unexpected errors.** Use `Fail` for a failed assertion
+  and `t.With(...).RaiseError(ex, because)` to add context to an unexpected error. Custom higher-order assertions
+  should catch only `AssertionFailedException` as an assertion failure.
 
 #### Fixes and improvements
 
-* Stop formatter projections that re-enter the same converter at the same JSON depth, preventing stack overflows
-  from boxed self-projections. Custom object converters and projections of nested values remain supported.
-
-* Detect cycles and bound recursive serialization across nested `TryFormat` wrappers, including dictionary keys,
-  so diagnostic formatting uses its fallback instead of overflowing the stack.
-
-* Preserve single-pass mismatch reports in `AllBe`, `AllBeMappedTo`, `ContainKeys`, `BeOneOf`, and
-  `NotContainItemsMatching`. `NotBeOneOf` now reports the matching candidate without enumerating the remaining
-  candidates. Evaluate projections once before formatting, so unexpected projection errors and cancellation cannot
-  be swallowed as serialization failures.
-
-* Honor configured HTTP header value masking in `HaveHeaderValue` and `NotHaveHeader` diagnostic fields, in addition
-  to the request and response dumps. If a header mapping callback throws while rendering a request or response,
-  omit that value and report only the exception type, without exposing raw headers or exception messages, and
-  continue rendering the remaining values.
-
-* Preserve nested type names and their declaring types' generic arguments in assertion diagnostics.
-
-* Preserve underscores in quoted literals and identifiers when deriving subject names, including method arguments
-  inside shorthand lambdas.
-
-* Preserve lambdas inside parenthesized subject expressions, such as `items.Select(_.Name)`, when deriving subject
-  names. Enclosing assertion lambdas continue to be omitted.
-
-* Avoid exponential regex backtracking in `MatchWildcard` and `NotMatchWildcard` for patterns with repeated `*`
-  sections, preserving existing matching behavior.
-
-* Fix `BeDistinct` recomputing duplicate counts when reporting a failure, which could lose duplicates or throw for
-  single-pass sequences.
-
-* Fall back to JSON diagnostics when serialized failure data cannot be loaded as YAML, such as when property names
-  are duplicated.
-
-* Fix `HaveStringContentSatisfying` crashing or losing error context when an asynchronous content read resumes
-  on another thread. Preserve successful results, assertion failures, unexpected errors, and cancellation.
-
-* Preserve dictionary comparer and set comparison semantics when returning stored containment matches.
-  Collection assertions avoid unnecessary re-enumeration; `ContainItemsMatching` retains its lazy derived sequence.
-  Multiset equality and subset/superset assertions now handle single-pass sequences correctly. Dictionary equality
-  checks item counts and reports mismatched values as a list so structurally equal distinct keys cannot collide.
-
-* Allow `BeOfCase` to read unions with private representations, including their case fields.
-
-* Fix signed integer, decimal, and `TimeSpan` overflow and unsigned underflow (including `UInt128`) in close-to
-  comparisons. Reject NaN operands (including `Half.NaN`) in scalar comparisons and adjacent sequence-ordering
-  comparisons, including projected ordering keys. Equality-based assertions continue to follow F# equality
-  semantics: `double` and `single` NaNs are unequal to themselves, while `Half.NaN` equals itself.
-
-* Match response and content headers consistently, including exact values and quoted comma-separated members.
-  `HaveHeader` returns all matching header values for further assertions.
-
-* Read bounded HTTP body previews, preserve content headers, and honor quoted charset parameters when decoding
-  diagnostics. Restore seekable stream positions even when reading fails. Obtaining a stream may still buffer
-  generated content, such as `JsonContent`, in full.
-
-* Improve diagnostic formatting for `TryFormat` dictionary keys, serialization failures, throwing `ToString`
-  implementations, and special floating-point values.
-
-* Normalize JSON object-key order recursively for equivalence checks while preserving case-sensitive key names.
-
-* Fix wildcard matching when literal text collides with the previous internal placeholder strings.
-
-* Wildcard matching now requires the entire string to match, including any trailing newline. A literal pattern
-  such as `abc` no longer matches `abc\n`; use `abc?`, `abc*`, or an explicit newline to match that character.
-
-#### Clarifications
-
-* Clarified zero enum flag semantics: `HaveFlag` passes and `NotHaveFlag` fails for a zero mask, consistently with
-  `Enum.HasFlag`. Use equality with the enum's zero value to assert that no flags are set.
-
-* Clarified that `SatisfyAny` passes when its assertion list is empty. This behavior is unchanged.
+* Correct numeric, collection, dictionary, JSON, and wildcard comparisons, including cases that previously passed
+  incorrectly. Existing tests may now reveal mismatches that Faqt previously missed.
+* Improve support for single-pass sequences and preserve useful collection mismatch reports without unnecessary
+  re-enumeration.
+* Make diagnostic formatting more resilient to cycles, recursive converters, and values that cannot be serialized.
+* Improve HTTP header matching, body previews, and diagnostic context. Honor configured header masking throughout
+  HTTP assertion diagnostics.
+* Improve automatic subject names and nested generic type names in failure messages.
+* Allow `BeOfCase` to inspect unions with private representations.
 
 ### 5.1.0 (2025-09-18)
 
