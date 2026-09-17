@@ -77,6 +77,9 @@ Release notes
 * Detect cycles and bound recursive serialization across nested `TryFormat` wrappers, including dictionary keys,
   so diagnostic formatting uses its fallback instead of overflowing the stack.
 
+* Fall back to JSON diagnostics when serialized failure data cannot be loaded as YAML, such as when property names
+  are duplicated.
+
 * Fix `HaveStringContentSatisfying` crashing or losing error context when an asynchronous content read resumes
   on another thread. Preserve successful results, assertion failures, unexpected errors, and cancellation.
 

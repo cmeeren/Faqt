@@ -468,12 +468,24 @@ module private FormattingHelpers =
 
     let formatAsYaml getYamlVisitor (json: string) =
         let yaml = YamlStream()
-        yaml.Load(new StringReader(json))
-        yaml.Accept(getYamlVisitor yaml.Documents[0])
-        let outputYaml = new StringWriter()
-        yaml.Save(outputYaml, false)
-        outputYaml.Flush()
-        outputYaml.ToString().Trim().Trim('.', '-').Trim()
+
+        let loaded =
+            try
+                yaml.Load(new StringReader(json))
+                true
+            with :? YamlException ->
+                // JSON can contain duplicate property names that YAML mappings cannot represent.
+                false
+
+        if loaded then
+            yaml.Accept(getYamlVisitor yaml.Documents[0])
+            let outputYaml = new StringWriter()
+            yaml.Save(outputYaml, false)
+            outputYaml.Flush()
+            outputYaml.ToString().Trim().Trim('.', '-').Trim()
+        else
+            // Preserve every property and let the assertion report its original failure.
+            json
 
 
     let getFormatter configureOptions formatAsYaml =
@@ -577,7 +589,7 @@ type YamlFormatterBuilder = private {
 
 
     /// Specifies which YAML visitor is used when converting JSON to YAML. Only the last call to this method will take
-    /// effect.
+    /// effect. The visitor is not invoked when JSON cannot be loaded as YAML.
     member this.SetYamlVisitor(getYamlVisitor: YamlDocument -> YamlVisitorBase) =
         if isNull (box getYamlVisitor) then
             nullArg (nameof getYamlVisitor)
@@ -588,7 +600,8 @@ type YamlFormatterBuilder = private {
         }
 
 
-    /// Returns a formatter according to the current configuration.
+    /// Returns a formatter according to the current configuration. Falls back to the serialized JSON if it cannot
+    /// be loaded as YAML, for example when it contains duplicate property names.
     member this.Build() =
         let configure = this.configureJsonSerializerOptions this
         getFormatter configure (formatAsYaml this.getYamlVisitor)

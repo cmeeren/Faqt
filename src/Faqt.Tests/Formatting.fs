@@ -33,6 +33,12 @@ type private Assertions =
         t.With("A", TestUnserializableType()).With("B", [ TryFormat(TestUnserializableType()) ]).Fail(None)
 
 
+    [<Extension>]
+    static member FailWithDuplicateData(t: Testable<'a>) : And<'a> =
+        use _ = t.Assert()
+        t.With("Repeated", "first").With("Repeated", "second").Fail(None)
+
+
 type private OneByteNonSeekableStream(bytes: byte[]) =
     inherit Stream()
 
@@ -1813,6 +1819,96 @@ module TryFormatCycles =
 
         Assert.Throws<JsonException>(fun () -> format (data value) |> ignore) |> ignore
         Assert.InRange(fallbackCalls, 1, 7)
+
+
+module YamlFallback =
+
+
+    let private diagnosticJson (error: AssertionFailedException) =
+        error.Message.Substring(("Assertion failed." + Environment.NewLine).Length)
+        |> JsonDocument.Parse
+
+
+    [<Theory>]
+    [<InlineData("{\"key\":1,\"key\":2}")>]
+    [<InlineData("{\"nested\":{\"key\":1,\"key\":2}}")>]
+    [<InlineData("[{\"key\":1,\"key\":2}]")>]
+    [<InlineData("{\"key\":null,\"key\":[true,{\"other\":\"value\"}]}")>]
+    let ``Preserves duplicate JSON properties in assertion diagnostics`` (json: string) =
+        use value = JsonDocument.Parse(json)
+        let error = assertFails (fun () -> ().Should().FailWith("Value", value.RootElement))
+        use diagnostic = diagnosticJson error
+        Assert.Equal("FailWith", diagnostic.RootElement.GetProperty("Should").GetString())
+
+        Assert.Equal(
+            JsonSerializer.Serialize(value.RootElement),
+            diagnostic.RootElement.GetProperty("Value").GetRawText()
+        )
+
+
+    [<Fact>]
+    let ``Preserves repeated extra data keys`` () =
+        let error = assertFails (fun () -> ().Should().FailWithDuplicateData())
+        use diagnostic = diagnosticJson error
+
+        let values =
+            diagnostic.RootElement.EnumerateObject()
+            |> Seq.filter (fun property -> property.Name = "Repeated")
+            |> Seq.map (fun property -> property.Value.GetString())
+            |> Seq.toList
+
+        Assert.Equal<(string | null) list>([ "first"; "second" ], values)
+
+
+    [<Fact>]
+    let ``Preserves dictionary keys that serialize to the same property name`` () =
+        let value = dict [ TryFormat 1, "number"; TryFormat "1", "string" ]
+        let error = assertFails (fun () -> ().Should().FailWith("Value", value))
+        use diagnostic = diagnosticJson error
+        Assert.Equal("{\"1\":\"number\",\"1\":\"string\"}", diagnostic.RootElement.GetProperty("Value").GetRawText())
+
+
+    [<Theory>]
+    [<InlineData("NotSatisfy")>]
+    [<InlineData("SatisfyAny")>]
+    let ``Duplicate JSON properties remain ordinary assertion failures in composed assertions`` composition =
+        use value = JsonDocument.Parse("{\"key\":1,\"key\":2}")
+
+        let fail () =
+            ().Should().FailWith("Value", value.RootElement) |> ignore
+
+        match composition with
+        | "NotSatisfy" -> ().Should().NotSatisfy(fail) |> ignore
+        | _ ->
+            let mutable reachedAlternative = false
+
+            ().Should().SatisfyAny([ fail; (fun () -> reachedAlternative <- true) ])
+            |> ignore
+
+            Assert.True(reachedAlternative)
+
+
+    [<Theory>]
+    [<InlineData(false)>]
+    [<InlineData(true)>]
+    let ``Yaml exceptions from custom visitors still propagate`` throwFromFactory =
+        let original = YamlException("Custom visitor failed")
+
+        let format =
+            YamlFormatterBuilder.Default
+                .SetYamlVisitor(fun _ ->
+                    if throwFromFactory then
+                        raise original
+
+                    { new YamlVisitorBase() with
+                        override _.Visit(_: YamlMappingNode) : unit = raise original
+                    }
+                )
+                .Build()
+
+        use _ = Formatter.With(format)
+        let actual = Assert.Throws<YamlException>(fun () -> ().Should().Fail() |> ignore)
+        Assert.Same(original, actual)
 
 
 module YamlFormatterBuilder =
