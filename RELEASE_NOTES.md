@@ -5,6 +5,9 @@ Release notes
 
 #### Breaking changes
 
+* `BeJsonEquivalentTo` now preserves exact JSON number spelling in comparisons and failure output. Long arrays
+  containing distinct numbers no longer compare equal because of numeric rounding or normalization.
+
 * Decimal `BeCloseTo` and `NotBeCloseTo` now compare exact distances without decimal subtraction rounding. Values
   just outside the tolerance no longer pass `BeCloseTo` (or fail `NotBeCloseTo`) when rounding previously hid the
   difference. Floating-point and custom-type tolerance behavior is unchanged.

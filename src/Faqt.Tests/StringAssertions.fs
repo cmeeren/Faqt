@@ -2410,6 +2410,64 @@ module BeJsonEquivalentTo =
         assertFails (fun () -> json2.Should().BeJsonEquivalentTo(json1)) |> ignore
 
 
+    [<Theory>]
+    [<InlineData("1.0000000000000001", "1")>]
+    [<InlineData("-1.0000000000000001", "-1")>]
+    [<InlineData("1.0", "1")>]
+    [<InlineData("1e0", "1")>]
+    [<InlineData("-0", "0")>]
+    [<InlineData("9007199254740992", "9007199254740993")>]
+    [<InlineData("1e-4000", "0")>]
+    let ``Number distinctions are independent of array length and nesting`` first second =
+        for count in [ 1; 40; 41; 80 ] do
+            let array number =
+                "[" + String.concat "," (List.replicate count number) + "]"
+
+            for wrap in
+                [
+                    id
+                    (fun json -> "{\"values\":" + json + "}")
+                    (fun json -> "[" + json + "]")
+                ] do
+                let subject = wrap (array first)
+                let expected = wrap (array second)
+                assertFails (fun () -> subject.Should().BeJsonEquivalentTo(expected)) |> ignore
+                assertFails (fun () -> expected.Should().BeJsonEquivalentTo(subject)) |> ignore
+
+
+    [<Fact>]
+    let ``Failure output preserves precise number spelling in long arrays`` () =
+        let preciseNumber = "1.0000000000000001"
+
+        let array number =
+            "[" + String.concat "," (List.replicate 80 number) + "]"
+
+        let error =
+            assertFails (fun () -> (array preciseNumber).Should().BeJsonEquivalentTo(array "2"))
+
+        let actual =
+            error.FailureData.Extra
+            |> List.find (fun (key, _) -> key = "But was")
+            |> snd
+            |> unbox<string>
+
+        use actualJson = JsonDocument.Parse(actual)
+        Assert.Equal(80, actualJson.RootElement.GetArrayLength())
+
+        for number in actualJson.RootElement.EnumerateArray() do
+            Assert.Equal(preciseNumber, number.GetRawText())
+
+
+    [<Theory>]
+    [<InlineData(41)>]
+    [<InlineData(80)>]
+    let ``Long precise arrays remain equivalent across whitespace and key order`` count =
+        let numbers = List.replicate count "1.0000000000000001"
+        let subject = "{\"b\":[" + String.concat "," numbers + "],\"a\":0}"
+        let expected = "{ \"a\": 0, \"b\": [ " + String.concat ",\n" numbers + " ] }"
+        subject.Should().BeJsonEquivalentTo(expected)
+
+
     [<Fact>]
     let ``Throws if null`` () =
         assertThrows (fun () -> Unchecked.defaultof<string>.Should().BeJsonEquivalentTo("0"))

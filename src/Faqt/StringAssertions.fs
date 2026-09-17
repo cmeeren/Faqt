@@ -398,7 +398,13 @@ type StringAssertions =
         serializerOptions.Converters.Add(JsonElementSortedKeysConverter())
 
         let formatter =
-            FracturedJson.Formatter(Options = FracturedJson.FracturedJsonOptions(OmitTrailingWhitespace = true))
+            FracturedJson.Formatter(
+                Options =
+                    FracturedJson.FracturedJsonOptions(
+                        OmitTrailingWhitespace = true,
+                        NumberListAlignment = FracturedJson.NumberListAlignment.Left
+                    )
+            )
 
         let expectedDoc =
             try
