@@ -120,8 +120,9 @@ pull request), you need to use `git push -f` to force rewrite the remote branch.
 
 For maintainers.
 
-* Make necessary changes to the code.
-* Update the changelog.
-* Update the version and release notes in the fsproj file.
-* Commit and tag the commit in the format `v/x.y.z` (this is what triggers deployment).
-* Push the changes and the tag to the repo. If the build succeeds, the package is automatically published to NuGet.
+Follow the [release-faqt skill](.agents/skills/release-faqt/SKILL.md) for the full release workflow.
+
+* Update `Version` in `src/Faqt/Faqt.fsproj` and finalize the version/date heading in `RELEASE_NOTES.md`.
+* Check formatting, run Release tests with both local and embedded sources, and inspect the packed NuGet package.
+* Commit and tag the commit as `v/x.y.z`, then push the commit and tag. Successful tag CI publishes to NuGet.
+* Confirm the exact version is available on NuGet, then create the GitHub Release using the tagged release notes.

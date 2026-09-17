@@ -1,0 +1,4 @@
+interface:
+  display_name: "Release Faqt"
+  short_description: "Prepare Faqt NuGet and GitHub releases."
+  default_prompt: "Use $release-faqt to prepare or publish a Faqt release."

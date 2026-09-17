@@ -19,7 +19,7 @@ Faqt follows [SemVer v2.0.0](https://semver.org/) and aims to preserve **source 
 releases, except when the major version is incremented. Note that any change to the assertion message format is
 considered a non-breaking change.
 
-Upgrading? See the [release notes](RELEASE_NOTES.md), including [guidance for upgrading from 5.x](RELEASE_NOTES.md#upgrading-from-5x).
+Upgrading? See the [release notes](https://github.com/cmeeren/Faqt/blob/main/RELEASE_NOTES.md), including [guidance for upgrading from 5.x](https://github.com/cmeeren/Faqt/blob/main/RELEASE_NOTES.md#upgrading-from-5x).
 
 ## Table of contents
 
@@ -56,7 +56,7 @@ test framework and can also be used in domain code.
 
 If you use path mapping, deterministic source paths, or run assertions without source files available, set `DebugType`
 to `embedded` and `EmbedAllSources` to `true` in each project that calls assertions. See the
-[setup instructions](DOCUMENTATION.md#installation-and-requirements) and [everyday usage guide](DOCUMENTATION.md#everyday-usage).
+[setup instructions](https://github.com/cmeeren/Faqt/blob/main/DOCUMENTATION.md#installation-and-requirements) and [everyday usage guide](https://github.com/cmeeren/Faqt/blob/main/DOCUMENTATION.md#everyday-usage).
 
 ## A motivating example
 
@@ -138,7 +138,7 @@ As expected by the discerning F# developer, Faqt is:
   (like `BeTrue()` for `Be(true)` on booleans, and `BeSome` for `BeOfCase(Some)` on `option` values).
 - **Safe:** Assertions are as type-safe as F# allows.
 - **Extensible:** No assertion? No problem! Writing your own assertions is very simple (details in
-  the [documentation](DOCUMENTATION.md)).
+  the [documentation](https://github.com/cmeeren/Faqt/blob/main/DOCUMENTATION.md)).
 - **Informative:** The assertion failure messages are designed to give you all the information you need in a consistent
   and easy-to-read format.
 - **Discoverable:** The fluent syntax means you can just type a dot to discover all possible assertions and actions on
@@ -154,11 +154,11 @@ As expected by the discerning F# developer, Faqt is:
 
 ## Documentation
 
-See the [documentation](DOCUMENTATION.md) for additional details, such as the list of assertions, how to use the
+See the [documentation](https://github.com/cmeeren/Faqt/blob/main/DOCUMENTATION.md) for additional details, such as the list of assertions, how to use the
 optional `%` operator (alias for `ignore`), instructions on writing your own assertions, customizing the output format,
 security considerations, and a FAQ with, among other things, a brief comparison with other assertion frameworks.
 
 ## Contributing
 
-Contributions are welcome! Please see the [contribution guidelines](CONTRIBUTING.md) before opening an issue or pull
+Contributions are welcome! Please see the [contribution guidelines](https://github.com/cmeeren/Faqt/blob/main/CONTRIBUTING.md) before opening an issue or pull
 request.
