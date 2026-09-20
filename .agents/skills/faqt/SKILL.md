@@ -21,17 +21,17 @@ let count = 3
 
 The optional `%` operator discards the return value; `|> ignore` works too.
 
-Assertions such as `BeSome`, `BeOk`, and `ContainExactlyOneItem` expose a derived value through `Whose`. Use `Should(())` for subsequent assertions on derived values or their properties within the same chain; the double parentheses preserve subject names in diagnostics. A separately extracted value starts a new chain with `Should()`.
+Assertions such as `BeSome`, `BeOk`, and `ContainExactlyOneItem` expose a derived value through the aliases `Whose`, `WhoseValue`, `That`, and `Derived`. In a fluent assertion chain, choose the alias that makes the sentence read most naturally. Prefer `Derived` when extracting the value into a separate binding. Use `Should(())` for subsequent assertions on derived values or their properties within the same chain; the double parentheses preserve subject names in diagnostics. A separately extracted value starts a new chain with `Should()`.
 
 ```fsharp
 let result = Some "Ada"
 %result.Should().BeSome().Whose.Length.Should(()).Be(3)
 
-let name = result.Should().BeSome().Whose
+let name = result.Should().BeSome().Derived
 %name.Should().Be("Ada")
 ```
 
-`WhoseValue`, `That`, and `Derived` are aliases for `Whose`. `Subject` returns the original value directly.
+`Subject` returns the original value directly.
 
 ## Choose assertions that explain failures
 
