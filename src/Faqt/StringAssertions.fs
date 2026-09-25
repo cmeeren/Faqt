@@ -379,7 +379,8 @@ type StringAssertions =
 
 
     /// Asserts that the subject represents a JSON structure equivalent to that represented by the specified string
-    /// (ignoring key order and formatting such as indentation). The comparison is case-sensitive.
+    /// (ignoring key order and formatting such as indentation). The comparison is case-sensitive. Numbers are compared
+    /// as written, so for example 180 and 180.0, or -0 and 0, are not equivalent.
     [<Extension>]
     static member BeJsonEquivalentTo
         (

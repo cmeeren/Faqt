@@ -548,7 +548,8 @@ is not a total memory limit.
 * `NotMatchRegex`
 * `MatchWildcard`: Case-insensitive invariant-culture wildcard check of the entire string with `*` (zero or more characters) and `?` (one character)
 * `NotMatchWildcard`: Case-insensitive invariant-culture wildcard check of the entire string with `*` (zero or more characters) and `?` (one character)
-* `BeJsonEquivalentTo`: Checks that two JSON strings are equivalent (ignoring formatting)
+* `BeJsonEquivalentTo`: Checks that two JSON strings are equivalent (ignoring formatting). Numbers are compared as
+  written, so for example `180` and `180.0`, or `-0` and `0`, are not equivalent.
 * `DeserializeTo`: Checks that a string is deserializable to a specified target type
 * `DeserializeToNullable`: Like `DeserializeTo`, but allows a null result
 * All `seq<_>` assertions, including:
