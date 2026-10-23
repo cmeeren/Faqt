@@ -86,7 +86,7 @@ if ($LASTEXITCODE -ne 0) { throw "NuGet availability check failed; do not create
 9. Refresh and inspect the GitHub Release notes immediately before creating the release:
    - Copy the exact release section from the tagged `RELEASE_NOTES.md` to a file under the user's temp directory, for example `$env:TEMP\faqt-release-v<Version>.md`.
    - Read the tagged file with `git show "v/<Version>:RELEASE_NOTES.md"` so the notes match the commit that was packaged and published.
-   - Inspect the temporary file. Include only the released version's notes, not the whole changelog or a stale `Unreleased` heading. Make documentation links absolute so they work from the GitHub Release page, using the release tag for version-specific documentation.
+   - Inspect the temporary file. Include only the released version's notes, not the whole changelog or a stale `Unreleased` heading. Check that its links work from the GitHub Release page, which resolves relative links such as `DOCUMENTATION.md#<anchor>` against the release tag.
 
 10. Create the GitHub Release only after successful NuGet publication, notes inspection, and authorization for that action:
 
