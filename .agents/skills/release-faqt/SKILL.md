@@ -69,8 +69,9 @@ if ($LASTEXITCODE -ne 0) { throw "Package creation failed" }
 ````powershell
 $tag = "v/<Version>"
 $repo = "cmeeren/Faqt"
-$run = @(gh run list --repo $repo --workflow ci.yml --branch $tag --event push --limit 1 --json databaseId,headBranch,headSha,status,conclusion,url | ConvertFrom-Json)
-if (-not $run) { throw "No CI run found for tag $tag" }
+$sha = git rev-parse "$tag^{commit}"
+$run = @(gh run list --repo $repo --workflow ci.yml --branch $tag --event push --limit 10 --json databaseId,headBranch,headSha,status,conclusion,url | ConvertFrom-Json | Where-Object headSha -eq $sha)
+if (-not $run) { throw "No CI run found for tag $tag at $sha" }
 $runId = $run[0].databaseId
 gh run watch $runId --repo $repo --exit-status
 ````
@@ -114,6 +115,6 @@ gh release view $tag --repo $repo --json tagName,name,url
 - Do not create the GitHub Release before the tag CI has successfully pushed to NuGet and the exact version is available.
 - Use `gh release create --verify-tag` so GitHub does not auto-create or retarget the release tag.
 - Use `--repo cmeeren/Faqt` for `gh` release and run commands; do not rely on implicit repository context.
-- Do not create duplicate releases or move an existing release tag.
+- Do not create duplicate releases. Do not move a release tag once its CI's `Push` step has started, even if it failed, since NuGet never reuses a version. If the tag CI fails earlier, rerun the failed jobs when the failure is transient; if it needs a fix, ask whether to move the tag to the fixed commit, repeating steps 4–8 for it, or release a new version.
 - Refresh release notes from tagged content after NuGet publication; do not reuse an older temp file.
 - Do not treat the versioned `PackageReleaseNotes` URL as fully verified until the matching GitHub Release exists.
