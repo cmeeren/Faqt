@@ -1423,7 +1423,9 @@ Value: |-
         Assert.Equal(6L, stream.Position)
 
 
-    [<Theory>]
+    // Runs alone: on busy CI runners, the other tests running alongside could delay this real loopback exchange past
+    // its timeout.
+    [<Theory(DisableParallelization = true)>]
     [<InlineData(false, false)>]
     [<InlineData(false, true)>]
     [<InlineData(true, false)>]
