@@ -1,6 +1,11 @@
 Release notes
 ==============
 
+### Unreleased
+
+* Failing assertions, including those that higher-order assertions such as `SatisfyAny` and `NotSatisfy` try internally,
+  are faster when source files aren't available on disk, such as with deterministic source paths and embedded sources.
+
 ### 6.0.0 (2026-09-17)
 
 This major release improves assertion correctness and failure diagnostics, and distinguishes assertion failures from

@@ -208,32 +208,30 @@ module internal EmbeddedSource =
             readSource stream
 
 
-    let get =
-        memoize2 (fun assemblyPath sourcePath ->
-            use assemblyFileStream = File.OpenRead(assemblyPath)
-            use peReader = new PEReader(assemblyFileStream)
+    let get assemblyPath sourcePath =
+        use assemblyFileStream = File.OpenRead(assemblyPath)
+        use peReader = new PEReader(assemblyFileStream)
 
-            let embeddedEntry =
-                peReader.ReadDebugDirectory()
-                |> Seq.filter (fun entry -> entry.Type = DebugDirectoryEntryType.EmbeddedPortablePdb)
-                |> Seq.exactlyOne
+        let embeddedEntry =
+            peReader.ReadDebugDirectory()
+            |> Seq.filter (fun entry -> entry.Type = DebugDirectoryEntryType.EmbeddedPortablePdb)
+            |> Seq.exactlyOne
 
-            use embeddedMetadataProvider =
-                peReader.ReadEmbeddedPortablePdbDebugDirectoryData(embeddedEntry)
+        use embeddedMetadataProvider =
+            peReader.ReadEmbeddedPortablePdbDebugDirectoryData(embeddedEntry)
 
-            let pdbReader = embeddedMetadataProvider.GetMetadataReader()
+        let pdbReader = embeddedMetadataProvider.GetMetadataReader()
 
-            pdbReader.Documents
-            |> Seq.pick (fun documentHandle ->
-                let document = pdbReader.GetDocument(documentHandle)
-                let documentPath = pdbReader.GetString(document.Name)
+        pdbReader.Documents
+        |> Seq.pick (fun documentHandle ->
+            let document = pdbReader.GetDocument(documentHandle)
+            let documentPath = pdbReader.GetString(document.Name)
 
-                if sourcePath = documentPath then
-                    let source = readEmbeddedSource pdbReader documentHandle
-                    Some source
-                else
-                    None
-            )
+            if sourcePath = documentPath then
+                let source = readEmbeddedSource pdbReader documentHandle
+                Some source
+            else
+                None
         )
 
 
@@ -271,7 +269,26 @@ module internal SubjectName =
         source.Substring(start)
 
 
-    let getFileLines = memoize File.ReadAllLines
+    // Every failing assertion looks up its source lines, so cache them per file, including missing files and failed
+    // embedded-source lookups, whose exceptions are costly. Other file read errors may be transient, so they aren't
+    // cached. Only the lines are kept, so each file's source is held once.
+    let private tryGetFileLines =
+        memoize (fun (path: string) ->
+            try
+                ValueSome(File.ReadAllLines path)
+            with
+            | :? FileNotFoundException
+            | :? DirectoryNotFoundException -> ValueNone
+        )
+
+
+    let private tryGetEmbeddedSourceLines =
+        memoize2 (fun assemblyPath sourcePath ->
+            try
+                ValueSome((EmbeddedSource.get assemblyPath sourcePath).Replace("\r\n", "\n").Split("\n"))
+            with _ ->
+                ValueNone
+        )
 
 
     let private transformationPlaceholder = "23b368b082614294bf7cadd3fda7924b"
@@ -279,11 +296,19 @@ module internal SubjectName =
 
     let get origin (assertions: string list) =
         try
-            let sourceCodeLines =
+            let fileLines =
                 try
-                    getFileLines origin.SourceFilePath
+                    tryGetFileLines origin.SourceFilePath
                 with _ ->
-                    (EmbeddedSource.get origin.AssemblyPath origin.SourceFilePath).Replace("\r\n", "\n").Split("\n")
+                    ValueNone
+
+            let sourceCodeLines =
+                match fileLines with
+                | ValueSome lines -> lines
+                | ValueNone ->
+                    match tryGetEmbeddedSourceLines origin.AssemblyPath origin.SourceFilePath with
+                    | ValueSome lines -> lines
+                    | ValueNone -> failwith "The source code is unavailable"
 
             let assertionCounts = assertions |> List.countBy id |> Map.ofList
             let lastAssertion = assertions[assertions.Length - 1]

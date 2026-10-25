@@ -1,7 +1,9 @@
 ﻿module ``Subject name``
 
 open System
+open System.IO
 open System.Linq
+open System.Runtime.ExceptionServices
 open Faqt
 open Faqt.Operators
 open Xunit
@@ -1158,3 +1160,33 @@ let ``Parentheses in lambda string arguments do not affect subject boundaries`` 
         assertFails (fun () -> [ "a" ].Select(fun x -> x.Replace("(", ")")).Should().Fail())
 
     Assert.Equal<string list>([ "[ \"a\" ].Select(fun x -> x.Replace(\"(\", \")\"))" ], error.FailureData.Subject)
+
+
+[<Fact>]
+let ``Repeated failures from a file don't retry reading it when it's missing`` () =
+    let fail () =
+        assertFails (fun () -> "a".Should().Fail()) |> ignore
+
+    fail ()
+
+    // With embedded sources, the source file is missing from disk. Collect any attempt to read it again.
+    let threadId = Environment.CurrentManagedThreadId
+    let missingFileErrors = ResizeArray<exn>()
+
+    let handler =
+        EventHandler<FirstChanceExceptionEventArgs>(fun _ e ->
+            match e.Exception with
+            | :? FileNotFoundException
+            | :? DirectoryNotFoundException when Environment.CurrentManagedThreadId = threadId ->
+                missingFileErrors.Add e.Exception
+            | _ -> ()
+        )
+
+    AppDomain.CurrentDomain.FirstChanceException.AddHandler handler
+
+    try
+        fail ()
+    finally
+        AppDomain.CurrentDomain.FirstChanceException.RemoveHandler handler
+
+    Assert.Empty(missingFileErrors)
