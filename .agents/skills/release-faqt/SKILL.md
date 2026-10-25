@@ -55,7 +55,7 @@ dotnet pack -c Release src/Faqt/Faqt.fsproj --output $packageDir
 if ($LASTEXITCODE -ne 0) { throw "Package creation failed" }
 ````
 
-   Inspect `Faqt.<Version>.nupkg`: confirm the version, versioned release-notes URL, packaged README and icon, and assemblies for every target framework declared in the project. Verify that `skills/SKILL.md` matches `.agents/skills/faqt/SKILL.md` byte for byte. Check that README links work outside GitHub. Local pack proves that the release URL is embedded; it cannot resolve until the matching GitHub Release exists. If preparing a major release, inspect important known consumers for affected contracts and run representative compatibility checks when practical.
+   Inspect `Faqt.<Version>.nupkg`: confirm the version, versioned release-notes URL, packaged README and icon, and assemblies for every target framework declared in the project. Verify that `skills/SKILL.md` matches `.agents/skills/faqt/SKILL.md` byte for byte. Check that README links work outside GitHub. Local pack proves that the release URL is embedded; it cannot resolve until the matching GitHub Release exists. If preparing a major release, inspect important known consumers for affected contracts and run representative compatibility checks when practical. Pack the package for any consumer check with `-p:Version=<Version>-compat.<n>`, using an `<n>` not yet in the global packages folder for each repack: NuGet never replaces a cached version, so a local build cached under the release version would shadow the published package on this machine, and a reused prerelease version would serve the earlier build.
 
 6. Commit and tag when authorized:
    - Use `git-commit` to execute the authorized commit; it routes message authoring to `git-commit-message`.
