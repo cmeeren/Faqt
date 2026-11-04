@@ -3,6 +3,8 @@ Release notes
 
 ### Unreleased
 
+* The bundled agent skill is now at `skills/faqt/SKILL.md` in the package instead of `skills/SKILL.md`, the layout
+  that the Agent Skills specification and .NET package-skill tools expect. Update anything that reads the old path.
 * Failing assertions, including those that higher-order assertions such as `SatisfyAny` and `NotSatisfy` try internally,
   are faster when source files aren't available on disk, such as with deterministic source paths and embedded sources.
 
