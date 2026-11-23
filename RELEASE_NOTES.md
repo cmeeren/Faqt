@@ -1,10 +1,19 @@
 Release notes
 ==============
 
-### Unreleased
+### 6.1.0 (2026-11-23)
 
-* The bundled agent skill is now at `skills/faqt/SKILL.md` in the package instead of `skills/SKILL.md`, the layout
-  that the Agent Skills specification and .NET package-skill tools expect. Update anything that reads the old path.
+#### Bundled skill path
+
+* If you read the agent skill from the package, switch from `skills/SKILL.md` to `skills/faqt/SKILL.md`. The new layout
+  follows the Agent Skills specification and works with .NET package-skill tools.
+
+#### Improvements
+
+* Control request and response body previews independently in the default formatter with
+  `SetShouldPreviewHttpRequestContent` and `SetShouldPreviewHttpResponseContent`. Use these options to omit previews
+  for sensitive messages before reading their bodies. Setting the preview limit to zero also skips computing
+  `Content-Length`. See [Configuring options](DOCUMENTATION.md#configuring-options).
 * Failing assertions, including those that higher-order assertions such as `SatisfyAny` and `NotSatisfy` try internally,
   are faster when source files aren't available on disk, such as with deterministic source paths and embedded sources.
 
