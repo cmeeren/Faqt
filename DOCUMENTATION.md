@@ -57,8 +57,9 @@ intended. Failure messages also include assertion values and, for HTTP assertion
 
 HTTP header values are unchanged by default. Use `SetMapHttpHeaderValues`, as shown in [Configuring options](#configuring-options),
 to mask sensitive headers. This does not mask secrets in URLs, bodies, other assertion values, or source code.
-You can omit HTTP body previews with `SetHttpContentMaxLength(0)`. Assertions on body content can still include that
-content in failure messages.
+Use `SetShouldPreviewHttpRequestContent` and `SetShouldPreviewHttpResponseContent` to omit selected body previews, or
+`SetHttpContentMaxLength(0)` to omit all previews. Request URLs are still rendered. Assertions on body content can
+still include that content in failure messages.
 
 ## Installation and requirements
 
@@ -461,6 +462,32 @@ use _ = Config.With(myConfig)
 ```
 
 Use `Config.Current` to access the effective configuration in your own converters and formatters.
+
+The default formatter permits all HTTP body previews subject to the preview limit. Set either predicate to control
+previews for that direction. This example omits all request body previews and allows response body previews for one
+host. A response may have no associated request, so choose a fallback for that case.
+
+```f#
+let selectiveConfig =
+    myConfig
+        .SetShouldPreviewHttpRequestContent(fun _ -> false)
+        .SetShouldPreviewHttpResponseContent(fun response ->
+            match response.RequestMessage with
+            | null -> false
+            | request ->
+                match request.RequestUri with
+                | null -> false
+                | uri -> uri.IsAbsoluteUri && uri.Host = "public.example"
+        )
+```
+
+Returning false skips reading the body for the preview. The formatter still shows the status or request line and
+existing headers. Omitted previews skip computing `Content-Length`. If the predicate throws, the formatter also omits
+the preview and reports only the exception type.
+
+When using `Config.With`, keep the scope active around the outermost assertion. Nested failures can be rendered again
+under the outer assertion's configuration. Log the formatted message when relying on this option. The exception's
+`FailureData` retains the original HTTP objects.
 
 HTTP failure diagnostics limit both captured body bytes and rendered body characters using `HttpContentMaxLength`
 (1 MiB by default). Set it to zero to omit bodies without reading them.

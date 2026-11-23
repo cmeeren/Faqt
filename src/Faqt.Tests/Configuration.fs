@@ -1,8 +1,11 @@
 ﻿module Configuration
 
 open System
+open System.IO
+open System.Net
 open System.Net.Http
 open System.Net.Http.Headers
+open System.Text
 open Faqt
 open Faqt.Configuration
 open Xunit
@@ -241,6 +244,172 @@ let ``Setting null HTTP header mapper throws ArgumentNullException`` () =
         |> ignore
     )
     |> ignore
+
+
+[<Fact>]
+let ``Setting a null request or response preview predicate throws ArgumentNullException`` () =
+    Assert.Throws<ArgumentNullException>(fun () ->
+        FaqtConfig.Default.SetShouldPreviewHttpRequestContent(Unchecked.defaultof<HttpRequestMessage -> bool>)
+        |> ignore
+    )
+    |> ignore
+
+    Assert.Throws<ArgumentNullException>(fun () ->
+        FaqtConfig.Default.SetShouldPreviewHttpResponseContent(Unchecked.defaultof<HttpResponseMessage -> bool>)
+        |> ignore
+    )
+    |> ignore
+
+
+[<Theory>]
+[<InlineData(false, false)>]
+[<InlineData(false, true)>]
+[<InlineData(true, false)>]
+[<InlineData(true, true)>]
+let ``HTTP failures honor the body preview predicate for requests and responses`` nested predicateThrows =
+    let mutable reads = 0
+
+    let body text =
+        let stream =
+            { new MemoryStream(Encoding.UTF8.GetBytes(text: string)) with
+                override this.Read(buffer: byte[], offset, count) =
+                    reads <- reads + 1
+                    base.Read(buffer, offset, count)
+            }
+
+        let content = new StreamContent(stream)
+        content.Headers.ContentType <- MediaTypeHeaderValue("text/plain")
+        content
+
+    use request = new HttpRequestMessage(HttpMethod.Post, "/sensitive?sample=visible")
+    request.Content <- body "sample request secret"
+    use response = new HttpResponseMessage(HttpStatusCode.BadRequest)
+    response.RequestMessage <- request
+    response.Content <- body "sample response secret"
+    use unrelatedResponse = new HttpResponseMessage(HttpStatusCode.BadRequest)
+    unrelatedResponse.Content <- new StringContent("ordinary response")
+
+    let shouldPreview (relatedRequest: HttpRequestMessage | null) =
+        if Object.ReferenceEquals(request, relatedRequest) then
+            if predicateThrows then
+                failwith "sample predicate secret"
+
+            false
+        else
+            true
+
+    use _ =
+        Config.With(
+            FaqtConfig.Default
+                .SetShouldPreviewHttpRequestContent(fun req -> shouldPreview req)
+                .SetShouldPreviewHttpResponseContent(fun res -> shouldPreview res.RequestMessage)
+        )
+
+    let error =
+        assertFails (fun () ->
+            if nested then
+                response
+                    .Should()
+                    .SatisfyAll(
+                        [
+                            fun r -> r.Should().HaveStatusCode(HttpStatusCode.OK) |> ignore
+                        ]
+                    )
+                |> ignore
+            else
+                response.Should().HaveStatusCode(HttpStatusCode.OK) |> ignore
+        )
+
+    let marker =
+        if predicateThrows then
+            "[content omitted: preview predicate failed with System.Exception]"
+        else
+            "[content omitted by configuration]"
+
+    // SatisfyAll also renders the outer response as its subject value.
+    let expectedPreviews = if nested then 3 else 2
+    Assert.Equal(expectedPreviews, error.Message.Split(marker).Length - 1)
+    Assert.DoesNotContain("sample request secret", error.Message)
+    Assert.DoesNotContain("sample response secret", error.Message)
+    Assert.DoesNotContain("sample predicate secret", error.Message)
+    Assert.Contains("POST /sensitive?sample=visible", error.Message)
+    Assert.Contains("400 Bad Request", error.Message)
+    Assert.Contains("Content-Type: text/plain", error.Message)
+    Assert.Equal(0, reads)
+
+    let ordinaryFailure =
+        assertFails (fun () -> unrelatedResponse.Should().HaveStatusCode(HttpStatusCode.OK))
+
+    Assert.Contains("ordinary response", ordinaryFailure.Message)
+
+
+[<Theory>]
+[<InlineData(true)>]
+[<InlineData(false)>]
+let ``Request and response previews can be configured independently`` suppressRequest =
+    use request = new HttpRequestMessage(HttpMethod.Post, "/token")
+    request.Content <- new StringContent("sample request body")
+    use response = new HttpResponseMessage(HttpStatusCode.BadRequest)
+    response.RequestMessage <- request
+    response.Content <- new StringContent("sample response body")
+
+    let config =
+        if suppressRequest then
+            FaqtConfig.Default.SetShouldPreviewHttpRequestContent(fun _ -> false)
+        else
+            FaqtConfig.Default.SetShouldPreviewHttpResponseContent(fun res ->
+                match res.RequestMessage with
+                | null -> true
+                | req -> req.Method <> HttpMethod.Post
+            )
+
+    use _ = Config.With(config)
+
+    let error =
+        assertFails (fun () -> response.Should().HaveStatusCode(HttpStatusCode.OK))
+
+    if suppressRequest then
+        Assert.DoesNotContain("sample request body", error.Message)
+        Assert.Contains("sample response body", error.Message)
+    else
+        Assert.Contains("sample request body", error.Message)
+        Assert.DoesNotContain("sample response body", error.Message)
+
+
+[<Theory>]
+[<InlineData(0, false, "[content omitted: preview limit is 0]")>]
+[<InlineData(10, true, "[content omitted by configuration]")>]
+let ``Omitting a preview skips computing the HTTP body length`` maxLength shouldCallPredicate (marker: string) =
+    let mutable predicateCalled = false
+    let mutable lengthComputed = false
+
+    use _ =
+        Config.With(
+            FaqtConfig.Default
+                .SetHttpContentMaxLength(maxLength)
+                .SetShouldPreviewHttpResponseContent(fun _ ->
+                    predicateCalled <- true
+                    false
+                )
+        )
+
+    let stream =
+        { new MemoryStream() with
+            override _.Length =
+                lengthComputed <- true
+                failwith "sample response secret"
+        }
+
+    use response = new HttpResponseMessage(HttpStatusCode.BadRequest)
+    response.Content <- new StreamContent(stream)
+
+    let error =
+        assertFails (fun () -> response.Should().HaveStatusCode(HttpStatusCode.OK))
+
+    Assert.Contains(marker, error.Message)
+    Assert.DoesNotContain("sample response secret", error.Message)
+    Assert.Equal(shouldCallPredicate, predicateCalled)
+    Assert.False(lengthComputed)
 
 
 [<Fact>]

@@ -130,43 +130,60 @@ module internal HttpContent =
         )
 
 
-    let serializeAppend
-        formatContent
-        maxLength
-        (mapHeaderValues: string -> string -> string)
-        (sb: StringBuilder)
-        (c: HttpContent)
-        =
-        let appendHeaders () =
+    let private previewOmissionReason shouldPreview =
+        try
+            if shouldPreview () then
+                None
+            else
+                Some "[content omitted by configuration]"
+        with ex ->
+            // The predicate's exception message may contain secrets.
+            Some $"[content omitted: preview predicate failed with %s{ex.GetType().FullName}]"
+
+
+    let serializeAppend (config: FaqtConfig) shouldPreview (sb: StringBuilder) (c: HttpContent) =
+        let maxLength = config.HttpContentMaxLength
+
+        let appendHeaders includeComputedLength =
             let hasContentLengthHeader =
                 c.Headers |> Seq.exists (fun h -> h.Key = "Content-Length")
 
             for h in c.Headers do
                 for v in h.Value do
-                    sb.AppendLine().Append(h.Key).Append(": ").Append(HttpHeader.mapValue mapHeaderValues h.Key v)
+                    sb
+                        .AppendLine()
+                        .Append(h.Key)
+                        .Append(": ")
+                        .Append(HttpHeader.mapValue config.MapHttpHeaderValues h.Key v)
                     |> ignore
 
-            if not hasContentLengthHeader then
+            if includeComputedLength && not hasContentLengthHeader then
                 match c.Headers.ContentLength with
                 | contentLength when contentLength.HasValue ->
                     sb.AppendLine().Append("Content-Length: ").Append(contentLength.Value: int64)
                     |> ignore
                 | _ -> ()
 
-        let hasNonLengthHeader =
-            c.Headers |> Seq.exists (fun h -> h.Key <> "Content-Length")
+        let hasEmptyBody () =
+            let length = c.Headers.ContentLength
+            length.HasValue && length.Value = 0L
 
         try
-            match c.Headers.ContentLength with
-            | contentLength when contentLength.HasValue && contentLength.Value = 0L ->
-                if hasNonLengthHeader then
-                    appendHeaders ()
-            | _ when maxLength = 0 ->
-                appendHeaders ()
+            let omissionReason =
+                if maxLength = 0 then
+                    Some "[content omitted: preview limit is 0]"
+                else
+                    previewOmissionReason shouldPreview
 
-                sb.AppendLine().AppendLine().Append("[content omitted: preview limit is 0]")
-                |> ignore
-            | _ ->
+            match omissionReason with
+            | Some reason ->
+                // Computing Content-Length can run custom content code even when the body is omitted.
+                appendHeaders false
+                sb.AppendLine().AppendLine().Append(reason) |> ignore
+            | None when hasEmptyBody () ->
+                if c.Headers |> Seq.exists (fun h -> h.Key <> "Content-Length") then
+                    appendHeaders true
+            | None ->
                 let strContent, note =
                     use buffer = new MemoryStream()
                     let truncated, note = readPreview c maxLength buffer
@@ -182,7 +199,10 @@ module internal HttpContent =
 
                     let strContent =
                         reader.ReadToEnd()
-                        |> if formatContent && not truncated then tryFormat else id
+                        |> if config.FormatHttpContent && not truncated then
+                               tryFormat
+                           else
+                               id
                         |> String.truncate $"…\n[content truncated after %i{maxLength} characters]" maxLength
 
                     let strContent =
@@ -193,7 +213,7 @@ module internal HttpContent =
 
                     strContent, note
 
-                appendHeaders ()
+                appendHeaders true
                 sb.AppendLine().AppendLine().Append(strContent).Append(note) |> ignore
         with
         | :? ObjectDisposedException ->
@@ -211,7 +231,7 @@ module internal HttpContent =
 module internal HttpRequestMessage =
 
 
-    let serialize formatContent maxLength (mapHeaderValues: string -> string -> string) (m: HttpRequestMessage) =
+    let serialize (config: FaqtConfig) (m: HttpRequestMessage) =
         let sb = StringBuilder()
 
         sb
@@ -229,12 +249,16 @@ module internal HttpRequestMessage =
 
         for h in m.Headers do
             for v in h.Value do
-                sb.AppendLine().Append(h.Key).Append(": ").Append(HttpHeader.mapValue mapHeaderValues h.Key v)
+                sb
+                    .AppendLine()
+                    .Append(h.Key)
+                    .Append(": ")
+                    .Append(HttpHeader.mapValue config.MapHttpHeaderValues h.Key v)
                 |> ignore
 
         m.Content
         |> Option.ofObj
-        |> Option.iter (HttpContent.serializeAppend formatContent maxLength mapHeaderValues sb)
+        |> Option.iter (HttpContent.serializeAppend config (fun () -> config.ShouldPreviewHttpRequestContent m) sb)
 
         sb.ToString()
 
@@ -242,7 +266,7 @@ module internal HttpRequestMessage =
 module internal HttpResponseMessage =
 
 
-    let serialize formatContent maxLength (mapHeaderValues: string -> string -> string) (m: HttpResponseMessage) =
+    let serialize (config: FaqtConfig) (m: HttpResponseMessage) =
         let sb = StringBuilder()
 
         sb
@@ -256,12 +280,16 @@ module internal HttpResponseMessage =
 
         for h in m.Headers do
             for v in h.Value do
-                sb.AppendLine().Append(h.Key).Append(": ").Append(HttpHeader.mapValue mapHeaderValues h.Key v)
+                sb
+                    .AppendLine()
+                    .Append(h.Key)
+                    .Append(": ")
+                    .Append(HttpHeader.mapValue config.MapHttpHeaderValues h.Key v)
                 |> ignore
 
         m.Content
         |> Option.ofObj
-        |> Option.iter (HttpContent.serializeAppend formatContent maxLength mapHeaderValues sb)
+        |> Option.iter (HttpContent.serializeAppend config (fun () -> config.ShouldPreviewHttpResponseContent m) sb)
 
         sb.ToString()
 
@@ -658,20 +686,8 @@ type YamlFormatterBuilder = private {
             .SerializeAs(string<Exception>)
             .SerializeAs(fun (t: Type) -> t.AssertionName)
             .SerializeAs(fun (ci: CultureInfo) -> if ci.Name = "" then "invariant" else ci.Name)
-            .SerializeAs(fun x ->
-                HttpRequestMessage.serialize
-                    Config.Current.FormatHttpContent
-                    Config.Current.HttpContentMaxLength
-                    Config.Current.MapHttpHeaderValues
-                    x
-            )
-            .SerializeAs(fun x ->
-                HttpResponseMessage.serialize
-                    Config.Current.FormatHttpContent
-                    Config.Current.HttpContentMaxLength
-                    Config.Current.MapHttpHeaderValues
-                    x
-            )
+            .SerializeAs(fun x -> HttpRequestMessage.serialize Config.Current x)
+            .SerializeAs(fun x -> HttpResponseMessage.serialize Config.Current x)
             .SerializeAs(fun (c: HttpStatusCode) ->
                 let reasonPhrase =
                     match (new HttpResponseMessage(c)).ReasonPhrase with

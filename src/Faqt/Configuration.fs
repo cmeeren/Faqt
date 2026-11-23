@@ -1,12 +1,15 @@
 ﻿namespace Faqt.Configuration
 
 open System
+open System.Net.Http
 open System.Threading
 
 
 type FaqtConfig = private {
     httpContentMaxLength: int
     formatHttpContent: bool
+    shouldPreviewHttpRequestContent: HttpRequestMessage -> bool
+    shouldPreviewHttpResponseContent: HttpResponseMessage -> bool
     mapHttpHeaderValues: string -> string -> string
 } with
 
@@ -16,6 +19,8 @@ type FaqtConfig = private {
     static member Default = {
         httpContentMaxLength = 1024 * 1024
         formatHttpContent = true
+        shouldPreviewHttpRequestContent = fun _ -> true
+        shouldPreviewHttpResponseContent = fun _ -> true
         mapHttpHeaderValues = fun _ v -> v
     }
 
@@ -48,6 +53,41 @@ type FaqtConfig = private {
         this with
             formatHttpContent = shouldFormat
     }
+
+
+    /// Gets the predicate that controls whether the default formatter may read an HTTP request body for a preview.
+    member this.ShouldPreviewHttpRequestContent = this.shouldPreviewHttpRequestContent
+
+
+    /// Sets the predicate that controls whether the default formatter may read an HTTP request body for a preview.
+    /// Returning false or throwing omits the preview. Headers and other message details are still rendered.
+    /// A zero preview limit skips the predicate. The predicate does not apply to separately asserted body values.
+    member this.SetShouldPreviewHttpRequestContent(shouldPreview: HttpRequestMessage -> bool) =
+        if isNull (box shouldPreview) then
+            nullArg (nameof shouldPreview)
+
+        {
+            this with
+                shouldPreviewHttpRequestContent = shouldPreview
+        }
+
+
+    /// Gets the predicate that controls whether the default formatter may read an HTTP response body for a preview.
+    member this.ShouldPreviewHttpResponseContent = this.shouldPreviewHttpResponseContent
+
+
+    /// Sets the predicate that controls whether the default formatter may read an HTTP response body for a preview.
+    /// Returning false or throwing omits the preview. Headers and other message details are still rendered.
+    /// A zero preview limit skips the predicate. The predicate does not apply to separately asserted body values.
+    /// The response's RequestMessage property may be null.
+    member this.SetShouldPreviewHttpResponseContent(shouldPreview: HttpResponseMessage -> bool) =
+        if isNull (box shouldPreview) then
+            nullArg (nameof shouldPreview)
+
+        {
+            this with
+                shouldPreviewHttpResponseContent = shouldPreview
+        }
 
 
     /// Gets the function used to format (e.g. mask) HTTP headers. The function accepts the header name and value, and
