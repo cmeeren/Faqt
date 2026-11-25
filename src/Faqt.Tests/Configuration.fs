@@ -428,6 +428,27 @@ let ``Setting null local config throws ArgumentNullException`` () =
 
 
 [<Fact>]
+let ``A throwing header mapping does not replace header assertion failures`` () =
+    use _ =
+        Config.With(FaqtConfig.Default.SetMapHttpHeaderValues(fun _ value -> failwith $"Cannot map %s{value}"))
+
+    use response = new HttpResponseMessage(HttpStatusCode.OK)
+    response.Headers.Add("X-Secret", "sensitive-1")
+    response.Headers.Add("X-Multi", "sensitive-2")
+    response.Headers.Add("X-Multi", "sensitive-3")
+
+    let failures = [
+        assertFails (fun () -> response.Should().HaveHeaderValue("X-Secret", "sensitive-expected"))
+        assertFails (fun () -> response.Should().NotHaveHeader("X-Secret"))
+        assertFails (fun () -> response.Should().NotHaveHeader("X-Multi"))
+    ]
+
+    for error in failures do
+        Assert.Contains("[header value omitted: header mapping failed with System.Exception]", error.Message)
+        Assert.DoesNotContain("sensitive", error.Message)
+
+
+[<Fact>]
 let ``HTTP headers are unchanged by default`` () =
     fun () ->
         let x = new HttpRequestMessage(HttpMethod.Get, "/")

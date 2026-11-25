@@ -1,6 +1,12 @@
 Release notes
 ==============
 
+### Unreleased
+
+* If a function passed to `SetMapHttpHeaderValues` throws, `HaveHeaderValue` and `NotHaveHeader` now report the
+  assertion failure with a placeholder for the header value, as other HTTP failure messages already did, instead of
+  raising the mapping exception.
+
 ### 6.1.0 (2026-11-23)
 
 #### Bundled skill path
