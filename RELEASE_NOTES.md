@@ -1,7 +1,7 @@
 Release notes
 ==============
 
-### Unreleased
+### 6.2.0 (2026-11-25)
 
 * HTTP failure messages now mask secrets by default: credential headers such as `Authorization` (keeping the scheme,
   as in `Bearer ***`) and `X-Api-Key`, cookie values in `Cookie` and `Set-Cookie` (as in `session=***; Path=/`), and
