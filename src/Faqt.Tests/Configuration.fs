@@ -428,6 +428,128 @@ let ``Setting null local config throws ArgumentNullException`` () =
 
 
 [<Fact>]
+let ``Credential and cookie request headers are masked by default`` () =
+    fun () ->
+        let x = new HttpRequestMessage(HttpMethod.Get, "/")
+        x.Version <- Version.Parse("0.5")
+        x.Headers.Add("Authorization", "Bearer secret")
+        x.Headers.Add("Proxy-Authorization", "secret")
+        x.Headers.Add("Cookie", "a=secret; b=secret")
+        x.Headers.Add("x-api-key", "secret")
+        x.Headers.Add("X-Auth-Token", "secret")
+        x.Headers.Add("Ocp-Apim-Subscription-Key", "secret")
+        x.Headers.Add("Other", "visible")
+        x.Should().FailWith("Value", x)
+    |> assertExnMsg
+        """
+Subject: x
+Should: FailWith
+Value: |-
+  GET / HTTP/0.5
+  Authorization: Bearer ***
+  Proxy-Authorization: ***
+  Cookie: ***
+  x-api-key: ***
+  X-Auth-Token: ***
+  Ocp-Apim-Subscription-Key: ***
+  Other: visible
+"""
+
+
+[<Fact>]
+let ``Set-Cookie response headers are masked by default, also in HaveHeaderValue`` () =
+    fun () ->
+        let x = new HttpResponseMessage(HttpStatusCode.OK)
+        x.Version <- Version.Parse("0.5")
+        x.Headers.Add("Set-Cookie", "session=secret; Path=/")
+        x.Headers.Add("Set-Cookie", "other=secret")
+        x.Should().HaveHeaderValue("Set-Cookie", "session=expected")
+    |> assertExnMsg
+        """
+Subject: x
+Should: HaveHeaderValue
+Header: Set-Cookie
+Value: '***'
+Response: |-
+  HTTP/0.5 200 OK
+  Set-Cookie: ***
+  Set-Cookie: ***
+Request: null
+"""
+
+
+[<Theory>]
+[<InlineData("authorization")>]
+[<InlineData("PROXY-AUTHORIZATION")>]
+[<InlineData("cookie")>]
+[<InlineData("SET-COOKIE")>]
+[<InlineData("x-api-key")>]
+[<InlineData("API-KEY")>]
+[<InlineData("x-auth-key")>]
+[<InlineData("X-AUTH-TOKEN")>]
+[<InlineData("x-access-token")>]
+[<InlineData("X-CSRF-TOKEN")>]
+[<InlineData("x-xsrf-token")>]
+[<InlineData("X-AMZ-SECURITY-TOKEN")>]
+[<InlineData("x-goog-api-key")>]
+[<InlineData("OCP-APIM-SUBSCRIPTION-KEY")>]
+[<InlineData("x-functions-key")>]
+[<InlineData("X-VAULT-TOKEN")>]
+[<InlineData("private-token")>]
+[<InlineData("X-GITLAB-TOKEN")>]
+let ``The default HTTP header mapping masks each listed header case-insensitively`` (name: string) =
+    Assert.Equal("***", FaqtConfig.Default.MapHttpHeaderValues name "secret")
+
+
+[<Theory>]
+[<InlineData("Bearer secret", "Bearer ***")>]
+[<InlineData("AWS4-HMAC-SHA256 Credential=secret", "AWS4-HMAC-SHA256 ***")>]
+[<InlineData("secret", "***")>]
+[<InlineData("secret1! secret2", "***")>]
+[<InlineData("1secret secret2", "***")>]
+[<InlineData("averylongsecretwithoutspaces secret2", "***")>]
+[<InlineData(" secret", "***")>]
+let ``The default HTTP header mapping keeps only an authentication scheme`` (value: string) (expected: string) =
+    Assert.Equal(expected, FaqtConfig.Default.MapHttpHeaderValues "Authorization" value)
+    Assert.Equal(expected, FaqtConfig.Default.MapHttpHeaderValues "Proxy-Authorization" value)
+
+
+[<Fact>]
+let ``The default HTTP header mapping does not mask other headers`` () =
+    Assert.Equal("Bearer visible", FaqtConfig.Default.MapHttpHeaderValues "Idempotency-Key" "Bearer visible")
+
+
+[<Fact>]
+let ``HaveHeaderValue fails normally with a null expected value for a masked header`` () =
+    use response = new HttpResponseMessage(HttpStatusCode.OK)
+
+    let error =
+        assertFails (fun () -> response.Should().HaveHeaderValue("Authorization", Unchecked.defaultof<string>))
+
+    Assert.Null(error.FailureData.Extra |> List.find (fst >> (=) "Value") |> snd)
+
+
+[<Fact>]
+let ``NotHaveHeader masks listed headers by default`` () =
+    fun () ->
+        let x = new HttpResponseMessage(HttpStatusCode.OK)
+        x.Version <- Version.Parse("0.5")
+        x.Headers.Add("Set-Cookie", "session=secret")
+        x.Should().NotHaveHeader("Set-Cookie")
+    |> assertExnMsg
+        """
+Subject: x
+Should: NotHaveHeader
+Header: Set-Cookie
+But was present with value: '***'
+Response: |-
+  HTTP/0.5 200 OK
+  Set-Cookie: ***
+Request: null
+"""
+
+
+[<Fact>]
 let ``A throwing header mapping does not replace header assertion failures`` () =
     use _ =
         Config.With(FaqtConfig.Default.SetMapHttpHeaderValues(fun _ value -> failwith $"Cannot map %s{value}"))
@@ -449,11 +571,13 @@ let ``A throwing header mapping does not replace header assertion failures`` () 
 
 
 [<Fact>]
-let ``HTTP headers are unchanged by default`` () =
+let ``The default HTTP header masking can be turned off`` () =
+    use _ = Config.With(FaqtConfig.Default.SetMapHttpHeaderValues(fun _ value -> value))
+
     fun () ->
         let x = new HttpRequestMessage(HttpMethod.Get, "/")
         x.Version <- Version.Parse("0.5")
-        x.Headers.Add("Authorization", "foobar")
+        x.Headers.Add("Authorization", "Bearer foobar")
         x.Headers.Add("Cookie", "foobar")
         x.Should().FailWith("Value", x)
     |> assertExnMsg
@@ -462,8 +586,39 @@ Subject: x
 Should: FailWith
 Value: |-
   GET / HTTP/0.5
-  Authorization: foobar
+  Authorization: Bearer foobar
   Cookie: foobar
+"""
+
+
+[<Fact>]
+let ``The default HTTP header masking can be extended`` () =
+    let mask = FaqtConfig.Default.MapHttpHeaderValues
+
+    use _ =
+        Config.With(
+            FaqtConfig.Default.SetMapHttpHeaderValues(fun name value ->
+                if name = "X-Custom-Secret" then
+                    "[masked]"
+                else
+                    mask name value
+            )
+        )
+
+    fun () ->
+        let x = new HttpRequestMessage(HttpMethod.Get, "/")
+        x.Version <- Version.Parse("0.5")
+        x.Headers.Add("Authorization", "Bearer foobar")
+        x.Headers.Add("X-Custom-Secret", "foobar")
+        x.Should().FailWith("Value", x)
+    |> assertExnMsg
+        """
+Subject: x
+Should: FailWith
+Value: |-
+  GET / HTTP/0.5
+  Authorization: Bearer ***
+  X-Custom-Secret: [masked]
 """
 
 
@@ -474,7 +629,7 @@ let ``HTTP headers can be changed`` () =
             FaqtConfig.Default.SetMapHttpHeaderValues(fun name value ->
                 match name with
                 | "Authorization"
-                | "Cookie" -> "***"
+                | "Cookie" -> "[masked]"
                 | "Multi"
                 | "Comma"
                 | "CommaSpace"
@@ -503,8 +658,8 @@ Subject: x
 Should: FailWith
 Value: |-
   GET / HTTP/0.5
-  Authorization: ***
-  Cookie: ***
+  Authorization: [masked]
+  Cookie: [masked]
   Multi: A!
   Multi: B!
   Comma: A,B!

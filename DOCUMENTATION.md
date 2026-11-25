@@ -55,8 +55,14 @@
 Faqt derives subject names from your source code. Known limitations and bugs can cause it to include more source than
 intended. Failure messages also include assertion values and, for HTTP assertions, request and response details.
 
-HTTP header values are unchanged by default. Use `SetMapHttpHeaderValues`, as shown in [Configuring options](#configuring-options),
-to mask sensitive headers. This does not mask secrets in URLs, bodies, other assertion values, or source code.
+By default, Faqt masks the values of these HTTP headers (matched case-insensitively) as `***`: `Authorization` and
+`Proxy-Authorization` (keeping the scheme, such as `Bearer ***`), `Cookie`, `Set-Cookie`, `X-Api-Key`, `Api-Key`,
+`X-Auth-Key`, `X-Auth-Token`, `X-Access-Token`, `X-CSRF-Token`, `X-XSRF-Token`, `X-Amz-Security-Token`,
+`X-Goog-Api-Key`, `Ocp-Apim-Subscription-Key`, `X-Functions-Key`, `X-Vault-Token`, `Private-Token` and
+`X-Gitlab-Token`. Use `SetMapHttpHeaderValues`, as shown in [Configuring options](#configuring-options), to mask other
+headers or to show all values. Your function replaces the default masking, so call
+`FaqtConfig.Default.MapHttpHeaderValues` from it to keep that. This does not mask secrets in URLs, bodies, other
+assertion values (such as values you assert on after `HaveHeader`), or source code.
 Use `SetShouldPreviewHttpRequestContent` and `SetShouldPreviewHttpResponseContent` to omit selected body previews, or
 `SetHttpContentMaxLength(0)` to omit all previews. Request URLs are still rendered. Assertions on body content can
 still include that content in failure messages.
@@ -449,9 +455,13 @@ let myConfig =
         .SetHttpContentMaxLength(1024 * 1024)
         // Disable formatting of HttpContent (such as indenting JSON for readability)
         .SetFormatHttpContent(false)
-        // Transform HTTP header values
+        // Transform HTTP header values. This replaces the default masking of credential and cookie headers; call the
+        // default mapping to keep it. To show all values unchanged, use fun _ value -> value.
         .SetMapHttpHeaderValues(fun name value ->
-            if name.Equals("Authorization", StringComparison.OrdinalIgnoreCase) then "***" else value
+            if name.Equals("X-Custom-Secret", StringComparison.OrdinalIgnoreCase) then
+                "***"
+            else
+                FaqtConfig.Default.MapHttpHeaderValues name value
         )
 
 // Set the default config

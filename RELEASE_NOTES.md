@@ -3,6 +3,11 @@ Release notes
 
 ### Unreleased
 
+* HTTP failure messages now mask credential and cookie headers by default, such as `Authorization` (keeping the
+  scheme, as in `Bearer ***`), `Cookie`, `Set-Cookie` and `X-Api-Key`. See
+  [Security considerations](DOCUMENTATION.md#security-considerations) for the full list. If you pass your own function
+  to `SetMapHttpHeaderValues`, it replaces this default; call `FaqtConfig.Default.MapHttpHeaderValues` from it to keep
+  the default masking. To show all header values as before, use `SetMapHttpHeaderValues(fun _ value -> value)`.
 * If a function passed to `SetMapHttpHeaderValues` throws, `HaveHeaderValue` and `NotHaveHeader` now report the
   assertion failure with a placeholder for the header value, as other HTTP failure messages already did, instead of
   raising the mapping exception.

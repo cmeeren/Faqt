@@ -1,8 +1,69 @@
 ﻿namespace Faqt.Configuration
 
 open System
+open System.Collections.Generic
 open System.Net.Http
 open System.Threading
+
+
+module private HttpHeaderMasking =
+
+
+    let private masked = "***"
+
+
+    let private credentialsHeaders =
+        HashSet([ "Authorization"; "Proxy-Authorization" ], StringComparer.OrdinalIgnoreCase)
+
+
+    let private secretHeaders =
+        HashSet(
+            [
+                "Cookie"
+                "Set-Cookie"
+                "X-Api-Key"
+                "Api-Key"
+                "X-Auth-Key"
+                "X-Auth-Token"
+                "X-Access-Token"
+                "X-CSRF-Token"
+                "X-XSRF-Token"
+                "X-Amz-Security-Token"
+                "X-Goog-Api-Key"
+                "Ocp-Apim-Subscription-Key"
+                "X-Functions-Key"
+                "X-Vault-Token"
+                "Private-Token"
+                "X-Gitlab-Token"
+            ],
+            StringComparer.OrdinalIgnoreCase
+        )
+
+
+    /// Whether the text looks like an authentication scheme (e.g. "Bearer" or "AWS4-HMAC-SHA256") rather than part of a
+    /// credential without a scheme.
+    let private isScheme (s: string) =
+        let isLetter c =
+            (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z')
+
+        s.Length <= 20
+        && isLetter s[0]
+        && s |> Seq.forall (fun c -> isLetter c || (c >= '0' && c <= '9') || c = '-')
+
+
+    let mask (name: string) (value: string) =
+        // C# callers and F# callers without nullness checking can pass a null expected value to header assertions.
+        if isNull (box value) then
+            value
+        elif credentialsHeaders.Contains name then
+            // Keep the scheme, which helps debugging and is not secret.
+            match value.IndexOf ' ' with
+            | i when i > 0 && isScheme (value.Substring(0, i)) -> value.Substring(0, i + 1) + masked
+            | _ -> masked
+        elif secretHeaders.Contains name then
+            masked
+        else
+            value
 
 
 type FaqtConfig = private {
@@ -21,7 +82,7 @@ type FaqtConfig = private {
         formatHttpContent = true
         shouldPreviewHttpRequestContent = fun _ -> true
         shouldPreviewHttpResponseContent = fun _ -> true
-        mapHttpHeaderValues = fun _ v -> v
+        mapHttpHeaderValues = HttpHeaderMasking.mask
     }
 
 
@@ -96,7 +157,10 @@ type FaqtConfig = private {
 
 
     /// Sets the function used to format (e.g. mask) HTTP headers. The function accepts the header name and value, and
-    /// returns the new value.
+    /// returns the new value. This replaces the default, which masks credentials and cookies in common headers such
+    /// as Authorization (except the scheme), Cookie, Set-Cookie and X-Api-Key. To extend the default, call
+    /// FaqtConfig.Default.MapHttpHeaderValues from your function. To show all values unchanged, use
+    /// fun _ value -> value.
     member this.SetMapHttpHeaderValues(mapHttpHeaderValues) =
         if isNull (box mapHttpHeaderValues) then
             nullArg (nameof mapHttpHeaderValues)
