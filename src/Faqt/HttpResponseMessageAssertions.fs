@@ -547,7 +547,7 @@ type HttpResponseMessageAssertions =
         let fail () =
             t
                 .With("Header", name)
-                .With("Value", HttpHeader.mapValue Config.Current.MapHttpHeaderValues name value)
+                .With("Value", HttpHeader.mapValue Config.Current name value)
                 .With("Response", t.Subject)
                 .With("Request", t.Subject.RequestMessage)
                 .Fail(because)
@@ -575,20 +575,14 @@ type HttpResponseMessageAssertions =
             | Some value ->
                 t
                     .With("Header", name)
-                    .With(
-                        "But was present with value",
-                        HttpHeader.mapValue Config.Current.MapHttpHeaderValues name value
-                    )
+                    .With("But was present with value", HttpHeader.mapValue Config.Current name value)
                     .With("Response", t.Subject)
                     .With("Request", t.Subject.RequestMessage)
                     .Fail(because)
             | None ->
                 t
                     .With("Header", name)
-                    .With(
-                        "But was present with values",
-                        values |> List.map (HttpHeader.mapValue Config.Current.MapHttpHeaderValues name)
-                    )
+                    .With("But was present with values", values |> List.map (HttpHeader.mapValue Config.Current name))
                     .With("Response", t.Subject)
                     .With("Request", t.Subject.RequestMessage)
                     .Fail(because)

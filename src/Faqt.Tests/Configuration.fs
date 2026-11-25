@@ -448,7 +448,7 @@ Value: |-
   GET / HTTP/0.5
   Authorization: Bearer ***
   Proxy-Authorization: ***
-  Cookie: ***
+  Cookie: a=***; b=***
   x-api-key: ***
   X-Auth-Token: ***
   Ocp-Apim-Subscription-Key: ***
@@ -469,11 +469,11 @@ let ``Set-Cookie response headers are masked by default, also in HaveHeaderValue
 Subject: x
 Should: HaveHeaderValue
 Header: Set-Cookie
-Value: '***'
+Value: session=***
 Response: |-
   HTTP/0.5 200 OK
-  Set-Cookie: ***
-  Set-Cookie: ***
+  Set-Cookie: session=***; Path=/
+  Set-Cookie: other=***
 Request: null
 """
 
@@ -481,8 +481,6 @@ Request: null
 [<Theory>]
 [<InlineData("authorization")>]
 [<InlineData("PROXY-AUTHORIZATION")>]
-[<InlineData("cookie")>]
-[<InlineData("SET-COOKIE")>]
 [<InlineData("x-api-key")>]
 [<InlineData("API-KEY")>]
 [<InlineData("x-auth-key")>]
@@ -519,6 +517,204 @@ let ``The default HTTP header mapping does not mask other headers`` () =
     Assert.Equal("Bearer visible", FaqtConfig.Default.MapHttpHeaderValues "Idempotency-Key" "Bearer visible")
 
 
+[<Theory>]
+[<InlineData("Cookie", "a=1; b=2", "a=***; b=***")>]
+[<InlineData("Cookie", "a=1;b=", "a=***;b=")>]
+[<InlineData("Cookie", "secret", "***")>]
+[<InlineData("Set-Cookie", "session=1; Path=/; HttpOnly", "session=***; Path=/; HttpOnly")>]
+[<InlineData("Set-Cookie",
+             "session=; Expires=Thu, 01 Jan 1970 00:00:00 GMT",
+             "session=; Expires=Thu, 01 Jan 1970 00:00:00 GMT")>]
+[<InlineData("Set-Cookie", "secret; Path=/", "***; Path=/")>]
+[<InlineData("cookie", "a=secret", "a=***")>]
+[<InlineData("SET-COOKIE", "a=secret", "a=***")>]
+[<InlineData("Cookie", ";; a= ", ";; a= ")>]
+[<InlineData("Cookie", "a=1; secret", "a=***; ***")>]
+[<InlineData("Set-Cookie",
+             "a=1; Expires=Thu, 01 Jan 1970 00:00:00 GMT, b=2; Path=/,c=3",
+             "a=***; Expires=Thu, 01 Jan 1970 00:00:00 GMT, b=***; Path=/,c=***")>]
+let ``The default HTTP header mapping masks only cookie values`` name (value: string) (expected: string) =
+    Assert.Equal(expected, FaqtConfig.Default.MapHttpHeaderValues name value)
+
+
+[<Theory>]
+[<InlineData("https://user:pass@example.com/p?code=abc&page=2#access_token=t&state=s",
+             "https://user:***@example.com/p?code=***&page=2#access_token=***&state=s")>]
+[<InlineData("https://example.com/?SIG=abc&Key=k&token=t&X-Amz-Signature=s&x-goog-credential=c",
+             "https://example.com/?SIG=***&Key=***&token=***&X-Amz-Signature=***&x-goog-credential=***")>]
+[<InlineData("https://example.com/?signature=1&id_token=2&refresh_token=3&client_secret=4",
+             "https://example.com/?signature=***&id_token=***&refresh_token=***&client_secret=***")>]
+[<InlineData("https://example.com/?api_key=1&apikey=2&password=3&X-Amz-Credential=4&X-Amz-Security-Token=5",
+             "https://example.com/?api_key=***&apikey=***&password=***&X-Amz-Credential=***&X-Amz-Security-Token=***")>]
+[<InlineData("https://example.com/?X-Goog-Signature=1", "https://example.com/?X-Goog-Signature=***")>]
+[<InlineData("https://example.com/?Subscription-Key=1", "https://example.com/?Subscription-Key=***")>]
+[<InlineData("/relative?code=abc", "/relative?code=***")>]
+[<InlineData("https://example.com/?code=&codes=1&page", "https://example.com/?code=&codes=1&page")>]
+[<InlineData("https://user@example.com/a@b:c", "https://user@example.com/a@b:c")>]
+[<InlineData("https://example.com/#section", "https://example.com/#section")>]
+let ``The default HTTP URL mapping masks secret URL parts`` (url: string) (expected: string) =
+    Assert.Equal(expected, FaqtConfig.Default.MapHttpUrls url)
+
+
+[<Theory>]
+[<InlineData("/cb?c%6Fde=secret&a+b=c", "/cb?c%6Fde=***&a+b=c")>]
+[<InlineData("//user:pass@cdn.example.com/x?sig=s", "//user:***@cdn.example.com/x?sig=***")>]
+let ``The default URL masking matches unescaped names and protocol-relative URLs`` (value: string) (expected: string) =
+    Assert.Equal(expected, FaqtConfig.Default.MapHttpUrls value)
+
+
+[<Fact>]
+let ``The default HTTP header mapping leaves URL masking to the URL mapping`` () =
+    let url = "https://example.com/cb?code=abc"
+    Assert.Equal(url, FaqtConfig.Default.MapHttpHeaderValues "Location" url)
+
+
+[<Fact>]
+let ``A request without a URI is still rendered`` () =
+    use request = new HttpRequestMessage()
+    request.RequestUri <- null
+
+    let error = assertFails (fun () -> request.Should().FailWith("Value", request))
+
+    Assert.Contains("[HttpRequestMessage.RequestUri not initialized]", error.Message)
+
+
+[<Fact>]
+let ``HTTP request URLs and URL headers are masked by default`` () =
+    fun () ->
+        let x = new HttpResponseMessage(HttpStatusCode.Redirect)
+        x.Version <- Version.Parse("0.5")
+        x.Headers.Location <- Uri("https://example.com/cb?code=secret&state=visible")
+        x.Content <- new ByteArrayContent([||])
+        x.Content.Headers.ContentLocation <- Uri("https://example.com/doc?sig=secret")
+
+        let request =
+            new HttpRequestMessage(HttpMethod.Get, "https://example.com/api?code=secret&page=2")
+
+        request.Version <- Version.Parse("0.5")
+        request.Headers.Referrer <- Uri("https://example.com/from?token=secret")
+        x.RequestMessage <- request
+        x.Should().HaveStatusCode(HttpStatusCode.OK)
+    |> assertExnMsg
+        """
+Subject: x
+Should: HaveStatusCode
+Expected: 200 OK
+But was: 302 Found
+Response: |-
+  HTTP/0.5 302 Found
+  Location: https://example.com/cb?code=***&state=visible
+  Content-Location: https://example.com/doc?sig=***
+  Content-Length: 0
+Request: |-
+  GET https://example.com/api?code=***&page=2 HTTP/0.5
+  Referer: https://example.com/from?token=***
+"""
+
+
+[<Fact>]
+let ``A custom HTTP URL mapping applies to request lines and URL headers before header mapping`` () =
+    use _ =
+        Config.With(
+            FaqtConfig.Default
+                .SetMapHttpUrls(fun url -> FaqtConfig.Default.MapHttpUrls(url).Replace("custom=secret", "custom=[url]"))
+                .SetMapHttpHeaderValues(fun name value -> if name = "Location" then value + " [header]" else value)
+        )
+
+    use request =
+        new HttpRequestMessage(HttpMethod.Get, "https://example.com/api?code=secret&custom=secret")
+
+    use response = new HttpResponseMessage(HttpStatusCode.Redirect)
+    response.RequestMessage <- request
+    response.Headers.Location <- Uri("https://example.com/cb?custom=secret")
+
+    let error =
+        assertFails (fun () -> response.Should().HaveHeaderValue("Location", "/cb?custom=secret&code=secret"))
+
+    Assert.Contains("GET https://example.com/api?code=***&custom=[url] HTTP/", error.Message)
+    Assert.Contains("Location: https://example.com/cb?custom=[url] [header]", error.Message)
+
+    Assert.Equal(
+        box "/cb?custom=[url]&code=*** [header]",
+        error.FailureData.Extra |> List.find (fst >> (=) "Value") |> snd
+    )
+
+
+[<Fact>]
+let ``The default HTTP URL masking can be turned off`` () =
+    use _ = Config.With(FaqtConfig.Default.SetMapHttpUrls(id))
+
+    use request =
+        new HttpRequestMessage(HttpMethod.Get, "https://example.com/api?code=secret")
+
+    request.Headers.Referrer <- Uri("https://example.com/from?token=secret")
+
+    let error = assertFails (fun () -> request.Should().FailWith("Value", request))
+
+    Assert.Contains("GET https://example.com/api?code=secret HTTP/", error.Message)
+    Assert.Contains("Referer: https://example.com/from?token=secret", error.Message)
+
+
+[<Fact>]
+let ``A throwing HTTP URL mapping does not expose URLs or stop rendering`` () =
+    use _ =
+        Config.With(FaqtConfig.Default.SetMapHttpUrls(fun url -> failwith $"Cannot map %s{url}"))
+
+    use request =
+        new HttpRequestMessage(HttpMethod.Get, "https://example.com/sensitive")
+
+    request.Headers.Referrer <- Uri("https://example.com/sensitive-referrer")
+    request.Headers.Add("Other", "visible")
+
+    let error = assertFails (fun () -> request.Should().FailWith("Value", request))
+
+    Assert.Contains("GET [request URL omitted: URL mapping failed with System.Exception] HTTP/", error.Message)
+    Assert.Contains("Referer: [header value omitted: URL mapping failed with System.Exception]", error.Message)
+    Assert.Contains("Other: visible", error.Message)
+    Assert.DoesNotContain("sensitive", error.Message)
+
+
+[<Fact>]
+let ``HaveHeaderValue fails normally with a null expected value for a URL header`` () =
+    use response = new HttpResponseMessage(HttpStatusCode.OK)
+
+    let error =
+        assertFails (fun () -> response.Should().HaveHeaderValue("Location", Unchecked.defaultof<string>))
+
+    Assert.Null(error.FailureData.Extra |> List.find (fst >> (=) "Value") |> snd)
+
+
+[<Fact>]
+let ``The default HTTP header mapping accepts a null header name`` () =
+    Assert.Equal("value", FaqtConfig.Default.MapHttpHeaderValues (Unchecked.defaultof<string>) "value")
+
+
+[<Fact>]
+let ``NotHaveHeader masks URL headers by default`` () =
+    use response = new HttpResponseMessage(HttpStatusCode.Redirect)
+    response.Headers.Location <- Uri("https://example.com/cb?code=secret")
+
+    let error = assertFails (fun () -> response.Should().NotHaveHeader("Location"))
+
+    Assert.Equal(
+        box "https://example.com/cb?code=***",
+        error.FailureData.Extra
+        |> List.find (fst >> (=) "But was present with value")
+        |> snd
+    )
+
+    Assert.DoesNotContain("secret", error.Message)
+
+
+[<Fact>]
+let ``Setting null HTTP URL mapper throws ArgumentNullException`` () =
+    Assert.Throws<ArgumentNullException>(fun () ->
+        FaqtConfig.Default.SetMapHttpUrls(Unchecked.defaultof<string -> string>)
+        |> ignore
+    )
+    |> ignore
+
+
 [<Fact>]
 let ``HaveHeaderValue fails normally with a null expected value for a masked header`` () =
     use response = new HttpResponseMessage(HttpStatusCode.OK)
@@ -541,10 +737,10 @@ let ``NotHaveHeader masks listed headers by default`` () =
 Subject: x
 Should: NotHaveHeader
 Header: Set-Cookie
-But was present with value: '***'
+But was present with value: session=***
 Response: |-
   HTTP/0.5 200 OK
-  Set-Cookie: ***
+  Set-Cookie: session=***
 Request: null
 """
 

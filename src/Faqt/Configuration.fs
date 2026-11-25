@@ -3,7 +3,101 @@
 open System
 open System.Collections.Generic
 open System.Net.Http
+open System.Text.RegularExpressions
 open System.Threading
+
+
+module private UrlMasking =
+
+
+    let private masked = "***"
+
+
+    let private secretParameters =
+        HashSet(
+            [
+                "code"
+                "key"
+                "sig"
+                "signature"
+                "token"
+                "access_token"
+                "id_token"
+                "refresh_token"
+                "client_secret"
+                "api_key"
+                "apikey"
+                "password"
+                "subscription-key"
+                "X-Amz-Signature"
+                "X-Amz-Credential"
+                "X-Amz-Security-Token"
+                "X-Goog-Signature"
+                "X-Goog-Credential"
+            ],
+            StringComparer.OrdinalIgnoreCase
+        )
+
+
+    let private maskParameter (parameter: string) =
+        match parameter.IndexOf '=' with
+        | i when i > 0 && i < parameter.Length - 1 ->
+            let name = parameter.Substring(0, i)
+
+            if secretParameters.Contains(Uri.UnescapeDataString name) then
+                name + "=" + masked
+            else
+                parameter
+        | _ -> parameter
+
+
+    let private maskParameters (parameters: string) =
+        parameters.Split('&') |> Array.map maskParameter |> String.concat "&"
+
+
+    let private maskUserInfo (beforeQuery: string) =
+        let authorityStart =
+            if beforeQuery.StartsWith("//", StringComparison.Ordinal) then
+                // Protocol-relative URL, such as in a Location header.
+                2
+            else
+                match beforeQuery.IndexOf("://", StringComparison.Ordinal) with
+                | -1 -> -1
+                | schemeEnd -> schemeEnd + 3
+
+        if authorityStart < 0 then
+            beforeQuery
+        else
+            let authorityEnd =
+                match beforeQuery.IndexOf('/', authorityStart) with
+                | -1 -> beforeQuery.Length
+                | i -> i
+
+            match beforeQuery.LastIndexOf('@', authorityEnd - 1, authorityEnd - authorityStart) with
+            | -1 -> beforeQuery
+            | at ->
+                match beforeQuery.IndexOf(':', authorityStart, at - authorityStart) with
+                | -1 -> beforeQuery
+                | colon -> beforeQuery.Substring(0, colon + 1) + masked + beforeQuery.Substring(at)
+
+
+    /// Masks the password in the user info and the values of known secret query and fragment parameters.
+    let mask (url: string) =
+        let beforeFragment, fragment =
+            match url.IndexOf '#' with
+            | -1 -> url, None
+            | i -> url.Substring(0, i), Some(url.Substring(i + 1))
+
+        let beforeQuery, query =
+            match beforeFragment.IndexOf '?' with
+            | -1 -> beforeFragment, None
+            | i -> beforeFragment.Substring(0, i), Some(beforeFragment.Substring(i + 1))
+
+        maskUserInfo beforeQuery
+        + (query |> Option.map (fun q -> "?" + maskParameters q) |> Option.defaultValue "")
+        + (fragment
+           |> Option.map (fun f -> "#" + maskParameters f)
+           |> Option.defaultValue "")
 
 
 module private HttpHeaderMasking =
@@ -19,8 +113,6 @@ module private HttpHeaderMasking =
     let private secretHeaders =
         HashSet(
             [
-                "Cookie"
-                "Set-Cookie"
                 "X-Api-Key"
                 "Api-Key"
                 "X-Auth-Key"
@@ -51,10 +143,42 @@ module private HttpHeaderMasking =
         && s |> Seq.forall (fun c -> isLetter c || (c >= '0' && c <= '9') || c = '-')
 
 
+    /// Masks the value of a "name=value" cookie pair, keeping the name and any surrounding whitespace. Empty values,
+    /// such as when deleting a cookie, are kept, since they are not secret.
+    let private maskCookiePair (pair: string) =
+        match pair.IndexOf '=' with
+        | -1 when String.IsNullOrWhiteSpace pair -> pair
+        | -1 -> pair.Substring(0, pair.Length - pair.TrimStart().Length) + masked
+        | i when String.IsNullOrWhiteSpace(pair.Substring(i + 1)) -> pair
+        | i -> pair.Substring(0, i + 1) + masked
+
+
+    /// Masks one Set-Cookie cookie. Only the first pair is the cookie; the rest are attributes such as Path and
+    /// HttpOnly, which are not secret.
+    let private maskSetCookie (cookie: string) =
+        match cookie.IndexOf ';' with
+        | -1 -> maskCookiePair cookie
+        | i -> maskCookiePair (cookie.Substring(0, i)) + cookie.Substring(i)
+
+
+    /// Matches the separator between cookies when several are folded into one Set-Cookie value. A comma is only a
+    /// separator when followed by "name=", so the comma in e.g. "Expires=Thu, 01 Jan 1970" is not.
+    let private foldedSetCookieSeparator =
+        Regex(@"(,\s*)(?=[^;=\s,]+=)", RegexOptions.CultureInvariant)
+
+
     let mask (name: string) (value: string) =
-        // C# callers and F# callers without nullness checking can pass a null expected value to header assertions.
+        // C# callers and F# callers without nullness checking can pass a null expected value or header name to header
+        // assertions.
         if isNull (box value) then
             value
+        elif String.Equals(name, "Cookie", StringComparison.OrdinalIgnoreCase) then
+            value.Split(';') |> Array.map maskCookiePair |> String.concat ";"
+        elif String.Equals(name, "Set-Cookie", StringComparison.OrdinalIgnoreCase) then
+            // Split keeps the captured separators at odd indexes.
+            foldedSetCookieSeparator.Split(value)
+            |> Array.mapi (fun i part -> if i % 2 = 0 then maskSetCookie part else part)
+            |> String.concat ""
         elif credentialsHeaders.Contains name then
             // Keep the scheme, which helps debugging and is not secret.
             match value.IndexOf ' ' with
@@ -72,6 +196,7 @@ type FaqtConfig = private {
     shouldPreviewHttpRequestContent: HttpRequestMessage -> bool
     shouldPreviewHttpResponseContent: HttpResponseMessage -> bool
     mapHttpHeaderValues: string -> string -> string
+    mapHttpUrls: string -> string
 } with
 
 
@@ -83,6 +208,7 @@ type FaqtConfig = private {
         shouldPreviewHttpRequestContent = fun _ -> true
         shouldPreviewHttpResponseContent = fun _ -> true
         mapHttpHeaderValues = HttpHeaderMasking.mask
+        mapHttpUrls = UrlMasking.mask
     }
 
 
@@ -157,10 +283,11 @@ type FaqtConfig = private {
 
 
     /// Sets the function used to format (e.g. mask) HTTP headers. The function accepts the header name and value, and
-    /// returns the new value. This replaces the default, which masks credentials and cookies in common headers such
-    /// as Authorization (except the scheme), Cookie, Set-Cookie and X-Api-Key. To extend the default, call
-    /// FaqtConfig.Default.MapHttpHeaderValues from your function. To show all values unchanged, use
-    /// fun _ value -> value.
+    /// returns the new value. This replaces the default, which masks credentials in common headers such as
+    /// Authorization (except the scheme) and X-Api-Key, and cookie values (keeping names and attributes) in Cookie and
+    /// Set-Cookie. To extend the default, call FaqtConfig.Default.MapHttpHeaderValues from your function. To show all
+    /// values unchanged, use fun _ value -> value. For the Location, Content-Location and Referer headers, the function
+    /// receives the value after MapHttpUrls has been applied.
     member this.SetMapHttpHeaderValues(mapHttpHeaderValues) =
         if isNull (box mapHttpHeaderValues) then
             nullArg (nameof mapHttpHeaderValues)
@@ -169,6 +296,24 @@ type FaqtConfig = private {
             this with
                 mapHttpHeaderValues = mapHttpHeaderValues
         }
+
+
+    /// Gets the function used to format (e.g. mask) URLs in HTTP request lines and in the Location, Content-Location
+    /// and Referer headers.
+    member this.MapHttpUrls = this.mapHttpUrls
+
+
+    /// Sets the function used to format (e.g. mask) URLs in HTTP request lines and in the Location, Content-Location
+    /// and Referer headers. The function accepts the URL as rendered, which may be relative, and returns the new value.
+    /// For headers, MapHttpHeaderValues is applied to the result. This replaces the default, which masks the password
+    /// in the user info and the values of known secret query and fragment parameters, such as code, sig, access_token
+    /// and X-Amz-Signature. To extend the default, call FaqtConfig.Default.MapHttpUrls from your function. To show URLs
+    /// unchanged, use id.
+    member this.SetMapHttpUrls(mapHttpUrls: string -> string) =
+        if isNull (box mapHttpUrls) then
+            nullArg (nameof mapHttpUrls)
+
+        { this with mapHttpUrls = mapHttpUrls }
 
 
 /// Allows changing the current formatter, either temporarily (for the current thread) or globally.

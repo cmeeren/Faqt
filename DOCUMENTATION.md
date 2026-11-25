@@ -55,17 +55,30 @@
 Faqt derives subject names from your source code. Known limitations and bugs can cause it to include more source than
 intended. Failure messages also include assertion values and, for HTTP assertions, request and response details.
 
-By default, Faqt masks the values of these HTTP headers (matched case-insensitively) as `***`: `Authorization` and
-`Proxy-Authorization` (keeping the scheme, such as `Bearer ***`), `Cookie`, `Set-Cookie`, `X-Api-Key`, `Api-Key`,
-`X-Auth-Key`, `X-Auth-Token`, `X-Access-Token`, `X-CSRF-Token`, `X-XSRF-Token`, `X-Amz-Security-Token`,
-`X-Goog-Api-Key`, `Ocp-Apim-Subscription-Key`, `X-Functions-Key`, `X-Vault-Token`, `Private-Token` and
-`X-Gitlab-Token`. Use `SetMapHttpHeaderValues`, as shown in [Configuring options](#configuring-options), to mask other
-headers or to show all values. Your function replaces the default masking, so call
-`FaqtConfig.Default.MapHttpHeaderValues` from it to keep that. This does not mask secrets in URLs, bodies, other
-assertion values (such as values you assert on after `HaveHeader`), or source code.
+By default, Faqt masks secrets in HTTP headers and request URLs as `***`. Header and parameter names are matched
+case-insensitively.
+
+* `Authorization` and `Proxy-Authorization` are masked except for the scheme, such as `Bearer ***`.
+* `Cookie` and `Set-Cookie` show cookie names and `Set-Cookie` attributes but mask cookie values, such as
+  `session=***; Path=/; HttpOnly`. Empty values, such as when deleting a cookie, are shown.
+* `X-Api-Key`, `Api-Key`, `X-Auth-Key`, `X-Auth-Token`, `X-Access-Token`, `X-CSRF-Token`, `X-XSRF-Token`,
+  `X-Amz-Security-Token`, `X-Goog-Api-Key`, `Ocp-Apim-Subscription-Key`, `X-Functions-Key`, `X-Vault-Token`,
+  `Private-Token` and `X-Gitlab-Token` are masked entirely.
+* Request URLs and the `Location`, `Content-Location` and `Referer` headers mask the password in `user:password@host`
+  and the values of these query and fragment parameters: `code`, `key`, `sig`, `signature`, `token`, `access_token`,
+  `id_token`, `refresh_token`, `client_secret`, `api_key`, `apikey`, `password`, `subscription-key`,
+  `X-Amz-Signature`, `X-Amz-Credential`, `X-Amz-Security-Token`, `X-Goog-Signature` and `X-Goog-Credential`. A
+  non-secret parameter with one of these names, such as a product `code`, is masked too.
+
+Use `SetMapHttpUrls` and `SetMapHttpHeaderValues`, as shown in [Configuring options](#configuring-options), to mask
+more or to show values unchanged. `SetMapHttpUrls` controls how URLs are rendered, both in request lines and in the
+`Location`, `Content-Location` and `Referer` headers. Header mapping then applies to every header value, including
+those. Your function replaces the default masking, so call `FaqtConfig.Default.MapHttpUrls` or
+`FaqtConfig.Default.MapHttpHeaderValues` from it to keep that. This does not mask secrets in bodies, other assertion
+values (such as values you assert on after `HaveHeader`), or source code.
 Use `SetShouldPreviewHttpRequestContent` and `SetShouldPreviewHttpResponseContent` to omit selected body previews, or
-`SetHttpContentMaxLength(0)` to omit all previews. Request URLs are still rendered. Assertions on body content can
-still include that content in failure messages.
+`SetHttpContentMaxLength(0)` to omit all previews. Assertions on body content can still include that content in
+failure messages.
 
 ## Installation and requirements
 
@@ -455,14 +468,17 @@ let myConfig =
         .SetHttpContentMaxLength(1024 * 1024)
         // Disable formatting of HttpContent (such as indenting JSON for readability)
         .SetFormatHttpContent(false)
-        // Transform HTTP header values. This replaces the default masking of credential and cookie headers; call the
-        // default mapping to keep it. To show all values unchanged, use fun _ value -> value.
+        // Transform HTTP header values. This replaces the default masking of secret headers; call the default
+        // mapping to keep it. To show all values unchanged, use fun _ value -> value.
         .SetMapHttpHeaderValues(fun name value ->
             if name.Equals("X-Custom-Secret", StringComparison.OrdinalIgnoreCase) then
                 "***"
             else
                 FaqtConfig.Default.MapHttpHeaderValues name value
         )
+        // Transform URLs in request lines and in the Location, Content-Location and Referer headers. This replaces the
+        // default masking of secret URL parts; call the default mapping to keep it. To show URLs unchanged, use id.
+        .SetMapHttpUrls(fun url -> FaqtConfig.Default.MapHttpUrls(url).Replace("tenant=contoso", "tenant=***"))
 
 // Set the default config
 Config.Set(myConfig)
@@ -695,7 +711,8 @@ is not a total memory limit.
 ### `HttpResponseMessage` assertions
 
 Failure messages include response details and the original request when available, with bounded body previews.
-See [Configuring options](#configuring-options) for preview limits and header masking.
+See [Configuring options](#configuring-options) for preview limits and
+[Security considerations](#security-considerations) for masking of headers and URLs.
 
 * `HaveStatusCode`
 * `Be1XXInformational`

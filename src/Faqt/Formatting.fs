@@ -1,6 +1,7 @@
 namespace Faqt.Formatting
 
 open System
+open System.Collections.Generic
 open System.Globalization
 open System.IO
 open System.Net
@@ -49,12 +50,30 @@ type FailureData = {
 module internal HttpHeader =
 
 
-    let mapValue (mapping: string -> string -> string) name value =
-        try
-            mapping name value
-        with ex ->
-            // The raw value and exception message may contain secrets; only include the exception type.
-            $"[header value omitted: header mapping failed with %s{ex.GetType().FullName}]"
+    let private urlHeaders =
+        HashSet([ "Location"; "Content-Location"; "Referer" ], StringComparer.OrdinalIgnoreCase)
+
+
+    /// Applies MapHttpUrls (for URL headers) and then MapHttpHeaderValues.
+    let mapValue (config: FaqtConfig) (name: string) (value: string) =
+        // The raw value and exception messages may contain secrets; only include the exception type.
+        let urlMapped =
+            // C# callers and F# callers without nullness checking can pass a null expected value to header assertions.
+            if urlHeaders.Contains name && not (isNull (box value)) then
+                try
+                    Ok(config.MapHttpUrls value)
+                with ex ->
+                    Error $"[header value omitted: URL mapping failed with %s{ex.GetType().FullName}]"
+            else
+                Ok value
+
+        match urlMapped with
+        | Error placeholder -> placeholder
+        | Ok value ->
+            try
+                config.MapHttpHeaderValues name value
+            with ex ->
+                $"[header value omitted: header mapping failed with %s{ex.GetType().FullName}]"
 
 
 module internal HttpContent =
@@ -150,11 +169,7 @@ module internal HttpContent =
 
             for h in c.Headers do
                 for v in h.Value do
-                    sb
-                        .AppendLine()
-                        .Append(h.Key)
-                        .Append(": ")
-                        .Append(HttpHeader.mapValue config.MapHttpHeaderValues h.Key v)
+                    sb.AppendLine().Append(h.Key).Append(": ").Append(HttpHeader.mapValue config h.Key v)
                     |> ignore
 
             if includeComputedLength && not hasContentLengthHeader then
@@ -238,10 +253,14 @@ module internal HttpRequestMessage =
             .Append(m.Method.ToString())
             .Append(" ")
             .Append(
-                m.RequestUri
-                |> Option.ofObj
-                |> Option.map string
-                |> Option.defaultValue "[HttpRequestMessage.RequestUri not initialized]"
+                match m.RequestUri with
+                | null -> "[HttpRequestMessage.RequestUri not initialized]"
+                | uri ->
+                    try
+                        config.MapHttpUrls(string uri)
+                    with ex ->
+                        // The raw URL and exception message may contain secrets; only include the exception type.
+                        $"[request URL omitted: URL mapping failed with %s{ex.GetType().FullName}]"
             )
             .Append(" HTTP/")
             .Append(m.Version.ToString())
@@ -249,11 +268,7 @@ module internal HttpRequestMessage =
 
         for h in m.Headers do
             for v in h.Value do
-                sb
-                    .AppendLine()
-                    .Append(h.Key)
-                    .Append(": ")
-                    .Append(HttpHeader.mapValue config.MapHttpHeaderValues h.Key v)
+                sb.AppendLine().Append(h.Key).Append(": ").Append(HttpHeader.mapValue config h.Key v)
                 |> ignore
 
         m.Content
@@ -280,11 +295,7 @@ module internal HttpResponseMessage =
 
         for h in m.Headers do
             for v in h.Value do
-                sb
-                    .AppendLine()
-                    .Append(h.Key)
-                    .Append(": ")
-                    .Append(HttpHeader.mapValue config.MapHttpHeaderValues h.Key v)
+                sb.AppendLine().Append(h.Key).Append(": ").Append(HttpHeader.mapValue config h.Key v)
                 |> ignore
 
         m.Content
