@@ -77,7 +77,7 @@ gh run watch $runId --repo $repo --exit-status
 ````
 
    - Confirm the tag run succeeded, including its `publish` job. That job pushes only the package whose version matches the tag and fails if NuGet already has that version, so success means this run uploaded it. If it failed, stop and inspect/report before creating a GitHub Release.
-   - Verify the exact package version is visible on NuGet with [scripts/wait-for-nuget.js](scripts/wait-for-nuget.js). Run from the repository root with Node.js 22 or newer. The helper checks every 30 seconds for up to ten minutes, bounds each request to 15 seconds, and exits nonzero on timeout or an unexpected HTTP response. It retries HTTP 404, 429, server errors, and network failures; it does not publish anything. Wait using bounded tool waits rather than starting additional polling commands.
+   - Verify the exact package version is visible on NuGet with [scripts/wait-for-nuget.js](scripts/wait-for-nuget.js). Run from the repository root with Node.js 22 or newer. The helper checks every 30 seconds for up to 20 minutes, since NuGet indexing can take over ten minutes, bounds each request to 15 seconds, and exits nonzero on timeout or an unexpected HTTP response. It retries HTTP 404, 429, server errors, and network failures; it does not publish anything. Where foreground commands stop before 20 minutes, as in Claude Code, run the block below as one background command and wait for its completion notice; otherwise wait using bounded tool waits rather than starting additional polling commands.
 
 ````powershell
 node .agents/skills/release-faqt/scripts/wait-for-nuget.js "<Version>"

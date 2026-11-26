@@ -4,7 +4,7 @@ async function waitForPackage(version, {
   fetchImpl = fetch,
   now = () => performance.now(),
   sleep: pause = sleep,
-  timeoutMs = 600_000,
+  timeoutMs = 1_200_000,
 } = {}) {
   if (typeof version !== 'string' || !/^\d+\.\d+\.\d+(?:-[0-9a-z.-]+)?$/i.test(version)) {
     throw new Error('Invalid version. Usage: node wait-for-nuget.js <version>, for example 6.0.0');

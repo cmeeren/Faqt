@@ -4,7 +4,7 @@ const { spawnSync } = require('node:child_process');
 const { join } = require('node:path');
 const { waitForPackage } = require('./wait-for-nuget.js');
 
-function scenario(outcomes, timeoutMs = 600_000) {
+function scenario(outcomes, timeoutMs) {
   let elapsed = 0;
   const requests = [];
   const sleeps = [];
@@ -52,6 +52,15 @@ test('times out without sleeping or requesting beyond the deadline', async () =>
   const error = await waitForPackage('6.0.0', run.options).catch(error => error.message);
   assert.deepEqual({ timedOut: /Timed out.*HTTP 404/.test(error), calls: run.requests.length, sleeps: run.sleeps }, {
     timedOut: true, calls: 2, sleeps: [30_000, 15_000],
+  });
+});
+
+test('waits up to 20 minutes by default', async () => {
+  const run = scenario([404]);
+  const error = await waitForPackage('6.0.0', run.options).catch(error => error.message);
+  const slept = run.sleeps.reduce((total, ms) => total + ms, 0);
+  assert.deepEqual({ timedOut: /Timed out/.test(error), calls: run.requests.length, slept }, {
+    timedOut: true, calls: 40, slept: 1_200_000,
   });
 });
 
